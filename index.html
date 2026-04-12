@@ -86,12 +86,12 @@
     </div>
   </div>
 
-  <div id="banner-trial" style="background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+  <div style="background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:16px 20px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
     <div>
       <div style="font-size:14px;font-weight:500;color:#e8eaf0;margin-bottom:4px;">Você está no período Trial</div>
       <div style="font-size:12px;color:#7aabf7;">30 dias grátis com acesso completo. Assine agora e garanta seu plano.</div>
     </div>
-    <a href="assinar.html" style="background:#4a7cdc;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;">Assinar plano</a>
+    <a href="assinar.html" style="background:#4a7cdc;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;">Assinar plano</a>
   </div>
 
   <div class="section-title">Menu principal</div>
@@ -140,7 +140,10 @@ if (!token) { window.location.href = 'login.html'; }
 
 const user = userRaw ? JSON.parse(userRaw) : {};
 document.getElementById('user-email').textContent = user.email || '';
-document.getElementById('user-nome').textContent = user.email?.split('@')[0] || 'usuário';
+const nomeCompleto = user.email?.split('@')[0] || 'usuário';
+const primeiroNome = nomeCompleto.split('.')[0];
+const nomeFmt = primeiroNome.charAt(0).toUpperCase() + primeiroNome.slice(1);
+document.getElementById('user-nome').textContent = nomeFmt;
 
 // Carrega estatísticas
 async function carregarStats() {
