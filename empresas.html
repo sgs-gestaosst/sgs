@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Empresas</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+    --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+    --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+    --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+  .header-title{font-size:13px;color:var(--text2);flex:1;}
+  .header-title span{color:var(--text);font-weight:500;}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .user-email{font-size:12px;color:var(--text2);}
+  .btn-logout{font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;font-family:var(--sans);}
+  .btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+  .container{max-width:960px;margin:0 auto;padding:32px 24px 80px;}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .page-title{font-size:20px;font-weight:500;}
+  .page-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#5a8ce8;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--border-focus);}
+  .voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+  .voltar:hover{color:var(--text);}
+
+  /* Busca */
+  .search-bar{display:flex;gap:10px;margin-bottom:16px;}
+  .search-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:14px;padding:10px 14px;outline:none;transition:border-color .15s;}
+  .search-input:focus{border-color:var(--border-focus);}
+  .search-input::placeholder{color:var(--text3);}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+  .stat{background:var(--surface2);border-radius:var(--radius);padding:14px 16px;}
+  .stat-label{font-size:12px;color:var(--text2);margin-bottom:4px;}
+  .stat-value{font-size:22px;font-weight:500;}
+
+  /* Lista */
+  .lista{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .lista-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);gap:12px;cursor:pointer;transition:background .1s;text-decoration:none;}
+  .lista-row:last-child{border-bottom:none;}
+  .lista-row:hover{background:var(--surface2);}
+  .avatar{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;}
+  .empresa-info{flex:1;min-width:0;}
+  .empresa-nome{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .empresa-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+  .badges{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+  .badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;white-space:nowrap;font-family:var(--mono);}
+  .gr1{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .gr2{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+  .gr3{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+  .gr4{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+  .badge-rural{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+  .func-count{font-size:12px;color:var(--text2);white-space:nowrap;min-width:60px;text-align:right;}
+  .chevron{font-size:16px;color:var(--text3);margin-left:4px;}
+
+  /* Estado vazio */
+  .empty{text-align:center;padding:60px 24px;}
+  .empty-icon{font-size:40px;margin-bottom:16px;}
+  .empty-title{font-size:16px;font-weight:500;margin-bottom:8px;}
+  .empty-desc{font-size:13px;color:var(--text2);margin-bottom:24px;}
+
+  /* Loading */
+  .loading{text-align:center;padding:40px;color:var(--text2);font-size:13px;}
+  .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;margin-bottom:12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  @media(max-width:600px){
+    .header{padding:12px 16px;}
+    .container{padding:16px 12px 60px;}
+    .stats{grid-template-columns:1fr 1fr;}
+    .badges{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">SGS</div>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span>Empresas</span></div>
+  <div class="header-right">
+    <span class="user-email" id="user-email"></span>
+    <button class="btn-logout" onclick="sair()">Sair</button>
+  </div>
+</div>
+
+<div class="container">
+  <a href="index.html" class="voltar">← Voltar ao início</a>
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">Empresas</div>
+      <div class="page-sub" id="page-sub">Carregando...</div>
+    </div>
+    <a href="cadastro_empresa.html" class="btn btn-primary">+ Nova empresa</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Total de empresas</div>
+      <div class="stat-value" id="stat-total">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total de funcionários</div>
+      <div class="stat-value" id="stat-funcs">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Grau de risco máximo</div>
+      <div class="stat-value" id="stat-gr">—</div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" class="search-input" id="busca" placeholder="Buscar por nome, cidade ou CNPJ..." oninput="filtrar()">
+  </div>
+
+  <div class="lista" id="lista">
+    <div class="loading">
+      <div class="spinner"></div><br>
+      Carregando empresas...
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token = localStorage.getItem('sgs_token');
+const userRaw = localStorage.getItem('sgs_user');
+if (!token) { window.location.href = 'login.html'; }
+const user = userRaw ? JSON.parse(userRaw) : {};
+document.getElementById('user-email').textContent = user.email || '';
+
+let todasEmpresas = [];
+
+function iniciais(nome) {
+  if (!nome) return '?';
+  const palavras = nome.trim().split(' ').filter(p => p.length > 2);
+  if (palavras.length >= 2) return (palavras[0][0] + palavras[1][0]).toUpperCase();
+  return nome.slice(0,2).toUpperCase();
+}
+
+const cores = [
+  {bg:'#1a2540',color:'#7aabf7'},
+  {bg:'#0e2820',color:'#2dd4a0'},
+  {bg:'#2a2010',color:'#e0a855'},
+  {bg:'#1e2040',color:'#a78bfa'},
+  {bg:'#2a1020',color:'#f472b6'},
+];
+
+function corAvatar(nome) {
+  let hash = 0;
+  for (let c of (nome||'')) hash += c.charCodeAt(0);
+  return cores[hash % cores.length];
+}
+
+function grClass(gr) {
+  const map = {1:'gr1',2:'gr2',3:'gr3',4:'gr4'};
+  return map[gr] || 'gr2';
+}
+
+function renderLista(empresas) {
+  const lista = document.getElementById('lista');
+  if (!empresas.length) {
+    lista.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🏢</div>
+        <div class="empty-title">Nenhuma empresa encontrada</div>
+        <div class="empty-desc">Cadastre sua primeira empresa para começar.</div>
+        <a href="cadastro_empresa.html" class="btn btn-primary">+ Cadastrar empresa</a>
+      </div>`;
+    return;
+  }
+
+  lista.innerHTML = empresas.map(e => {
+    const ini = iniciais(e.nome_fantasia || e.razao_social);
+    const cor = corAvatar(e.razao_social);
+    const gr = e.grau_risco;
+    const funcs = e.total_funcionarios_previsto || 0;
+    const cidade = [e.cidade, e.estado].filter(Boolean).join(' — ');
+    const rural = e.atividade_rural ? `<span class="badge badge-rural">Rural</span>` : '';
+    const grBadge = gr ? `<span class="badge ${grClass(gr)}">GR ${gr}</span>` : '';
+
+    return `
+      <a href="empresa_detalhe.html?id=${e.id}" class="lista-row">
+        <div class="avatar" style="background:${cor.bg};color:${cor.color};">${ini}</div>
+        <div class="empresa-info">
+          <div class="empresa-nome">${e.nome_fantasia || e.razao_social}</div>
+          <div class="empresa-sub">${e.razao_social}${cidade ? ' · ' + cidade : ''}</div>
+        </div>
+        <div class="badges">
+          ${grBadge}
+          ${rural}
+        </div>
+        <div class="func-count">${funcs} func</div>
+        <div class="chevron">›</div>
+      </a>`;
+  }).join('');
+}
+
+function filtrar() {
+  const termo = document.getElementById('busca').value.toLowerCase().trim();
+  if (!termo) { renderLista(todasEmpresas); return; }
+  const filtradas = todasEmpresas.filter(e =>
+    (e.razao_social||'').toLowerCase().includes(termo) ||
+    (e.nome_fantasia||'').toLowerCase().includes(termo) ||
+    (e.cidade||'').toLowerCase().includes(termo) ||
+    (e.cnpj_raiz||'').includes(termo)
+  );
+  renderLista(filtradas);
+}
+
+async function carregarEmpresas() {
+  try {
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/empresas?select=*&order=razao_social.asc`,
+      { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` } }
+    );
+    if (!res.ok) throw new Error('Erro ao carregar empresas');
+    todasEmpresas = await res.json();
+
+    // Stats
+    const total = todasEmpresas.length;
+    const totalFuncs = todasEmpresas.reduce((a,e) => a + (e.total_funcionarios_previsto||0), 0);
+    const maxGR = todasEmpresas.reduce((a,e) => Math.max(a, e.grau_risco||0), 0);
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-funcs').textContent = totalFuncs;
+    document.getElementById('stat-gr').textContent = maxGR ? `GR ${maxGR}` : '—';
+    document.getElementById('page-sub').textContent = `${total} empresa${total !== 1 ? 's' : ''} cadastrada${total !== 1 ? 's' : ''}`;
+
+    renderLista(todasEmpresas);
+  } catch(e) {
+    document.getElementById('lista').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Erro ao carregar empresas</div>
+        <div class="empty-desc">${e.message}</div>
+      </div>`;
+  }
+}
+
+function sair() {
+  localStorage.removeItem('sgs_token');
+  localStorage.removeItem('sgs_user');
+  window.location.href = 'login.html';
+}
+
+carregarEmpresas();
+</script>
+</body>
+</html>

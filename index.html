@@ -26,7 +26,7 @@
   .welcome{margin-bottom:40px;}
   .welcome h1{font-size:24px;font-weight:500;margin-bottom:8px;}
   .welcome p{color:var(--text2);font-size:14px;}
-  .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+  .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px;}
   .menu-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:border-color .15s,transform .15s;text-decoration:none;display:block;}
   .menu-card:hover{border-color:var(--border-focus);transform:translateY(-2px);}
   .menu-card.disabled{opacity:.4;cursor:not-allowed;pointer-events:none;}
@@ -96,10 +96,10 @@
 
   <div class="section-title">Menu principal</div>
   <div class="menu-grid">
-    <a href="cadastro_empresa.html" class="menu-card">
+    <a href="empresas.html" class="menu-card">
       <div class="menu-icon icon-blue">🏢</div>
-      <div class="menu-title">Cadastro de Empresa <span class="badge badge-new">ativo</span></div>
-      <div class="menu-desc">Cadastre empresas clientes com consulta automática na Receita Federal e cálculo do Grau de Risco.</div>
+      <div class="menu-title">Empresas <span class="badge badge-new">ativo</span></div>
+      <div class="menu-desc">Visualize, gerencie e cadastre empresas com consulta automática na Receita Federal e cálculo do Grau de Risco.</div>
     </a>
     <div class="menu-card disabled">
       <div class="menu-icon icon-green">👷</div>
@@ -107,24 +107,74 @@
       <div class="menu-desc">Cadastro de colaboradores, ASOs, treinamentos e documentos individuais.</div>
     </div>
     <div class="menu-card disabled">
+      <div class="menu-icon icon-amber">🔥</div>
+      <div class="menu-title">Equipamentos de Segurança <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Extintores, sprinklers, iluminação de emergência e kits de primeiros socorros com controle de vistoria e alertas.</div>
+    </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-gray">⚙️</div>
+      <div class="menu-title">Equipamentos Críticos <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Caldeiras, vasos de pressão, máquinas e equipamentos elétricos com laudos e inspeções periódicas.</div>
+    </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-amber">🥽</div>
+      <div class="menu-title">Gestão de EPIs <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Ficha de EPI por funcionário, entregas, devoluções, controle de validade e CA.</div>
+    </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-blue">🎓</div>
+      <div class="menu-title">Treinamentos <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Catálogo por NR, histórico por funcionário, habilitações especiais e alertas de vencimento.</div>
+    </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-green">📊</div>
+      <div class="menu-title">Medições Ambientais <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Registros de ruído, calor, iluminação e qualidade do ar por setor com histórico.</div>
+    </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-amber">🚒</div>
+      <div class="menu-title">Brigada e Emergência <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Gestão da brigada, simulacros, planos de emergência, PPCI e AVCB.</div>
+    </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-gray">📄</div>
+      <div class="menu-title">Documentos e Laudos <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">PGR, PCMSO, LTCAT, laudos de insalubridade, periculosidade e ergonomia com controle de validade.</div>
+    </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-blue">🔔</div>
+      <div class="menu-title">Alertas e Notificações <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Central de alertas automáticos de vencimentos e notificações configuráveis por usuário.</div>
+    </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-green">📎</div>
+      <div class="menu-title">Documentos do Colaborador <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Upload de documentos por funcionário na nuvem ou link externo (OneDrive, Google Drive).</div>
+    </div>
+    <div class="menu-card disabled">
       <div class="menu-icon icon-amber">📋</div>
-      <div class="menu-title">PGR <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Programa de Gerenciamento de Riscos — geração automática conforme NR-1.</div>
+      <div class="menu-title">Gestão de Requisitos <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Controle de requisitos legais das NRs, ISO 45001, OHSAS e requisitos de clientes com status de conformidade.</div>
     </div>
     <div class="menu-card disabled">
-      <div class="menu-icon icon-green">🩺</div>
-      <div class="menu-title">PCMSO <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Programa de Controle Médico de Saúde Ocupacional e gestão de exames.</div>
+      <div class="menu-icon icon-gray">🔍</div>
+      <div class="menu-title">Inspeções e Checklists <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Checklists de campo, não conformidades e geração automática de ações corretivas.</div>
     </div>
     <div class="menu-card disabled">
-      <div class="menu-icon icon-blue">📊</div>
-      <div class="menu-title">eSocial <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Envio de eventos SST — S-2210, S-2220 e S-2240 integrados.</div>
+      <div class="menu-icon icon-blue">🏛️</div>
+      <div class="menu-title">CIPA / CIPATR <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Gestão completa de eleições, mandatos, atas de reuniões e ações da comissão.</div>
     </div>
     <div class="menu-card disabled">
-      <div class="menu-icon icon-gray">📁</div>
-      <div class="menu-title">Documentos <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Armazenamento e gestão de laudos, licenças e documentos SST.</div>
+      <div class="menu-icon icon-amber">⚡</div>
+      <div class="menu-title">Gestão de Ações <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Central única de ações corretivas e preventivas com responsável, prazo e status.</div>
+    </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-green">📊</div>
+      <div class="menu-title">eSocial SST <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Envio de eventos SST — S-2210 CAT, S-2220 ASO e S-2240 PPP integrados.</div>
     </div>
   </div>
 </div>
