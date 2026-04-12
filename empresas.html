@@ -191,9 +191,9 @@ function renderLista(empresas) {
     const cidade = [e.cidade, e.estado].filter(Boolean).join(' — ');
     const rural = e.atividade_rural ? `<span class="badge badge-rural">Rural</span>` : '';
     const grBadge = gr ? `<span class="badge ${grClass(gr)}">GR ${gr}</span>` : '';
-    const isFilial = e._tipo === 'filial';
-    const filialBadge = isFilial ? `<span class="badge" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);">${e._tipo_unidade||'FILIAL'}</span>` : '';
-    const href = isFilial ? `unidade_detalhe.html?id=${e.unidade_id}&empresa_id=${e.id}` : `empresa_detalhe.html?id=${e.id}`;
+    const isFilial = e._tipo === 'FILIAL';
+    const filialBadge = isFilial ? `<span class="badge" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);">FILIAL</span>` : '';
+    const href = `empresa_detalhe.html?id=${e.id}`;
     const indent = isFilial ? 'padding-left:36px;border-left:2px solid var(--border);margin-left:8px;' : '';
 
     return `
@@ -228,48 +228,39 @@ function filtrar() {
 
 async function carregarEmpresas() {
   try {
-    const [resEmp, resUni] = await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/empresas?select=*&order=razao_social.asc`,
-        { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` } }),
-      fetch(`${SUPA_URL}/rest/v1/unidades?select=*&order=nome_unidade.asc`,
-        { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` } })
-    ]);
-    if (!resEmp.ok) throw new Error('Erro ao carregar empresas');
-    todasEmpresas = await resEmp.json();
-    const unidades = resUni.ok ? await resUni.json() : [];
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/empresas?select=*&order=empresa_mae_id.asc.nullsfirst,razao_social.asc`,
+      { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` } }
+    );
+    if (!res.ok) throw new Error('Erro ao carregar empresas');
+    const todas = await res.json();
 
-    // Monta lista combinada: empresas + filiais
+    // Separa matrizes e filiais
+    const matrizes = todas.filter(e => !e.empresa_mae_id);
+    const filiais = todas.filter(e => e.empresa_mae_id);
+
+    // Monta lista agrupada: matriz seguida das suas filiais
     let listaCompleta = [];
-    todasEmpresas.forEach(emp => {
-      listaCompleta.push({...emp, _tipo: 'empresa'});
-      const filiais = unidades.filter(u => u.empresa_id === emp.id);
-      filiais.forEach(f => {
-        listaCompleta.push({
-          id: emp.id,
-          unidade_id: f.id,
-          razao_social: f.nome_unidade,
-          nome_fantasia: f.nome_unidade,
-          cidade: f.cidade,
-          estado: f.estado,
-          grau_risco: emp.grau_risco,
-          total_funcionarios_previsto: f.numero_funcionarios || 0,
-          atividade_rural: emp.atividade_rural,
-          cnpj_raiz: emp.cnpj_raiz,
-          _tipo: 'filial',
-          _tipo_unidade: f.tipo
-        });
+    matrizes.forEach(m => {
+      listaCompleta.push({...m, _tipo: 'MATRIZ'});
+      filiais.filter(f => f.empresa_mae_id === m.id).forEach(f => {
+        listaCompleta.push({...f, _tipo: 'FILIAL'});
       });
     });
+    // Filiais órfãs (sem matriz cadastrada) aparecem no final
+    filiais.filter(f => !matrizes.find(m => m.id === f.empresa_mae_id))
+      .forEach(f => listaCompleta.push({...f, _tipo: 'FILIAL'}));
 
-    // Stats — conta empresas + filiais
-    const totalEmpresas = listaCompleta.length;
+    // Stats
+    const total = listaCompleta.length;
     const totalFuncs = listaCompleta.reduce((a,e) => a + (e.total_funcionarios_previsto||0), 0);
     const maxGR = listaCompleta.reduce((a,e) => Math.max(a, e.grau_risco||0), 0);
+    const nFiliais = filiais.length;
 
-    document.getElementById('stat-total').textContent = totalEmpresas;
+    document.getElementById('stat-total').textContent = total;
     document.getElementById('stat-funcs').textContent = totalFuncs;
     document.getElementById('stat-gr').textContent = maxGR ? `GR ${maxGR}` : '—';
-    document.getElementById('page-sub').textContent = `${todasEmpresas.length} empresa${todasEmpresas.length !== 1 ? 's' : ''} · ${unidades.length} filial${unidades.length !== 1 ? 'is' : ''} cadastrada${unidades.length !== 1 ? 's' : ''}`;
+    document.getElementById('page-sub').textContent = `${matrizes.length} empresa${matrizes.length !== 1 ? 's' : ''}${nFiliais ? ' · ' + nFiliais + ' filial' + (nFiliais > 1 ? 'is' : '') : ''}`;
 
     todasEmpresas = listaCompleta;
     renderLista(todasEmpresas);
