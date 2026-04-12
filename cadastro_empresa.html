@@ -88,6 +88,7 @@
 <div class="header">
   <div class="header-logo">SGS</div>
   <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span>Cadastro de Empresa</span></div>
+  <a href="index.html" style="font-size:12px;color:var(--text2);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);">← Voltar</a>
 </div>
 <div class="container">
 
@@ -200,10 +201,15 @@
 </div>
 <script>
 // =====================================================
-// SUPABASE
+// SUPABASE + AUTENTICAÇÃO
 // =====================================================
 const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+
+// Verifica se está logado
+const sgs_token = localStorage.getItem('sgs_token');
+const sgs_user = localStorage.getItem('sgs_user') ? JSON.parse(localStorage.getItem('sgs_user')) : null;
+if (!sgs_token) { window.location.href = 'login.html'; }
 
 async function salvarNoSupabase(empresa, cnaes) {
   const resEmpresa = await fetch(`${SUPA_URL}/rest/v1/empresas`, {
@@ -211,7 +217,7 @@ async function salvarNoSupabase(empresa, cnaes) {
     headers: {
       'Content-Type': 'application/json',
       'apikey': SUPA_KEY,
-      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Authorization': `Bearer ${sgs_token}`,
       'Prefer': 'return=representation'
     },
     body: JSON.stringify(empresa)
@@ -229,7 +235,7 @@ async function salvarNoSupabase(empresa, cnaes) {
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPA_KEY,
-        'Authorization': `Bearer ${SUPA_KEY}`
+        'Authorization': `Bearer ${sgs_token}`
       },
       body: JSON.stringify({ ...c, empresa_id: empresaId })
     });
@@ -364,6 +370,7 @@ async function salvarEmpresa(){
   const fn=document.getElementById('total_funcionarios').value;
   const empresa={
     razao_social:razao,
+    user_id:sgs_user?.id||null,
     nome_fantasia:document.getElementById('nome_fantasia').value||null,
     cnpj_raiz:raw.slice(0,8),
     telefone:document.getElementById('telefone').value||null,

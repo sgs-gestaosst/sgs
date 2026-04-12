@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Acesso</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+    --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+    --danger:#e05555;--success:#2dd4a0;
+    --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:420px;margin:24px;}
+  .logo{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:6px 14px;border-radius:var(--radius);display:inline-block;margin-bottom:32px;}
+  .title{font-size:22px;font-weight:500;margin-bottom:6px;}
+  .subtitle{font-size:13px;color:var(--text2);margin-bottom:32px;}
+  .tabs{display:flex;gap:0;margin-bottom:28px;border-bottom:1px solid var(--border);}
+  .tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:14px;padding:11px 14px;outline:none;transition:border-color .15s;}
+  input:focus{border-color:var(--border-focus);}
+  input::placeholder{color:var(--text3);}
+  .btn{width:100%;padding:12px;border-radius:var(--radius);font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#5a8ce8;}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+  .status{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:14px;align-items:center;gap:8px;}
+  .status.show{display:flex;}
+  .status.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+  .status.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+  .status.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .spinner.show{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .divider{text-align:center;color:var(--text3);font-size:12px;margin:20px 0;position:relative;}
+  .divider::before{content:'';position:absolute;left:0;top:50%;width:42%;height:1px;background:var(--border);}
+  .divider::after{content:'';position:absolute;right:0;top:50%;width:42%;height:1px;background:var(--border);}
+  .hint{font-size:11px;color:var(--text3);margin-top:6px;}
+  #form-cadastro{display:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">SGS</div>
+  <div class="title">Bem-vindo</div>
+  <div class="subtitle">Sistema de Gestão em Saúde e Segurança do Trabalho</div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-login" onclick="mudarTab('login')">Entrar</div>
+    <div class="tab" id="tab-cadastro" onclick="mudarTab('cadastro')">Criar conta</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="form-login">
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="login-email" placeholder="seu@email.com">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="login-senha" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" id="btn-login" onclick="fazerLogin()">
+      <span class="spinner" id="spinner-login"></span>
+      <span id="btn-login-label">Entrar</span>
+    </button>
+    <div class="status" id="status-login"></div>
+  </div>
+
+  <!-- CADASTRO -->
+  <div id="form-cadastro">
+    <div class="field">
+      <label>Nome completo</label>
+      <input type="text" id="cad-nome" placeholder="Seu nome">
+    </div>
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="cad-email" placeholder="seu@email.com">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres">
+      <div class="hint">Use letras, números e símbolos para maior segurança.</div>
+    </div>
+    <div class="field">
+      <label>Confirmar senha</label>
+      <input type="password" id="cad-senha2" placeholder="Repita a senha">
+    </div>
+    <button class="btn btn-primary" id="btn-cadastro" onclick="fazerCadastro()">
+      <span class="spinner" id="spinner-cadastro"></span>
+      <span id="btn-cadastro-label">Criar conta</span>
+    </button>
+    <div class="status" id="status-cadastro"></div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+
+function mudarTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-cadastro').classList.toggle('active', tab === 'cadastro');
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-cadastro').style.display = tab === 'cadastro' ? 'block' : 'none';
+}
+
+function setStatus(id, tipo, msg) {
+  const el = document.getElementById(id);
+  const icons = {error:'✕', success:'✓', info:'↻'};
+  el.className = 'status show ' + tipo;
+  el.innerHTML = `<span>${icons[tipo]}</span><span>${msg}</span>`;
+}
+
+function setLoad(btn, spinner, label, state, texto) {
+  document.getElementById(btn).disabled = state;
+  document.getElementById(spinner).className = 'spinner' + (state ? ' show' : '');
+  document.getElementById(label).textContent = state ? texto : document.getElementById(label).dataset.orig || document.getElementById(label).textContent;
+}
+
+async function fazerLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  if (!email || !senha) { setStatus('status-login','error','Preencha e-mail e senha.'); return; }
+
+  document.getElementById('btn-login').disabled = true;
+  document.getElementById('spinner-login').className = 'spinner show';
+  document.getElementById('btn-login-label').textContent = 'Entrando...';
+  setStatus('status-login','info','Verificando...');
+
+  try {
+    const res = await fetch(`${SUPA_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
+      body: JSON.stringify({email, password: senha})
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Erro ao entrar');
+
+    // Salva token
+    localStorage.setItem('sgs_token', data.access_token);
+    localStorage.setItem('sgs_user', JSON.stringify({email, id: data.user?.id}));
+
+    setStatus('status-login','success','Acesso autorizado! Redirecionando...');
+    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+  } catch(e) {
+    setStatus('status-login','error', e.message.includes('Invalid') ? 'E-mail ou senha incorretos.' : e.message);
+  } finally {
+    document.getElementById('btn-login').disabled = false;
+    document.getElementById('spinner-login').className = 'spinner';
+    document.getElementById('btn-login-label').textContent = 'Entrar';
+  }
+}
+
+async function fazerCadastro() {
+  const nome = document.getElementById('cad-nome').value.trim();
+  const email = document.getElementById('cad-email').value.trim();
+  const senha = document.getElementById('cad-senha').value;
+  const senha2 = document.getElementById('cad-senha2').value;
+
+  if (!nome || !email || !senha) { setStatus('status-cadastro','error','Preencha todos os campos.'); return; }
+  if (senha.length < 6) { setStatus('status-cadastro','error','Senha deve ter no mínimo 6 caracteres.'); return; }
+  if (senha !== senha2) { setStatus('status-cadastro','error','As senhas não coincidem.'); return; }
+
+  document.getElementById('btn-cadastro').disabled = true;
+  document.getElementById('spinner-cadastro').className = 'spinner show';
+  document.getElementById('btn-cadastro-label').textContent = 'Criando conta...';
+  setStatus('status-cadastro','info','Criando sua conta...');
+
+  try {
+    const res = await fetch(`${SUPA_URL}/auth/v1/signup`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
+      body: JSON.stringify({email, password: senha, data: {nome_completo: nome}})
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Erro ao criar conta');
+
+    setStatus('status-cadastro','success','Conta criada! Verifique seu e-mail para confirmar.');
+  } catch(e) {
+    setStatus('status-cadastro','error', e.message.includes('already') ? 'Este e-mail já está cadastrado.' : e.message);
+  } finally {
+    document.getElementById('btn-cadastro').disabled = false;
+    document.getElementById('spinner-cadastro').className = 'spinner';
+    document.getElementById('btn-cadastro-label').textContent = 'Criar conta';
+  }
+}
+
+// Enter para login
+document.getElementById('login-senha').addEventListener('keydown', e => { if(e.key==='Enter') fazerLogin(); });
+document.getElementById('login-email').addEventListener('keydown', e => { if(e.key==='Enter') fazerLogin(); });
+
+// Verifica se já está logado
+const token = localStorage.getItem('sgs_token');
+if (token) window.location.href = 'index.html';
+</script>
+</body>
+</html>
