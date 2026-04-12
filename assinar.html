@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Assinar Plano</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+    --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+    --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+    --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;}
+  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+  .header-title{font-size:13px;color:var(--text2);flex:1;}
+  .header-title span{color:var(--text);font-weight:500;}
+  .container{max-width:680px;margin:0 auto;padding:40px 24px 80px;}
+  .section-label{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* Card do plano */
+  .plano-card{background:var(--surface);border:2px solid var(--border-focus);border-radius:12px;padding:24px;margin-bottom:24px;}
+  .plano-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+  .plano-nome{font-size:20px;font-weight:500;}
+  .plano-badge{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:var(--radius);background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+  .plano-desc{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px;}
+
+  .preco-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:20px;}
+  .preco-linha{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:14px;}
+  .preco-linha:not(:last-child){border-bottom:1px solid var(--border);}
+  .preco-label{color:var(--text2);}
+  .preco-valor{font-weight:500;}
+  .preco-desconto{color:var(--success);}
+  .preco-total{font-size:18px;color:var(--accent2);}
+  .preco-total-label{font-size:13px;font-weight:500;}
+  .preco-extra{font-size:12px;color:var(--text3);margin-top:8px;text-align:right;}
+
+  /* Cupom */
+  .cupom-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;}
+  .cupom-row{display:flex;gap:10px;}
+  .cupom-row input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;padding:11px 14px;outline:none;transition:border-color .15s;text-transform:uppercase;letter-spacing:.08em;}
+  .cupom-row input:focus{border-color:var(--border-focus);}
+  .cupom-row input::placeholder{text-transform:none;letter-spacing:0;color:var(--text3);}
+  .cupom-row input.valido{border-color:var(--success);color:var(--success);}
+  .cupom-row input.invalido{border-color:var(--danger);}
+  .btn-cupom{padding:11px 20px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:border-color .15s;}
+  .btn-cupom:hover{border-color:var(--border-focus);}
+  .cupom-status{margin-top:10px;font-size:12px;display:none;}
+  .cupom-status.show{display:block;}
+  .cupom-status.ok{color:var(--success);}
+  .cupom-status.err{color:var(--danger);}
+
+  /* Trial info */
+  .trial-box{background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:16px;margin-bottom:24px;display:flex;gap:12px;align-items:flex-start;}
+  .trial-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+  .trial-texto{font-size:13px;color:#7aabf7;line-height:1.6;}
+  .trial-texto strong{color:#e8eaf0;}
+
+  /* Botão */
+  .btn-assinar{width:100%;padding:14px;background:var(--accent2);color:#0f1117;font-family:var(--sans);font-size:15px;font-weight:600;border:none;border-radius:var(--radius);cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-assinar:hover{background:#3de8b4;}
+  .btn-assinar:disabled{opacity:.4;cursor:not-allowed;}
+  .spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f1117;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .spinner.show{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .status-bar{display:none;padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-top:14px;align-items:center;gap:8px;}
+  .status-bar.show{display:flex;}
+  .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+  .status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+  .status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+
+  .voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;}
+  .voltar:hover{color:var(--text);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">SGS</div>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span>Assinar Plano</span></div>
+</div>
+
+<div class="container">
+  <a href="index.html" class="voltar">← Voltar ao início</a>
+
+  <div class="section-label">Período de teste</div>
+  <div class="trial-box">
+    <div class="trial-icon">🎯</div>
+    <div class="trial-texto">
+      <strong>30 dias gratuitos</strong> — Você tem acesso completo ao SGS por 30 dias sem custo.<br>
+      Após o período trial, sua assinatura será ativada automaticamente com o plano escolhido.
+    </div>
+  </div>
+
+  <div class="section-label">Plano SGS</div>
+  <div class="plano-card">
+    <div class="plano-header">
+      <div class="plano-nome">Plano SGS</div>
+      <div class="plano-badge">Único plano</div>
+    </div>
+    <div class="plano-desc">
+      R$ 99,90/mês para até 50 funcionários. Para cada funcionário adicional acima de 50, acrescenta-se R$ 1,80. Acima de 1.000 funcionários, sob consulta. Suporte via WhatsApp.
+    </div>
+    <div class="preco-box">
+      <div class="preco-linha">
+        <span class="preco-label">Valor base (até 50 func)</span>
+        <span class="preco-valor" id="valor-base-display">R$ 99,90</span>
+      </div>
+      <div class="preco-linha" id="linha-desconto" style="display:none;">
+        <span class="preco-label" id="label-desconto">Desconto cupom</span>
+        <span class="preco-valor preco-desconto" id="valor-desconto-display">-R$ 0,00</span>
+      </div>
+      <div class="preco-linha">
+        <span class="preco-total-label">Base com desconto</span>
+        <span class="preco-valor preco-total" id="valor-final-display">R$ 99,90</span>
+      </div>
+      <div class="preco-extra">+ R$ 1,80 por funcionário acima de 50 (sem desconto)</div>
+    </div>
+  </div>
+
+  <div class="section-label">Cupom de desconto</div>
+  <div class="cupom-card">
+    <div class="cupom-row">
+      <input type="text" id="cupom-input" placeholder="Digite seu cupom (opcional)" maxlength="30">
+      <button class="btn-cupom" onclick="validarCupom()">Aplicar</button>
+    </div>
+    <div class="cupom-status" id="cupom-status"></div>
+  </div>
+
+  <button class="btn-assinar" id="btn-assinar" onclick="assinar()">
+    <span class="spinner" id="spinner-assinar"></span>
+    <span id="btn-assinar-label">Iniciar 30 dias grátis</span>
+  </button>
+  <div class="status-bar" id="status-assinar"></div>
+</div>
+
+<script>
+const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+
+const token = localStorage.getItem('sgs_token');
+const userRaw = localStorage.getItem('sgs_user');
+if (!token) { window.location.href = 'login.html'; }
+const user = userRaw ? JSON.parse(userRaw) : {};
+
+const BASE = 99.90;
+let cupomAtivo = null;
+let valorFinal = BASE;
+
+function fmt(v) {
+  return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+
+function atualizarPreco() {
+  const baseEl = document.getElementById('valor-base-display');
+  const finalEl = document.getElementById('valor-final-display');
+  const descontoEl = document.getElementById('valor-desconto-display');
+  const linhaDesc = document.getElementById('linha-desconto');
+  const labelDesc = document.getElementById('label-desconto');
+
+  baseEl.textContent = fmt(BASE);
+
+  if (cupomAtivo) {
+    const desconto = BASE * (cupomAtivo.valor_desconto / 100);
+    valorFinal = Math.max(0, BASE - desconto);
+    descontoEl.textContent = `-${fmt(desconto)}`;
+    labelDesc.textContent = `Desconto ${cupomAtivo.codigo} (-${cupomAtivo.valor_desconto}%)`;
+    linhaDesc.style.display = 'flex';
+  } else {
+    valorFinal = BASE;
+    linhaDesc.style.display = 'none';
+  }
+
+  finalEl.textContent = fmt(valorFinal);
+}
+
+async function validarCupom() {
+  const codigo = document.getElementById('cupom-input').value.trim().toUpperCase();
+  const statusEl = document.getElementById('cupom-status');
+  const inputEl = document.getElementById('cupom-input');
+
+  if (!codigo) {
+    statusEl.className = 'cupom-status show err';
+    statusEl.textContent = 'Digite um código de cupom.';
+    return;
+  }
+
+  statusEl.className = 'cupom-status show';
+  statusEl.style.color = 'var(--text2)';
+  statusEl.textContent = 'Validando...';
+
+  try {
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/cupons?codigo=eq.${codigo}&ativo=eq.true&select=*`,
+      { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` } }
+    );
+    const data = await res.json();
+
+    if (!data.length) {
+      inputEl.className = 'invalido';
+      statusEl.className = 'cupom-status show err';
+      statusEl.textContent = '✕ Cupom inválido ou expirado.';
+      cupomAtivo = null;
+      atualizarPreco();
+      return;
+    }
+
+    const cupom = data[0];
+
+    // Verifica validade
+    if (cupom.data_expiracao && new Date(cupom.data_expiracao) < new Date()) {
+      inputEl.className = 'invalido';
+      statusEl.className = 'cupom-status show err';
+      statusEl.textContent = '✕ Este cupom está expirado.';
+      cupomAtivo = null;
+      atualizarPreco();
+      return;
+    }
+
+    // Verifica limite de uso
+    if (cupom.uso_maximo && cupom.usos_realizados >= cupom.uso_maximo) {
+      inputEl.className = 'invalido';
+      statusEl.className = 'cupom-status show err';
+      statusEl.textContent = '✕ Este cupom atingiu o limite de usos.';
+      cupomAtivo = null;
+      atualizarPreco();
+      return;
+    }
+
+    // Cupom válido!
+    cupomAtivo = cupom;
+    inputEl.className = 'valido';
+    const expira = cupom.data_expiracao
+      ? ` · Válido até ${new Date(cupom.data_expiracao).toLocaleDateString('pt-BR')}`
+      : '';
+    statusEl.className = 'cupom-status show ok';
+    statusEl.textContent = `✓ ${cupom.descricao}${expira}`;
+    atualizarPreco();
+
+  } catch(e) {
+    statusEl.className = 'cupom-status show err';
+    statusEl.textContent = 'Erro ao validar cupom.';
+  }
+}
+
+document.getElementById('cupom-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') validarCupom();
+});
+
+function setStatus(tipo, msg) {
+  const el = document.getElementById('status-assinar');
+  const icons = {success:'✓', error:'✕', info:'↻'};
+  el.className = 'status-bar show ' + tipo;
+  el.innerHTML = `<span>${icons[tipo]}</span><span>${msg}</span>`;
+}
+
+async function assinar() {
+  document.getElementById('btn-assinar').disabled = true;
+  document.getElementById('spinner-assinar').className = 'spinner show';
+  document.getElementById('btn-assinar-label').textContent = 'Ativando...';
+  setStatus('info', 'Ativando sua assinatura...');
+
+  try {
+    // Busca o plano SGS
+    const resPlano = await fetch(
+      `${SUPA_URL}/rest/v1/planos?nome=eq.SGS&select=id`,
+      { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` } }
+    );
+    const planos = await resPlano.json();
+    if (!planos.length) throw new Error('Plano não encontrado.');
+    const planoId = planos[0].id;
+
+    // Calcula datas
+    const hoje = new Date();
+    const fimTrial = new Date(hoje);
+    fimTrial.setDate(fimTrial.getDate() + 30);
+
+    const assinatura = {
+      user_id: user.id,
+      plano_id: planoId,
+      status: 'Trial',
+      data_inicio: hoje.toISOString().split('T')[0],
+      data_fim_trial: fimTrial.toISOString().split('T')[0],
+      valor_base: BASE,
+      valor_base_com_desconto: valorFinal,
+      percentual_desconto: cupomAtivo ? cupomAtivo.valor_desconto : 0,
+      ativo: true
+    };
+
+    if (cupomAtivo) {
+      assinatura.cupom_id = cupomAtivo.id;
+      assinatura.data_expiracao_cupom = cupomAtivo.data_expiracao;
+    }
+
+    // Salva assinatura
+    const res = await fetch(`${SUPA_URL}/rest/v1/assinaturas`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(assinatura)
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Erro ao ativar assinatura.');
+    }
+
+    // Atualiza contagem de usos do cupom
+    if (cupomAtivo) {
+      await fetch(`${SUPA_URL}/rest/v1/cupons?id=eq.${cupomAtivo.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPA_KEY,
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ usos_realizados: cupomAtivo.usos_realizados + 1 })
+      });
+    }
+
+    setStatus('success', 'Assinatura ativada! Seus 30 dias grátis começaram. Redirecionando...');
+    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+
+  } catch(e) {
+    setStatus('error', `Erro: ${e.message}`);
+    document.getElementById('btn-assinar').disabled = false;
+    document.getElementById('spinner-assinar').className = 'spinner';
+    document.getElementById('btn-assinar-label').textContent = 'Iniciar 30 dias grátis';
+  }
+}
+
+// Inicializa preço
+atualizarPreco();
+</script>
+</body>
+</html>
