@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Detalhe da Empresa</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+    --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+    --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+    --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+  .header-title{font-size:13px;color:var(--text2);flex:1;}
+  .header-title span{color:var(--text);font-weight:500;}
+  .btn-logout{font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;font-family:var(--sans);}
+  .btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+  .container{max-width:960px;margin:0 auto;padding:32px 24px 80px;}
+  .voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+  .voltar:hover{color:var(--text);}
+
+  /* Hero */
+  .hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:8px;}
+  .hero-top{display:flex;align-items:flex-start;gap:16px;}
+  .avatar{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:500;flex-shrink:0;background:#1a2540;color:#7aabf7;}
+  .hero-info{flex:1;min-width:0;}
+  .hero-nome{font-size:18px;font-weight:500;margin-bottom:4px;}
+  .hero-razao{font-size:13px;color:var(--text2);margin-bottom:8px;}
+  .hero-badges{display:flex;gap:6px;flex-wrap:wrap;}
+  .badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500;font-family:var(--mono);}
+  .gr1{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .gr2{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+  .gr3{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+  .gr4{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+  .badge-rural{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+  .badge-ativa{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .hero-actions{display:flex;gap:8px;flex-shrink:0;}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+  .btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-edit:hover{border-color:var(--border-focus);}
+  .btn-save{background:var(--accent2);color:#0f1117;}
+  .btn-save:hover{background:#3de8b4;}
+  .btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+  .btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+  .btn-danger:hover{background:#2a1515;}
+
+  /* Abas */
+  .tabs-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
+  .tab{padding:12px 18px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-content{display:none;padding:24px;}
+  .tab-content.active{display:block;}
+
+  /* Campos */
+  .fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .field-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:16px;}
+  .field-row:last-child{border-bottom:none;}
+  .field-label{font-size:12px;color:var(--text2);min-width:140px;flex-shrink:0;}
+  .field-val{font-size:13px;font-weight:500;text-align:right;flex:1;}
+  .field-input{background:var(--bg);border:1px solid var(--border-focus);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:6px 10px;outline:none;width:100%;text-align:right;}
+  .field-input:focus{border-color:var(--accent2);}
+  .field-select{background:var(--bg);border:1px solid var(--border-focus);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:6px 10px;outline:none;appearance:none;}
+  .toggle-wrap{display:flex;align-items:center;gap:8px;}
+  .toggle{width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+  .toggle.on{background:var(--accent2);}
+  .toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;}
+  .toggle.on::after{left:19px;}
+
+  /* CNAEs */
+  .cnae-list{display:flex;flex-direction:column;gap:8px;}
+  .cnae-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-size:13px;}
+  .cnae-tipo{font-size:10px;padding:2px 7px;border-radius:4px;white-space:nowrap;font-family:var(--mono);}
+  .tipo-p{background:#1a2e50;color:#7aabf7;border:1px solid #2a4a80;}
+  .tipo-s{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+  .cnae-code{font-family:var(--mono);font-size:12px;color:var(--accent2);white-space:nowrap;}
+  .cnae-desc{flex:1;color:var(--text2);}
+
+  /* Seção vazia */
+  .empty-tab{text-align:center;padding:40px 20px;color:var(--text2);}
+  .empty-tab-icon{font-size:32px;margin-bottom:12px;}
+  .empty-tab-title{font-size:14px;font-weight:500;margin-bottom:6px;color:var(--text);}
+
+  /* Status bar */
+  .status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+  .status-bar.show{display:flex;}
+  .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+  .status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+  .status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+
+  .spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f1117;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .spinner.show{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .section-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;}
+
+  @media(max-width:600px){
+    .header{padding:12px 16px;}
+    .container{padding:16px 12px 60px;}
+    .fields-grid{grid-template-columns:1fr;}
+    .hero-actions{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-logo">SGS</div>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Empresa</span></div>
+  <button class="btn-logout" onclick="sair()">Sair</button>
+</div>
+
+<div class="container">
+  <a href="empresas.html" class="voltar">← Voltar para empresas</a>
+
+  <!-- Hero -->
+  <div class="hero" id="hero">
+    <div class="hero-top">
+      <div class="avatar" id="hero-avatar">—</div>
+      <div class="hero-info">
+        <div class="hero-nome" id="hero-nome">Carregando...</div>
+        <div class="hero-razao" id="hero-razao"></div>
+        <div class="hero-badges" id="hero-badges"></div>
+      </div>
+      <div class="hero-actions" id="hero-actions">
+        <button class="btn btn-edit" id="btn-editar" onclick="modoEditar()">Editar</button>
+      </div>
+    </div>
+    <div class="status-bar" id="status-edit"></div>
+  </div>
+
+  <!-- Abas -->
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <div class="tab active" onclick="mudarAba('dados')">Dados gerais</div>
+      <div class="tab" onclick="mudarAba('cnaes')">CNAEs</div>
+      <div class="tab" onclick="mudarAba('unidades')">Unidades</div>
+      <div class="tab" onclick="mudarAba('setores')">Setores</div>
+      <div class="tab" onclick="mudarAba('funcionarios')">Funcionários</div>
+    </div>
+
+    <!-- ABA DADOS -->
+    <div class="tab-content active" id="aba-dados">
+      <div class="section-label">Informações da empresa</div>
+      <div id="campos-dados"></div>
+    </div>
+
+    <!-- ABA CNAEs -->
+    <div class="tab-content" id="aba-cnaes">
+      <div class="section-label">CNAEs cadastrados</div>
+      <div class="cnae-list" id="lista-cnaes"></div>
+    </div>
+
+    <!-- ABA UNIDADES -->
+    <div class="tab-content" id="aba-unidades">
+      <div class="empty-tab">
+        <div class="empty-tab-icon">🏭</div>
+        <div class="empty-tab-title">Unidades em breve</div>
+        <div>Cadastro de filiais e unidades estará disponível em breve.</div>
+      </div>
+    </div>
+
+    <!-- ABA SETORES -->
+    <div class="tab-content" id="aba-setores">
+      <div class="empty-tab">
+        <div class="empty-tab-icon">🗂️</div>
+        <div class="empty-tab-title">Setores em breve</div>
+        <div>Cadastro de departamentos e setores estará disponível em breve.</div>
+      </div>
+    </div>
+
+    <!-- ABA FUNCIONÁRIOS -->
+    <div class="tab-content" id="aba-funcionarios">
+      <div class="empty-tab">
+        <div class="empty-tab-icon">👷</div>
+        <div class="empty-tab-title">Funcionários em breve</div>
+        <div>Cadastro de colaboradores estará disponível em breve.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token = localStorage.getItem('sgs_token');
+if (!token) { window.location.href = 'login.html'; }
+
+const params = new URLSearchParams(window.location.search);
+const empresaId = params.get('id');
+if (!empresaId) { window.location.href = 'empresas.html'; }
+
+let empresa = null;
+let cnaes = [];
+let modoEdicao = false;
+
+function iniciais(nome) {
+  if (!nome) return '?';
+  const p = nome.trim().split(' ').filter(w => w.length > 2);
+  return p.length >= 2 ? (p[0][0]+p[1][0]).toUpperCase() : nome.slice(0,2).toUpperCase();
+}
+
+const grInfo = {
+  1:{cls:'gr1',label:'GR 1'},2:{cls:'gr2',label:'GR 2'},
+  3:{cls:'gr3',label:'GR 3'},4:{cls:'gr4',label:'GR 4'}
+};
+
+function renderHero() {
+  const nome = empresa.nome_fantasia || empresa.razao_social;
+  document.getElementById('hero-avatar').textContent = iniciais(nome);
+  document.getElementById('hero-nome').textContent = nome;
+  document.getElementById('hero-razao').textContent = empresa.razao_social + (empresa.cnpj_raiz ? ' · CNPJ raiz: ' + empresa.cnpj_raiz : '');
+  document.getElementById('header-nome').textContent = nome;
+
+  let badges = '';
+  if (empresa.grau_risco && grInfo[empresa.grau_risco]) {
+    badges += `<span class="badge ${grInfo[empresa.grau_risco].cls}">${grInfo[empresa.grau_risco].label}</span>`;
+  }
+  if (empresa.atividade_rural) badges += `<span class="badge badge-rural">Rural</span>`;
+  if (empresa.ativo) badges += `<span class="badge badge-ativa">Ativa</span>`;
+  document.getElementById('hero-badges').innerHTML = badges;
+}
+
+function renderCampos() {
+  const campos = [
+    {label:'Telefone', key:'telefone', type:'text'},
+    {label:'E-mail', key:'email', type:'email'},
+    {label:'Endereço', key:'endereco', type:'text'},
+    {label:'Cidade', key:'cidade', type:'text'},
+    {label:'Estado', key:'estado', type:'select', options:['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']},
+    {label:'CEP', key:'cep', type:'text'},
+    {label:'Grau de Risco', key:'grau_risco', type:'select', options:[{v:1,l:'GR 1 — Baixo'},{v:2,l:'GR 2 — Médio-Baixo'},{v:3,l:'GR 3 — Médio-Alto'},{v:4,l:'GR 4 — Alto'}]},
+    {label:'Nº de Funcionários', key:'total_funcionarios_previsto', type:'number'},
+    {label:'Atividade Rural', key:'atividade_rural', type:'toggle'},
+    {label:'Ativa no sistema', key:'ativo', type:'toggle'},
+  ];
+
+  const container = document.getElementById('campos-dados');
+  container.innerHTML = campos.map(c => {
+    const val = empresa[c.key];
+    const valDisplay = val !== null && val !== undefined && val !== '' ? val : '—';
+
+    if (!modoEdicao) {
+      let display = valDisplay;
+      if (c.type === 'toggle') display = val ? 'Sim' : 'Não';
+      if (c.key === 'grau_risco' && val) display = grInfo[val]?.label || val;
+      return `<div class="field-row">
+        <span class="field-label">${c.label}</span>
+        <span class="field-val">${display}</span>
+      </div>`;
+    }
+
+    // Modo edição
+    if (c.type === 'toggle') {
+      return `<div class="field-row">
+        <span class="field-label">${c.label}</span>
+        <div class="toggle-wrap">
+          <div class="toggle ${val ? 'on' : ''}" id="toggle-${c.key}" onclick="toggleField('${c.key}')"></div>
+          <span style="font-size:12px;color:var(--text2)" id="toggle-label-${c.key}">${val ? 'Sim' : 'Não'}</span>
+        </div>
+      </div>`;
+    }
+    if (c.type === 'select') {
+      const opts = c.options.map(o => {
+        const v = typeof o === 'object' ? o.v : o;
+        const l = typeof o === 'object' ? o.l : o;
+        return `<option value="${v}" ${val == v ? 'selected' : ''}>${l}</option>`;
+      }).join('');
+      return `<div class="field-row">
+        <span class="field-label">${c.label}</span>
+        <select class="field-select" id="field-${c.key}"><option value="">—</option>${opts}</select>
+      </div>`;
+    }
+    return `<div class="field-row">
+      <span class="field-label">${c.label}</span>
+      <input class="field-input" type="${c.type}" id="field-${c.key}" value="${val||''}">
+    </div>`;
+  }).join('');
+}
+
+function renderCNAEs() {
+  const lista = document.getElementById('lista-cnaes');
+  if (!cnaes.length) {
+    lista.innerHTML = `<div class="empty-tab"><div class="empty-tab-icon">📋</div><div class="empty-tab-title">Nenhum CNAE cadastrado</div></div>`;
+    return;
+  }
+  lista.innerHTML = cnaes.map(c => {
+    const gr = c.grau_risco ? `<span class="badge ${grInfo[c.grau_risco]?.cls||'gr2'}">${grInfo[c.grau_risco]?.label||''}</span>` : '';
+    return `<div class="cnae-item">
+      <span class="cnae-tipo ${c.tipo==='Principal'?'tipo-p':'tipo-s'}">${c.tipo}</span>
+      <span class="cnae-code">${c.cnae}</span>
+      <span class="cnae-desc">${c.descricao||''}</span>
+      ${gr}
+    </div>`;
+  }).join('');
+}
+
+function mudarAba(aba) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const abas = ['dados','cnaes','unidades','setores','funcionarios'];
+    t.classList.toggle('active', abas[i] === aba);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(`aba-${aba}`).classList.add('active');
+}
+
+function modoEditar() {
+  modoEdicao = true;
+  renderCampos();
+  document.getElementById('hero-actions').innerHTML = `
+    <button class="btn btn-cancel" onclick="cancelarEdicao()">Cancelar</button>
+    <button class="btn btn-save" id="btn-salvar" onclick="salvarEdicao()">
+      <span class="spinner" id="spinner-save"></span>
+      <span id="label-save">Salvar</span>
+    </button>`;
+}
+
+function cancelarEdicao() {
+  modoEdicao = false;
+  renderCampos();
+  document.getElementById('hero-actions').innerHTML = `<button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
+  document.getElementById('status-edit').className = 'status-bar';
+}
+
+function toggleField(key) {
+  const t = document.getElementById(`toggle-${key}`);
+  const l = document.getElementById(`toggle-label-${key}`);
+  const isOn = t.classList.toggle('on');
+  l.textContent = isOn ? 'Sim' : 'Não';
+}
+
+function getFieldVal(key, type) {
+  if (type === 'toggle') return document.getElementById(`toggle-${key}`)?.classList.contains('on');
+  const el = document.getElementById(`field-${key}`);
+  if (!el) return empresa[key];
+  if (type === 'number') return el.value ? parseInt(el.value) : null;
+  return el.value || null;
+}
+
+async function salvarEdicao() {
+  document.getElementById('btn-salvar').disabled = true;
+  document.getElementById('spinner-save').className = 'spinner show';
+  document.getElementById('label-save').textContent = 'Salvando...';
+
+  const campos = [
+    {key:'telefone',type:'text'},{key:'email',type:'email'},{key:'endereco',type:'text'},
+    {key:'cidade',type:'text'},{key:'estado',type:'select'},{key:'cep',type:'text'},
+    {key:'grau_risco',type:'select'},{key:'total_funcionarios_previsto',type:'number'},
+    {key:'atividade_rural',type:'toggle'},{key:'ativo',type:'toggle'},
+  ];
+
+  const updates = {};
+  campos.forEach(c => { updates[c.key] = getFieldVal(c.key, c.type); });
+  updates.atualizado_em = new Date().toISOString();
+
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type':'application/json',
+        'apikey':SUPA_KEY,
+        'Authorization':`Bearer ${token}`,
+        'Prefer':'return=representation'
+      },
+      body: JSON.stringify(updates)
+    });
+    if (!res.ok) throw new Error('Erro ao salvar');
+    const data = await res.json();
+    empresa = {...empresa, ...data[0]};
+    modoEdicao = false;
+    renderHero();
+    renderCampos();
+    document.getElementById('hero-actions').innerHTML = `<button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
+    const s = document.getElementById('status-edit');
+    s.className = 'status-bar show success';
+    s.innerHTML = '✓ Dados salvos com sucesso!';
+    setTimeout(() => { s.className = 'status-bar'; }, 3000);
+  } catch(e) {
+    const s = document.getElementById('status-edit');
+    s.className = 'status-bar show error';
+    s.innerHTML = `✕ Erro: ${e.message}`;
+    document.getElementById('btn-salvar').disabled = false;
+    document.getElementById('spinner-save').className = 'spinner';
+    document.getElementById('label-save').textContent = 'Salvar';
+  }
+}
+
+async function carregarEmpresa() {
+  try {
+    const [resEmp, resCnaes] = await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`, {
+        headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
+      }),
+      fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?empresa_id=eq.${empresaId}&select=*&order=tipo.asc`, {
+        headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
+      })
+    ]);
+    const empData = await resEmp.json();
+    const cnaesData = await resCnaes.json();
+    if (!empData.length) { window.location.href = 'empresas.html'; return; }
+    empresa = empData[0];
+    cnaes = cnaesData;
+    renderHero();
+    renderCampos();
+    renderCNAEs();
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function sair() {
+  localStorage.removeItem('sgs_token');
+  localStorage.removeItem('sgs_user');
+  window.location.href = 'login.html';
+}
+
+carregarEmpresa();
+</script>
+</body>
+</html>
