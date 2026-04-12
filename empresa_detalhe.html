@@ -161,7 +161,7 @@
     <div class="tab-content" id="aba-unidades">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <div class="section-label" style="margin:0;">Unidades cadastradas</div>
-        <button class="btn btn-edit" onclick="mostrarFormUnidade()" id="btn-nova-unidade">+ Nova unidade</button>
+        <button class="btn btn-edit" id="btn-nova-unidade" onclick="novaUnidade()">+ Nova unidade</button>
       </div>
 
       <!-- Formulário de nova unidade -->
@@ -492,6 +492,10 @@ function sair() {
   localStorage.removeItem('sgs_token');
   localStorage.removeItem('sgs_user');
   window.location.href = 'login.html';
+}
+
+function novaUnidade() {
+  window.location.href = `cadastro_empresa.html?mae_id=${empresaId}`;
 }
 
 // =====================================================
