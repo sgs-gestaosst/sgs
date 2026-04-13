@@ -184,8 +184,12 @@ document.addEventListener('click', function(e) {
     </div>
 
     <div class="section-label">Empresas que poderá acessar</div>
-    <div id="lista-empresas-check">
-      <div style="color:var(--text2);font-size:13px;">Carregando empresas...</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button onclick="selecionarTodasEmpresas(true)" style="font-size:12px;padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;">Selecionar todas</button>
+      <button onclick="selecionarTodasEmpresas(false)" style="font-size:12px;padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;">Limpar seleção</button>
+    </div>
+    <div id="lista-empresas-check" style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:4px;">
+      <div style="color:var(--text2);font-size:13px;padding:8px;">Carregando empresas...</div>
     </div>
 
     <div class="section-label">Módulos e nível de acesso</div>
@@ -221,11 +225,14 @@ const MODULOS = [
   {key:'medicoes', nome:'Medições Ambientais'},
   {key:'brigada', nome:'Brigada e Emergência'},
   {key:'documentos', nome:'Documentos e Laudos'},
-  {key:'alertas', nome:'Alertas'},
+  {key:'alertas', nome:'Alertas e Notificações'},
+  {key:'docs_colaborador', nome:'Documentos do Colaborador'},
+  {key:'requisitos', nome:'Gestão de Requisitos'},
   {key:'checklists', nome:'Inspeções e Checklists'},
   {key:'cipa', nome:'CIPA / CIPATR'},
   {key:'acoes', nome:'Gestão de Ações'},
   {key:'esocial', nome:'eSocial SST'},
+  {key:'permissao_trabalho', nome:'Permissão de Trabalho'},
 ];
 
 let usuariosCadastrados = [];
@@ -318,6 +325,10 @@ function abrirConvite() {
 
 function fecharConvite() {
   document.getElementById('modal-convite').classList.remove('show');
+}
+
+function selecionarTodasEmpresas(selecionar) {
+  document.querySelectorAll('input[name="empresa-perm"]').forEach(cb => cb.checked = selecionar);
 }
 
 function renderEmpresasCheck() {
