@@ -408,7 +408,7 @@ async function buscarCNPJ(){
             <a href="empresa_detalhe.html?id=${emp.id}" style="padding:8px 16px;background:#4a7cdc;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;display:inline-block;">
               Ver cadastro existente
             </a>
-            <button onclick="document.getElementById('aviso-existe').remove()" style="padding:8px 16px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;">
+            <button onclick="fecharAvisoExiste()" style="padding:8px 16px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;">
               Cadastrar mesmo assim
             </button>
           </div>`;
@@ -449,7 +449,7 @@ async function buscarCNPJ(){
               <button onclick="vincularFilial(${mae.id})" style="padding:8px 16px;background:#4a7cdc;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;">
                 Sim, cadastrar como filial
               </button>
-              <button onclick="document.getElementById('aviso-grupo').remove()" style="padding:8px 16px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;">
+              <button onclick="fecharAvisoGrupo()" style="padding:8px 16px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;">
                 Não, cadastrar independente
               </button>
             </div>`;
@@ -464,6 +464,16 @@ async function buscarCNPJ(){
     document.getElementById('btn-buscar-label').textContent='Buscar';
     document.getElementById('btn-buscar').disabled=false;
   }
+}
+
+function fecharAvisoGrupo() {
+  const el = document.getElementById('aviso-grupo');
+  if (el) el.remove();
+}
+
+function fecharAvisoExiste() {
+  const el = document.getElementById('aviso-existe');
+  if (el) el.remove();
 }
 
 function vincularFilial(maeId) {
@@ -553,8 +563,15 @@ async function salvarEmpresa(){
         el.id = 'aviso-limite';
         el.style.cssText = 'background:#2a1515;border:1px solid #4a2020;border-radius:10px;padding:14px 18px;margin-top:12px;font-size:13px;color:#e05555;';
         el.innerHTML = !isPago
-          ? `⚠️ No plano <strong style="color:#e8eaf0;">${nomeAssinatura}</strong> o limite é de <strong style="color:#e8eaf0;">${limiteFuncionarios.toLocaleString('pt-BR')} funcionários</strong> por empresa. <a href="assinar.html" style="color:#4a7cdc;">Assine um plano</a> para aumentar o limite.`
-          : `⚠️ O limite do plano <strong style="color:#e8eaf0;">${nomeAssinatura}</strong> é de <strong style="color:#e8eaf0;">${limiteFuncionarios.toLocaleString('pt-BR')} funcionários</strong> por empresa. Entre em contato com o suporte via WhatsApp para o plano Enterprise.`;
+          ? `⚠️ No plano <strong style="color:#e8eaf0;">${nomeAssinatura}</strong> o limite é de <strong style="color:#e8eaf0;">${limiteFuncionarios.toLocaleString('pt-BR')} funcionários</strong> por empresa.
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <a href="assinar.html" style="display:inline-block;padding:7px 16px;background:#4a7cdc;color:#fff;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Fazer upgrade do plano</a>
+              <a href="https://wa.me/559191234567" target="_blank" style="display:inline-block;padding:7px 16px;background:#1a4a38;color:#2dd4a0;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Falar com suporte</a>
+            </div>`
+          : `⚠️ O limite do plano <strong style="color:#e8eaf0;">${nomeAssinatura}</strong> é de <strong style="color:#e8eaf0;">${limiteFuncionarios.toLocaleString('pt-BR')} funcionários</strong> por empresa.
+            <div style="margin-top:10px;">
+              <a href="https://wa.me/559191234567" target="_blank" style="display:inline-block;padding:7px 16px;background:#1a4a38;color:#2dd4a0;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Falar com suporte via WhatsApp</a>
+            </div>`;
         document.getElementById('btn-salvar').parentNode.insertBefore(el, document.getElementById('btn-salvar'));
         document.getElementById('spinner-salvar').className = 'spinner';
         document.getElementById('btn-salvar').disabled = false;
