@@ -192,7 +192,7 @@ document.addEventListener('click', function(e) {
         </select>
         <div class="hint" id="gr-hint">Preenchido automaticamente pela tabela NR-4 após busca do CNPJ.</div>
       </div>
-      <div class="field"><label>Nº de Funcionários <span class="req">*</span></label><input type="number" id="total_funcionarios" placeholder="0" min="0"></div>
+      <div class="field"><label>Nº de Funcionários <span class="req">*</span></label><input type="number" id="total_funcionarios" placeholder="0" min="0" oninput="verificarLimiteInput()"></div>
     </div>
     <div class="grid-2">
       <div class="field"><label>Atividade Rural</label>
@@ -467,6 +467,15 @@ async function buscarCNPJ(){
   }
 }
 
+function verificarLimiteInput() {
+  const aviso = document.getElementById('aviso-limite');
+  if (aviso) {
+    aviso.remove();
+    document.getElementById('btn-salvar').disabled = false;
+    document.getElementById('btn-salvar-label').textContent = 'Salvar no Sistema';
+  }
+}
+
 function fecharAvisoGrupo() {
   const el = document.getElementById('aviso-grupo');
   if (el) el.remove();
@@ -580,8 +589,8 @@ async function salvarEmpresa(){
             </div>`;
         document.getElementById('btn-salvar').parentNode.insertBefore(el, document.getElementById('btn-salvar'));
         document.getElementById('spinner-salvar').className = 'spinner';
-        document.getElementById('btn-salvar').disabled = false;
-        document.getElementById('btn-salvar-label').textContent = 'Salvar no Sistema';
+        document.getElementById('btn-salvar').disabled = true;
+        document.getElementById('btn-salvar-label').textContent = 'Limite excedido';
         return;
       }
 
