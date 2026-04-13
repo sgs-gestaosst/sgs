@@ -233,6 +233,7 @@ const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
 const sgs_token = localStorage.getItem('sgs_token');
 const sgs_user = localStorage.getItem('sgs_user') ? JSON.parse(localStorage.getItem('sgs_user')) : null;
 if (!sgs_token) { window.location.href = 'login.html'; }
+let _temDuplicata = false;
 
 // Verifica se está cadastrando uma filial
 const _urlParams = new URLSearchParams(window.location.search);
@@ -397,6 +398,7 @@ async function buscarCNPJ(){
         const avisoExiste = document.getElementById('aviso-existe');
         if (avisoExiste) avisoExiste.remove();
         const aviso = document.createElement('div');
+        _temDuplicata = true;
         aviso.id = 'aviso-existe';
         aviso.style.cssText = 'background:#2a1515;border:1px solid #4a2020;border-radius:10px;padding:16px 18px;margin-top:12px;';
         aviso.innerHTML = `
@@ -473,6 +475,7 @@ function fecharAvisoGrupo() {
 function fecharAvisoExiste() {
   const el = document.getElementById('aviso-existe');
   if (el) el.remove();
+  _temDuplicata = false;
 }
 
 function vincularFilial(maeId) {
@@ -501,6 +504,10 @@ function toggleRural(){rural=!rural;document.getElementById('toggle-rural').clas
 function toggleAtivo(){ativo=!ativo;document.getElementById('toggle-ativo').classList.toggle('on',ativo);}
 
 async function salvarEmpresa(){
+  if (_temDuplicata) {
+    setStatus('status-salvar','error','Esta empresa já está cadastrada. Clique em "Ver cadastro existente" ou limpe o formulário.');
+    return;
+  }
   const razao=document.getElementById('razao_social').value;
   if(!razao){setStatus('status-salvar','error','Preencha pelo menos a Razão Social.');return;}
   const raw=document.getElementById('cnpj-input').value.replace(/\D/g,'');
@@ -604,7 +611,7 @@ async function salvarEmpresa(){
   const cnaesParaSalvar=cnaes.map(c=>({cnae:c.cnae,descricao:c.descricao,tipo:c.tipo,grau_risco:c.gr||null,ativo:true}));
   try{
     const id=await salvarNoSupabase(empresa,cnaesParaSalvar);
-    setStatus('status-salvar','success',`✓ Empresa salva com sucesso! ID: ${id}`);
+    setStatus('status-salvar','success','✓ Empresa cadastrada com sucesso!');
     const maeParaRedir = _maeId || window._maeIdDinamico;
     if (maeParaRedir) { setTimeout(() => { window.location.href = `empresa_detalhe.html?id=${maeParaRedir}`; }, 1500); }
   }catch(e){
