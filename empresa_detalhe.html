@@ -49,6 +49,16 @@
   .btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
   .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
   .btn-danger:hover{background:#2a1515;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:440px;width:90%;margin:24px;}
+  .modal-icon{font-size:36px;margin-bottom:16px;text-align:center;}
+  .modal-title{font-size:17px;font-weight:500;margin-bottom:8px;text-align:center;}
+  .modal-desc{font-size:13px;color:var(--text2);line-height:1.6;text-align:center;margin-bottom:20px;}
+  .modal-aviso{background:#2a1515;border:1px solid #4a2020;border-radius:8px;padding:12px 14px;font-size:12px;color:#e05555;margin-bottom:20px;text-align:center;}
+  .modal-actions{display:flex;gap:10px;justify-content:center;}
+  .modal-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:10px 14px;outline:none;margin-bottom:16px;}
+  .modal-input:focus{border-color:var(--danger);}
 
   /* Abas */
   .tabs-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
@@ -129,6 +139,7 @@
         <div class="hero-badges" id="hero-badges"></div>
       </div>
       <div class="hero-actions" id="hero-actions">
+        <button class="btn btn-danger" onclick="abrirModal()">Excluir</button>
         <button class="btn btn-edit" id="btn-editar" onclick="modoEditar()">Editar</button>
       </div>
     </div>
@@ -256,6 +267,31 @@
         <div>Cadastro de colaboradores estará disponível em breve.</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal de exclusão -->
+<div class="modal-overlay" id="modal-excluir">
+  <div class="modal">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">Excluir empresa?</div>
+    <div class="modal-desc">
+      A empresa ficará <strong>inativa por 120 dias</strong> antes de ser excluída definitivamente.<br>
+      Durante esse período você pode reativá-la a qualquer momento.
+    </div>
+    <div class="modal-aviso">
+      Esta ação irá ocultar a empresa e todos os seus dados do sistema.
+    </div>
+    <div style="margin-bottom:8px;font-size:12px;color:var(--text2);text-align:center;">Digite o motivo da exclusão (opcional):</div>
+    <input class="modal-input" type="text" id="motivo-exclusao" placeholder="Ex: Encerramento de contrato, empresa fechou...">
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn" style="background:var(--danger);color:#fff;" onclick="confirmarExclusao()">
+        <span class="spinner" id="spinner-excluir"></span>
+        <span id="label-excluir">Confirmar exclusão</span>
+      </button>
+    </div>
+    <div class="status-bar" id="status-excluir" style="margin-top:12px;"></div>
   </div>
 </div>
 
@@ -397,7 +433,7 @@ function modoEditar() {
 function cancelarEdicao() {
   modoEdicao = false;
   renderCampos();
-  document.getElementById('hero-actions').innerHTML = `<button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
+  document.getElementById('hero-actions').innerHTML = `<button class="btn btn-danger" onclick="abrirModal()">Excluir</button><button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
   document.getElementById('status-edit').className = 'status-bar';
 }
 
@@ -449,7 +485,7 @@ async function salvarEdicao() {
     modoEdicao = false;
     renderHero();
     renderCampos();
-    document.getElementById('hero-actions').innerHTML = `<button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
+    document.getElementById('hero-actions').innerHTML = `<button class="btn btn-danger" onclick="abrirModal()">Excluir</button><button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
     const s = document.getElementById('status-edit');
     s.className = 'status-bar show success';
     s.innerHTML = '✓ Dados salvos com sucesso!';
@@ -485,6 +521,49 @@ async function carregarEmpresa() {
     await carregarUnidades();
   } catch(e) {
     console.error(e);
+  }
+}
+
+function abrirModal() {
+  document.getElementById('modal-excluir').classList.add('show');
+  document.getElementById('motivo-exclusao').value = '';
+  document.getElementById('status-excluir').className = 'status-bar';
+}
+
+function fecharModal() {
+  document.getElementById('modal-excluir').classList.remove('show');
+}
+
+async function confirmarExclusao() {
+  const motivo = document.getElementById('motivo-exclusao').value.trim();
+  document.getElementById('spinner-excluir').className = 'spinner show';
+  document.getElementById('label-excluir').textContent = 'Inativando...';
+  document.querySelector('#modal-excluir .btn[onclick="confirmarExclusao()"]').disabled = true;
+
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        ativo: false,
+        data_inativacao: new Date().toISOString(),
+        motivo_inativacao: motivo || 'Não informado'
+      })
+    });
+    if (!res.ok) throw new Error('Erro ao inativar empresa');
+    fecharModal();
+    setTimeout(() => { window.location.href = 'empresas.html'; }, 800);
+  } catch(e) {
+    const s = document.getElementById('status-excluir');
+    s.className = 'status-bar show error';
+    s.innerHTML = `✕ ${e.message}`;
+    document.getElementById('spinner-excluir').className = 'spinner';
+    document.getElementById('label-excluir').textContent = 'Confirmar exclusão';
+    document.querySelector('#modal-excluir .btn[onclick="confirmarExclusao()"]').disabled = false;
   }
 }
 
