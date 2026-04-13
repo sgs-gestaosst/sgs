@@ -403,8 +403,11 @@ async function buscarCNPJ(){
           { headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${sgs_token}`} }
         );
         const grupo = await resGrupo.json();
-        const matrizes = grupo.filter(e => !e.empresa_mae_id || e.tipo_empresa === 'MATRIZ');
-        if (matrizes.length > 0) {
+        const matrizes = grupo.filter(e => (!e.empresa_mae_id || e.tipo_empresa === 'MATRIZ') && e.id !== parseInt(_maeId));
+        // Verifica se não é a própria empresa sendo cadastrada de novo
+        const cnpjCompleto = raw;
+        const mesmoCNPJCompleto = grupo.find(e => e.cnpj_raiz === cnpjCompleto.slice(0,8) && e.user_id === sgs_user?.id);
+        if (matrizes.length > 0 && !mesmoCNPJCompleto) {
           const mae = matrizes[0];
           const nomeMae = mae.nome_fantasia || mae.razao_social;
           // Remove aviso anterior se houver
