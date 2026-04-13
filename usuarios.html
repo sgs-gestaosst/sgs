@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Usuários</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+    --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+    --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+    --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+  .header-title{font-size:13px;color:var(--text2);flex:1;}
+  .header-title span{color:var(--text);font-weight:500;}
+  .btn-logout{font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;font-family:var(--sans);}
+  .btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+  .container{max-width:960px;margin:0 auto;padding:32px 24px 80px;}
+  .voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+  .voltar:hover{color:var(--text);}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+  .page-title{font-size:20px;font-weight:500;}
+  .page-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#5a8ce8;}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-secondary:hover{border-color:var(--border-focus);}
+  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:5px 10px;}
+  .btn-danger:hover{background:#2a1515;}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+  .stat{background:var(--surface2);border-radius:var(--radius);padding:14px 16px;}
+  .stat-label{font-size:12px;color:var(--text2);margin-bottom:4px;}
+  .stat-value{font-size:22px;font-weight:500;}
+
+  /* Lista usuários */
+  .lista{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .lista-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);gap:12px;}
+  .lista-row:last-child{border-bottom:none;}
+  .avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;background:#1a2540;color:#7aabf7;}
+  .user-info{flex:1;}
+  .user-nome{font-size:13px;font-weight:500;}
+  .user-email{font-size:12px;color:var(--text2);margin-top:2px;}
+  .badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500;}
+  .badge-admin{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .badge-usuario{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+  .badge-pendente{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+  .user-empresas{font-size:11px;color:var(--text3);margin-top:4px;}
+
+  /* Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:580px;margin:auto;}
+  .modal-title{font-size:17px;font-weight:500;margin-bottom:6px;}
+  .modal-sub{font-size:13px;color:var(--text2);margin-bottom:24px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  input,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:10px 12px;outline:none;transition:border-color .15s;}
+  input:focus,select:focus{border-color:var(--border-focus);}
+  input::placeholder{color:var(--text3);}
+  .section-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);}
+
+  /* Empresas checkboxes */
+  .empresa-check{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;}
+  .empresa-check:hover{border-color:var(--border-focus);}
+  .empresa-check input[type=checkbox]{width:16px;height:16px;flex-shrink:0;cursor:pointer;}
+  .empresa-check-nome{font-size:13px;font-weight:500;flex:1;}
+  .empresa-check-cidade{font-size:11px;color:var(--text2);}
+
+  /* Módulos */
+  .modulos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .modulo-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;}
+  .modulo-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .modulo-header input[type=checkbox]{width:15px;height:15px;flex-shrink:0;cursor:pointer;}
+  .modulo-nome{font-size:12px;font-weight:500;}
+  .modulo-nivel{display:flex;gap:6px;margin-left:23px;}
+  .nivel-btn{font-size:10px;padding:3px 8px;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all .15s;}
+  .nivel-btn.active-leitura{background:#1a2540;color:#7aabf7;border-color:#2a4070;}
+  .nivel-btn.active-escrita{background:#0e2820;color:#2dd4a0;border-color:#1a4a38;}
+
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;}
+  .status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+  .status-bar.show{display:flex;}
+  .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+  .status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+  .status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .spinner.show{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .empty{text-align:center;padding:48px 24px;}
+  .empty-icon{font-size:36px;margin-bottom:12px;}
+  .empty-title{font-size:15px;font-weight:500;margin-bottom:6px;}
+  .empty-desc{font-size:13px;color:var(--text2);}
+
+  .limite-aviso{font-size:12px;color:var(--text2);margin-top:4px;}
+  .limite-aviso.cheio{color:var(--danger);}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-logo">SGS</div>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span>Usuários</span></div>
+  <button class="btn-logout" onclick="sair()">Sair</button>
+</div>
+
+<div class="container">
+  <a href="index.html" class="voltar">← Voltar ao início</a>
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">Usuários</div>
+      <div class="page-sub" id="page-sub">Carregando...</div>
+    </div>
+    <button class="btn btn-primary" id="btn-convidar" onclick="abrirConvite()">+ Convidar usuário</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Usuários ativos</div>
+      <div class="stat-value" id="stat-ativos">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Convites pendentes</div>
+      <div class="stat-value" id="stat-pendentes">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Limite disponível</div>
+      <div class="stat-value" id="stat-limite">—</div>
+    </div>
+  </div>
+
+  <div class="lista" id="lista-usuarios">
+    <div class="empty">
+      <div class="empty-icon">👥</div>
+      <div class="empty-title">Carregando usuários...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de convite -->
+<div class="modal-overlay" id="modal-convite">
+  <div class="modal">
+    <div class="modal-title">Convidar usuário</div>
+    <div class="modal-sub">O usuário receberá um e-mail para criar sua senha e acessar o sistema.</div>
+
+    <div class="field">
+      <label>Nome completo</label>
+      <input type="text" id="conv-nome" placeholder="Nome do usuário">
+    </div>
+    <div class="field">
+      <label>E-mail</label>
+      <input type="email" id="conv-email" placeholder="email@exemplo.com">
+    </div>
+
+    <div class="section-label">Empresas que poderá acessar</div>
+    <div id="lista-empresas-check">
+      <div style="color:var(--text2);font-size:13px;">Carregando empresas...</div>
+    </div>
+
+    <div class="section-label">Módulos e nível de acesso</div>
+    <div class="modulos-grid" id="lista-modulos"></div>
+
+    <div class="status-bar" id="status-convite"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="fecharConvite()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-enviar" onclick="enviarConvite()">
+        <span class="spinner" id="spinner-convite"></span>
+        <span id="label-convite">Enviar convite</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token = localStorage.getItem('sgs_token');
+const userRaw = localStorage.getItem('sgs_user');
+if (!token) { window.location.href = 'login.html'; }
+const user = userRaw ? JSON.parse(userRaw) : {};
+
+const LIMITE_USUARIOS = 10;
+const MODULOS = [
+  {key:'empresas', nome:'Empresas'},
+  {key:'funcionarios', nome:'Funcionários'},
+  {key:'epi', nome:'Gestão de EPIs'},
+  {key:'treinamentos', nome:'Treinamentos'},
+  {key:'equipamentos_seguranca', nome:'Equip. Segurança'},
+  {key:'equipamentos_criticos', nome:'Equip. Críticos'},
+  {key:'medicoes', nome:'Medições Ambientais'},
+  {key:'brigada', nome:'Brigada e Emergência'},
+  {key:'documentos', nome:'Documentos e Laudos'},
+  {key:'alertas', nome:'Alertas'},
+  {key:'checklists', nome:'Inspeções e Checklists'},
+  {key:'cipa', nome:'CIPA / CIPATR'},
+  {key:'acoes', nome:'Gestão de Ações'},
+  {key:'esocial', nome:'eSocial SST'},
+];
+
+let usuariosCadastrados = [];
+let empresasDoCliente = [];
+
+function iniciais(nome) {
+  if (!nome) return '?';
+  const p = nome.trim().split(' ').filter(w => w.length > 1);
+  return p.length >= 2 ? (p[0][0]+p[1][0]).toUpperCase() : nome.slice(0,2).toUpperCase();
+}
+
+function setStatus(id, tipo, msg) {
+  const el = document.getElementById(id);
+  const icons = {success:'✓', error:'✕', info:'↻'};
+  el.className = 'status-bar show ' + tipo;
+  el.innerHTML = `<span>${icons[tipo]}</span><span>${msg}</span>`;
+}
+
+async function carregarDados() {
+  try {
+    const [resUsu, resEmp] = await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/usuarios?select=*&order=criado_em.asc`, {
+        headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}`}
+      }),
+      fetch(`${SUPA_URL}/rest/v1/empresas?ativo=eq.true&select=id,razao_social,nome_fantasia,cidade,estado&order=razao_social.asc`, {
+        headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}`}
+      })
+    ]);
+
+    usuariosCadastrados = resUsu.ok ? await resUsu.json() : [];
+    empresasDoCliente = resEmp.ok ? await resEmp.json() : [];
+
+    const usuarios = usuariosCadastrados.filter(u => u.perfil !== 'SGS_ADMIN');
+    const ativos = usuarios.filter(u => u.ativo);
+    const pendentes = usuarios.filter(u => !u.ativo);
+    const disponivel = LIMITE_USUARIOS - ativos.length;
+
+    document.getElementById('stat-ativos').textContent = ativos.length;
+    document.getElementById('stat-pendentes').textContent = pendentes.length;
+    document.getElementById('stat-limite').textContent = `${disponivel} de ${LIMITE_USUARIOS}`;
+    document.getElementById('page-sub').textContent = `${ativos.length} usuário${ativos.length !== 1 ? 's' : ''} ativo${ativos.length !== 1 ? 's' : ''}`;
+
+    if (disponivel <= 0) {
+      document.getElementById('btn-convidar').disabled = true;
+      document.getElementById('btn-convidar').title = 'Limite de 10 usuários atingido';
+    }
+
+    renderUsuarios(usuarios);
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function renderUsuarios(usuarios) {
+  const lista = document.getElementById('lista-usuarios');
+  if (!usuarios.length) {
+    lista.innerHTML = `<div class="empty">
+      <div class="empty-icon">👥</div>
+      <div class="empty-title">Nenhum usuário cadastrado</div>
+      <div class="empty-desc">Convide usuários para colaborar na gestão SST das suas empresas.</div>
+    </div>`;
+    return;
+  }
+  lista.innerHTML = usuarios.map(u => {
+    const ini = iniciais(u.nome_completo || u.email);
+    const badgeClass = u.perfil === 'CLIENT_ADMIN' ? 'badge-admin' : 'badge-usuario';
+    const badgeLabel = u.perfil === 'CLIENT_ADMIN' ? 'Admin' : 'Usuário';
+    const statusBadge = !u.ativo ? '<span class="badge badge-pendente">Pendente</span>' : '';
+    return `<div class="lista-row">
+      <div class="avatar">${ini}</div>
+      <div class="user-info">
+        <div class="user-nome">${u.nome_completo || '—'}</div>
+        <div class="user-email">${u.email}</div>
+      </div>
+      <span class="badge ${badgeClass}">${badgeLabel}</span>
+      ${statusBadge}
+      ${u.perfil !== 'CLIENT_ADMIN' ? `<button class="btn btn-danger" onclick="revogarAcesso(${u.id})">Revogar</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function abrirConvite() {
+  document.getElementById('modal-convite').classList.add('show');
+  document.getElementById('conv-nome').value = '';
+  document.getElementById('conv-email').value = '';
+  document.getElementById('status-convite').className = 'status-bar';
+  renderEmpresasCheck();
+  renderModulos();
+}
+
+function fecharConvite() {
+  document.getElementById('modal-convite').classList.remove('show');
+}
+
+function renderEmpresasCheck() {
+  const container = document.getElementById('lista-empresas-check');
+  if (!empresasDoCliente.length) {
+    container.innerHTML = '<div style="color:var(--text2);font-size:13px;">Nenhuma empresa cadastrada ainda.</div>';
+    return;
+  }
+  container.innerHTML = empresasDoCliente.map(e => `
+    <label class="empresa-check">
+      <input type="checkbox" value="${e.id}" name="empresa-perm">
+      <div>
+        <div class="empresa-check-nome">${e.nome_fantasia || e.razao_social}</div>
+        <div class="empresa-check-cidade">${[e.cidade, e.estado].filter(Boolean).join(' — ')}</div>
+      </div>
+    </label>`).join('');
+}
+
+function renderModulos() {
+  const container = document.getElementById('lista-modulos');
+  container.innerHTML = MODULOS.map(m => `
+    <div class="modulo-item">
+      <div class="modulo-header">
+        <input type="checkbox" id="mod-${m.key}" value="${m.key}" onchange="toggleModulo('${m.key}')">
+        <label for="mod-${m.key}" class="modulo-nome" style="cursor:pointer;">${m.nome}</label>
+      </div>
+      <div class="modulo-nivel" id="nivel-${m.key}" style="display:none;">
+        <button class="nivel-btn active-leitura" id="nivel-btn-leitura-${m.key}" onclick="setNivel('${m.key}','leitura')">Leitura</button>
+        <button class="nivel-btn" id="nivel-btn-escrita-${m.key}" onclick="setNivel('${m.key}','escrita')">Escrita</button>
+      </div>
+    </div>`).join('');
+}
+
+function toggleModulo(key) {
+  const checked = document.getElementById(`mod-${key}`).checked;
+  document.getElementById(`nivel-${key}`).style.display = checked ? 'flex' : 'none';
+}
+
+function setNivel(key, nivel) {
+  document.getElementById(`nivel-btn-leitura-${key}`).className = nivel === 'leitura' ? 'nivel-btn active-leitura' : 'nivel-btn';
+  document.getElementById(`nivel-btn-escrita-${key}`).className = nivel === 'escrita' ? 'nivel-btn active-escrita' : 'nivel-btn';
+}
+
+function getNivel(key) {
+  return document.getElementById(`nivel-btn-escrita-${key}`)?.classList.contains('active-escrita') ? 'escrita' : 'leitura';
+}
+
+async function enviarConvite() {
+  const nome = document.getElementById('conv-nome').value.trim();
+  const email = document.getElementById('conv-email').value.trim();
+  if (!nome || !email) { setStatus('status-convite','error','Preencha nome e e-mail.'); return; }
+
+  const empresasSelecionadas = [...document.querySelectorAll('input[name="empresa-perm"]:checked')].map(e => parseInt(e.value));
+  const modulosSelecionados = MODULOS.filter(m => document.getElementById(`mod-${m.key}`)?.checked);
+
+  if (!empresasSelecionadas.length) { setStatus('status-convite','error','Selecione ao menos uma empresa.'); return; }
+  if (!modulosSelecionados.length) { setStatus('status-convite','error','Selecione ao menos um módulo.'); return; }
+
+  document.getElementById('btn-enviar').disabled = true;
+  document.getElementById('spinner-convite').className = 'spinner show';
+  document.getElementById('label-convite').textContent = 'Enviando...';
+  setStatus('status-convite','info','Enviando convite...');
+
+  try {
+    // Envia convite pelo Supabase Auth
+    const resConvite = await fetch(`${SUPA_URL}/auth/v1/invite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ email, data: { nome_completo: nome } })
+    });
+
+    if (!resConvite.ok) {
+      const err = await resConvite.json();
+      throw new Error(err.msg || err.message || 'Erro ao enviar convite');
+    }
+
+    const conviteData = await resConvite.json();
+    const novoUserId = conviteData.id;
+
+    // Cadastra o usuário na tabela usuarios
+    const resUsu = await fetch(`${SUPA_URL}/rest/v1/usuarios`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        user_id: novoUserId,
+        nome_completo: nome,
+        email,
+        perfil: 'USUARIO',
+        cliente_admin_id: null,
+        ativo: false,
+        senha_hash: 'supabase_auth'
+      })
+    });
+
+    if (!resUsu.ok) throw new Error('Erro ao registrar usuário');
+    const usuData = await resUsu.json();
+    const usuarioId = usuData[0].id;
+
+    // Salva permissões
+    const permissoes = [];
+    empresasSelecionadas.forEach(empId => {
+      modulosSelecionados.forEach(m => {
+        permissoes.push({
+          usuario_id: usuarioId,
+          empresa_id: empId,
+          modulo: m.key,
+          nivel_acesso: getNivel(m.key),
+          ativo: true
+        });
+      });
+    });
+
+    if (permissoes.length) {
+      await fetch(`${SUPA_URL}/rest/v1/usuario_permissoes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPA_KEY,
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(permissoes)
+      });
+    }
+
+    setStatus('status-convite','success',`Convite enviado para ${email}!`);
+    setTimeout(() => { fecharConvite(); carregarDados(); }, 2000);
+
+  } catch(e) {
+    setStatus('status-convite','error', e.message.includes('already') ? 'Este e-mail já possui uma conta no sistema.' : `Erro: ${e.message}`);
+    document.getElementById('btn-enviar').disabled = false;
+    document.getElementById('spinner-convite').className = 'spinner';
+    document.getElementById('label-convite').textContent = 'Enviar convite';
+  }
+}
+
+async function revogarAcesso(usuarioId) {
+  if (!confirm('Revogar acesso deste usuário?')) return;
+  try {
+    await fetch(`${SUPA_URL}/rest/v1/usuarios?id=eq.${usuarioId}`, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body: JSON.stringify({ativo: false})
+    });
+    carregarDados();
+  } catch(e) { alert('Erro ao revogar acesso.'); }
+}
+
+function sair() {
+  localStorage.removeItem('sgs_token');
+  localStorage.removeItem('sgs_user');
+  window.location.href = 'login.html';
+}
+
+carregarDados();
+</script>
+</body>
+</html>
