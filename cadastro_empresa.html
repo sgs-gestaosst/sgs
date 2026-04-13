@@ -408,9 +408,6 @@ async function buscarCNPJ(){
             <a href="empresa_detalhe.html?id=${emp.id}" style="padding:8px 16px;background:#4a7cdc;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;display:inline-block;">
               Ver cadastro existente
             </a>
-            <button onclick="fecharAvisoExiste()" style="padding:8px 16px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;">
-              Cadastrar mesmo assim
-            </button>
           </div>`;
         const statusBusca = document.getElementById('status-busca');
         statusBusca.parentNode.insertBefore(aviso, statusBusca.nextSibling);
@@ -430,7 +427,9 @@ async function buscarCNPJ(){
         // Verifica se não é a própria empresa sendo cadastrada de novo
         const cnpjCompleto = raw;
         const mesmoCNPJCompleto = grupo.find(e => e.cnpj_raiz === cnpjCompleto.slice(0,8) && e.user_id === sgs_user?.id);
-        if (matrizes.length > 0 && !mesmoCNPJCompleto) {
+        // Só mostra aviso de filial se NÃO houver duplicata já cadastrada
+        const temDuplicata = document.getElementById('aviso-existe') !== null;
+        if (matrizes.length > 0 && !mesmoCNPJCompleto && !temDuplicata) {
           const mae = matrizes[0];
           const nomeMae = mae.nome_fantasia || mae.razao_social;
           // Remove aviso anterior se houver
