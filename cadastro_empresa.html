@@ -636,6 +636,12 @@ function limparTudo(){
   const a=document.getElementById('actions-bar');a.style.opacity='.3';a.style.pointerEvents='none';
   document.getElementById('status-busca').className='status-bar';
   document.getElementById('status-salvar').className='status-bar';
+  // Remove todos os avisos
+  ['aviso-existe','aviso-grupo','aviso-limite'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+  window._maeIdDinamico = null;
 }
 </script>
 </body>
