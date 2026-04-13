@@ -200,6 +200,11 @@ document.addEventListener('click', function(e) {
       <div class="menu-title">eSocial SST <span class="badge badge-soon">em breve</span></div>
       <div class="menu-desc">Envio de eventos SST — S-2210 CAT, S-2220 ASO e S-2240 PPP integrados.</div>
     </div>
+    <div class="menu-card disabled">
+      <div class="menu-icon icon-amber">📝</div>
+      <div class="menu-title">Permissão de Trabalho <span class="badge badge-soon">em breve</span></div>
+      <div class="menu-desc">Geração e controle de PT para trabalhos críticos — espaço confinado, altura, eletricidade, inflamáveis e quentes.</div>
+    </div>
   </div>
 </div>
 
@@ -222,7 +227,7 @@ document.getElementById('user-nome').textContent = nomeFmt;
 // Carrega estatísticas
 async function carregarStats() {
   try {
-    const res = await fetch(`${SUPA_URL}/rest/v1/empresas?select=id,total_funcionarios_previsto`, {
+    const res = await fetch(`${SUPA_URL}/rest/v1/empresas?select=id,total_funcionarios_previsto&ativo=eq.true`, {
       headers: {
         'apikey': SUPA_KEY,
         'Authorization': `Bearer ${token}`
