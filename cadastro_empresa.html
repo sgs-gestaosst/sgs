@@ -211,6 +211,30 @@ const sgs_token = localStorage.getItem('sgs_token');
 const sgs_user = localStorage.getItem('sgs_user') ? JSON.parse(localStorage.getItem('sgs_user')) : null;
 if (!sgs_token) { window.location.href = 'login.html'; }
 
+// Verifica se está cadastrando uma filial
+const _urlParams = new URLSearchParams(window.location.search);
+const _maeId = _urlParams.get('mae_id') ? parseInt(_urlParams.get('mae_id')) : null;
+
+// Se for filial, mostra aviso no topo
+if (_maeId) {
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${_maeId}&select=razao_social,nome_fantasia`, {
+        headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${sgs_token}`}
+      });
+      const data = await res.json();
+      if (data.length) {
+        const nomeMae = data[0].nome_fantasia || data[0].razao_social;
+        const aviso = document.createElement('div');
+        aviso.style.cssText = 'background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#7aabf7;display:flex;align-items:center;gap:10px;';
+        aviso.innerHTML = `<span>↳</span><span>Cadastrando filial de <strong style="color:#e8eaf0;">${nomeMae}</strong> — o vínculo será feito automaticamente.</span>`;
+        const container = document.querySelector('.container') || document.querySelector('form') || document.body;
+        container.insertBefore(aviso, container.firstChild);
+      }
+    } catch(e) { console.log(e); }
+  });
+}
+
 async function salvarNoSupabase(empresa, cnaes) {
   const resEmpresa = await fetch(`${SUPA_URL}/rest/v1/empresas`, {
     method: 'POST',
@@ -336,12 +360,95 @@ async function buscarCNPJ(){
     else document.getElementById('gr-hint').textContent='CNAE não localizado na tabela NR-4. Selecione manualmente.';
     ativar();
     setStatus('status-busca','success',`Empresa encontrada — ${d.razao_social}`);
+
+    // Verifica se CNPJ já está cadastrado
+    try {
+      const resExiste = await fetch(
+        `${SUPA_URL}/rest/v1/empresas?cnpj_raiz=eq.${raw.slice(0,8)}&ativo=eq.true&user_id=eq.${sgs_user?.id}&select=id,razao_social,nome_fantasia`,
+        { headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${sgs_token}`} }
+      );
+      const jaExiste = await resExiste.json();
+      if (jaExiste.length > 0 && !_maeId) {
+        const emp = jaExiste[0];
+        const nomeEmp = emp.nome_fantasia || emp.razao_social;
+        const avisoExiste = document.getElementById('aviso-existe');
+        if (avisoExiste) avisoExiste.remove();
+        const aviso = document.createElement('div');
+        aviso.id = 'aviso-existe';
+        aviso.style.cssText = 'background:#2a1515;border:1px solid #4a2020;border-radius:10px;padding:16px 18px;margin-top:12px;';
+        aviso.innerHTML = `
+          <div style="font-size:13px;color:#e05555;margin-bottom:12px;">
+            ⚠️ <strong style="color:#e8eaf0;">${nomeEmp}</strong> já está cadastrada no sistema.<br>
+            <span style="font-size:12px;color:#8892a4;margin-top:4px;display:block;">Verifique se não está tentando cadastrar uma empresa duplicada.</span>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="empresa_detalhe.html?id=${emp.id}" style="padding:8px 16px;background:#4a7cdc;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;display:inline-block;">
+              Ver cadastro existente
+            </a>
+            <button onclick="document.getElementById('aviso-existe').remove()" style="padding:8px 16px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;">
+              Cadastrar mesmo assim
+            </button>
+          </div>`;
+        const statusBusca = document.getElementById('status-busca');
+        statusBusca.parentNode.insertBefore(aviso, statusBusca.nextSibling);
+      }
+    } catch(e) { console.log('Erro ao verificar duplicata:', e); }
+
+    // Verifica se o CNPJ raiz já existe no banco (possível filial)
+    if (!_maeId) {
+      const cnpjRaiz = raw.slice(0,8);
+      try {
+        const resGrupo = await fetch(
+          `${SUPA_URL}/rest/v1/empresas?cnpj_raiz=eq.${cnpjRaiz}&select=id,razao_social,nome_fantasia,tipo_empresa`,
+          { headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${sgs_token}`} }
+        );
+        const grupo = await resGrupo.json();
+        const matrizes = grupo.filter(e => !e.empresa_mae_id || e.tipo_empresa === 'MATRIZ');
+        if (matrizes.length > 0) {
+          const mae = matrizes[0];
+          const nomeMae = mae.nome_fantasia || mae.razao_social;
+          // Remove aviso anterior se houver
+          const avisoAnterior = document.getElementById('aviso-grupo');
+          if (avisoAnterior) avisoAnterior.remove();
+          // Cria aviso
+          const aviso = document.createElement('div');
+          aviso.id = 'aviso-grupo';
+          aviso.style.cssText = 'background:#2a2010;border:1px solid #4a3a10;border-radius:10px;padding:16px 18px;margin-top:12px;';
+          aviso.innerHTML = `
+            <div style="font-size:13px;color:#e0a855;margin-bottom:12px;">
+              ⚠️ Este CNPJ pertence ao grupo <strong style="color:#e8eaf0;">${nomeMae}</strong>.<br>
+              <span style="font-size:12px;color:#8892a4;margin-top:4px;display:block;">Deseja cadastrar como filial desta empresa?</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button onclick="vincularFilial(${mae.id})" style="padding:8px 16px;background:#4a7cdc;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;">
+                Sim, cadastrar como filial
+              </button>
+              <button onclick="document.getElementById('aviso-grupo').remove()" style="padding:8px 16px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:13px;cursor:pointer;">
+                Não, cadastrar independente
+              </button>
+            </div>`;
+          const statusBusca = document.getElementById('status-busca');
+          statusBusca.parentNode.insertBefore(aviso, statusBusca.nextSibling);
+        }
+      } catch(e) { console.log('Erro ao verificar grupo:', e); }
+    }
   }catch(e){setStatus('status-busca','error',`Erro: ${e.message}`);}
   finally{
     document.getElementById('spinner-busca').className='spinner';
     document.getElementById('btn-buscar-label').textContent='Buscar';
     document.getElementById('btn-buscar').disabled=false;
   }
+}
+
+function vincularFilial(maeId) {
+  // Remove aviso e define o mae_id para o salvamento
+  const aviso = document.getElementById('aviso-grupo');
+  if (aviso) {
+    aviso.style.background = '#0e2820';
+    aviso.style.border = '1px solid #1a4a38';
+    aviso.innerHTML = `<div style="font-size:13px;color:#2dd4a0;">✓ Será cadastrada como filial. O vínculo será feito automaticamente ao salvar.</div>`;
+  }
+  window._maeIdDinamico = maeId;
 }
 
 function grManual(){const gr=parseInt(document.getElementById('grau_risco').value);if(gr)mostrarGR(gr,'—','Definido manualmente');}
@@ -371,6 +478,8 @@ async function salvarEmpresa(){
   const empresa={
     razao_social:razao,
     user_id:sgs_user?.id||null,
+    empresa_mae_id:(_maeId||window._maeIdDinamico)||null,
+    tipo_empresa:(_maeId||window._maeIdDinamico)?'FILIAL':'MATRIZ',
     nome_fantasia:document.getElementById('nome_fantasia').value||null,
     cnpj_raiz:raw.slice(0,8),
     telefone:document.getElementById('telefone').value||null,
@@ -388,6 +497,8 @@ async function salvarEmpresa(){
   try{
     const id=await salvarNoSupabase(empresa,cnaesParaSalvar);
     setStatus('status-salvar','success',`✓ Empresa salva com sucesso! ID: ${id}`);
+    const maeParaRedir = _maeId || window._maeIdDinamico;
+    if (maeParaRedir) { setTimeout(() => { window.location.href = `empresa_detalhe.html?id=${maeParaRedir}`; }, 1500); }
   }catch(e){
     setStatus('status-salvar','error',`Erro ao salvar: ${e.message}`);
   }finally{
