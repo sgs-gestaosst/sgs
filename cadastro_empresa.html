@@ -523,7 +523,7 @@ async function salvarEmpresa(){
   document.getElementById('spinner-salvar').className='spinner show';
   document.getElementById('btn-salvar-label').textContent='Salvando...';
   document.getElementById('btn-salvar').disabled=true;
-  setStatus('status-salvar','info','Salvando no banco de dados...');
+  if(!document.getElementById('aviso-limite')) setStatus('status-salvar','info','Salvando no banco de dados...');
   const gr=parseInt(document.getElementById('grau_risco').value)||null;
   const fn=document.getElementById('total_funcionarios').value;
 
