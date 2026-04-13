@@ -229,15 +229,18 @@ function filtrar() {
 async function carregarEmpresas() {
   try {
     const res = await fetch(
-      `${SUPA_URL}/rest/v1/empresas?select=*&order=empresa_mae_id.asc.nullsfirst,razao_social.asc`,
+      `${SUPA_URL}/rest/v1/empresas?select=*&ativo=eq.true&order=empresa_mae_id.asc.nullsfirst,razao_social.asc`,
       { headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` } }
     );
     if (!res.ok) throw new Error('Erro ao carregar empresas');
     const todas = await res.json();
 
+    // Filtra só ativas (dupla proteção além do filtro na URL)
+    const ativas = todas.filter(e => e.ativo === true);
+
     // Separa matrizes e filiais
-    const matrizes = todas.filter(e => !e.empresa_mae_id);
-    const filiais = todas.filter(e => e.empresa_mae_id);
+    const matrizes = ativas.filter(e => !e.empresa_mae_id);
+    const filiais = ativas.filter(e => e.empresa_mae_id);
 
     // Monta lista agrupada: matriz seguida das suas filiais
     let listaCompleta = [];
