@@ -84,7 +84,7 @@
   .spinner.show{display:inline-block;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .hint{font-size:11px;color:var(--text3);margin-top:4px;}
-  @media(max-width:600px){.grid-2,.grid-3{grid-template-columns:1fr;}.cnpj-row{flex-direction:column;}.header{padding:12px 16px;}.container{padding:16px 12px 60px;}}
+  @media(max-width:600px){.header-title{display:none;}.user-email{display:none;}.grid-2,.grid-3{grid-template-columns:1fr;}.cnpj-row{flex-direction:column;}.header{padding:12px 16px;}.container{padding:16px 12px 60px;}}
 </style>
 </head>
 <body>
@@ -593,11 +593,11 @@ async function salvarEmpresa(){
           ? `⚠️ No plano <strong style="color:#e8eaf0;">${nomeAssinatura}</strong> o limite total é de <strong style="color:#e8eaf0;">${limiteFuncionarios.toLocaleString('pt-BR')} funcionários</strong> entre todas as empresas. Você já tem <strong style="color:#e8eaf0;">${totalJaCadastrado}</strong> cadastrados — restam <strong style="color:#e8eaf0;">${restante}</strong> disponíveis.
             <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
               <a href="assinar.html" style="display:inline-block;padding:7px 16px;background:#4a7cdc;color:#fff;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Fazer upgrade do plano</a>
-              <a href="https://wa.me/559191234567" target="_blank" style="display:inline-block;padding:7px 16px;background:#1a4a38;color:#2dd4a0;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Falar com suporte</a>
+              <a href="https://wa.me/5594981564271?text=Ol%C3%A1%21%20Preciso%20de%20suporte%20no%20SGS%20%E2%80%94%20Sistema%20de%20Gest%C3%A3o%20em%20SST." target="_blank" style="display:inline-block;padding:7px 16px;background:#1a4a38;color:#2dd4a0;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Falar com suporte</a>
             </div>`
           : `⚠️ O limite do plano <strong style="color:#e8eaf0;">${nomeAssinatura}</strong> é de <strong style="color:#e8eaf0;">${limiteFuncionarios.toLocaleString('pt-BR')} funcionários</strong> no total. Você já tem <strong style="color:#e8eaf0;">${totalJaCadastrado}</strong> cadastrados.
             <div style="margin-top:10px;">
-              <a href="https://wa.me/559191234567" target="_blank" style="display:inline-block;padding:7px 16px;background:#1a4a38;color:#2dd4a0;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Falar com suporte via WhatsApp</a>
+              <a href="https://wa.me/5594981564271?text=Ol%C3%A1%21%20Preciso%20de%20suporte%20no%20SGS%20%E2%80%94%20Sistema%20de%20Gest%C3%A3o%20em%20SST." target="_blank" style="display:inline-block;padding:7px 16px;background:#1a4a38;color:#2dd4a0;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Falar com suporte via WhatsApp</a>
             </div>`;
         document.getElementById('btn-salvar').parentNode.insertBefore(el, document.getElementById('btn-salvar'));
         document.getElementById('spinner-salvar').className = 'spinner';
