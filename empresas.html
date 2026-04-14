@@ -94,26 +94,7 @@
   <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span>Empresas</span></div>
   <div class="header-right">
     <span class="user-email" id="user-email"></span>
-    <div style="position:relative;" id="menu-config">
-  <button onclick="toggleConfig()" style="font-size:18px;padding:6px 8px;color:var(--text2);border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;line-height:1;" title="Configurações">⚙️</button>
-  <div id="dropdown-config" style="display:none;position:fixed;top:56px;right:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:200px;max-width:calc(100vw - 16px);z-index:9999;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.6);">
-    <div style="padding:8px 12px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Configurações</div>
-    <a href="usuarios.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
-      <span style="font-size:15px;">👥</span> Gerenciar usuários
-    </a>
-  </div>
-</div>
-<script>
-function toggleConfig() {
-  const d = document.getElementById('dropdown-config');
-  d.style.display = d.style.display === 'none' ? 'block' : 'none';
-}
-document.addEventListener('click', function(e) {
-  if (!document.getElementById('menu-config').contains(e.target)) {
-    document.getElementById('dropdown-config').style.display = 'none';
-  }
-});
-</script><button class="btn-logout" onclick="sair()">Sair</button>
+    <button class="btn-logout" onclick="sair()">Sair</button>
   </div>
 </div>
 
