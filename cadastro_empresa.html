@@ -84,16 +84,14 @@
   .spinner.show{display:inline-block;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .hint{font-size:11px;color:var(--text3);margin-top:4px;}
-  @media(max-width:600px){.header-title{display:none;}.user-email{display:none;}.grid-2,.grid-3{grid-template-columns:1fr;}.cnpj-row{flex-direction:column;}.header{padding:12px 16px;}.container{padding:16px 12px 60px;}}
+  @media(max-width:600px){.header-title{display:none;}.user-email{display:none;}.grid-2,.grid-3{grid-template-columns:1fr;}.cnpj-row{flex-direction:column;}.cnpj-row .field{width:100%;}.header{padding:10px 12px;}.container{padding:16px 12px 60px;}}
 </style>
 </head>
 <body>
 <div class="header">
   <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
   <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span>Cadastro de Empresa</span></div>
-  <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-  <a href="empresas.html" style="font-size:12px;color:var(--text2);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);">← Voltar</a>
-  
+  <a href="empresas.html" style="margin-left:auto;font-size:12px;color:var(--text2);text-decoration:none;padding:6px 14px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);">← Voltar</a>
 </div>
 <div class="container">
 
@@ -104,13 +102,11 @@
         <label>CNPJ <span class="req">*</span></label>
         <input type="text" id="cnpj-input" placeholder="00.000.000/0000-00" maxlength="18">
       </div>
-      <div style="margin-bottom:16px;">
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-shrink:0;">
         <button class="btn btn-primary" id="btn-buscar" onclick="buscarCNPJ()">
           <span class="spinner" id="spinner-busca"></span>
           <span id="btn-buscar-label">Buscar</span>
         </button>
-      </div>
-      <div style="margin-bottom:16px;">
         <button class="btn btn-secondary" onclick="limparTudo()">Limpar</button>
       </div>
     </div>
