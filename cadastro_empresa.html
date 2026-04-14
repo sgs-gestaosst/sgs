@@ -366,10 +366,16 @@ async function buscarCNPJ(){
     // Verifica se CNPJ já está cadastrado
     try {
       const resExiste = await fetch(
-        `${SUPA_URL}/rest/v1/empresas?cnpj_raiz=eq.${raw.slice(0,8)}&ativo=eq.true&user_id=eq.${sgs_user?.id}&select=id,razao_social,nome_fantasia`,
+        `${SUPA_URL}/rest/v1/empresas?cnpj_raiz=eq.${raw.slice(0,8)}&ativo=eq.true&user_id=eq.${sgs_user?.id}&select=id,razao_social,nome_fantasia,cnpj_completo`,
         { headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${sgs_token}`} }
       );
-      const jaExiste = await resExiste.json();
+      const todasDoGrupo = await resExiste.json();
+      // Verifica duplicata pelo CNPJ completo
+      const cnpjFormatado = document.getElementById('cnpj-input').value;
+      const duplicataExata = todasDoGrupo.filter(e => 
+        e.cnpj_completo && e.cnpj_completo.replace(/\D/g,'') === raw
+      );
+      const jaExiste = duplicataExata;
       if (jaExiste.length > 0 && !_maeId) {
         const emp = jaExiste[0];
         const nomeEmp = emp.nome_fantasia || emp.razao_social;
@@ -602,6 +608,7 @@ async function salvarEmpresa(){
     tipo_empresa:(_maeId||window._maeIdDinamico)?'FILIAL':'MATRIZ',
     nome_fantasia:document.getElementById('nome_fantasia').value||null,
     cnpj_raiz:raw.slice(0,8),
+    cnpj_completo:document.getElementById('cnpj-input').value,
     telefone:document.getElementById('telefone').value||null,
     email:document.getElementById('email').value||null,
     endereco:document.getElementById('endereco').value||null,
