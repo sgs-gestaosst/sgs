@@ -84,6 +84,11 @@
     .header{padding:10px 12px;flex-wrap:wrap;gap:8px;}
     .header-title{display:none;}
     .user-email{display:none;}
+    .container{padding:20px 12px 60px;}
+    .card-plano{padding:20px 16px;}
+    .preco-valor{font-size:36px;}
+    .btn-assinar{font-size:14px;padding:12px;}
+    .recurso-item{font-size:13px;}
   }
 </style>
 </head>
@@ -272,7 +277,7 @@ async function assinar() {
   document.getElementById('btn-assinar').disabled = true;
   document.getElementById('spinner-assinar').className = 'spinner show';
   document.getElementById('btn-assinar-label').textContent = 'Ativando...';
-  setStatus('info', 'Ativando sua assinatura...');
+  setStatus('info', 'Criando sua assinatura...');
 
   try {
     // Busca o plano SGS
@@ -284,60 +289,31 @@ async function assinar() {
     if (!planos.length) throw new Error('Plano não encontrado.');
     const planoId = planos[0].id;
 
-    // Calcula datas
-    const hoje = new Date();
-    const fimTrial = new Date(hoje);
-    fimTrial.setDate(fimTrial.getDate() + 30);
-
-    const assinatura = {
-      user_id: user.id,
-      plano_id: planoId,
-      status: 'Trial',
-      data_inicio: hoje.toISOString().split('T')[0],
-      data_fim_trial: fimTrial.toISOString().split('T')[0],
-      valor_base: BASE,
-      valor_base_com_desconto: valorFinal,
-      percentual_desconto: cupomAtivo ? cupomAtivo.valor_desconto : 0,
-      ativo: true
-    };
-
-    if (cupomAtivo) {
-      assinatura.cupom_id = cupomAtivo.id;
-      assinatura.data_expiracao_cupom = cupomAtivo.data_expiracao;
-    }
-
-    // Salva assinatura
-    const res = await fetch(`${SUPA_URL}/rest/v1/assinaturas`, {
+    // Chama Edge Function para criar assinatura no Mercado Pago
+    const res = await fetch(`${SUPA_URL}/functions/v1/criar-assinatura`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': SUPA_KEY,
-        'Authorization': `Bearer ${token}`,
-        'Prefer': 'return=representation'
+        'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(assinatura)
+      body: JSON.stringify({
+        user_id: user.id,
+        plano_id: planoId,
+        cupom_codigo: cupomAtivo ? cupomAtivo.codigo : null
+      })
     });
 
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Erro ao ativar assinatura.');
-    }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erro ao criar assinatura.');
 
-    // Atualiza contagem de usos do cupom
-    if (cupomAtivo) {
-      await fetch(`${SUPA_URL}/rest/v1/cupons?id=eq.${cupomAtivo.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPA_KEY,
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ usos_realizados: cupomAtivo.usos_realizados + 1 })
-      });
+    // Redireciona para o Mercado Pago para pagamento
+    if (data.mp_init_point) {
+      setStatus('success', 'Redirecionando para o pagamento...');
+      setTimeout(() => { window.location.href = data.mp_init_point; }, 1500);
+    } else {
+      setStatus('success', 'Assinatura criada! Seus 30 dias grátis começaram. Redirecionando...');
+      setTimeout(() => { window.location.href = 'index.html'; }, 2000);
     }
-
-    setStatus('success', 'Assinatura ativada! Seus 30 dias grátis começaram. Redirecionando...');
-    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
 
   } catch(e) {
     setStatus('error', `Erro: ${e.message}`);
