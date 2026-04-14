@@ -628,7 +628,7 @@ async function salvarEmpresa(){
   }
 }
 
-function limparTudo(){
+function limparTudo(){ window.location.reload(); return;
   document.querySelectorAll('input').forEach(e=>{e.value='';e.classList.remove('filled','error');});
   document.querySelectorAll('select').forEach(e=>e.selectedIndex=0);
   cnaes=[];rural=false;ativo=true;
