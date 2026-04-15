@@ -52,6 +52,7 @@
   .btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
   .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
   .btn-danger:hover{background:#2a1515;}
+  .btn-sm{padding:5px 12px;font-size:12px;}
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;}
   .modal-overlay.show{display:flex;}
   .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:440px;width:90%;margin:24px;}
@@ -63,6 +64,26 @@
   .modal-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:10px 14px;outline:none;margin-bottom:16px;}
   .modal-input:focus{border-color:var(--danger);}
 
+  /* Modal genérico (setores/funções) */
+  .modal-lg{max-width:620px;}
+  .modal-field{margin-bottom:14px;}
+  .modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  .modal-field input,.modal-field select,.modal-field textarea{
+    width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+    color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;transition:border-color .15s;
+  }
+  .modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+  .modal-field textarea{resize:vertical;min-height:70px;}
+  .modal-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .modal-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);}
+  .toggle-row-label{font-size:13px;color:var(--text);}
+  .toggle{width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+  .toggle.on{background:var(--accent2);}
+  .toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;}
+  .toggle.on::after{left:19px;}
+  .section-mini{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px;}
+
   /* Abas */
   .tabs-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
   .tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
@@ -72,8 +93,7 @@
   .tab-content{display:none;padding:24px;}
   .tab-content.active{display:block;}
 
-  /* Campos */
-  .fields-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  /* Campos dados gerais */
   .field-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:16px;}
   .field-row:last-child{border-bottom:none;}
   .field-label{font-size:12px;color:var(--text2);min-width:140px;flex-shrink:0;}
@@ -82,10 +102,6 @@
   .field-input:focus{border-color:var(--accent2);}
   .field-select{background:var(--bg);border:1px solid var(--border-focus);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:6px 10px;outline:none;appearance:none;}
   .toggle-wrap{display:flex;align-items:center;gap:8px;}
-  .toggle{width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
-  .toggle.on{background:var(--accent2);}
-  .toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;}
-  .toggle.on::after{left:19px;}
 
   /* CNAEs */
   .cnae-list{display:flex;flex-direction:column;gap:8px;}
@@ -95,6 +111,26 @@
   .tipo-s{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
   .cnae-code{font-family:var(--mono);font-size:12px;color:var(--accent2);white-space:nowrap;}
   .cnae-desc{flex:1;color:var(--text2);}
+
+  /* Lista genérica (setores/funções) */
+  .lista-item{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;transition:border-color .15s;}
+  .lista-item:hover{border-color:var(--border-focus);}
+  .lista-item-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .icon-setor{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+  .icon-funcao{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .lista-item-info{flex:1;min-width:0;}
+  .lista-item-nome{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lista-item-sub{font-size:11px;color:var(--text2);margin-top:3px;}
+  .lista-item-badges{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+  .mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;}
+  .mb-risk{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+  .mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+  .mb-green{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .lista-item-actions{display:flex;gap:6px;flex-shrink:0;}
+
+  /* Tab header */
+  .tab-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .tab-header-title{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
 
   /* Seção vazia */
   .empty-tab{text-align:center;padding:40px 20px;color:var(--text2);}
@@ -110,15 +146,18 @@
 
   .spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f1117;border-radius:50%;animation:spin .7s linear infinite;display:none;}
   .spinner.show{display:inline-block;}
+  .spinner-w{border-top-color:#fff;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
   .section-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;}
 
-  @media(max-width:600px){.header-title{display:none;}.user-email{display:none;}
+  @media(max-width:600px){
+    .header-title{display:none;}
     .header{padding:12px 16px;}
     .container{padding:16px 12px 60px;}
-    .fields-grid{grid-template-columns:1fr;}
     .hero-actions{flex-direction:column;}
+    .modal-grid-2,.modal-grid-3{grid-template-columns:1fr;}
+    .lista-item-badges{display:none;}
   }
 </style>
 </head>
@@ -153,8 +192,8 @@
     <div class="tabs">
       <div class="tab active" onclick="mudarAba('dados')">Dados gerais</div>
       <div class="tab" onclick="mudarAba('cnaes')">CNAEs</div>
-      <div class="tab" onclick="mudarAba('unidades')">Unidades</div>
       <div class="tab" onclick="mudarAba('setores')">Setores</div>
+      <div class="tab" onclick="mudarAba('funcoes')">Funções</div>
       <div class="tab" onclick="mudarAba('funcionarios')">Funcionários</div>
     </div>
 
@@ -170,95 +209,24 @@
       <div class="cnae-list" id="lista-cnaes"></div>
     </div>
 
-    <!-- ABA UNIDADES -->
-    <div class="tab-content" id="aba-unidades">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div class="section-label" style="margin:0;">Unidades cadastradas</div>
-        <button class="btn btn-edit" id="btn-nova-unidade" onclick="novaUnidade()">+ Nova unidade</button>
-      </div>
-
-      <!-- Formulário de nova unidade -->
-      <div id="form-unidade" style="display:none;background:var(--bg);border:1px solid var(--border-focus);border-radius:10px;padding:20px;margin-bottom:20px;">
-        <div style="font-size:13px;font-weight:500;margin-bottom:16px;color:var(--accent);">Nova unidade</div>
-        
-        <!-- Busca CNPJ -->
-        <div style="display:flex;gap:10px;margin-bottom:16px;">
-          <div style="flex:1;">
-            <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">CNPJ da unidade</label>
-            <input type="text" id="u-cnpj" placeholder="00.000.000/0000-00" maxlength="18" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;padding:10px 14px;outline:none;">
-          </div>
-          <div style="display:flex;align-items:flex-end;gap:8px;padding-bottom:0;">
-            <button class="btn btn-edit" id="btn-buscar-unidade" onclick="buscarCNPJUnidade()" style="height:40px;">
-              <span class="spinner" id="spinner-unidade"></span>
-              <span id="label-buscar-unidade">Buscar</span>
-            </button>
-          </div>
-        </div>
-        <div class="status-bar" id="status-unidade" style="margin-bottom:12px;"></div>
-
-        <!-- Campos da unidade -->
-        <div id="campos-unidade" style="display:none;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-            <div>
-              <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nome / Razão Social</label>
-              <input type="text" id="u-nome" placeholder="Nome da unidade" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Tipo</label>
-              <select id="u-tipo" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-                <option value="FILIAL">Filial</option>
-                <option value="MATRIZ">Matriz</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Endereço</label>
-              <input type="text" id="u-endereco" placeholder="Rua, Av, Rod..." style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Cidade</label>
-              <input type="text" id="u-cidade" placeholder="Cidade" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Estado</label>
-              <select id="u-estado" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-                <option value="">UF</option>
-                <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">CEP</label>
-              <input type="text" id="u-cep" placeholder="00000-000" maxlength="9" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Telefone</label>
-              <input type="text" id="u-telefone" placeholder="(00) 00000-0000" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-            </div>
-            <div>
-              <label style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nº de Funcionários</label>
-              <input type="number" id="u-funcionarios" placeholder="0" min="0" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;justify-content:flex-end;">
-            <button class="btn btn-cancel" onclick="cancelarFormUnidade()">Cancelar</button>
-            <button class="btn btn-save" id="btn-salvar-unidade" onclick="salvarUnidade()">
-              <span class="spinner" id="spinner-salvar-unidade"></span>
-              <span id="label-salvar-unidade">Salvar unidade</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Lista de unidades -->
-      <div id="lista-unidades"></div>
-    </div>
-
     <!-- ABA SETORES -->
     <div class="tab-content" id="aba-setores">
-      <div class="empty-tab">
-        <div class="empty-tab-icon">🗂️</div>
-        <div class="empty-tab-title">Setores em breve</div>
-        <div>Cadastro de departamentos e setores estará disponível em breve.</div>
+      <div class="tab-header">
+        <div class="tab-header-title">Setores cadastrados</div>
+        <button class="btn btn-edit" onclick="abrirModalSetor()">+ Novo setor</button>
       </div>
+      <div class="status-bar" id="status-setor"></div>
+      <div id="lista-setores"></div>
+    </div>
+
+    <!-- ABA FUNÇÕES -->
+    <div class="tab-content" id="aba-funcoes">
+      <div class="tab-header">
+        <div class="tab-header-title">Funções cadastradas</div>
+        <button class="btn btn-edit" onclick="abrirModalFuncao()">+ Nova função</button>
+      </div>
+      <div class="status-bar" id="status-funcao"></div>
+      <div id="lista-funcoes"></div>
     </div>
 
     <!-- ABA FUNCIONÁRIOS -->
@@ -272,7 +240,7 @@
   </div>
 </div>
 
-<!-- Modal de exclusão -->
+<!-- Modal de exclusão da empresa -->
 <div class="modal-overlay" id="modal-excluir">
   <div class="modal">
     <div class="modal-icon">⚠️</div>
@@ -281,19 +249,224 @@
       A empresa ficará <strong>inativa por 120 dias</strong> antes de ser excluída definitivamente.<br>
       Se precisar reativar, entre em contato com o suporte via WhatsApp.
     </div>
-    <div class="modal-aviso">
-      Esta ação irá ocultar a empresa e todos os seus dados do sistema.
-    </div>
+    <div class="modal-aviso">Esta ação irá ocultar a empresa e todos os seus dados do sistema.</div>
     <div style="margin-bottom:8px;font-size:12px;color:var(--text2);text-align:center;">Digite o motivo da exclusão (opcional):</div>
     <input class="modal-input" type="text" id="motivo-exclusao" placeholder="Ex: Encerramento de contrato, empresa fechou...">
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
       <button class="btn" style="background:var(--danger);color:#fff;" onclick="confirmarExclusao()">
-        <span class="spinner" id="spinner-excluir"></span>
+        <span class="spinner spinner-w" id="spinner-excluir"></span>
         <span id="label-excluir">Confirmar exclusão</span>
       </button>
     </div>
     <div class="status-bar" id="status-excluir" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<!-- Modal SETOR -->
+<div class="modal-overlay" id="modal-setor">
+  <div class="modal modal-lg">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-size:16px;font-weight:500;" id="modal-setor-titulo">Novo setor</div>
+      <button onclick="fecharModalSetor()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;">×</button>
+    </div>
+
+    <div class="modal-field">
+      <label>Nome do setor <span style="color:var(--accent);">*</span></label>
+      <input type="text" id="s-nome" placeholder="Ex: Produção, Administrativo, Manutenção...">
+    </div>
+
+    <div class="modal-grid-2">
+      <div class="modal-field">
+        <label>Responsável</label>
+        <input type="text" id="s-responsavel" placeholder="Nome do responsável">
+      </div>
+      <div class="modal-field">
+        <label>Andar / Localização</label>
+        <input type="text" id="s-andar" placeholder="Ex: Térreo, 1º Andar, Galpão A">
+      </div>
+      <div class="modal-field">
+        <label>Área (m²)</label>
+        <input type="number" id="s-area" placeholder="0" min="0" step="0.01">
+      </div>
+      <div class="modal-field">
+        <label>Nº de funcionários previsto</label>
+        <input type="number" id="s-num-funcionarios" placeholder="0" min="0">
+      </div>
+    </div>
+
+    <div class="modal-field">
+      <label>Descrição</label>
+      <textarea id="s-descricao" placeholder="Descrição das atividades do setor..."></textarea>
+    </div>
+
+    <div class="section-mini">Agentes de risco presentes</div>
+    <div class="modal-grid-3">
+      <div class="toggle-row">
+        <span class="toggle-row-label">Físico</span>
+        <div class="toggle" id="s-toggle-fisico" onclick="toggleModal('s-toggle-fisico')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Químico</span>
+        <div class="toggle" id="s-toggle-quimico" onclick="toggleModal('s-toggle-quimico')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Biológico</span>
+        <div class="toggle" id="s-toggle-biologico" onclick="toggleModal('s-toggle-biologico')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Ergonômico</span>
+        <div class="toggle" id="s-toggle-ergonomico" onclick="toggleModal('s-toggle-ergonomico')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Acidente</span>
+        <div class="toggle" id="s-toggle-acidente" onclick="toggleModal('s-toggle-acidente')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Psicossocial</span>
+        <div class="toggle" id="s-toggle-psicossocial" onclick="toggleModal('s-toggle-psicossocial')"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="fecharModalSetor()">Cancelar</button>
+      <button class="btn btn-save" id="btn-salvar-setor" onclick="salvarSetor()">
+        <span class="spinner" id="spinner-setor"></span>
+        <span id="label-salvar-setor">Salvar setor</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal FUNÇÃO -->
+<div class="modal-overlay" id="modal-funcao">
+  <div class="modal modal-lg">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div style="font-size:16px;font-weight:500;" id="modal-funcao-titulo">Nova função</div>
+      <button onclick="fecharModalFuncao()" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;">×</button>
+    </div>
+
+    <div class="modal-grid-2">
+      <div class="modal-field">
+        <label>Nome da função <span style="color:var(--accent);">*</span></label>
+        <input type="text" id="f-nome" placeholder="Ex: Operador de Máquina, Técnico de SST...">
+      </div>
+      <div class="modal-field">
+        <label>Setor</label>
+        <select id="f-setor">
+          <option value="">— Selecione um setor —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Código CBO</label>
+        <input type="text" id="f-cbo" placeholder="Ex: 7170-35" maxlength="10">
+      </div>
+      <div class="modal-field">
+        <label>Turno</label>
+        <select id="f-turno">
+          <option value="">— Selecione —</option>
+          <option>Diurno</option>
+          <option>Noturno</option>
+          <option>Misto</option>
+          <option>12x36</option>
+          <option>6x1</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Escolaridade mínima</label>
+        <select id="f-escolaridade">
+          <option value="">— Selecione —</option>
+          <option>Fundamental incompleto</option>
+          <option>Fundamental completo</option>
+          <option>Médio incompleto</option>
+          <option>Médio completo</option>
+          <option>Técnico</option>
+          <option>Superior incompleto</option>
+          <option>Superior completo</option>
+          <option>Pós-graduação</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Experiência mínima</label>
+        <input type="text" id="f-experiencia" placeholder="Ex: 6 meses, 1 ano...">
+      </div>
+      <div class="modal-field">
+        <label>Nº funcionários previsto</label>
+        <input type="number" id="f-num-funcionarios" placeholder="0" min="0">
+      </div>
+      <div class="modal-field">
+        <label>Curso / Habilitação exigida</label>
+        <input type="text" id="f-curso" placeholder="Ex: NR-35, CNH B...">
+      </div>
+    </div>
+
+    <div class="modal-field">
+      <label>NR aplicável</label>
+      <input type="text" id="f-nr" placeholder="Ex: NR-10, NR-33, NR-35...">
+    </div>
+
+    <div class="modal-field">
+      <label>EPI obrigatório</label>
+      <textarea id="f-epi" placeholder="Liste os EPIs obrigatórios para esta função..."></textarea>
+    </div>
+
+    <div class="modal-field">
+      <label>Descrição</label>
+      <textarea id="f-descricao" placeholder="Descrição das atividades da função..."></textarea>
+    </div>
+
+    <div class="section-mini">Condições especiais de trabalho</div>
+    <div class="modal-grid-3">
+      <div class="toggle-row">
+        <span class="toggle-row-label">Trabalho externo</span>
+        <div class="toggle" id="f-toggle-externo" onclick="toggleModal('f-toggle-externo')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Trabalho em altura</span>
+        <div class="toggle" id="f-toggle-altura" onclick="toggleModal('f-toggle-altura')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Espaço confinado</span>
+        <div class="toggle" id="f-toggle-confinado" onclick="toggleModal('f-toggle-confinado')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Trabalho elétrico</span>
+        <div class="toggle" id="f-toggle-eletrico" onclick="toggleModal('f-toggle-eletrico')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Insalubre</span>
+        <div class="toggle" id="f-toggle-insalubre" onclick="toggleModal('f-toggle-insalubre')"></div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-row-label">Periculoso</span>
+        <div class="toggle" id="f-toggle-periculoso" onclick="toggleModal('f-toggle-periculoso')"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="fecharModalFuncao()">Cancelar</button>
+      <button class="btn btn-save" id="btn-salvar-funcao" onclick="salvarFuncao()">
+        <span class="spinner" id="spinner-funcao"></span>
+        <span id="label-salvar-funcao">Salvar função</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmação exclusão setor/função -->
+<div class="modal-overlay" id="modal-confirmar-exclusao">
+  <div class="modal">
+    <div class="modal-icon" id="icon-confirmar">🗂️</div>
+    <div class="modal-title" id="titulo-confirmar">Excluir setor?</div>
+    <div class="modal-desc" id="desc-confirmar">Esta ação não pode ser desfeita.</div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="fecharModalConfirmar()">Cancelar</button>
+      <button class="btn" style="background:var(--danger);color:#fff;" id="btn-confirmar-exclusao">
+        <span class="spinner spinner-w" id="spinner-confirmar"></span>
+        <span id="label-confirmar">Excluir</span>
+      </button>
+    </div>
+    <div class="status-bar" id="status-confirmar" style="margin-top:12px;"></div>
   </div>
 </div>
 
@@ -309,8 +482,15 @@ if (!empresaId) { window.location.href = 'empresas.html'; }
 
 let empresa = null;
 let cnaes = [];
+let setores = [];
+let funcoes = [];
 let modoEdicao = false;
+let setorEditandoId = null;
+let funcaoEditandoId = null;
 
+// =====================================================
+// UTILITÁRIOS
+// =====================================================
 function iniciais(nome) {
   if (!nome) return '?';
   const p = nome.trim().split(' ').filter(w => w.length > 2);
@@ -322,6 +502,35 @@ const grInfo = {
   3:{cls:'gr3',label:'GR 3'},4:{cls:'gr4',label:'GR 4'}
 };
 
+function toggleModal(id) {
+  document.getElementById(id).classList.toggle('on');
+}
+
+function getToggle(id) {
+  return document.getElementById(id).classList.contains('on');
+}
+
+function setToggle(id, val) {
+  const el = document.getElementById(id);
+  if (val) el.classList.add('on'); else el.classList.remove('on');
+}
+
+function setStatus(id, tipo, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const icons = {info:'↻',success:'✓',error:'✕'};
+  el.className = 'status-bar show ' + tipo;
+  el.innerHTML = `<span>${icons[tipo]}</span><span>${msg}</span>`;
+}
+
+function clearStatus(id) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'status-bar';
+}
+
+// =====================================================
+// HERO E DADOS GERAIS
+// =====================================================
 function renderHero() {
   const nome = empresa.nome_fantasia || empresa.razao_social;
   document.getElementById('hero-avatar').textContent = iniciais(nome);
@@ -367,7 +576,6 @@ function renderCampos() {
       </div>`;
     }
 
-    // Modo edição
     if (c.type === 'toggle') {
       return `<div class="field-row">
         <span class="field-label">${c.label}</span>
@@ -413,12 +621,15 @@ function renderCNAEs() {
 }
 
 function mudarAba(aba) {
+  const abas = ['dados','cnaes','setores','funcoes','funcionarios'];
   document.querySelectorAll('.tab').forEach((t,i) => {
-    const abas = ['dados','cnaes','unidades','setores','funcionarios'];
     t.classList.toggle('active', abas[i] === aba);
   });
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById(`aba-${aba}`).classList.add('active');
+
+  if (aba === 'setores') carregarSetores();
+  if (aba === 'funcoes') { carregarSetores(); carregarFuncoes(); }
 }
 
 function modoEditar() {
@@ -436,7 +647,7 @@ function cancelarEdicao() {
   modoEdicao = false;
   renderCampos();
   document.getElementById('hero-actions').innerHTML = `<button class="btn btn-danger" onclick="abrirModal()">Excluir</button><button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
-  document.getElementById('status-edit').className = 'status-bar';
+  clearStatus('status-edit');
 }
 
 function toggleField(key) {
@@ -484,7 +695,6 @@ async function salvarEdicao() {
     if (!res.ok) {
       const err = await res.json();
       const msg = err.message || err.details || 'Erro ao salvar';
-      // Verifica se é erro de limite de funcionários
       if (msg.includes('Limite do plano')) {
         throw new Error(msg + ' — <a href="assinar.html" style="color:#4a7cdc;">Fazer upgrade do plano</a>');
       }
@@ -510,6 +720,9 @@ async function salvarEdicao() {
   }
 }
 
+// =====================================================
+// CARREGAMENTO INICIAL
+// =====================================================
 async function carregarEmpresa() {
   try {
     const [resEmp, resCnaes] = await Promise.all([
@@ -528,16 +741,18 @@ async function carregarEmpresa() {
     renderHero();
     renderCampos();
     renderCNAEs();
-    await carregarUnidades();
   } catch(e) {
     console.error(e);
   }
 }
 
+// =====================================================
+// MODAL EXCLUSÃO EMPRESA
+// =====================================================
 function abrirModal() {
   document.getElementById('modal-excluir').classList.add('show');
   document.getElementById('motivo-exclusao').value = '';
-  document.getElementById('status-excluir').className = 'status-bar';
+  clearStatus('status-excluir');
 }
 
 function fecharModal() {
@@ -546,32 +761,22 @@ function fecharModal() {
 
 async function confirmarExclusao() {
   const motivo = document.getElementById('motivo-exclusao').value.trim();
-  document.getElementById('spinner-excluir').className = 'spinner show';
+  document.getElementById('spinner-excluir').className = 'spinner spinner-w show';
   document.getElementById('label-excluir').textContent = 'Inativando...';
   document.querySelector('#modal-excluir .btn[onclick="confirmarExclusao()"]').disabled = true;
 
   try {
     const res = await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPA_KEY,
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        ativo: false,
-        data_inativacao: new Date().toISOString(),
-        motivo_inativacao: motivo || 'Não informado'
-      })
+      headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body: JSON.stringify({ativo:false,data_inativacao:new Date().toISOString(),motivo_inativacao:motivo||'Não informado'})
     });
     if (!res.ok) throw new Error('Erro ao inativar empresa');
     fecharModal();
     setTimeout(() => { window.location.href = 'empresas.html'; }, 800);
   } catch(e) {
-    const s = document.getElementById('status-excluir');
-    s.className = 'status-bar show error';
-    s.innerHTML = `✕ ${e.message}`;
-    document.getElementById('spinner-excluir').className = 'spinner';
+    setStatus('status-excluir','error',e.message);
+    document.getElementById('spinner-excluir').className = 'spinner spinner-w';
     document.getElementById('label-excluir').textContent = 'Confirmar exclusão';
     document.querySelector('#modal-excluir .btn[onclick="confirmarExclusao()"]').disabled = false;
   }
@@ -583,171 +788,394 @@ function sair() {
   window.location.href = 'login.html';
 }
 
-function novaUnidade() {
-  window.location.href = `cadastro_empresa.html?mae_id=${empresaId}`;
-}
-
 // =====================================================
-// UNIDADES
+// SETORES
 // =====================================================
-let unidades = [];
-
-function mostrarFormUnidade() {
-  document.getElementById('form-unidade').style.display = 'block';
-  document.getElementById('btn-nova-unidade').style.display = 'none';
-  document.getElementById('campos-unidade').style.display = 'none';
-  document.getElementById('u-cnpj').value = '';
-  document.getElementById('status-unidade').className = 'status-bar';
-}
-
-function cancelarFormUnidade() {
-  document.getElementById('form-unidade').style.display = 'none';
-  document.getElementById('btn-nova-unidade').style.display = 'inline-flex';
-}
-
-function fmtTelU(r){const d=r.replace(/\D/g,'');if(d.length===10)return`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;if(d.length===11)return`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;return r;}
-function fmtCEPU(r){if(!r)return'';const d=r.replace(/\D/g,'');return d.length===8?`${d.slice(0,5)}-${d.slice(5)}`:r;}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const cnpjInput = document.getElementById('u-cnpj');
-  if (cnpjInput) {
-    cnpjInput.addEventListener('input', function(e) {
-      let v = e.target.value.replace(/\D/g,'');
-      if(v.length>14)v=v.slice(0,14);
-      if(v.length>12)v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8,12)+'-'+v.slice(12);
-      else if(v.length>8)v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5,8)+'/'+v.slice(8);
-      else if(v.length>5)v=v.slice(0,2)+'.'+v.slice(2,5)+'.'+v.slice(5);
-      else if(v.length>2)v=v.slice(0,2)+'.'+v.slice(2);
-      e.target.value=v;
-    });
-    cnpjInput.addEventListener('keydown', e => { if(e.key==='Enter') buscarCNPJUnidade(); });
-  }
-});
-
-function setStatusU(tipo, msg) {
-  const el = document.getElementById('status-unidade');
-  const icons = {info:'↻',success:'✓',error:'✕'};
-  el.className = 'status-bar show ' + tipo;
-  el.innerHTML = `<span>${icons[tipo]}</span><span>${msg}</span>`;
-}
-
-async function buscarCNPJUnidade() {
-  const cnpj = document.getElementById('u-cnpj').value.replace(/\D/g,'');
-  if (cnpj.length !== 14) { setStatusU('error','CNPJ inválido — verifique os 14 dígitos.'); return; }
-  
-  document.getElementById('btn-buscar-unidade').disabled = true;
-  document.getElementById('spinner-unidade').className = 'spinner show';
-  document.getElementById('label-buscar-unidade').textContent = 'Buscando...';
-  setStatusU('info', 'Consultando Receita Federal...');
-
-  try {
-    const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
-    if (!res.ok) throw new Error('CNPJ não encontrado');
-    const d = await res.json();
-
-    // Verifica se é do mesmo grupo (mesmo CNPJ raiz)
-    const raizBuscado = cnpj.slice(0,8);
-    if (raizBuscado !== empresa.cnpj_raiz) {
-      setStatusU('error', `Este CNPJ (${raizBuscado}) não pertence ao grupo desta empresa (${empresa.cnpj_raiz}). Confirme se é uma filial correta.`);
-    } else {
-      setStatusU('success', `Filial encontrada — ${d.razao_social}`);
-    }
-
-    document.getElementById('u-nome').value = d.razao_social || '';
-    const log = [d.descricao_tipo_de_logradouro, d.logradouro, d.numero].filter(Boolean).join(' ');
-    document.getElementById('u-endereco').value = log;
-    document.getElementById('u-cidade').value = d.municipio || '';
-    if (d.uf) document.getElementById('u-estado').value = d.uf;
-    document.getElementById('u-cep').value = fmtCEPU(d.cep);
-    document.getElementById('u-telefone').value = d.ddd_telefone_1 ? fmtTelU(d.ddd_telefone_1) : '';
-    document.getElementById('campos-unidade').style.display = 'block';
-
-  } catch(e) {
-    setStatusU('error', e.message);
-  } finally {
-    document.getElementById('btn-buscar-unidade').disabled = false;
-    document.getElementById('spinner-unidade').className = 'spinner';
-    document.getElementById('label-buscar-unidade').textContent = 'Buscar';
-  }
-}
-
-async function salvarUnidade() {
-  const cnpjCompleto = document.getElementById('u-cnpj').value;
-  const nome = document.getElementById('u-nome').value;
-  if (!nome) { setStatusU('error','Preencha o nome da unidade.'); return; }
-
-  document.getElementById('btn-salvar-unidade').disabled = true;
-  document.getElementById('spinner-salvar-unidade').className = 'spinner show';
-  document.getElementById('label-salvar-unidade').textContent = 'Salvando...';
-
-  const unidade = {
-    empresa_id: parseInt(empresaId),
-    nome_unidade: nome,
-    cnpj_completo: cnpjCompleto,
-    tipo: document.getElementById('u-tipo').value,
-    endereco: document.getElementById('u-endereco').value || null,
-    cidade: document.getElementById('u-cidade').value || null,
-    estado: document.getElementById('u-estado').value || null,
-    cep: document.getElementById('u-cep').value.replace(/\D/g,'') || null,
-    telefone: document.getElementById('u-telefone').value || null,
-    numero_funcionarios: parseInt(document.getElementById('u-funcionarios').value) || 0,
-    ativo: true
-  };
-
-  try {
-    const res = await fetch(`${SUPA_URL}/rest/v1/unidades`, {
-      method: 'POST',
-      headers: {
-        'Content-Type':'application/json',
-        'apikey':SUPA_KEY,
-        'Authorization':`Bearer ${token}`,
-        'Prefer':'return=representation'
-      },
-      body: JSON.stringify(unidade)
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.message || 'Erro ao salvar unidade');
-    }
-    cancelarFormUnidade();
-    await carregarUnidades();
-    setStatusU('success','Unidade cadastrada com sucesso!');
-  } catch(e) {
-    setStatusU('error', `Erro: ${e.message}`);
-    document.getElementById('btn-salvar-unidade').disabled = false;
-    document.getElementById('spinner-salvar-unidade').className = 'spinner';
-    document.getElementById('label-salvar-unidade').textContent = 'Salvar unidade';
-  }
-}
-
-async function carregarUnidades() {
+async function carregarSetores() {
   try {
     const res = await fetch(
-      `${SUPA_URL}/rest/v1/unidades?empresa_id=eq.${empresaId}&select=*&order=tipo.asc,nome_unidade.asc`,
-      { headers: {'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`} }
+      `${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,
+      { headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`} }
     );
-    unidades = await res.json();
-    renderUnidades();
+    setores = await res.json();
+    renderSetores();
+    popularSelectSetores();
   } catch(e) { console.error(e); }
 }
 
-function renderUnidades() {
-  const lista = document.getElementById('lista-unidades');
-  if (!unidades.length) {
-    lista.innerHTML = `<div class="empty-tab"><div class="empty-tab-icon">🏭</div><div class="empty-tab-title">Nenhuma unidade cadastrada</div><div>Clique em "+ Nova unidade" para cadastrar uma filial.</div></div>`;
+function renderSetores() {
+  const lista = document.getElementById('lista-setores');
+  if (!setores.length) {
+    lista.innerHTML = `<div class="empty-tab"><div class="empty-tab-icon">🗂️</div><div class="empty-tab-title">Nenhum setor cadastrado</div><div>Clique em "+ Novo setor" para começar.</div></div>`;
     return;
   }
-  lista.innerHTML = unidades.map(u => `
-    <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;">
-      <div style="width:36px;height:36px;border-radius:8px;background:#1a2540;color:#7aabf7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;">${u.tipo==='MATRIZ'?'MTZ':'FIL'}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:500;">${u.nome_unidade}</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px;">${u.cnpj_completo}${u.cidade?' · '+u.cidade+(u.estado?' — '+u.estado:''):''}</div>
+  lista.innerHTML = setores.map(s => {
+    const riscos = [];
+    if (s.tem_agente_fisico) riscos.push('Físico');
+    if (s.tem_agente_quimico) riscos.push('Químico');
+    if (s.tem_agente_biologico) riscos.push('Biológico');
+    if (s.tem_agente_ergonomico) riscos.push('Ergonômico');
+    if (s.tem_agente_acidente) riscos.push('Acidente');
+    if (s.tem_agente_psicossocial) riscos.push('Psicossocial');
+
+    const riscoBadges = riscos.map(r => `<span class="mini-badge mb-risk">${r}</span>`).join('');
+    const funcCount = s.num_funcionarios_previsto ? `<span class="mini-badge mb-info">${s.num_funcionarios_previsto} func</span>` : '';
+    const responsavel = s.responsavel_setor ? `<span style="font-size:11px;color:var(--text2);">👤 ${s.responsavel_setor}</span>` : '';
+
+    return `
+    <div class="lista-item">
+      <div class="lista-item-icon icon-setor">🗂️</div>
+      <div class="lista-item-info">
+        <div class="lista-item-nome">${s.nome_setor}</div>
+        <div class="lista-item-sub">${[s.andar, responsavel].filter(Boolean).join(' · ') || (s.descricao ? s.descricao.slice(0,60) : '—')}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">${riscoBadges}${funcCount}</div>
       </div>
-      <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:${u.tipo==='MATRIZ'?'#1a2540':'var(--surface2)'};color:${u.tipo==='MATRIZ'?'#7aabf7':'var(--text2)'};border:1px solid ${u.tipo==='MATRIZ'?'#2a4070':'var(--border)'};">${u.tipo}</span>
-      <span style="font-size:12px;color:var(--text2);">${u.numero_funcionarios||0} func</span>
-    </div>`).join('');
+      <div class="lista-item-actions">
+        <button class="btn btn-edit btn-sm" onclick="editarSetor(${s.id})">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirSetorConfirmar(${s.id},'${s.nome_setor.replace(/'/g,"\\'")}')">Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
 }
+
+function popularSelectSetores() {
+  const sel = document.getElementById('f-setor');
+  if (!sel) return;
+  const val = sel.value;
+  sel.innerHTML = '<option value="">— Sem setor vinculado —</option>' +
+    setores.map(s => `<option value="${s.id}" ${val == s.id ? 'selected' : ''}>${s.nome_setor}</option>`).join('');
+}
+
+function limparFormSetor() {
+  ['s-nome','s-responsavel','s-andar','s-descricao'].forEach(id => document.getElementById(id).value = '');
+  ['s-area','s-num-funcionarios'].forEach(id => document.getElementById(id).value = '');
+  ['s-toggle-fisico','s-toggle-quimico','s-toggle-biologico','s-toggle-ergonomico','s-toggle-acidente','s-toggle-psicossocial']
+    .forEach(id => document.getElementById(id).classList.remove('on'));
+}
+
+function abrirModalSetor() {
+  setorEditandoId = null;
+  limparFormSetor();
+  document.getElementById('modal-setor-titulo').textContent = 'Novo setor';
+  document.getElementById('label-salvar-setor').textContent = 'Salvar setor';
+  document.getElementById('modal-setor').classList.add('show');
+}
+
+function fecharModalSetor() {
+  document.getElementById('modal-setor').classList.remove('show');
+  setorEditandoId = null;
+}
+
+function editarSetor(id) {
+  const s = setores.find(x => x.id === id);
+  if (!s) return;
+  setorEditandoId = id;
+  document.getElementById('s-nome').value = s.nome_setor || '';
+  document.getElementById('s-responsavel').value = s.responsavel_setor || '';
+  document.getElementById('s-andar').value = s.andar || '';
+  document.getElementById('s-area').value = s.area_m2 || '';
+  document.getElementById('s-num-funcionarios').value = s.num_funcionarios_previsto || '';
+  document.getElementById('s-descricao').value = s.descricao || '';
+  setToggle('s-toggle-fisico', s.tem_agente_fisico);
+  setToggle('s-toggle-quimico', s.tem_agente_quimico);
+  setToggle('s-toggle-biologico', s.tem_agente_biologico);
+  setToggle('s-toggle-ergonomico', s.tem_agente_ergonomico);
+  setToggle('s-toggle-acidente', s.tem_agente_acidente);
+  setToggle('s-toggle-psicossocial', s.tem_agente_psicossocial);
+  document.getElementById('modal-setor-titulo').textContent = 'Editar setor';
+  document.getElementById('label-salvar-setor').textContent = 'Salvar alterações';
+  document.getElementById('modal-setor').classList.add('show');
+}
+
+async function salvarSetor() {
+  const nome = document.getElementById('s-nome').value.trim();
+  if (!nome) { alert('Informe o nome do setor.'); return; }
+
+  document.getElementById('btn-salvar-setor').disabled = true;
+  document.getElementById('spinner-setor').className = 'spinner show';
+  document.getElementById('label-salvar-setor').textContent = 'Salvando...';
+
+  const payload = {
+    empresa_id: parseInt(empresaId),
+    nome_setor: nome,
+    responsavel_setor: document.getElementById('s-responsavel').value || null,
+    andar: document.getElementById('s-andar').value || null,
+    area_m2: document.getElementById('s-area').value ? parseFloat(document.getElementById('s-area').value) : null,
+    num_funcionarios_previsto: document.getElementById('s-num-funcionarios').value ? parseInt(document.getElementById('s-num-funcionarios').value) : null,
+    descricao: document.getElementById('s-descricao').value || null,
+    tem_agente_fisico: getToggle('s-toggle-fisico'),
+    tem_agente_quimico: getToggle('s-toggle-quimico'),
+    tem_agente_biologico: getToggle('s-toggle-biologico'),
+    tem_agente_ergonomico: getToggle('s-toggle-ergonomico'),
+    tem_agente_acidente: getToggle('s-toggle-acidente'),
+    tem_agente_psicossocial: getToggle('s-toggle-psicossocial'),
+    ativo: true,
+    atualizado_em: new Date().toISOString()
+  };
+
+  try {
+    let res;
+    if (setorEditandoId) {
+      res = await fetch(`${SUPA_URL}/rest/v1/setores?id=eq.${setorEditandoId}`, {
+        method: 'PATCH',
+        headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body: JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch(`${SUPA_URL}/rest/v1/setores`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body: JSON.stringify(payload)
+      });
+    }
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'Erro ao salvar setor'); }
+    fecharModalSetor();
+    await carregarSetores();
+    setStatus('status-setor','success', setorEditandoId ? 'Setor atualizado com sucesso!' : 'Setor cadastrado com sucesso!');
+    setTimeout(() => clearStatus('status-setor'), 3000);
+  } catch(e) {
+    setStatus('status-setor','error',`Erro: ${e.message}`);
+  } finally {
+    document.getElementById('btn-salvar-setor').disabled = false;
+    document.getElementById('spinner-setor').className = 'spinner';
+    document.getElementById('label-salvar-setor').textContent = setorEditandoId ? 'Salvar alterações' : 'Salvar setor';
+  }
+}
+
+// =====================================================
+// FUNÇÕES
+// =====================================================
+async function carregarFuncoes() {
+  try {
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_funcao.asc`,
+      { headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`} }
+    );
+    funcoes = await res.json();
+    renderFuncoes();
+  } catch(e) { console.error(e); }
+}
+
+function renderFuncoes() {
+  const lista = document.getElementById('lista-funcoes');
+  if (!funcoes.length) {
+    lista.innerHTML = `<div class="empty-tab"><div class="empty-tab-icon">👷</div><div class="empty-tab-title">Nenhuma função cadastrada</div><div>Clique em "+ Nova função" para começar.</div></div>`;
+    return;
+  }
+  lista.innerHTML = funcoes.map(f => {
+    const setor = setores.find(s => s.id === f.setor_id);
+    const condicoes = [];
+    if (f.trabalho_altura) condicoes.push('Altura');
+    if (f.trabalho_confinado) condicoes.push('Confinado');
+    if (f.trabalho_eletrico) condicoes.push('Elétrico');
+    if (f.trabalho_insalubre) condicoes.push('Insalubre');
+    if (f.trabalho_periculoso) condicoes.push('Periculoso');
+    if (f.trabalho_externo) condicoes.push('Externo');
+
+    const condBadges = condicoes.map(c => `<span class="mini-badge mb-risk">${c}</span>`).join('');
+    const cboBadge = f.cbo ? `<span class="mini-badge mb-info">CBO ${f.cbo}</span>` : '';
+    const funcCount = f.num_funcionarios_previsto ? `<span class="mini-badge mb-green">${f.num_funcionarios_previsto} func</span>` : '';
+    const setorLabel = setor ? `📁 ${setor.nome_setor}` : '';
+    const turno = f.turno ? `🕐 ${f.turno}` : '';
+
+    return `
+    <div class="lista-item">
+      <div class="lista-item-icon icon-funcao">👷</div>
+      <div class="lista-item-info">
+        <div class="lista-item-nome">${f.nome_funcao}</div>
+        <div class="lista-item-sub">${[setorLabel, turno].filter(Boolean).join(' · ') || '—'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">${cboBadge}${funcCount}${condBadges}</div>
+      </div>
+      <div class="lista-item-actions">
+        <button class="btn btn-edit btn-sm" onclick="editarFuncao(${f.id})">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirFuncaoConfirmar(${f.id},'${f.nome_funcao.replace(/'/g,"\\'")}')">Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function limparFormFuncao() {
+  ['f-nome','f-cbo','f-curso','f-nr','f-epi','f-descricao','f-experiencia'].forEach(id => document.getElementById(id).value = '');
+  ['f-num-funcionarios'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-setor').value = '';
+  document.getElementById('f-turno').value = '';
+  document.getElementById('f-escolaridade').value = '';
+  ['f-toggle-externo','f-toggle-altura','f-toggle-confinado','f-toggle-eletrico','f-toggle-insalubre','f-toggle-periculoso']
+    .forEach(id => document.getElementById(id).classList.remove('on'));
+}
+
+function abrirModalFuncao() {
+  funcaoEditandoId = null;
+  limparFormFuncao();
+  popularSelectSetores();
+  document.getElementById('modal-funcao-titulo').textContent = 'Nova função';
+  document.getElementById('label-salvar-funcao').textContent = 'Salvar função';
+  document.getElementById('modal-funcao').classList.add('show');
+}
+
+function fecharModalFuncao() {
+  document.getElementById('modal-funcao').classList.remove('show');
+  funcaoEditandoId = null;
+}
+
+function editarFuncao(id) {
+  const f = funcoes.find(x => x.id === id);
+  if (!f) return;
+  funcaoEditandoId = id;
+  popularSelectSetores();
+  document.getElementById('f-nome').value = f.nome_funcao || '';
+  document.getElementById('f-setor').value = f.setor_id || '';
+  document.getElementById('f-cbo').value = f.cbo || '';
+  document.getElementById('f-turno').value = f.turno || '';
+  document.getElementById('f-escolaridade').value = f.escolaridade_minima || '';
+  document.getElementById('f-experiencia').value = f.experiencia_minima || '';
+  document.getElementById('f-num-funcionarios').value = f.num_funcionarios_previsto || '';
+  document.getElementById('f-curso').value = f.curso_habilitacao || '';
+  document.getElementById('f-nr').value = f.nr_aplicavel || '';
+  document.getElementById('f-epi').value = f.epi_obrigatorio || '';
+  document.getElementById('f-descricao').value = f.descricao || '';
+  setToggle('f-toggle-externo', f.trabalho_externo);
+  setToggle('f-toggle-altura', f.trabalho_altura);
+  setToggle('f-toggle-confinado', f.trabalho_confinado);
+  setToggle('f-toggle-eletrico', f.trabalho_eletrico);
+  setToggle('f-toggle-insalubre', f.trabalho_insalubre);
+  setToggle('f-toggle-periculoso', f.trabalho_periculoso);
+  document.getElementById('modal-funcao-titulo').textContent = 'Editar função';
+  document.getElementById('label-salvar-funcao').textContent = 'Salvar alterações';
+  document.getElementById('modal-funcao').classList.add('show');
+}
+
+async function salvarFuncao() {
+  const nome = document.getElementById('f-nome').value.trim();
+  if (!nome) { alert('Informe o nome da função.'); return; }
+
+  document.getElementById('btn-salvar-funcao').disabled = true;
+  document.getElementById('spinner-funcao').className = 'spinner show';
+  document.getElementById('label-salvar-funcao').textContent = 'Salvando...';
+
+  const setorVal = document.getElementById('f-setor').value;
+  const payload = {
+    empresa_id: parseInt(empresaId),
+    setor_id: setorVal ? parseInt(setorVal) : null,
+    nome_funcao: nome,
+    cbo: document.getElementById('f-cbo').value || null,
+    turno: document.getElementById('f-turno').value || null,
+    escolaridade_minima: document.getElementById('f-escolaridade').value || null,
+    experiencia_minima: document.getElementById('f-experiencia').value || null,
+    num_funcionarios_previsto: document.getElementById('f-num-funcionarios').value ? parseInt(document.getElementById('f-num-funcionarios').value) : null,
+    curso_habilitacao: document.getElementById('f-curso').value || null,
+    nr_aplicavel: document.getElementById('f-nr').value || null,
+    epi_obrigatorio: document.getElementById('f-epi').value || null,
+    descricao: document.getElementById('f-descricao').value || null,
+    trabalho_externo: getToggle('f-toggle-externo'),
+    trabalho_altura: getToggle('f-toggle-altura'),
+    trabalho_confinado: getToggle('f-toggle-confinado'),
+    trabalho_eletrico: getToggle('f-toggle-eletrico'),
+    trabalho_insalubre: getToggle('f-toggle-insalubre'),
+    trabalho_periculoso: getToggle('f-toggle-periculoso'),
+    ativo: true,
+    atualizado_em: new Date().toISOString()
+  };
+
+  try {
+    let res;
+    if (funcaoEditandoId) {
+      res = await fetch(`${SUPA_URL}/rest/v1/funcoes?id=eq.${funcaoEditandoId}`, {
+        method: 'PATCH',
+        headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body: JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch(`${SUPA_URL}/rest/v1/funcoes`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body: JSON.stringify(payload)
+      });
+    }
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'Erro ao salvar função'); }
+    fecharModalFuncao();
+    await carregarFuncoes();
+    setStatus('status-funcao','success', funcaoEditandoId ? 'Função atualizada com sucesso!' : 'Função cadastrada com sucesso!');
+    setTimeout(() => clearStatus('status-funcao'), 3000);
+  } catch(e) {
+    setStatus('status-funcao','error',`Erro: ${e.message}`);
+  } finally {
+    document.getElementById('btn-salvar-funcao').disabled = false;
+    document.getElementById('spinner-funcao').className = 'spinner';
+    document.getElementById('label-salvar-funcao').textContent = funcaoEditandoId ? 'Salvar alterações' : 'Salvar função';
+  }
+}
+
+// =====================================================
+// MODAL CONFIRMAR EXCLUSÃO (setor / função)
+// =====================================================
+let _excluirCallback = null;
+
+function abrirModalConfirmar(icon, titulo, desc, callback) {
+  document.getElementById('icon-confirmar').textContent = icon;
+  document.getElementById('titulo-confirmar').textContent = titulo;
+  document.getElementById('desc-confirmar').textContent = desc;
+  clearStatus('status-confirmar');
+  _excluirCallback = callback;
+  document.getElementById('btn-confirmar-exclusao').onclick = async () => {
+    document.getElementById('spinner-confirmar').className = 'spinner spinner-w show';
+    document.getElementById('label-confirmar').textContent = 'Excluindo...';
+    document.getElementById('btn-confirmar-exclusao').disabled = true;
+    try {
+      await _excluirCallback();
+      fecharModalConfirmar();
+    } catch(e) {
+      setStatus('status-confirmar','error',e.message);
+      document.getElementById('spinner-confirmar').className = 'spinner spinner-w';
+      document.getElementById('label-confirmar').textContent = 'Excluir';
+      document.getElementById('btn-confirmar-exclusao').disabled = false;
+    }
+  };
+  document.getElementById('modal-confirmar-exclusao').classList.add('show');
+}
+
+function fecharModalConfirmar() {
+  document.getElementById('modal-confirmar-exclusao').classList.remove('show');
+  _excluirCallback = null;
+}
+
+function excluirSetorConfirmar(id, nome) {
+  abrirModalConfirmar('🗂️', `Excluir setor "${nome}"?`, 'Esta ação não pode ser desfeita.', async () => {
+    const res = await fetch(`${SUPA_URL}/rest/v1/setores?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body: JSON.stringify({ativo:false, atualizado_em: new Date().toISOString()})
+    });
+    if (!res.ok) throw new Error('Erro ao excluir setor');
+    await carregarSetores();
+    setStatus('status-setor','success','Setor removido com sucesso!');
+    setTimeout(() => clearStatus('status-setor'), 3000);
+  });
+}
+
+function excluirFuncaoConfirmar(id, nome) {
+  abrirModalConfirmar('👷', `Excluir função "${nome}"?`, 'Esta ação não pode ser desfeita.', async () => {
+    const res = await fetch(`${SUPA_URL}/rest/v1/funcoes?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body: JSON.stringify({ativo:false, atualizado_em: new Date().toISOString()})
+    });
+    if (!res.ok) throw new Error('Erro ao excluir função');
+    await carregarFuncoes();
+    setStatus('status-funcao','success','Função removida com sucesso!');
+    setTimeout(() => clearStatus('status-funcao'), 3000);
+  });
+}
+
+// Fechar modais clicando fora
+['modal-setor','modal-funcao'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) {
+      if (id === 'modal-setor') fecharModalSetor();
+      if (id === 'modal-funcao') fecharModalFuncao();
+    }
+  });
+});
 
 carregarEmpresa();
 </script>
