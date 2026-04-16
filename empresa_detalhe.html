@@ -194,11 +194,11 @@
   <!-- Abas -->
   <div class="tabs-wrap">
     <div class="tabs">
-      <div class="tab active" onclick="mudarAba('dados')">Dados gerais</div>
-      <div class="tab" onclick="mudarAba('cnaes')">CNAEs</div>
-      <div class="tab" onclick="mudarAba('setores')">Setores</div>
-      <div class="tab" onclick="mudarAba('funcoes')">Funções</div>
-      <div class="tab" onclick="mudarAba('funcionarios')">Funcionários</div>
+      <div class="tab active" data-aba="dados" onclick="mudarAba('dados')">Dados gerais</div>
+      <div class="tab" data-aba="cnaes" onclick="mudarAba('cnaes')">CNAEs</div>
+      <div class="tab" data-aba="setores" onclick="mudarAba('setores')">Setores</div>
+      <div class="tab" data-aba="funcoes" onclick="mudarAba('funcoes')">Funções</div>
+      <div class="tab" data-aba="funcionarios" onclick="mudarAba('funcionarios')">Funcionários</div>
     </div>
 
     <!-- ABA DADOS -->
@@ -485,8 +485,7 @@ function renderCNAEs(){
 }
 
 function mudarAba(aba){
-  const abas=['dados','cnaes','setores','funcoes','funcionarios'];
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',abas[i]===aba));
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.toggle('active', t.dataset.aba===aba));
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.getElementById(`aba-${aba}`).classList.add('active');
   if(aba==='setores')carregarSetores();
