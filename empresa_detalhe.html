@@ -351,22 +351,6 @@
           <option>Superior completo</option><option>Pós-graduação</option>
         </select>
       </div>
-      <div class="modal-field">
-        <label>Experiência mínima</label>
-        <input type="text" id="f-experiencia" placeholder="Ex: 6 meses, 1 ano...">
-      </div>
-      <div class="modal-field">
-        <label>Nº funcionários previsto</label>
-        <input type="number" id="f-num-funcionarios" placeholder="0" min="0">
-      </div>
-      <div class="modal-field">
-        <label>Curso / Habilitação exigida</label>
-        <input type="text" id="f-curso" placeholder="Ex: NR-35, CNH B...">
-      </div>
-      <div class="modal-field" style="grid-column:1/-1;">
-        <label>NR aplicável</label>
-        <input type="text" id="f-nr" placeholder="Ex: NR-10, NR-33, NR-35...">
-      </div>
       <div class="modal-field" style="grid-column:1/-1;">
         <label>Descrição</label>
         <textarea id="f-descricao" placeholder="Descrição das atividades da função..."></textarea>
@@ -598,15 +582,6 @@ function renderSetores(){
     return;
   }
   lista.innerHTML=setores.map(s=>{
-    const riscos=[];
-    if(s.tem_agente_fisico)riscos.push({n:'Físico',c:'#e0a855'});
-    if(s.tem_agente_quimico)riscos.push({n:'Químico',c:'#e05555'});
-    if(s.tem_agente_biologico)riscos.push({n:'Biológico',c:'#a78bfa'});
-    if(s.tem_agente_ergonomico)riscos.push({n:'Ergonômico',c:'#4a7cdc'});
-    if(s.tem_agente_acidente)riscos.push({n:'Acidente',c:'#e05555'});
-    if(s.tem_agente_psicossocial)riscos.push({n:'Psicossocial',c:'#f472b6'});
-    const badges=riscos.map(r=>`<span class="mini-badge" style="background:#1e2333;color:${r.c};border:1px solid ${r.c}40;">● ${r.n}</span>`).join('');
-    const funcCount=s.num_funcionarios_previsto?`<span class="mini-badge mb-info">${s.num_funcionarios_previsto} func</span>`:'';
     const sub=[s.andar,s.responsavel_setor].filter(Boolean).join(' · ')||s.descricao?.slice(0,60)||'—';
     return`<div class="lista-item">
       <div class="lista-item-icon icon-setor">🗂️</div>
@@ -633,7 +608,6 @@ function popularSelectSetores(){
 function limparFormSetor(){
   ['s-nome','s-responsavel','s-andar','s-descricao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['s-area','s-num-funcionarios'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['s-toggle-fisico','s-toggle-quimico','s-toggle-biologico','s-toggle-ergonomico','s-toggle-acidente','s-toggle-psicossocial'].forEach(id=>document.getElementById(id)?.classList.remove('on'));
 }
 
 function abrirModalSetor(){
@@ -660,12 +634,6 @@ function editarSetor(id){
   document.getElementById('s-area').value=s.area_m2||'';
   document.getElementById('s-num-funcionarios').value=s.num_funcionarios_previsto||'';
   document.getElementById('s-descricao').value=s.descricao||'';
-  setToggle('s-toggle-fisico',s.tem_agente_fisico);
-  setToggle('s-toggle-quimico',s.tem_agente_quimico);
-  setToggle('s-toggle-biologico',s.tem_agente_biologico);
-  setToggle('s-toggle-ergonomico',s.tem_agente_ergonomico);
-  setToggle('s-toggle-acidente',s.tem_agente_acidente);
-  setToggle('s-toggle-psicossocial',s.tem_agente_psicossocial);
   document.getElementById('modal-setor-titulo').textContent='Editar setor';
   document.getElementById('label-salvar-setor').textContent='Salvar alterações';
   document.getElementById('modal-setor').classList.add('show');
@@ -685,12 +653,6 @@ async function salvarSetor(){
     area_m2:document.getElementById('s-area').value?parseFloat(document.getElementById('s-area').value):null,
     num_funcionarios_previsto:document.getElementById('s-num-funcionarios').value?parseInt(document.getElementById('s-num-funcionarios').value):null,
     descricao:document.getElementById('s-descricao').value||null,
-    tem_agente_fisico:getToggle('s-toggle-fisico'),
-    tem_agente_quimico:getToggle('s-toggle-quimico'),
-    tem_agente_biologico:getToggle('s-toggle-biologico'),
-    tem_agente_ergonomico:getToggle('s-toggle-ergonomico'),
-    tem_agente_acidente:getToggle('s-toggle-acidente'),
-    tem_agente_psicossocial:getToggle('s-toggle-psicossocial'),
     ativo:true,
     atualizado_em:new Date().toISOString()
   };
@@ -752,7 +714,7 @@ function renderFuncoes(){
 }
 
 function limparFormFuncao(){
-  ['f-nome','f-cbo','f-curso','f-nr','f-descricao','f-experiencia'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['f-nome','f-cbo','f-descricao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('f-num-funcionarios').value='';
   document.getElementById('f-setor').value='';
   document.getElementById('f-turno').value='';
@@ -784,10 +746,8 @@ function editarFuncao(id){
   document.getElementById('f-setor').value=f.setor_id||'';
   document.getElementById('f-turno').value=f.turno||'';
   document.getElementById('f-escolaridade').value=f.escolaridade_minima||'';
-  document.getElementById('f-experiencia').value=f.experiencia_minima||'';
+
   document.getElementById('f-num-funcionarios').value=f.num_funcionarios_previsto||'';
-  document.getElementById('f-curso').value=f.curso_habilitacao||'';
-  document.getElementById('f-nr').value=f.nr_aplicavel||'';
   document.getElementById('f-descricao').value=f.descricao||'';
   if(f.cbo){const entry=CBO_LIST.find(([cod])=>cod===f.cbo);document.getElementById('f-cbo').value=entry?`${entry[0]} — ${entry[1]}`:f.cbo;}
   document.getElementById('modal-funcao-titulo').textContent='Editar função';
@@ -810,10 +770,8 @@ async function salvarFuncao(){
     cbo:cboVal,
     turno:document.getElementById('f-turno').value||null,
     escolaridade_minima:document.getElementById('f-escolaridade').value||null,
-    experiencia_minima:document.getElementById('f-experiencia').value||null,
+
     num_funcionarios_previsto:document.getElementById('f-num-funcionarios').value?parseInt(document.getElementById('f-num-funcionarios').value):null,
-    curso_habilitacao:document.getElementById('f-curso').value||null,
-    nr_aplicavel:document.getElementById('f-nr').value||null,
     descricao:document.getElementById('f-descricao').value||null,
     ativo:true,
     atualizado_em:new Date().toISOString()
