@@ -433,7 +433,8 @@ function renderCampos(){
     {label:'Estado',key:'estado',type:'select',options:['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']},
     {label:'CEP',key:'cep',type:'text'},
     {label:'Grau de Risco',key:'grau_risco',type:'select',options:[{v:1,l:'GR 1 — Baixo'},{v:2,l:'GR 2 — Médio-Baixo'},{v:3,l:'GR 3 — Médio-Alto'},{v:4,l:'GR 4 — Alto'}]},
-    {label:'Nº de Funcionários',key:'total_funcionarios_previsto',type:'number'},
+    {label:'Funcionários previstos',key:'total_funcionarios_previsto',type:'number'},
+    {label:'Funcionários cadastrados',key:'total_funcionarios_cadastrados',type:'readonly'},
     {label:'Atividade Rural',key:'atividade_rural',type:'toggle'},
     {label:'Ativa no sistema',key:'ativo',type:'toggle'},
   ];
@@ -445,8 +446,14 @@ function renderCampos(){
       let d=disp;
       if(f.type==='toggle')d=val?'Sim':'Não';
       if(f.key==='grau_risco'&&val)d=grInfo[val]?.label||val;
+      // Campo readonly — sempre aparece como somente leitura com destaque
+      if(f.type==='readonly'){
+        const cor=val>0?'var(--accent2)':'var(--text2)';
+        return`<div class="field-row"><span class="field-label">${f.label}</span><span class="field-val" style="color:${cor};font-weight:600;">${disp}</span></div>`;
+      }
       return`<div class="field-row"><span class="field-label">${f.label}</span><span class="field-val">${d}</span></div>`;
     }
+    if(f.type==='readonly')return`<div class="field-row"><span class="field-label">${f.label}</span><span class="field-val" style="color:var(--accent2);font-weight:600;">${disp} <span style="font-size:10px;color:var(--text3);">(calculado automaticamente)</span></span></div>`;
     if(f.type==='toggle')return`<div class="field-row"><span class="field-label">${f.label}</span><div class="toggle-wrap"><div class="toggle ${val?'on':''}" id="toggle-${f.key}" onclick="toggleField('${f.key}')"></div><span style="font-size:12px;color:var(--text2)" id="toggle-label-${f.key}">${val?'Sim':'Não'}</span></div></div>`;
     if(f.type==='select'){const opts=f.options.map(o=>{const v=typeof o==='object'?o.v:o;const l=typeof o==='object'?o.l:o;return`<option value="${v}" ${val==v?'selected':''}>${l}</option>`;}).join('');return`<div class="field-row"><span class="field-label">${f.label}</span><select class="field-select" id="field-${f.key}"><option value="">—</option>${opts}</select></div>`;}
     return`<div class="field-row"><span class="field-label">${f.label}</span><input class="field-input" type="${f.type}" id="field-${f.key}" value="${val||''}"></div>`;
@@ -587,12 +594,17 @@ function renderSetores(){
   }
   lista.innerHTML=setores.map(s=>{
     const sub=[s.andar,s.responsavel_setor].filter(Boolean).join(' · ')||s.descricao?.slice(0,60)||'—';
+    const previsto=s.num_funcionarios_previsto||0;
+    const cadastrado=s.num_funcionarios_cadastrados||0;
+    const funcBadge=previsto>0
+      ? `<span class="mini-badge mb-info">${cadastrado}/${previsto} func</span>`
+      : cadastrado>0 ? `<span class="mini-badge mb-info">${cadastrado} func</span>` : '';
     return`<div class="lista-item">
       <div class="lista-item-icon icon-setor">🗂️</div>
       <div class="lista-item-info">
         <div class="lista-item-nome">${escHtml(s.nome_setor)}</div>
         <div class="lista-item-sub">${escHtml(sub)}</div>
-        <div style="margin-top:6px;">${badges}${funcCount}</div>
+        <div style="margin-top:6px;">${funcBadge}</div>
       </div>
       <div class="lista-item-actions">
         <button class="btn btn-edit btn-sm" onclick="editarSetor(${s.id})">Editar</button>
@@ -701,13 +713,17 @@ function renderFuncoes(){
     const cboBadge=f.cbo?`<span class="mini-badge mb-info">CBO ${f.cbo}</span>`:'';
     const turnoBadge=f.turno?`<span class="mini-badge mb-blue">${f.turno}</span>`:'';
     const setorLabel=setor?`📁 ${escHtml(setor.nome_setor)}`:'';
-    const sub=[setorLabel,f.turno?null:''].filter(Boolean).join(' · ')||'—';
+    const previsto=f.num_funcionarios_previsto||0;
+    const cadastrado=f.num_funcionarios_cadastrados||0;
+    const funcBadge=previsto>0
+      ? `<span class="mini-badge mb-green">${cadastrado}/${previsto} func</span>`
+      : cadastrado>0 ? `<span class="mini-badge mb-green">${cadastrado} func</span>` : '';
     return`<div class="lista-item">
       <div class="lista-item-icon icon-funcao">👷</div>
       <div class="lista-item-info">
         <div class="lista-item-nome">${escHtml(f.nome_funcao)}</div>
         <div class="lista-item-sub">${setor?escHtml(setorLabel):'Sem setor vinculado'}</div>
-        <div style="margin-top:6px;">${cboBadge}${turnoBadge}</div>
+        <div style="margin-top:6px;">${cboBadge}${turnoBadge}${funcBadge}</div>
       </div>
       <div class="lista-item-actions">
         <button class="btn btn-edit btn-sm" onclick="editarFuncao(${f.id})">Editar</button>
