@@ -351,6 +351,10 @@
           <option>Superior completo</option><option>Pós-graduação</option>
         </select>
       </div>
+      <div class="modal-field">
+        <label>Nº funcionários previsto</label>
+        <input type="number" id="f-num-funcionarios" placeholder="0" min="0">
+      </div>
       <div class="modal-field" style="grid-column:1/-1;">
         <label>Descrição</label>
         <textarea id="f-descricao" placeholder="Descrição das atividades da função..."></textarea>
@@ -714,12 +718,12 @@ function renderFuncoes(){
 }
 
 function limparFormFuncao(){
-  ['f-nome','f-cbo','f-descricao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('f-num-funcionarios').value='';
-  document.getElementById('f-setor').value='';
-  document.getElementById('f-turno').value='';
-  document.getElementById('f-escolaridade').value='';
-  document.getElementById('cbo-dropdown').classList.remove('show');
+  ['f-nome','f-cbo','f-descricao','f-num-funcionarios','f-setor','f-turno','f-escolaridade'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.value='';
+  });
+  const dd=document.getElementById('cbo-dropdown');
+  if(dd)dd.classList.remove('show');
 }
 
 function abrirModalFuncao(){
