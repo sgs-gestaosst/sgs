@@ -323,8 +323,12 @@
         <input type="text" id="f-nome" placeholder="Ex: Operador de Máquina, Técnico de SST...">
       </div>
       <div class="modal-field">
-        <label>Setor</label>
-        <select id="f-setor"><option value="">— Sem setor vinculado —</option></select>
+        <label>Turno</label>
+        <select id="f-turno">
+          <option value="">— Selecione —</option>
+          <option>Diurno</option><option>Noturno</option><option>Misto</option>
+          <option>12x36</option><option>6x1</option><option>5x2</option>
+        </select>
       </div>
       <div class="modal-field" style="grid-column:1/-1;">
         <label>Código CBO</label>
@@ -333,13 +337,10 @@
           <div class="cbo-dropdown" id="cbo-dropdown"></div>
         </div>
       </div>
-      <div class="modal-field">
-        <label>Turno</label>
-        <select id="f-turno">
-          <option value="">— Selecione —</option>
-          <option>Diurno</option><option>Noturno</option><option>Misto</option>
-          <option>12x36</option><option>6x1</option><option>5x2</option>
-        </select>
+      <div class="modal-field" style="grid-column:1/-1;">
+        <label>Setores vinculados <span style="color:var(--accent);">*</span></label>
+        <div id="f-setores-lista" style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;"></div>
+        <div id="f-setores-erro" style="font-size:11px;color:var(--danger);margin-top:4px;display:none;">Selecione ao menos um setor.</div>
       </div>
       <div class="modal-field">
         <label>Escolaridade mínima</label>
@@ -474,7 +475,7 @@ function mudarAba(aba){
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.getElementById(`aba-${aba}`).classList.add('active');
   if(aba==='setores')carregarSetores();
-  if(aba==='funcoes'){carregarSetores();carregarFuncoes();}
+  if(aba==='funcoes'){carregarSetores().then(()=>carregarFuncoes());}
 }
 
 function modoEditar(){
@@ -614,11 +615,28 @@ function renderSetores(){
   }).join('');
 }
 
+function popularCheckboxSetores(selecionados=[]){
+  const lista=document.getElementById('f-setores-lista');
+  if(!lista)return;
+  if(!setores.length){
+    lista.innerHTML=`<div style="font-size:12px;color:var(--text3);padding:4px 0;">Nenhum setor cadastrado. Cadastre setores primeiro.</div>`;
+    return;
+  }
+  lista.innerHTML=setores.map(s=>`
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:3px 0;">
+      <input type="checkbox" value="${s.id}" ${selecionados.includes(s.id)?'checked':''} style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;">
+      <span>${escHtml(s.nome_setor)}</span>
+    </label>`).join('');
+}
+
+function getSetoresSelecionados(){
+  const lista=document.getElementById('f-setores-lista');
+  if(!lista)return[];
+  return [...lista.querySelectorAll('input[type=checkbox]:checked')].map(el=>parseInt(el.value));
+}
+
 function popularSelectSetores(){
-  const sel=document.getElementById('f-setor');
-  if(!sel)return;
-  const val=sel.value;
-  sel.innerHTML='<option value="">— Sem setor vinculado —</option>'+setores.map(s=>`<option value="${s.id}" ${val==s.id?'selected':''}>${escHtml(s.nome_setor)}</option>`).join('');
+  // mantida para compatibilidade — não usada mais no modal de função
 }
 
 function limparFormSetor(){
@@ -698,6 +716,13 @@ async function carregarFuncoes(){
   try{
     const res=await fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     funcoes=await res.json();
+    // Carrega setores vinculados para cada função
+    if(funcoes.length){
+      const ids=funcoes.map(f=>f.id).join(',');
+      const resFs=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=in.(${ids})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const fsData=await resFs.json();
+      funcoes=funcoes.map(f=>({...f,setor_ids:fsData.filter(x=>x.funcao_id===f.id).map(x=>x.setor_id)}));
+    }
     renderFuncoes();
   }catch(e){console.error(e);}
 }
@@ -709,20 +734,18 @@ function renderFuncoes(){
     return;
   }
   lista.innerHTML=funcoes.map(f=>{
-    const setor=setores.find(s=>s.id===f.setor_id);
+    const setoresVinculados=(f.setor_ids||[]).map(sid=>{const s=setores.find(x=>x.id===sid);return s?escHtml(s.nome_setor):null;}).filter(Boolean);
+    const setorLabel=setoresVinculados.length?`📁 ${setoresVinculados.join(', ')}`:'';
     const cboBadge=f.cbo?`<span class="mini-badge mb-info">CBO ${f.cbo}</span>`:'';
     const turnoBadge=f.turno?`<span class="mini-badge mb-blue">${f.turno}</span>`:'';
-    const setorLabel=setor?`📁 ${escHtml(setor.nome_setor)}`:'';
     const previsto=f.num_funcionarios_previsto||0;
     const cadastrado=f.num_funcionarios_cadastrados||0;
-    const funcBadge=previsto>0
-      ? `<span class="mini-badge mb-green">${cadastrado}/${previsto} func</span>`
-      : cadastrado>0 ? `<span class="mini-badge mb-green">${cadastrado} func</span>` : '';
+    const funcBadge=previsto>0?`<span class="mini-badge mb-green">${cadastrado}/${previsto} func</span>`:cadastrado>0?`<span class="mini-badge mb-green">${cadastrado} func</span>`:'';
     return`<div class="lista-item">
       <div class="lista-item-icon icon-funcao">👷</div>
       <div class="lista-item-info">
         <div class="lista-item-nome">${escHtml(f.nome_funcao)}</div>
-        <div class="lista-item-sub">${setor?escHtml(setorLabel):'Sem setor vinculado'}</div>
+        <div class="lista-item-sub">${setorLabel||'Sem setor vinculado'}</div>
         <div style="margin-top:6px;">${cboBadge}${turnoBadge}${funcBadge}</div>
       </div>
       <div class="lista-item-actions">
@@ -734,18 +757,25 @@ function renderFuncoes(){
 }
 
 function limparFormFuncao(){
-  ['f-nome','f-cbo','f-descricao','f-num-funcionarios','f-setor','f-turno','f-escolaridade'].forEach(id=>{
+  ['f-nome','f-cbo','f-descricao','f-num-funcionarios','f-turno','f-escolaridade'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.value='';
   });
   const dd=document.getElementById('cbo-dropdown');
   if(dd)dd.classList.remove('show');
+  const erro=document.getElementById('f-setores-erro');
+  if(erro)erro.style.display='none';
+  popularCheckboxSetores([]);
 }
 
 function abrirModalFuncao(){
   funcaoEditandoId=null;
   limparFormFuncao();
-  popularSelectSetores();
+  if(!setores.length){
+    carregarSetores().then(()=>popularCheckboxSetores([]));
+  }else{
+    popularCheckboxSetores([]);
+  }
   document.getElementById('modal-funcao-titulo').textContent='Nova função';
   document.getElementById('label-salvar-funcao').textContent='Salvar função';
   document.getElementById('modal-funcao').classList.add('show');
@@ -756,20 +786,24 @@ function fecharModalFuncao(){
   funcaoEditandoId=null;
 }
 
-function editarFuncao(id){
+async function editarFuncao(id){
   const f=funcoes.find(x=>x.id===id);
   if(!f)return;
   funcaoEditandoId=id;
   limparFormFuncao();
-  popularSelectSetores();
   document.getElementById('f-nome').value=f.nome_funcao||'';
-  document.getElementById('f-setor').value=f.setor_id||'';
   document.getElementById('f-turno').value=f.turno||'';
   document.getElementById('f-escolaridade').value=f.escolaridade_minima||'';
-
   document.getElementById('f-num-funcionarios').value=f.num_funcionarios_previsto||'';
   document.getElementById('f-descricao').value=f.descricao||'';
   if(f.cbo){const entry=CBO_LIST.find(([cod])=>cod===f.cbo);document.getElementById('f-cbo').value=entry?`${entry[0]} — ${entry[1]}`:f.cbo;}
+  // Carrega setores vinculados
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${id}&ativo=eq.true&select=setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const data=await res.json();
+    const selecionados=data.map(x=>x.setor_id);
+    popularCheckboxSetores(selecionados);
+  }catch(e){popularCheckboxSetores([]);}
   document.getElementById('modal-funcao-titulo').textContent='Editar função';
   document.getElementById('label-salvar-funcao').textContent='Salvar alterações';
   document.getElementById('modal-funcao').classList.add('show');
@@ -778,6 +812,12 @@ function editarFuncao(id){
 async function salvarFuncao(){
   const nome=document.getElementById('f-nome').value.trim();
   if(!nome){alert('Informe o nome da função.');return;}
+  const setoresSelecionados=getSetoresSelecionados();
+  if(!setoresSelecionados.length){
+    document.getElementById('f-setores-erro').style.display='block';
+    return;
+  }
+  document.getElementById('f-setores-erro').style.display='none';
   document.getElementById('btn-salvar-funcao').disabled=true;
   document.getElementById('spinner-funcao').className='spinner show';
   document.getElementById('label-salvar-funcao').textContent='Salvando...';
@@ -785,25 +825,38 @@ async function salvarFuncao(){
   const cboVal=cboRaw?cboRaw.split('—')[0].trim().replace(/\D/g,'').slice(0,6)||null:null;
   const payload={
     empresa_id:parseInt(empresaId),
-    setor_id:document.getElementById('f-setor').value?parseInt(document.getElementById('f-setor').value):null,
     nome_funcao:nome,
     cbo:cboVal,
     turno:document.getElementById('f-turno').value||null,
     escolaridade_minima:document.getElementById('f-escolaridade').value||null,
-
     num_funcionarios_previsto:document.getElementById('f-num-funcionarios').value?parseInt(document.getElementById('f-num-funcionarios').value):null,
     descricao:document.getElementById('f-descricao').value||null,
     ativo:true,
     atualizado_em:new Date().toISOString()
   };
   try{
+    let funcaoId;
     let res;
     if(funcaoEditandoId){
       res=await fetch(`${SUPA_URL}/rest/v1/funcoes?id=eq.${funcaoEditandoId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar função');}
+      funcaoId=funcaoEditandoId;
+      // Remove vínculos antigos e recria
+      await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${funcaoId}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     }else{
       res=await fetch(`${SUPA_URL}/rest/v1/funcoes`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar função');}
+      const data=await res.json();
+      funcaoId=data[0].id;
     }
-    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar função');}
+    // Salva vínculos com setores
+    for(const setorId of setoresSelecionados){
+      await fetch(`${SUPA_URL}/rest/v1/funcao_setores`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+        body:JSON.stringify({funcao_id:funcaoId,setor_id:setorId,ativo:true})
+      });
+    }
     fecharModalFuncao();
     await carregarFuncoes();
     setStatus('status-funcao','success',funcaoEditandoId?'Função atualizada com sucesso!':'Função cadastrada com sucesso!');
