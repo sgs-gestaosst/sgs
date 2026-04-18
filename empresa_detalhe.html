@@ -352,10 +352,6 @@
           <option>Superior completo</option><option>Pós-graduação</option>
         </select>
       </div>
-      <div class="modal-field">
-        <label>Nº funcionários previsto</label>
-        <input type="number" id="f-num-funcionarios" placeholder="0" min="0">
-      </div>
       <div class="modal-field" style="grid-column:1/-1;">
         <label>Descrição</label>
         <textarea id="f-descricao" placeholder="Descrição das atividades da função..."></textarea>
@@ -616,23 +612,50 @@ function renderSetores(){
 }
 
 function popularCheckboxSetores(selecionados=[]){
+  // selecionados = [{setor_id, num_funcionarios_previsto}] ou [id, id, ...]
   const lista=document.getElementById('f-setores-lista');
   if(!lista)return;
   if(!setores.length){
     lista.innerHTML=`<div style="font-size:12px;color:var(--text3);padding:4px 0;">Nenhum setor cadastrado. Cadastre setores primeiro.</div>`;
     return;
   }
-  lista.innerHTML=setores.map(s=>`
-    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:3px 0;">
-      <input type="checkbox" value="${s.id}" ${selecionados.includes(s.id)?'checked':''} style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;">
-      <span>${escHtml(s.nome_setor)}</span>
-    </label>`).join('');
+  lista.innerHTML=setores.map(s=>{
+    const vinculo=selecionados.find(x=>(typeof x==='object'?x.setor_id:x)===s.id);
+    const checked=!!vinculo;
+    const qtd=typeof vinculo==='object'?vinculo.num_funcionarios_previsto||'':'';
+    return`<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:0;">
+        <input type="checkbox" value="${s.id}" ${checked?'checked':''} 
+          style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;"
+          onchange="toggleSetorQtd(${s.id},this.checked)">
+        <span style="font-size:13px;">${escHtml(s.nome_setor)}</span>
+      </label>
+      <div id="qtd-setor-${s.id}" style="display:${checked?'flex':'none'};align-items:center;gap:6px;flex-shrink:0;">
+        <span style="font-size:11px;color:var(--text3);">Func. previsto:</span>
+        <input type="number" id="num-setor-${s.id}" value="${qtd}" min="0" placeholder="0"
+          style="width:64px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:4px 8px;outline:none;text-align:center;">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSetorQtd(setorId, checked){
+  const wrap=document.getElementById(`qtd-setor-${setorId}`);
+  if(wrap)wrap.style.display=checked?'flex':'none';
+  if(!checked){
+    const inp=document.getElementById(`num-setor-${setorId}`);
+    if(inp)inp.value='';
+  }
 }
 
 function getSetoresSelecionados(){
   const lista=document.getElementById('f-setores-lista');
   if(!lista)return[];
-  return [...lista.querySelectorAll('input[type=checkbox]:checked')].map(el=>parseInt(el.value));
+  return [...lista.querySelectorAll('input[type=checkbox]:checked')].map(el=>{
+    const id=parseInt(el.value);
+    const qtdEl=document.getElementById(`num-setor-${id}`);
+    return{setor_id:id, num_funcionarios_previsto:qtdEl&&qtdEl.value?parseInt(qtdEl.value):0};
+  });
 }
 
 function popularSelectSetores(){
@@ -799,10 +822,9 @@ async function editarFuncao(id){
   if(f.cbo){const entry=CBO_LIST.find(([cod])=>cod===f.cbo);document.getElementById('f-cbo').value=entry?`${entry[0]} — ${entry[1]}`:f.cbo;}
   // Carrega setores vinculados
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${id}&ativo=eq.true&select=setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${id}&ativo=eq.true&select=setor_id,num_funcionarios_previsto`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const data=await res.json();
-    const selecionados=data.map(x=>x.setor_id);
-    popularCheckboxSetores(selecionados);
+    popularCheckboxSetores(data);
   }catch(e){popularCheckboxSetores([]);}
   document.getElementById('modal-funcao-titulo').textContent='Editar função';
   document.getElementById('label-salvar-funcao').textContent='Salvar alterações';
@@ -816,8 +838,7 @@ async function salvarFuncao(){
   if(!setoresSelecionados.length){
     document.getElementById('f-setores-erro').style.display='block';
     return;
-  }
-  document.getElementById('f-setores-erro').style.display='none';
+  }  document.getElementById('f-setores-erro').style.display='none';
   document.getElementById('btn-salvar-funcao').disabled=true;
   document.getElementById('spinner-funcao').className='spinner show';
   document.getElementById('label-salvar-funcao').textContent='Salvando...';
@@ -829,7 +850,6 @@ async function salvarFuncao(){
     cbo:cboVal,
     turno:document.getElementById('f-turno').value||null,
     escolaridade_minima:document.getElementById('f-escolaridade').value||null,
-    num_funcionarios_previsto:document.getElementById('f-num-funcionarios').value?parseInt(document.getElementById('f-num-funcionarios').value):null,
     descricao:document.getElementById('f-descricao').value||null,
     ativo:true,
     atualizado_em:new Date().toISOString()
@@ -849,12 +869,12 @@ async function salvarFuncao(){
       const data=await res.json();
       funcaoId=data[0].id;
     }
-    // Salva vínculos com setores
-    for(const setorId of setoresSelecionados){
+    // Salva vínculos com setores e quantidades
+    for(const vs of setoresSelecionados){
       await fetch(`${SUPA_URL}/rest/v1/funcao_setores`,{
         method:'POST',
         headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
-        body:JSON.stringify({funcao_id:funcaoId,setor_id:setorId,ativo:true})
+        body:JSON.stringify({funcao_id:funcaoId,setor_id:vs.setor_id,num_funcionarios_previsto:vs.num_funcionarios_previsto,ativo:true})
       });
     }
     fecharModalFuncao();
