@@ -780,7 +780,7 @@ function renderFuncoes(){
 }
 
 function limparFormFuncao(){
-  ['f-nome','f-cbo','f-descricao','f-num-funcionarios','f-turno','f-escolaridade'].forEach(id=>{
+  ['f-nome','f-cbo','f-descricao','f-turno','f-escolaridade'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.value='';
   });
@@ -817,7 +817,6 @@ async function editarFuncao(id){
   document.getElementById('f-nome').value=f.nome_funcao||'';
   document.getElementById('f-turno').value=f.turno||'';
   document.getElementById('f-escolaridade').value=f.escolaridade_minima||'';
-  document.getElementById('f-num-funcionarios').value=f.num_funcionarios_previsto||'';
   document.getElementById('f-descricao').value=f.descricao||'';
   if(f.cbo){const entry=CBO_LIST.find(([cod])=>cod===f.cbo);document.getElementById('f-cbo').value=entry?`${entry[0]} — ${entry[1]}`:f.cbo;}
   // Carrega setores vinculados
