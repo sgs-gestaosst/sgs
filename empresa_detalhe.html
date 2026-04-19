@@ -53,6 +53,8 @@
   .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
   .btn-danger:hover{background:#2a1515;}
   .btn-sm{padding:5px 12px;font-size:12px;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#5a8ce8;}
 
   /* Modais */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
@@ -209,7 +211,43 @@
 
     <!-- ABA CNAEs -->
     <div class="tab-content" id="aba-cnaes">
-      <div class="section-label">CNAEs cadastrados</div>
+      <div class="tab-header">
+        <div class="tab-header-title">CNAEs cadastrados</div>
+      </div>
+      <!-- Formulário de adição -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:flex-end;">
+          <div>
+            <label style="display:block;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Código CNAE</label>
+            <input type="text" id="cnae-codigo" placeholder="Ex: 0210-1/01" maxlength="10"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:9px 12px;outline:none;"
+              oninput="buscarCNAE()" onkeydown="if(event.key==='Enter')adicionarCNAE()">
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Tipo</label>
+            <select id="cnae-tipo" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+              <option value="Secundário">Secundário</option>
+              <option value="Principal">Principal</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Grau de Risco</label>
+            <select id="cnae-gr" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+              <option value="">— GR —</option>
+              <option value="1">GR 1</option>
+              <option value="2">GR 2</option>
+              <option value="3">GR 3</option>
+              <option value="4">GR 4</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="adicionarCNAE()" style="white-space:nowrap;">
+            <span class="spinner spinner-w" id="spinner-cnae"></span>
+            <span id="label-cnae">+ Adicionar</span>
+          </button>
+        </div>
+        <div id="cnae-descricao-preview" style="margin-top:8px;font-size:12px;color:var(--accent2);min-height:18px;"></div>
+        <div class="status-bar" id="status-cnae" style="margin-top:8px;"></div>
+      </div>
       <div class="cnae-list" id="lista-cnaes"></div>
     </div>
 
@@ -460,11 +498,108 @@ function renderCampos(){
 
 function renderCNAEs(){
   const lista=document.getElementById('lista-cnaes');
-  if(!cnaes.length){lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">📋</div><div class="empty-tab-title">Nenhum CNAE cadastrado</div></div>`;return;}
+  if(!cnaes.length){
+    lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">📋</div><div class="empty-tab-title">Nenhum CNAE cadastrado</div><div>Adicione um CNAE acima.</div></div>`;
+    return;
+  }
   lista.innerHTML=cnaes.map(c=>{
     const gr=c.grau_risco?`<span class="badge ${grInfo[c.grau_risco]?.cls||'gr2'}">${grInfo[c.grau_risco]?.label||''}</span>`:'';
-    return`<div class="cnae-item"><span class="cnae-tipo ${c.tipo==='Principal'?'tipo-p':'tipo-s'}">${c.tipo}</span><span class="cnae-code">${c.cnae}</span><span class="cnae-desc">${c.descricao||''}</span>${gr}</div>`;
+    return`<div class="cnae-item">
+      <span class="cnae-tipo ${c.tipo==='Principal'?'tipo-p':'tipo-s'}">${c.tipo}</span>
+      <span class="cnae-code">${c.cnae}</span>
+      <span class="cnae-desc">${c.descricao||''}</span>
+      ${gr}
+      <button onclick="removerCNAE(${c.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:2px 6px;flex-shrink:0;" title="Remover CNAE">×</button>
+    </div>`;
   }).join('');
+}
+
+async function buscarCNAE(){
+  const codigo=document.getElementById('cnae-codigo').value.trim().replace(/\D/g,'');
+  const preview=document.getElementById('cnae-descricao-preview');
+  if(codigo.length<4){preview.textContent='';return;}
+  try{
+    const res=await fetch(`https://servicodados.ibge.gov.br/api/v2/cnae/subclasses/${codigo}`);
+    if(!res.ok){preview.textContent='';return;}
+    const data=await res.json();
+    if(data&&data.length){
+      preview.textContent=`✓ ${data[0].descricao}`;
+      preview.dataset.descricao=data[0].descricao;
+    }else{
+      preview.textContent='CNAE não encontrado';
+      preview.dataset.descricao='';
+    }
+  }catch(e){preview.textContent='';}
+}
+
+async function adicionarCNAE(){
+  const codigoRaw=document.getElementById('cnae-codigo').value.trim();
+  const codigo=codigoRaw.replace(/\D/g,'');
+  if(!codigo||codigo.length<4){alert('Informe um código CNAE válido.');return;}
+  const tipo=document.getElementById('cnae-tipo').value;
+  const gr=document.getElementById('cnae-gr').value||null;
+  const preview=document.getElementById('cnae-descricao-preview');
+  const descricao=preview.dataset.descricao||codigoRaw;
+
+  // Verifica se já existe
+  if(cnaes.find(c=>c.cnae.replace(/\D/g,'')=== codigo)){
+    setStatus('status-cnae','error','Este CNAE já está cadastrado.');
+    setTimeout(()=>clearStatus('status-cnae'),3000);
+    return;
+  }
+
+  document.getElementById('spinner-cnae').className='spinner spinner-w show';
+  document.getElementById('label-cnae').textContent='Salvando...';
+
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/empresa_cnaes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({empresa_id:parseInt(empresaId),cnae:codigoRaw,descricao,tipo,grau_risco:gr?parseInt(gr):null})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar');}
+    const data=await res.json();
+    cnaes.push(data[0]);
+    // Se for Principal, atualiza grau de risco da empresa
+    if(tipo==='Principal'&&gr){
+      await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+        body:JSON.stringify({grau_risco:parseInt(gr)})
+      });
+      empresa.grau_risco=parseInt(gr);
+      renderHero();
+    }
+    renderCNAEs();
+    document.getElementById('cnae-codigo').value='';
+    document.getElementById('cnae-descricao-preview').textContent='';
+    document.getElementById('cnae-descricao-preview').dataset.descricao='';
+    document.getElementById('cnae-gr').value='';
+    setStatus('status-cnae','success','CNAE adicionado com sucesso!');
+    setTimeout(()=>clearStatus('status-cnae'),3000);
+  }catch(e){
+    setStatus('status-cnae','error',`Erro: ${e.message}`);
+  }finally{
+    document.getElementById('spinner-cnae').className='spinner spinner-w';
+    document.getElementById('label-cnae').textContent='+ Adicionar';
+  }
+}
+
+async function removerCNAE(id){
+  if(!confirm('Remover este CNAE?'))return;
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
+    });
+    if(!res.ok)throw new Error('Erro ao remover');
+    cnaes=cnaes.filter(c=>c.id!==id);
+    renderCNAEs();
+    setStatus('status-cnae','success','CNAE removido!');
+    setTimeout(()=>clearStatus('status-cnae'),3000);
+  }catch(e){
+    setStatus('status-cnae','error',`Erro: ${e.message}`);
+  }
 }
 
 function mudarAba(aba){
