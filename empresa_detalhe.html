@@ -925,7 +925,18 @@ function excluirSetorConfirmar(id,nome){
 
 function excluirFuncaoConfirmar(id,nome){
   abrirModalConfirmar('👷',`Excluir função "${nome}"?`,'Esta ação não pode ser desfeita.',async()=>{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcoes?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})});
+    // Inativa funcao_setores primeiro
+    await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({ativo:false})
+    });
+    // Inativa a função
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcoes?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})
+    });
     if(!res.ok)throw new Error('Erro ao excluir função');
     await carregarFuncoes();
     setStatus('status-funcao','success','Função removida com sucesso!');
