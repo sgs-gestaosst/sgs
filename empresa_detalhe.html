@@ -235,11 +235,12 @@
 
     <!-- ABA FUNCIONÁRIOS -->
     <div class="tab-content" id="aba-funcionarios">
-      <div class="empty-tab">
-        <div class="empty-tab-icon">👷</div>
-        <div class="empty-tab-title">Funcionários em breve</div>
-        <div>Cadastro de colaboradores estará disponível em breve.</div>
+      <div class="tab-header">
+        <div class="tab-header-title">Funcionários cadastrados</div>
+        <a id="btn-novo-funcionario" class="btn btn-edit" href="funcionario_detalhe.html?empresa_id=X&novo=1">+ Novo funcionário</a>
       </div>
+      <div class="status-bar" id="status-funcionario"></div>
+      <div id="lista-funcionarios"></div>
     </div>
   </div>
 </div>
@@ -472,6 +473,7 @@ function mudarAba(aba){
   document.getElementById(`aba-${aba}`).classList.add('active');
   if(aba==='setores')carregarSetores();
   if(aba==='funcoes'){carregarSetores().then(()=>carregarFuncoes());}
+  if(aba==='funcionarios')carregarFuncionarios();
 }
 
 function modoEditar(){
@@ -947,6 +949,52 @@ function excluirFuncaoConfirmar(id,nome){
     setStatus('status-funcao','success','Função removida com sucesso!');
     setTimeout(()=>clearStatus('status-funcao'),3000);
   });
+}
+
+// ── FUNCIONÁRIOS ─────────────────────────────────────
+async function carregarFuncionarios(){
+  // Atualiza link do botão novo com empresa_id
+  const btn=document.getElementById('btn-novo-funcionario');
+  if(btn)btn.href=`funcionario_detalhe.html?empresa_id=${empresaId}&novo=1`;
+
+  const lista=document.getElementById('lista-funcionarios');
+  lista.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);font-size:13px;">Carregando...</div>`;
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,cpf,matricula,data_admissao,tipo_contrato,funcao_id,setor_id&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const data=await res.json();
+    renderFuncionarios(data);
+  }catch(e){
+    lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">⚠️</div><div class="empty-tab-title">Erro ao carregar funcionários</div></div>`;
+  }
+}
+
+function renderFuncionarios(funcionarios){
+  const lista=document.getElementById('lista-funcionarios');
+  if(!funcionarios.length){
+    lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">👷</div><div class="empty-tab-title">Nenhum funcionário cadastrado</div><div>Clique em "+ Novo funcionário" para começar.</div></div>`;
+    return;
+  }
+  lista.innerHTML=funcionarios.map(f=>{
+    const funcao=funcoes.find(x=>x.id===f.funcao_id);
+    const setor=setores.find(x=>x.id===f.setor_id);
+    const admissao=f.data_admissao?new Date(f.data_admissao).toLocaleDateString('pt-BR'):'—';
+    const iniciais=f.nome_completo.trim().split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+    return`<a href="funcionario_detalhe.html?id=${f.id}&empresa_id=${empresaId}" style="text-decoration:none;">
+      <div class="lista-item" style="cursor:pointer;">
+        <div style="width:36px;height:36px;border-radius:50%;background:#1a2540;color:#7aabf7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;">${iniciais}</div>
+        <div class="lista-item-info">
+          <div class="lista-item-nome">${escHtml(f.nome_completo)}</div>
+          <div class="lista-item-sub">${funcao?escHtml(funcao.nome_funcao):'—'}${setor?' · '+escHtml(setor.nome_setor):''}</div>
+          <div style="margin-top:4px;">
+            ${f.matricula?`<span class="mini-badge mb-info">Mat. ${escHtml(f.matricula)}</span>`:''}
+            ${f.tipo_contrato?`<span class="mini-badge mb-blue">${escHtml(f.tipo_contrato)}</span>`:''}
+            <span class="mini-badge mb-info">Adm. ${admissao}</span>
+          </div>
+        </div>
+        <div style="color:var(--text3);font-size:18px;">›</div>
+      </div>
+    </a>`;
+  }).join('');
 }
 
 // ── CBO AUTOCOMPLETE ─────────────────────────────────

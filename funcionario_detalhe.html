@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Funcionário</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+    --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+    --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+    --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+  .header-title{font-size:13px;color:var(--text2);flex:1;}
+  .header-title span{color:var(--text);font-weight:500;}
+  .container{max-width:960px;margin:0 auto;padding:32px 24px 80px;}
+  .voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+  .voltar:hover{color:var(--text);}
+  /* Hero */
+  .hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:8px;}
+  .hero-top{display:flex;align-items:flex-start;gap:16px;}
+  .avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;flex-shrink:0;background:#1a2540;color:#7aabf7;}
+  .hero-info{flex:1;min-width:0;}
+  .hero-nome{font-size:18px;font-weight:500;margin-bottom:4px;}
+  .hero-sub{font-size:13px;color:var(--text2);margin-bottom:8px;}
+  .hero-badges{display:flex;gap:6px;flex-wrap:wrap;}
+  .badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500;font-family:var(--mono);}
+  .badge-ativo{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .badge-inativo{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+  .badge-contrato{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+  .hero-actions{display:flex;gap:8px;flex-shrink:0;}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+  .btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-edit:hover{border-color:var(--border-focus);}
+  .btn-save{background:var(--accent2);color:#0f1117;}
+  .btn-save:hover{background:#3de8b4;}
+  .btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+  .btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+  .btn-danger:hover{background:#2a1515;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#5a8ce8;}
+  /* Abas */
+  .tabs-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:8px;}
+  .tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
+  .tab{padding:12px 18px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-content{display:none;padding:24px;}
+  .tab-content.active{display:block;}
+  /* Formulário */
+  .section-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 12px;display:flex;align-items:center;gap:8px;}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  .field{margin-bottom:0;}
+  .field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  .field label .req{color:var(--accent);margin-left:2px;}
+  .field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;transition:border-color .15s;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--border-focus);}
+  .field input:disabled,.field select:disabled{opacity:.5;cursor:not-allowed;}
+  .field input::placeholder{color:var(--text3);}
+  /* View mode */
+  .field-view{padding:9px 0;font-size:13px;font-weight:500;color:var(--text);border-bottom:1px solid var(--border);}
+  .field-view-label{font-size:11px;color:var(--text2);margin-bottom:2px;}
+  /* Status */
+  .status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+  .status-bar.show{display:flex;}
+  .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+  .status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+  .status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+  .spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f1117;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .spinner.show{display:inline-block;}
+  .spinner-w{border-top-color:#fff!important;border-color:rgba(255,255,255,.2)!important;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  /* Histórico */
+  .historico-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;}
+  .historico-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+  .historico-info{flex:1;}
+  .historico-evento{font-size:13px;font-weight:500;}
+  .historico-data{font-size:11px;color:var(--text3);margin-top:2px;}
+  .historico-obs{font-size:12px;color:var(--text2);margin-top:4px;}
+  /* Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:500px;width:100%;margin:auto;}
+  .modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+  .modal-field{margin-bottom:14px;}
+  .modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  .modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+  .modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+  .modal-field textarea{resize:vertical;min-height:80px;}
+  @media(max-width:600px){
+    .header-title{display:none;}
+    .header{padding:12px 16px;}
+    .container{padding:16px 12px 60px;}
+    .grid-2,.grid-3{grid-template-columns:1fr;}
+    .hero-actions{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Funcionário</span></div>
+</div>
+
+<div class="container">
+  <a id="link-voltar" href="empresa_detalhe.html" class="voltar">← Voltar para empresa</a>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-top">
+      <div class="avatar" id="hero-avatar">—</div>
+      <div class="hero-info">
+        <div class="hero-nome" id="hero-nome">Carregando...</div>
+        <div class="hero-sub" id="hero-sub"></div>
+        <div class="hero-badges" id="hero-badges"></div>
+      </div>
+      <div class="hero-actions" id="hero-actions"></div>
+    </div>
+    <div class="status-bar" id="status-hero"></div>
+  </div>
+
+  <!-- Abas -->
+  <div class="tabs-wrap">
+    <div class="tabs">
+      <div class="tab active" data-aba="pessoal" onclick="mudarAba('pessoal')">Dados pessoais</div>
+      <div class="tab" data-aba="contrato" onclick="mudarAba('contrato')">Contrato</div>
+      <div class="tab" data-aba="endereco" onclick="mudarAba('endereco')">Endereço</div>
+      <div class="tab" data-aba="historico" onclick="mudarAba('historico')">Histórico</div>
+    </div>
+
+    <!-- ABA DADOS PESSOAIS -->
+    <div class="tab-content active" id="aba-pessoal">
+      <div id="campos-pessoal"></div>
+    </div>
+
+    <!-- ABA CONTRATO -->
+    <div class="tab-content" id="aba-contrato">
+      <div id="campos-contrato"></div>
+    </div>
+
+    <!-- ABA ENDEREÇO -->
+    <div class="tab-content" id="aba-endereco">
+      <div id="campos-endereco"></div>
+    </div>
+
+    <!-- ABA HISTÓRICO -->
+    <div class="tab-content" id="aba-historico">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;">Histórico de contrato</div>
+        <button class="btn btn-edit" style="font-size:12px;padding:6px 12px;" onclick="abrirModalHistorico()">+ Registrar evento</button>
+      </div>
+      <div id="lista-historico"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HISTÓRICO -->
+<div class="modal-overlay" id="modal-historico">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span>Registrar evento</span>
+      <button onclick="fecharModalHistorico()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div class="modal-field">
+      <label>Tipo de evento <span style="color:var(--accent);">*</span></label>
+      <select id="h-tipo" onchange="mostrarCamposHistorico()">
+        <option value="">— Selecione —</option>
+        <option>Admissão</option>
+        <option>Mudança de função</option>
+        <option>Mudança de setor</option>
+        <option>Promoção</option>
+        <option>Demissão</option>
+        <option>Reintegração</option>
+        <option>Afastamento</option>
+        <option>Retorno</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Data do evento <span style="color:var(--accent);">*</span></label>
+      <input type="date" id="h-data">
+    </div>
+    <div id="h-campos-funcao" style="display:none;">
+      <div class="modal-field">
+        <label>Nova função</label>
+        <select id="h-funcao-nova"></select>
+      </div>
+    </div>
+    <div id="h-campos-demissao" style="display:none;">
+      <div class="modal-field">
+        <label>Motivo da demissão</label>
+        <select id="h-motivo-demissao">
+          <option value="">— Selecione —</option>
+          <option>Pedido de demissão</option>
+          <option>Demissão sem justa causa</option>
+          <option>Demissão por justa causa</option>
+          <option>Término de contrato</option>
+          <option>Acordo entre partes (§6 CLT)</option>
+          <option>Aposentadoria</option>
+          <option>Falecimento</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Observação</label>
+      <textarea id="h-obs" placeholder="Observações sobre o evento..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-cancel" onclick="fecharModalHistorico()">Cancelar</button>
+      <button class="btn btn-save" id="btn-salvar-historico" onclick="salvarHistorico()">
+        <span class="spinner" id="spinner-historico"></span>
+        <span id="label-historico">Salvar evento</span>
+      </button>
+    </div>
+    <div class="status-bar" id="status-historico" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+
+const params=new URLSearchParams(window.location.search);
+const funcId=params.get('id');
+const empresaId=params.get('empresa_id');
+const isNovo=params.get('novo')==='1';
+
+if(!empresaId)window.location.href='empresas.html';
+
+let funcionario=null;
+let funcoes=[];
+let setores=[];
+let modoEdicao=isNovo;
+
+// Link voltar
+document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+
+// ── UTILITÁRIOS ──────────────────────────────────────
+function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className='status-bar show '+tipo;el.innerHTML=`<span>${{info:'↻',success:'✓',error:'✕'}[tipo]}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+function fmtCPF(v){if(!v)return'';const d=v.replace(/\D/g,'');return d.length===11?`${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9)}`:v;}
+
+function mudarAba(aba){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.toggle('active',t.dataset.aba===aba));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(`aba-${aba}`).classList.add('active');
+  if(aba==='historico')carregarHistorico();
+}
+
+// ── RENDER HERO ───────────────────────────────────────
+function renderHero(){
+  if(isNovo&&!funcionario){
+    document.getElementById('hero-avatar').textContent='?';
+    document.getElementById('hero-nome').textContent='Novo funcionário';
+    document.getElementById('hero-sub').textContent='Preencha os dados abaixo';
+    document.getElementById('hero-badges').innerHTML='';
+    document.getElementById('hero-actions').innerHTML=`
+      <button class="btn btn-cancel" onclick="cancelarEdicao()">Cancelar</button>
+      <button class="btn btn-save" onclick="salvarFuncionario()">
+        <span class="spinner" id="spinner-save"></span>
+        <span id="label-save">Salvar funcionário</span>
+      </button>`;
+    return;
+  }
+  const nome=funcionario.nome_completo||'—';
+  const ini=nome.trim().split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+  document.getElementById('hero-avatar').textContent=ini;
+  document.getElementById('hero-nome').textContent=nome;
+  document.getElementById('header-nome').textContent=nome;
+  const funcao=funcoes.find(x=>x.id===funcionario.funcao_id);
+  const setor=setores.find(x=>x.id===funcionario.setor_id);
+  document.getElementById('hero-sub').textContent=[funcao?.nome_funcao,setor?.nome_setor].filter(Boolean).join(' · ')||'Sem função definida';
+  let badges=`<span class="badge ${funcionario.ativo?'badge-ativo':'badge-inativo'}">${funcionario.ativo?'Ativo':'Inativo'}</span>`;
+  if(funcionario.tipo_contrato)badges+=`<span class="badge badge-contrato">${funcionario.tipo_contrato}</span>`;
+  if(funcionario.matricula)badges+=`<span class="badge" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);">Mat. ${funcionario.matricula}</span>`;
+  document.getElementById('hero-badges').innerHTML=badges;
+  if(!modoEdicao){
+    document.getElementById('hero-actions').innerHTML=`
+      <button class="btn btn-danger" onclick="confirmarDesligamento()">Desligar</button>
+      <button class="btn btn-edit" onclick="ativarEdicao()">Editar</button>`;
+  }else{
+    document.getElementById('hero-actions').innerHTML=`
+      <button class="btn btn-cancel" onclick="cancelarEdicao()">Cancelar</button>
+      <button class="btn btn-save" onclick="salvarFuncionario()">
+        <span class="spinner" id="spinner-save"></span>
+        <span id="label-save">Salvar</span>
+      </button>`;
+  }
+}
+
+// ── CAMPOS ────────────────────────────────────────────
+function campo(id,label,valor,tipo='text',opcoes=null,obrigatorio=false){
+  const val=valor||'';
+  const req=obrigatorio?`<span class="req">*</span>`:'';
+  if(!modoEdicao){
+    return`<div class="field">
+      <div class="field-view-label">${label}</div>
+      <div class="field-view">${escHtml(val)||'—'}</div>
+    </div>`;
+  }
+  if(tipo==='select'&&opcoes){
+    const opts=opcoes.map(o=>{
+      const v=typeof o==='object'?o.v:o;
+      const l=typeof o==='object'?o.l:o;
+      return`<option value="${v}" ${val==v?'selected':''}>${l}</option>`;
+    }).join('');
+    return`<div class="field"><label>${label}${req}</label><select id="${id}"><option value="">— Selecione —</option>${opts}</select></div>`;
+  }
+  if(tipo==='textarea'){
+    return`<div class="field"><label>${label}${req}</label><textarea id="${id}" placeholder="${label}...">${escHtml(val)}</textarea></div>`;
+  }
+  return`<div class="field"><label>${label}${req}</label><input type="${tipo}" id="${id}" value="${escHtml(val)}" placeholder="${label}..."></div>`;
+}
+
+function renderCamposPessoal(){
+  const f=funcionario||{};
+  document.getElementById('campos-pessoal').innerHTML=`
+    <div class="section-label">Identificação</div>
+    <div class="grid-2">
+      ${campo('nome_completo','Nome completo',f.nome_completo,'text',null,true)}
+      ${campo('cpf','CPF',fmtCPF(f.cpf),'text')}
+    </div>
+    <div class="grid-3">
+      ${campo('rg','RG',f.rg,'text')}
+      ${campo('pis_pasep','PIS/PASEP',f.pis_pasep,'text')}
+      ${campo('matricula','Matrícula',f.matricula,'text')}
+    </div>
+    <div class="grid-2">
+      ${campo('ctps_numero','CTPS — Número',f.ctps_numero,'text')}
+      ${campo('ctps_serie','CTPS — Série',f.ctps_serie,'text')}
+    </div>
+    <div class="section-label">Dados pessoais</div>
+    <div class="grid-3">
+      ${campo('data_nascimento','Data de nascimento',f.data_nascimento,'date')}
+      ${campo('sexo','Sexo',f.sexo,'select',[{v:'M',l:'Masculino'},{v:'F',l:'Feminino'},{v:'O',l:'Outro'}])}
+      ${campo('estado_civil','Estado civil',f.estado_civil,'select',['Solteiro','Casado','Divorciado','Viúvo','União estável','Separado'])}
+    </div>
+    <div class="grid-3">
+      ${campo('raca_cor','Raça/cor',f.raca_cor,'select',[{v:'1',l:'Branca'},{v:'2',l:'Preta'},{v:'3',l:'Parda'},{v:'4',l:'Amarela'},{v:'5',l:'Indígena'},{v:'6',l:'Não informado'}])}
+      ${campo('nacionalidade','Nacionalidade',f.nacionalidade||'Brasileira','text')}
+      ${campo('grau_instrucao','Grau de instrução',f.grau_instrucao,'select',['Analfabeto','Fundamental incompleto','Fundamental completo','Médio incompleto','Médio completo','Técnico','Superior incompleto','Superior completo','Pós-graduação','Mestrado','Doutorado'])}
+    </div>
+    <div class="grid-2">
+      ${campo('nome_mae','Nome da mãe',f.nome_mae,'text')}
+      ${campo('municipio_nascimento','Município de nascimento',f.municipio_nascimento,'text')}
+    </div>
+    <div class="section-label">Contato</div>
+    <div class="grid-2">
+      ${campo('email','E-mail',f.email,'email')}
+      ${campo('telefone','Telefone',f.telefone,'text')}
+    </div>
+    ${modoEdicao?`<div style="display:flex;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-save" onclick="salvarFuncionario()">
+        <span class="spinner" id="spinner-pessoal"></span>
+        <span>Salvar</span>
+      </button>
+    </div>`:''}
+  `;
+  if(modoEdicao)aplicarMascaras();
+}
+
+function renderCamposContrato(){
+  const f=funcionario||{};
+  const opFuncoes=funcoes.map(x=>({v:x.id,l:x.nome_funcao}));
+  const opSetores=setores.map(x=>({v:x.id,l:x.nome_setor}));
+  document.getElementById('campos-contrato').innerHTML=`
+    <div class="section-label">Vínculo empregatício</div>
+    <div class="grid-2">
+      ${campo('tipo_contrato','Tipo de contrato',f.tipo_contrato,'select',['CLT','PJ','Temporário','Estagiário','Aprendiz','Autônomo'])}
+      ${campo('regime_previdenciario','Regime previdenciário',f.regime_previdenciario,'select',['RGPS — INSS','RPPS — Servidor público','Não segurado'])}
+    </div>
+    <div class="grid-2">
+      ${campo('funcao_id','Função',f.funcao_id,'select',opFuncoes,true)}
+      ${campo('setor_id','Setor',f.setor_id,'select',opSetores)}
+    </div>
+    <div class="grid-2">
+      ${campo('data_admissao','Data de admissão',f.data_admissao,'date',null,true)}
+      ${campo('tipo_admissao','Tipo de admissão',f.tipo_admissao,'select',['Primeiro emprego','Reemprego','Transferência','Reintegração','Contrato experiência'])}
+    </div>
+    <div class="grid-2">
+      ${campo('data_opcao_fgts','Data opção FGTS',f.data_opcao_fgts,'date')}
+      ${campo('ctps_uf','UF da CTPS',f.ctps_uf,'select',['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'])}
+    </div>
+    ${f.data_demissao?`
+    <div class="section-label">Desligamento</div>
+    <div class="grid-2">
+      ${campo('data_demissao','Data de demissão',f.data_demissao,'date')}
+      ${campo('motivo_demissao','Motivo',f.motivo_demissao,'select',['Pedido de demissão','Demissão sem justa causa','Demissão por justa causa','Término de contrato','Acordo entre partes','Aposentadoria','Falecimento'])}
+    </div>`:''}
+    ${modoEdicao?`<div style="display:flex;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-save" onclick="salvarFuncionario()">
+        <span class="spinner" id="spinner-contrato"></span>
+        <span>Salvar</span>
+      </button>
+    </div>`:''}
+  `;
+}
+
+function renderCamposEndereco(){
+  const f=funcionario||{};
+  document.getElementById('campos-endereco').innerHTML=`
+    <div class="section-label">Endereço residencial</div>
+    <div class="grid-2">
+      ${campo('cep','CEP',f.cep,'text')}
+      ${campo('logradouro','Logradouro',f.logradouro,'text')}
+    </div>
+    <div class="grid-3">
+      ${campo('numero_endereco','Número',f.numero_endereco,'text')}
+      ${campo('complemento','Complemento',f.complemento,'text')}
+      ${campo('bairro','Bairro',f.bairro,'text')}
+    </div>
+    <div class="grid-2">
+      ${campo('cidade','Cidade',f.cidade,'text')}
+      ${campo('estado','Estado',f.estado,'select',['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'])}
+    </div>
+    ${modoEdicao?`<div style="display:flex;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-save" onclick="salvarFuncionario()">
+        <span class="spinner" id="spinner-endereco"></span>
+        <span>Salvar</span>
+      </button>
+    </div>`:''}
+  `;
+  if(modoEdicao)aplicarMascaraCEP();
+}
+
+// ── MÁSCARAS ──────────────────────────────────────────
+function aplicarMascaras(){
+  const cpf=document.getElementById('cpf');
+  if(cpf){
+    cpf.addEventListener('input',function(){
+      let v=this.value.replace(/\D/g,'').slice(0,11);
+      if(v.length>9)v=v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6,9)+'-'+v.slice(9);
+      else if(v.length>6)v=v.slice(0,3)+'.'+v.slice(3,6)+'.'+v.slice(6);
+      else if(v.length>3)v=v.slice(0,3)+'.'+v.slice(3);
+      this.value=v;
+    });
+  }
+}
+
+function aplicarMascaraCEP(){
+  const cep=document.getElementById('cep');
+  if(cep){
+    cep.addEventListener('input',function(){
+      let v=this.value.replace(/\D/g,'').slice(0,8);
+      if(v.length>5)v=v.slice(0,5)+'-'+v.slice(5);
+      this.value=v;
+    });
+    cep.addEventListener('blur',async function(){
+      const v=this.value.replace(/\D/g,'');
+      if(v.length===8){
+        try{
+          const res=await fetch(`https://viacep.com.br/ws/${v}/json/`);
+          const d=await res.json();
+          if(!d.erro){
+            const log=document.getElementById('logradouro');
+            const bairro=document.getElementById('bairro');
+            const cidade=document.getElementById('cidade');
+            const estado=document.getElementById('estado');
+            if(log&&!log.value)log.value=d.logradouro||'';
+            if(bairro&&!bairro.value)bairro.value=d.bairro||'';
+            if(cidade&&!cidade.value)cidade.value=d.localidade||'';
+            if(estado)estado.value=d.uf||'';
+          }
+        }catch(e){}
+      }
+    });
+  }
+}
+
+// ── SALVAR ────────────────────────────────────────────
+function getVal(id){const el=document.getElementById(id);return el?el.value.trim()||null:null;}
+function getValInt(id){const v=getVal(id);return v?parseInt(v):null;}
+
+async function salvarFuncionario(){
+  const nome=getVal('nome_completo');
+  if(!nome){alert('Informe o nome completo.');return;}
+  const funcaoId=getValInt('funcao_id');
+  if(!funcaoId){alert('Selecione uma função.');return;}
+  const admissao=getVal('data_admissao');
+  if(!admissao){alert('Informe a data de admissão.');return;}
+
+  const btns=document.querySelectorAll('.btn-save');
+  btns.forEach(b=>b.disabled=true);
+  document.querySelectorAll('.spinner').forEach(s=>s.className='spinner show');
+
+  const payload={
+    empresa_id:parseInt(empresaId),
+    nome_completo:nome,
+    cpf:getVal('cpf')?.replace(/\D/g,'')||null,
+    rg:getVal('rg'),
+    pis_pasep:getVal('pis_pasep'),
+    matricula:getVal('matricula'),
+    ctps_numero:getVal('ctps_numero'),
+    ctps_serie:getVal('ctps_serie'),
+    ctps_uf:getVal('ctps_uf'),
+    data_nascimento:getVal('data_nascimento'),
+    sexo:getVal('sexo'),
+    estado_civil:getVal('estado_civil'),
+    raca_cor:getVal('raca_cor'),
+    nacionalidade:getVal('nacionalidade'),
+    grau_instrucao:getVal('grau_instrucao'),
+    nome_mae:getVal('nome_mae'),
+    municipio_nascimento:getVal('municipio_nascimento'),
+    email:getVal('email'),
+    telefone:getVal('telefone'),
+    tipo_contrato:getVal('tipo_contrato'),
+    regime_previdenciario:getVal('regime_previdenciario'),
+    funcao_id:funcaoId,
+    setor_id:getValInt('setor_id'),
+    data_admissao:admissao,
+    tipo_admissao:getVal('tipo_admissao'),
+    data_opcao_fgts:getVal('data_opcao_fgts'),
+    logradouro:getVal('logradouro'),
+    numero_endereco:getVal('numero_endereco'),
+    complemento:getVal('complemento'),
+    bairro:getVal('bairro'),
+    cidade:getVal('cidade'),
+    estado:getVal('estado'),
+    cep:getVal('cep')?.replace(/\D/g,'')||null,
+    ativo:true,
+    atualizado_em:new Date().toISOString()
+  };
+
+  try{
+    let res,data;
+    if(funcId&&!isNovo){
+      res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify(payload)
+      });
+    }else{
+      res=await fetch(`${SUPA_URL}/rest/v1/funcionarios`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify(payload)
+      });
+    }
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar');}
+    data=await res.json();
+    const saved=data[0];
+
+    // Se novo, registra evento de admissão no histórico
+    if(isNovo){
+      await fetch(`${SUPA_URL}/rest/v1/historico_contrato`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+        body:JSON.stringify({
+          funcionario_id:saved.id,
+          empresa_id:parseInt(empresaId),
+          tipo_evento:'Admissão',
+          data_evento:admissao,
+          funcao_nova_id:funcaoId,
+          setor_novo_id:getValInt('setor_id'),
+          observacao:`Admissão — ${getVal('tipo_contrato')||'CLT'}`
+        })
+      });
+      window.location.href=`funcionario_detalhe.html?id=${saved.id}&empresa_id=${empresaId}`;
+      return;
+    }
+
+    funcionario={...funcionario,...saved};
+    modoEdicao=false;
+    renderHero();
+    renderCamposPessoal();
+    renderCamposContrato();
+    renderCamposEndereco();
+    setStatus('status-hero','success','Dados salvos com sucesso!');
+    setTimeout(()=>clearStatus('status-hero'),3000);
+  }catch(e){
+    setStatus('status-hero','error',`Erro: ${e.message}`);
+  }finally{
+    btns.forEach(b=>b.disabled=false);
+    document.querySelectorAll('.spinner').forEach(s=>s.className='spinner');
+  }
+}
+
+function ativarEdicao(){
+  modoEdicao=true;
+  renderHero();
+  renderCamposPessoal();
+  renderCamposContrato();
+  renderCamposEndereco();
+}
+
+function cancelarEdicao(){
+  if(isNovo){window.location.href=`empresa_detalhe.html?id=${empresaId}`;return;}
+  modoEdicao=false;
+  renderHero();
+  renderCamposPessoal();
+  renderCamposContrato();
+  renderCamposEndereco();
+}
+
+// ── HISTÓRICO ─────────────────────────────────────────
+async function carregarHistorico(){
+  if(!funcId)return;
+  const lista=document.getElementById('lista-historico');
+  lista.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">Carregando...</div>`;
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/historico_contrato?funcionario_id=eq.${funcId}&select=*&order=data_evento.desc`,{
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
+    });
+    const data=await res.json();
+    renderHistorico(data);
+  }catch(e){lista.innerHTML='<div style="color:var(--danger);padding:12px;">Erro ao carregar histórico</div>';}
+}
+
+const EVENTO_CORES={
+  'Admissão':'#2dd4a0',
+  'Mudança de função':'#4a7cdc',
+  'Mudança de setor':'#7aabf7',
+  'Promoção':'#a78bfa',
+  'Demissão':'#e05555',
+  'Reintegração':'#2dd4a0',
+  'Afastamento':'#e0a855',
+  'Retorno':'#2dd4a0',
+};
+
+function renderHistorico(historico){
+  const lista=document.getElementById('lista-historico');
+  if(!historico.length){
+    lista.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);font-size:13px;">Nenhum evento registrado.</div>`;
+    return;
+  }
+  lista.innerHTML=historico.map(h=>{
+    const cor=EVENTO_CORES[h.tipo_evento]||'#888';
+    const funcaoNova=funcoes.find(x=>x.id===h.funcao_nova_id);
+    const funcaoAnt=funcoes.find(x=>x.id===h.funcao_anterior_id);
+    let detalhe='';
+    if(funcaoNova&&funcaoAnt)detalhe=`${funcaoAnt.nome_funcao} → ${funcaoNova.nome_funcao}`;
+    else if(funcaoNova)detalhe=funcaoNova.nome_funcao;
+    return`<div class="historico-item">
+      <div class="historico-dot" style="background:${cor};"></div>
+      <div class="historico-info">
+        <div class="historico-evento">${h.tipo_evento}</div>
+        <div class="historico-data">${fmtData(h.data_evento)}${detalhe?' · '+detalhe:''}</div>
+        ${h.observacao?`<div class="historico-obs">${escHtml(h.observacao)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirModalHistorico(){
+  document.getElementById('h-tipo').value='';
+  document.getElementById('h-data').value=new Date().toISOString().split('T')[0];
+  document.getElementById('h-obs').value='';
+  document.getElementById('h-campos-funcao').style.display='none';
+  document.getElementById('h-campos-demissao').style.display='none';
+  // Popula select de funções
+  const sel=document.getElementById('h-funcao-nova');
+  sel.innerHTML='<option value="">— Selecione —</option>'+funcoes.map(f=>`<option value="${f.id}">${escHtml(f.nome_funcao)}</option>`).join('');
+  clearStatus('status-historico');
+  document.getElementById('modal-historico').classList.add('show');
+}
+
+function fecharModalHistorico(){document.getElementById('modal-historico').classList.remove('show');}
+
+function mostrarCamposHistorico(){
+  const tipo=document.getElementById('h-tipo').value;
+  document.getElementById('h-campos-funcao').style.display=['Mudança de função','Promoção','Admissão'].includes(tipo)?'block':'none';
+  document.getElementById('h-campos-demissao').style.display=tipo==='Demissão'?'block':'none';
+}
+
+async function salvarHistorico(){
+  const tipo=document.getElementById('h-tipo').value;
+  const data=document.getElementById('h-data').value;
+  if(!tipo||!data){alert('Preencha o tipo e a data do evento.');return;}
+
+  document.getElementById('btn-salvar-historico').disabled=true;
+  document.getElementById('spinner-historico').className='spinner show';
+
+  const payload={
+    funcionario_id:parseInt(funcId),
+    empresa_id:parseInt(empresaId),
+    tipo_evento:tipo,
+    data_evento:data,
+    funcao_nova_id:getValInt('h-funcao-nova')||null,
+    observacao:document.getElementById('h-obs').value.trim()||null,
+  };
+
+  // Se demissão, atualiza o funcionário também
+  if(tipo==='Demissão'){
+    const motivo=document.getElementById('h-motivo-demissao').value;
+    await fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({data_demissao:data,motivo_demissao:motivo||null,ativo:false,atualizado_em:new Date().toISOString()})
+    });
+    funcionario.data_demissao=data;
+    funcionario.ativo=false;
+  }
+
+  // Se mudança de função, atualiza funcao_id do funcionário
+  if(['Mudança de função','Promoção'].includes(tipo)){
+    const novaFuncaoId=getValInt('h-funcao-nova');
+    if(novaFuncaoId){
+      payload.funcao_anterior_id=funcionario.funcao_id;
+      await fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+        body:JSON.stringify({funcao_id:novaFuncaoId,atualizado_em:new Date().toISOString()})
+      });
+      funcionario.funcao_id=novaFuncaoId;
+    }
+  }
+
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/historico_contrato`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok)throw new Error('Erro ao salvar evento');
+    fecharModalHistorico();
+    renderHero();
+    carregarHistorico();
+  }catch(e){
+    setStatus('status-historico','error',e.message);
+  }finally{
+    document.getElementById('btn-salvar-historico').disabled=false;
+    document.getElementById('spinner-historico').className='spinner';
+  }
+}
+
+// ── DESLIGAMENTO ──────────────────────────────────────
+function confirmarDesligamento(){
+  if(confirm('Registrar desligamento deste funcionário?')){
+    abrirModalHistorico();
+    setTimeout(()=>{document.getElementById('h-tipo').value='Demissão';mostrarCamposHistorico();},100);
+  }
+}
+
+// ── INICIALIZAÇÃO ─────────────────────────────────────
+async function inicializar(){
+  try{
+    const [resFuncoes,resSetores]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+    ]);
+    funcoes=await resFuncoes.json();
+    setores=await resSetores.json();
+
+    if(funcId&&!isNovo){
+      const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const data=await res.json();
+      if(!data.length){window.location.href=`empresa_detalhe.html?id=${empresaId}`;return;}
+      funcionario=data[0];
+    }
+
+    renderHero();
+    renderCamposPessoal();
+    renderCamposContrato();
+    renderCamposEndereco();
+  }catch(e){console.error(e);}
+}
+
+inicializar();
+</script>
+</body>
+</html>
