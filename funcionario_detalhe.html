@@ -376,15 +376,27 @@ function renderCamposContrato(){
   const f=funcionario||{};
   const opFuncoes=funcoes.map(x=>({v:x.id,l:x.nome_funcao}));
   const opSetores=setores.map(x=>({v:x.id,l:x.nome_setor}));
+  const funcaoAtual=funcoes.find(x=>x.id===f.funcao_id);
+  const setorAtual=setores.find(x=>x.id===f.setor_id);
+
+  // Em modo visualização, mostra nome em vez do ID
+  const funcaoDisplay=modoEdicao
+    ?campo('funcao_id','Função atual',f.funcao_id,'select',opFuncoes,true)
+    :`<div class="field"><div class="field-view-label">Função atual</div><div class="field-view" style="color:var(--accent2);font-weight:600;">${funcaoAtual?.nome_funcao||'—'}</div></div>`;
+  const setorDisplay=modoEdicao
+    ?campo('setor_id','Setor',f.setor_id,'select',opSetores,true)
+    :`<div class="field"><div class="field-view-label">Setor</div><div class="field-view">${setorAtual?.nome_setor||'—'}</div></div>`;
+
   document.getElementById('campos-contrato').innerHTML=`
+    <div class="section-label">Função e setor atuais</div>
+    <div class="grid-2">
+      ${funcaoDisplay}
+      ${setorDisplay}
+    </div>
     <div class="section-label">Vínculo empregatício</div>
     <div class="grid-2">
       ${campo('tipo_contrato','Tipo de contrato',f.tipo_contrato,'select',['CLT','PJ','Temporário','Estagiário','Aprendiz','Autônomo'])}
       ${campo('regime_previdenciario','Regime previdenciário',f.regime_previdenciario,'select',['RGPS — INSS','RPPS — Servidor público','Não segurado'])}
-    </div>
-    <div class="grid-2">
-      ${campo('funcao_id','Função',f.funcao_id,'select',opFuncoes,true)}
-      ${campo('setor_id','Setor',f.setor_id,'select',opSetores,true)}
     </div>
     <div class="grid-2">
       ${campo('data_admissao','Data de admissão',f.data_admissao,'date',null,true)}
@@ -669,11 +681,24 @@ const EVENTO_CORES={
 
 function renderHistorico(historico){
   const lista=document.getElementById('lista-historico');
+  const funcaoAtual=funcoes.find(x=>x.id===funcionario?.funcao_id);
+  const setorAtual=setores.find(x=>x.id===funcionario?.setor_id);
+
+  const destaque=funcaoAtual?`
+    <div style="background:var(--surface2);border:1px solid var(--border-focus);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--accent2);flex-shrink:0;"></div>
+      <div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;">Função atual</div>
+        <div style="font-size:14px;font-weight:600;color:var(--accent2);">${escHtml(funcaoAtual.nome_funcao)}</div>
+        ${setorAtual?`<div style="font-size:12px;color:var(--text2);margin-top:2px;">📁 ${escHtml(setorAtual.nome_setor)}</div>`:''}
+      </div>
+    </div>`:'';
+
   if(!historico.length){
-    lista.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);font-size:13px;">Nenhum evento registrado.</div>`;
+    lista.innerHTML=destaque+`<div style="text-align:center;padding:30px;color:var(--text2);font-size:13px;">Nenhum evento registrado.</div>`;
     return;
   }
-  lista.innerHTML=historico.map(h=>{
+  lista.innerHTML=destaque+historico.map(h=>{
     const cor=EVENTO_CORES[h.tipo_evento]||'#888';
     const funcaoNova=funcoes.find(x=>x.id===h.funcao_nova_id);
     const funcaoAnt=funcoes.find(x=>x.id===h.funcao_anterior_id);
@@ -684,7 +709,7 @@ function renderHistorico(historico){
       <div class="historico-dot" style="background:${cor};"></div>
       <div class="historico-info">
         <div class="historico-evento">${h.tipo_evento}</div>
-        <div class="historico-data">${fmtData(h.data_evento)}${detalhe?' · '+detalhe:''}</div>
+        <div class="historico-data">${fmtData(h.data_evento)}${detalhe?' · '+escHtml(detalhe):''}</div>
         ${h.observacao?`<div class="historico-obs">${escHtml(h.observacao)}</div>`:''}
       </div>
     </div>`;
