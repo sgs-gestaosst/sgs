@@ -174,14 +174,14 @@
       <label>Tipo de evento <span style="color:var(--accent);">*</span></label>
       <select id="h-tipo" onchange="mostrarCamposHistorico()">
         <option value="">— Selecione —</option>
-        <option>Admissão</option>
-        <option>Mudança de função</option>
-        <option>Mudança de setor</option>
-        <option>Promoção</option>
-        <option>Demissão</option>
-        <option>Reintegração</option>
-        <option>Afastamento</option>
-        <option>Retorno</option>
+        <option value="Admissão">Admissão</option>
+        <option value="Mudança de função">Mudança de função</option>
+        <option value="Mudança de setor">Mudança de setor</option>
+        <option value="Promoção">Promoção</option>
+        <option value="Demissão">Demissão</option>
+        <option value="Reintegração">Reintegração</option>
+        <option value="Afastamento">Afastamento</option>
+        <option value="Retorno">Retorno</option>
       </select>
     </div>
     <div class="modal-field">
@@ -761,7 +761,10 @@ async function salvarHistorico(){
       headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
       body:JSON.stringify(payload)
     });
-    if(!res.ok)throw new Error('Erro ao salvar evento');
+    if(!res.ok){
+      const errData=await res.json();
+      throw new Error(errData.message||errData.details||'Erro ao salvar evento');
+    }
     fecharModalHistorico();
     renderHero();
     carregarHistorico();
