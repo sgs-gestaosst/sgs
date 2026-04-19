@@ -316,7 +316,8 @@ function campo(id,label,valor,tipo='text',opcoes=null,obrigatorio=false){
       const l=typeof o==='object'?o.l:o;
       return`<option value="${v}" ${val==v?'selected':''}>${l}</option>`;
     }).join('');
-    return`<div class="field"><label>${label}${req}</label><select id="${id}"><option value="">— Selecione —</option>${opts}</select></div>`;
+    const onchange=id==='funcao_id'?` onchange="filtrarSetoresPorFuncao()"`:id==='setor_id'?'':'' ;
+    return`<div class="field"><label>${label}${req}</label><select id="${id}"${onchange}><option value="">— Selecione —</option>${opts}</select></div>`;
   }
   if(tipo==='textarea'){
     return`<div class="field"><label>${label}${req}</label><textarea id="${id}" placeholder="${label}...">${escHtml(val)}</textarea></div>`;
@@ -383,7 +384,7 @@ function renderCamposContrato(){
     </div>
     <div class="grid-2">
       ${campo('funcao_id','Função',f.funcao_id,'select',opFuncoes,true)}
-      ${campo('setor_id','Setor',f.setor_id,'select',opSetores)}
+      ${campo('setor_id','Setor',f.setor_id,'select',opSetores,true)}
     </div>
     <div class="grid-2">
       ${campo('data_admissao','Data de admissão',f.data_admissao,'date',null,true)}
@@ -433,6 +434,41 @@ function renderCamposEndereco(){
     </div>`:''}
   `;
   if(modoEdicao)aplicarMascaraCEP();
+}
+
+// ── FILTRAR SETORES POR FUNÇÃO ────────────────────────
+let funcaoSetoresMap = {}; // funcao_id -> [setor_id]
+
+async function carregarFuncaoSetores(){
+  if(!funcoes.length)return;
+  const ids=funcoes.map(f=>f.id).join(',');
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=in.(${ids})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const data=await res.json();
+    funcaoSetoresMap={};
+    data.forEach(x=>{
+      if(!funcaoSetoresMap[x.funcao_id])funcaoSetoresMap[x.funcao_id]=[];
+      funcaoSetoresMap[x.funcao_id].push(x.setor_id);
+    });
+  }catch(e){console.error(e);}
+}
+
+function filtrarSetoresPorFuncao(){
+  const funcaoId=getValInt('funcao_id');
+  const setorSel=document.getElementById('setor_id');
+  if(!setorSel)return;
+  const setoresVinculados=funcaoId?funcaoSetoresMap[funcaoId]||[]:[];
+  // Filtra apenas os setores vinculados à função
+  const setoresFiltrados=setoresVinculados.length
+    ?setores.filter(s=>setoresVinculados.includes(s.id))
+    :setores;
+  const valAtual=setorSel.value;
+  setorSel.innerHTML='<option value="">— Selecione —</option>'+
+    setoresFiltrados.map(s=>`<option value="${s.id}" ${valAtual==s.id?'selected':''}>${escHtml(s.nome_setor)}</option>`).join('');
+  // Se só tem um setor, seleciona automaticamente
+  if(setoresFiltrados.length===1)setorSel.value=setoresFiltrados[0].id;
+  // Se o setor atual não pertence à função, limpa
+  if(funcaoId&&setoresVinculados.length&&!setoresVinculados.includes(parseInt(valAtual)))setorSel.value='';
 }
 
 // ── MÁSCARAS ──────────────────────────────────────────
@@ -488,6 +524,8 @@ async function salvarFuncionario(){
   if(!nome){alert('Informe o nome completo.');return;}
   const funcaoId=getValInt('funcao_id');
   if(!funcaoId){alert('Selecione uma função.');return;}
+  const setorId=getValInt('setor_id');
+  if(!setorId){alert('Selecione um setor.');return;}
   const admissao=getVal('data_admissao');
   if(!admissao){alert('Informe a data de admissão.');return;}
 
@@ -752,6 +790,7 @@ async function inicializar(){
     ]);
     funcoes=await resFuncoes.json();
     setores=await resSetores.json();
+    await carregarFuncaoSetores();
 
     if(funcId&&!isNovo){
       const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
