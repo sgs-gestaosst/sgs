@@ -246,7 +246,7 @@ let modoEdicao=isNovo;
 document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
 
 // ── UTILITÁRIOS ──────────────────────────────────────
-function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className='status-bar show '+tipo;el.innerHTML=`<span>${{info:'↻',success:'✓',error:'✕'}[tipo]}</span><span>${msg}</span>`;}
 function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
 function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
@@ -302,7 +302,7 @@ function renderHero(){
 
 // ── CAMPOS ────────────────────────────────────────────
 function campo(id,label,valor,tipo='text',opcoes=null,obrigatorio=false){
-  const val=valor||'';
+  const val=valor===null||valor===undefined?'':(valor+'');
   const req=obrigatorio?`<span class="req">*</span>`:'';
   if(!modoEdicao){
     return`<div class="field">
@@ -520,13 +520,13 @@ function getVal(id){const el=document.getElementById(id);return el?el.value.trim
 function getValInt(id){const v=getVal(id);return v?parseInt(v):null;}
 
 async function salvarFuncionario(){
-  const nome=getVal('nome_completo');
+  const nome=getVal('nome_completo')||funcionario?.nome_completo;
   if(!nome){alert('Informe o nome completo.');return;}
-  const funcaoId=getValInt('funcao_id');
+  const funcaoId=getValInt('funcao_id')||funcionario?.funcao_id;
   if(!funcaoId){alert('Selecione uma função.');return;}
-  const setorId=getValInt('setor_id');
+  const setorId=getValInt('setor_id')||funcionario?.setor_id;
   if(!setorId){alert('Selecione um setor.');return;}
-  const admissao=getVal('data_admissao');
+  const admissao=getVal('data_admissao')||funcionario?.data_admissao;
   if(!admissao){alert('Informe a data de admissão.');return;}
 
   const btns=document.querySelectorAll('.btn-save');
@@ -536,37 +536,37 @@ async function salvarFuncionario(){
   const payload={
     empresa_id:parseInt(empresaId),
     nome_completo:nome,
-    cpf:getVal('cpf')?.replace(/\D/g,'')||null,
-    rg:getVal('rg'),
-    pis_pasep:getVal('pis_pasep'),
-    matricula:getVal('matricula'),
-    ctps_numero:getVal('ctps_numero'),
-    ctps_serie:getVal('ctps_serie'),
-    ctps_uf:getVal('ctps_uf'),
-    data_nascimento:getVal('data_nascimento'),
-    sexo:getVal('sexo'),
-    estado_civil:getVal('estado_civil'),
-    raca_cor:getVal('raca_cor'),
-    nacionalidade:getVal('nacionalidade'),
-    grau_instrucao:getVal('grau_instrucao'),
-    nome_mae:getVal('nome_mae'),
-    municipio_nascimento:getVal('municipio_nascimento'),
-    email:getVal('email'),
-    telefone:getVal('telefone'),
-    tipo_contrato:getVal('tipo_contrato'),
-    regime_previdenciario:getVal('regime_previdenciario'),
+    cpf:getVal('cpf')?.replace(/\D/g,'')||funcionario?.cpf||null,
+    rg:getVal('rg')??funcionario?.rg??null,
+    pis_pasep:getVal('pis_pasep')??funcionario?.pis_pasep??null,
+    matricula:getVal('matricula')??funcionario?.matricula??null,
+    ctps_numero:getVal('ctps_numero')??funcionario?.ctps_numero??null,
+    ctps_serie:getVal('ctps_serie')??funcionario?.ctps_serie??null,
+    ctps_uf:getVal('ctps_uf')??funcionario?.ctps_uf??null,
+    data_nascimento:getVal('data_nascimento')||funcionario?.data_nascimento||null,
+    sexo:getVal('sexo')||funcionario?.sexo||null,
+    estado_civil:getVal('estado_civil')||funcionario?.estado_civil||null,
+    raca_cor:getVal('raca_cor')||funcionario?.raca_cor||null,
+    nacionalidade:getVal('nacionalidade')||funcionario?.nacionalidade||null,
+    grau_instrucao:getVal('grau_instrucao')||funcionario?.grau_instrucao||null,
+    nome_mae:getVal('nome_mae')??funcionario?.nome_mae??null,
+    municipio_nascimento:getVal('municipio_nascimento')??funcionario?.municipio_nascimento??null,
+    email:getVal('email')||funcionario?.email||null,
+    telefone:getVal('telefone')||funcionario?.telefone||null,
+    tipo_contrato:getVal('tipo_contrato')||funcionario?.tipo_contrato||null,
+    regime_previdenciario:getVal('regime_previdenciario')||funcionario?.regime_previdenciario||null,
     funcao_id:funcaoId,
-    setor_id:getValInt('setor_id'),
+    setor_id:setorId,
     data_admissao:admissao,
-    tipo_admissao:getVal('tipo_admissao'),
-    data_opcao_fgts:getVal('data_opcao_fgts'),
-    logradouro:getVal('logradouro'),
-    numero_endereco:getVal('numero_endereco'),
-    complemento:getVal('complemento'),
-    bairro:getVal('bairro'),
-    cidade:getVal('cidade'),
-    estado:getVal('estado'),
-    cep:getVal('cep')?.replace(/\D/g,'')||null,
+    tipo_admissao:getVal('tipo_admissao')||funcionario?.tipo_admissao||null,
+    data_opcao_fgts:getVal('data_opcao_fgts')||funcionario?.data_opcao_fgts||null,
+    logradouro:getVal('logradouro')??funcionario?.logradouro??null,
+    numero_endereco:getVal('numero_endereco')??funcionario?.numero_endereco??null,
+    complemento:getVal('complemento')??funcionario?.complemento??null,
+    bairro:getVal('bairro')??funcionario?.bairro??null,
+    cidade:getVal('cidade')??funcionario?.cidade??null,
+    estado:getVal('estado')||funcionario?.estado||null,
+    cep:getVal('cep')?.replace(/\D/g,'')||funcionario?.cep||null,
     ativo:true,
     atualizado_em:new Date().toISOString()
   };
