@@ -512,6 +512,10 @@ async function salvarEdicao(){
   ];
   const updates={};
   campos.forEach(c=>{updates[c.key]=getFieldVal(c.key,c.type);});
+  // Salva base junto com previsto
+  if(updates.total_funcionarios_previsto!==null){
+    updates.total_funcionarios_previsto_base=updates.total_funcionarios_previsto;
+  }
   updates.atualizado_em=new Date().toISOString();
   try{
     const res=await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}`,{
@@ -709,6 +713,7 @@ async function salvarSetor(){
     andar:document.getElementById('s-andar').value||null,
     area_m2:document.getElementById('s-area').value?parseFloat(document.getElementById('s-area').value):null,
     num_funcionarios_previsto:document.getElementById('s-num-funcionarios').value?parseInt(document.getElementById('s-num-funcionarios').value):null,
+    num_funcionarios_previsto_base:document.getElementById('s-num-funcionarios').value?parseInt(document.getElementById('s-num-funcionarios').value):null,
     descricao:document.getElementById('s-descricao').value||null,
     ativo:true,
     atualizado_em:new Date().toISOString()
