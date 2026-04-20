@@ -755,7 +755,7 @@ function renderSugestoes(){
           <span style="font-size:13px;font-weight:500;color:var(--text);">${escHtml(s.titulo)}</span>
           <span style="font-size:10px;padding:2px 7px;border-radius:3px;background:${ORIG_COR[s.origem]||'#1e2333'};color:var(--text2);">${s.origem}</span>
           <span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#1e1515;color:${PRIOR_COR[s.prioridade]||'var(--text2)'};">${s.prioridade}</span>
-          ${s.setor_nome?`<span style="font-size:10px;color:var(--text3);">🗂️ ${escHtml(s.setor_nome)}</span>`:''}
+          ${s.ret_setor_nome?`<span style="font-size:10px;color:var(--text3);">🗂️ ${escHtml(s.ret_setor_nome)}</span>`:''}
         </div>
         <div style="font-size:11px;color:var(--text3);">${escHtml(s.descricao||'')}${s.prazo?` · 📅 Prazo: ${fmtData(s.prazo)}`:''}</div>
       </label>
@@ -801,7 +801,7 @@ async function criarAcoesSelecionadas(){
           descricao:s.descricao||null,
           origem:s.origem,
           prioridade:s.prioridade,
-          setor_id:s.setor_id||null,
+          setor_id:s.ret_setor_id||null,
           prazo:s.prazo||null,
           status:'Pendente',
           ativo:true
