@@ -462,18 +462,29 @@ function renderHierarquia(sr){
             <label for="check-${sr.id}-${n.key}">${n.hint}</label>
           </div>
           <div class="hier-detalhe ${show}" id="det-${sr.id}-${n.key}">
-            <div class="hier-detalhe-grid">
-              <select id="epi-sel-${sr.id}" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;">
-                <option value="">— Selecionar EPI do catálogo —</option>
-                ${todosEpis.map(e=>`<option value="${e.id}">${escHtml(e.nome)} (${escHtml(e.categoria||'')})</option>`).join('')}
-              </select>
-              <input type="text" id="epi-ca-${sr.id}" placeholder="CA" style="width:80px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:7px 10px;outline:none;">
+            <div style="display:grid;grid-template-columns:1fr 100px 120px;gap:8px;align-items:end;margin-bottom:8px;">
+              <div>
+                <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">EPI</div>
+                <select id="epi-sel-${sr.id}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;">
+                  <option value="">— Selecionar do catálogo —</option>
+                  ${todosEpis.map(e=>`<option value="${e.id}">${escHtml(e.nome)} (${escHtml(e.categoria||'')})</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">Nº CA</div>
+                <input type="text" id="epi-ca-${sr.id}" placeholder="Ex: 12345" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:7px 10px;outline:none;">
+              </div>
+              <div>
+                <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">Validade CA</div>
+                <input type="date" id="epi-validade-${sr.id}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:7px 10px;outline:none;">
+              </div>
             </div>
-            <button onclick="adicionarEPI(${sr.id})" style="margin-top:6px;padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;cursor:pointer;">+ Adicionar EPI</button>
+            <button onclick="adicionarEPI(${sr.id})" style="padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;cursor:pointer;width:100%;">+ Adicionar EPI</button>
             <div class="epis-lista" id="epis-${sr.id}">
               ${(sr.epis||[]).map(e=>`<div class="epi-tag" id="epitag-${sr.id}-${e.epi_id}">
                 <span class="epi-tag-nome">🛡 ${escHtml(e.nome||'')}</span>
                 ${e.ca?`<span class="epi-tag-ca">CA:${escHtml(e.ca)}</span>`:''}
+                ${e.validade_ca?`<span class="epi-tag-ca">Val:${new Date(e.validade_ca).toLocaleDateString('pt-BR')}</span>`:''}
                 <button onclick="removerEPI(${sr.id},${e.epi_id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;">✕</button>
               </div>`).join('')}
             </div>
@@ -632,31 +643,37 @@ async function salvarMedida(srId,nivel,valor){
 function adicionarEPI(srId){
   const sel=document.getElementById(`epi-sel-${srId}`);
   const caInp=document.getElementById(`epi-ca-${srId}`);
+  const validadeInp=document.getElementById(`epi-validade-${srId}`);
   if(!sel?.value)return;
   const epi=todosEpis.find(e=>e.id==sel.value);
   if(!epi)return;
   const lista=document.getElementById(`epis-${srId}`);
   const tagId=`epitag-${srId}-${epi.id}`;
   if(document.getElementById(tagId))return;
+  const ca=caInp?.value||'';
+  const validade=validadeInp?.value||'';
   const tag=document.createElement('div');
   tag.id=tagId;
   tag.className='epi-tag';
   tag.dataset.epiId=epi.id;
-  tag.dataset.ca=caInp.value;
-  tag.innerHTML=`<span class="epi-tag-nome">🛡 ${escHtml(epi.nome)}</span>${caInp.value?`<span class="epi-tag-ca">CA:${escHtml(caInp.value)}</span>`:''}<button onclick="removerEPI(${srId},${epi.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;">✕</button>`;
+  tag.dataset.ca=ca;
+  tag.dataset.validade=validade;
+  tag.innerHTML=`<span class="epi-tag-nome">🛡 ${escHtml(epi.nome)}</span>
+    ${ca?`<span class="epi-tag-ca">CA:${escHtml(ca)}</span>`:''}
+    ${validade?`<span class="epi-tag-ca">Val:${new Date(validade+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}
+    <button onclick="removerEPI(${srId},${epi.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;">✕</button>`;
   lista.appendChild(tag);
-  // Salva no banco
-  salvarEPI(srId,epi.id,caInp.value);
-  caInp.value='';
+  salvarEPI(srId,epi.id,ca,validade);
+  if(caInp)caInp.value='';
+  if(validadeInp)validadeInp.value='';
   sel.value='';
 }
 
-async function salvarEPI(srId,epiId,ca){
+async function salvarEPI(srId,epiId,ca,validade){
   const tabela=contexto==='setor'?'setor_risco_medidas':'funcao_risco_medidas';
   const campo=contexto==='setor'?'setor_risco_id':'funcao_risco_id';
   try{
-    await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({[campo]:srId,nivel:'EPI',epi_id:epiId,ca:ca||null,ativo:true})});
-    // Garante que medida_epi está marcada
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({[campo]:srId,nivel:'EPI',epi_id:epiId,ca:ca||null,validade_ca:validade||null,ativo:true})});
     const tabVinculo=contexto==='setor'?'setor_riscos':'funcao_riscos';
     await fetch(`${SUPA_URL}/rest/v1/${tabVinculo}?id=eq.${srId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({medida_epi:true})});
   }catch(e){console.error(e);}
