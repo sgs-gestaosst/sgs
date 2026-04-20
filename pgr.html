@@ -177,26 +177,39 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 </div>
 
 <!-- Painel empresa elaboradora -->
-<div id="painel-elaboradora" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:14px 32px;">
-  <div style="max-width:800px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:end;">
-    <div>
-      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Nome da empresa elaboradora</label>
-      <input type="text" id="elab-nome" placeholder="Ex: SST Consultoria Ltda" oninput="atualizarElaboradora()"
-        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+<div id="painel-elaboradora" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 32px;">
+  <div style="max-width:900px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:16px;align-items:end;">
+      <!-- Upload de logo -->
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Logo</label>
+        <div id="logo-preview" onclick="document.getElementById('elab-logo-input').click()"
+          style="width:60px;height:60px;border-radius:8px;background:#1a2540;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font-size:11px;color:var(--text3);text-align:center;line-height:1.3;">
+          📷<br>Logo
+        </div>
+        <input type="file" id="elab-logo-input" accept="image/*" style="display:none;" onchange="carregarLogo(this)">
+        <button onclick="removerLogo()" id="btn-remover-logo" style="display:none;margin-top:4px;font-size:10px;background:none;border:none;color:var(--danger);cursor:pointer;padding:0;">✕ Remover</button>
+      </div>
+      <!-- Campos -->
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Nome da empresa elaboradora</label>
+        <input type="text" id="elab-nome" placeholder="Ex: SST Consultoria Ltda" oninput="atualizarElaboradora()"
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">CNPJ da elaboradora</label>
+        <input type="text" id="elab-cnpj" placeholder="00.000.000/0000-00" oninput="atualizarElaboradora()"
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Responsável técnico</label>
+        <input type="text" id="elab-responsavel" placeholder="Nome do Técnico / Engenheiro" oninput="atualizarElaboradora()"
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
     </div>
-    <div>
-      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">CNPJ da elaboradora</label>
-      <input type="text" id="elab-cnpj" placeholder="00.000.000/0000-00" oninput="atualizarElaboradora()"
-        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+    <div style="margin-top:8px;font-size:11px;color:var(--text3);">
+      ℹ️ Estes dados aparecem na capa e rodapé. Não são salvos no banco — preencha antes de imprimir.
     </div>
-    <div>
-      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Responsável técnico</label>
-      <input type="text" id="elab-responsavel" placeholder="Nome do Técnico / Engenheiro" oninput="atualizarElaboradora()"
-        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
-    </div>
-  </div>
-  <div style="max-width:800px;margin:8px auto 0;font-size:11px;color:var(--text3);">
-    ℹ️ Estes dados aparecem na capa e rodapé do documento. Preenchimento opcional — não são salvos no banco.
   </div>
 </div>
 
@@ -661,6 +674,69 @@ function renderPlanoAcao(){
     <span class="pf-page">Página 6</span>
   </div>`;
   return pg;
+}
+
+// ── EMPRESA ELABORADORA ───────────────────────────────
+let elaboradora={nome:'',cnpj:'',responsavel:'',logoUrl:''};
+
+function toggleElaboradora(){
+  const p=document.getElementById('painel-elaboradora');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+
+function carregarLogo(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    elaboradora.logoUrl=e.target.result;
+    // Preview na barra
+    const prev=document.getElementById('logo-preview');
+    prev.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;">`;
+    document.getElementById('btn-remover-logo').style.display='block';
+    // Atualiza no documento
+    atualizarLogoDocumento();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removerLogo(){
+  elaboradora.logoUrl='';
+  document.getElementById('logo-preview').innerHTML='📷<br>Logo';
+  document.getElementById('btn-remover-logo').style.display='none';
+  document.getElementById('elab-logo-input').value='';
+  atualizarLogoDocumento();
+}
+
+function atualizarLogoDocumento(){
+  const logoEl=document.getElementById('doc-elab-logo');
+  if(!logoEl)return;
+  if(elaboradora.logoUrl){
+    logoEl.innerHTML=`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`;
+    logoEl.style.background='#fff';
+    logoEl.style.padding='4pt';
+  }else{
+    const sigla=(elaboradora.nome||'SST').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'SST';
+    logoEl.innerHTML=`<span class="capa-logo-text">${sigla}</span>`;
+    logoEl.style.background='#0d2040';
+    logoEl.style.padding='0';
+  }
+}
+
+function atualizarElaboradora(){
+  elaboradora.nome=document.getElementById('elab-nome').value.trim();
+  elaboradora.cnpj=document.getElementById('elab-cnpj').value.trim();
+  elaboradora.responsavel=document.getElementById('elab-responsavel').value.trim();
+  // Atualiza capa
+  const nomeEl=document.getElementById('doc-elab-nome');
+  const footerEl=document.getElementById('doc-elab-footer');
+  if(nomeEl)nomeEl.textContent=elaboradora.nome||'Empresa Elaboradora';
+  if(footerEl)footerEl.textContent=elaboradora.nome||'—';
+  atualizarLogoDocumento();
+  // Atualiza campos dinâmicos
+  document.querySelectorAll('.elab-responsavel').forEach(el=>{el.textContent=elaboradora.responsavel||'—';});
+  document.querySelectorAll('.elab-nome-field').forEach(el=>{el.textContent=elaboradora.nome||'—';});
+  document.querySelectorAll('.elab-cnpj-field').forEach(el=>{el.textContent=elaboradora.cnpj||'—';});
 }
 
 carregar();
