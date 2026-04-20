@@ -188,6 +188,7 @@
       <div class="hero-actions" id="hero-actions">
         <a id="btn-riscos" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">⚠️ Riscos</a>
         <a id="btn-exames" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">🩺 Exames</a>
+        <a id="btn-acoes" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">⚡ Ações</a>
         <button class="btn btn-danger" onclick="abrirModal()">Excluir</button>
         <button class="btn btn-edit" onclick="modoEditar()">Editar</button>
       </div>
@@ -671,6 +672,16 @@ async function salvarEdicao(){
     if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar');}
     const data=await res.json();
     empresa={...empresa,...data[0]};
+    // Recalcula SESMT automaticamente se GR ou nº funcionários mudou
+    if(updates.grau_risco!==undefined||updates.total_funcionarios_previsto!==undefined){
+      try{
+        await fetch(`${SUPA_URL}/rest/v1/rpc/calcular_sesmt_empresa`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+          body:JSON.stringify({p_empresa_id:parseInt(empresaId)})
+        });
+      }catch(e){console.warn('SESMT não recalculado:',e);}
+    }
     modoEdicao=false;renderHero();renderCampos();
     document.getElementById('hero-actions').innerHTML=`<button class="btn btn-danger" onclick="abrirModal()">Excluir</button><button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
     const s=document.getElementById('status-edit');s.className='status-bar show success';s.innerHTML='✓ Dados salvos com sucesso!';
@@ -699,6 +710,8 @@ async function carregarEmpresa(){
     if(btnRiscos){btnRiscos.href=`riscos.html?empresa_id=${empresaId}`;btnRiscos.style.display='inline-flex';}
     const btnExames=document.getElementById('btn-exames');
     if(btnExames){btnExames.href=`exames.html?empresa_id=${empresaId}`;btnExames.style.display='inline-flex';}
+    const btnAcoes=document.getElementById('btn-acoes');
+    if(btnAcoes){btnAcoes.href=`acoes.html?empresa_id=${empresaId}`;btnAcoes.style.display='inline-flex';}
   }catch(e){console.error(e);}
 }
 

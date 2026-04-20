@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Central de Ações</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.header-title span{color:var(--text);font-weight:500;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+/* Hero */
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+/* Botões */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:border-color .15s;}
+.stat-card:hover,.stat-card.active{border-color:var(--border-focus);}
+.stat-card.active{background:var(--surface2);}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:600;}
+/* Filtros */
+.filtros{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.filtro-select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;cursor:pointer;}
+.filtro-select:focus{border-color:var(--border-focus);}
+.filtro-busca{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;}
+.filtro-busca:focus{border-color:var(--border-focus);}
+/* Kanban */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start;}
+.kanban-col{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.kanban-col-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.kanban-col-titulo{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.kanban-col-count{font-size:10px;font-family:var(--mono);padding:2px 6px;border-radius:4px;background:var(--bg);}
+.kanban-col-body{padding:10px;display:flex;flex-direction:column;gap:8px;min-height:100px;}
+/* Ação card */
+.acao-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:border-color .15s;position:relative;}
+.acao-card:hover{border-color:var(--border-focus);}
+.acao-card-prioridade{position:absolute;top:0;left:0;bottom:0;width:3px;border-radius:8px 0 0 8px;}
+.acao-card-titulo{font-size:12px;font-weight:600;margin-bottom:6px;padding-left:8px;line-height:1.4;}
+.acao-card-meta{display:flex;flex-wrap:wrap;gap:5px;padding-left:8px;}
+.acao-card-prazo{font-size:10px;font-family:var(--mono);color:var(--text3);}
+.acao-card-prazo.atrasado{color:var(--danger);}
+.mini-badge{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--mono);white-space:nowrap;display:inline-block;}
+/* Lista view */
+.lista-view{display:none;}
+.lista-view.show{display:block;}
+.kanban-view.hide{display:none;}
+.lista-item-acao{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px;cursor:pointer;transition:border-color .15s;}
+.lista-item-acao:hover{border-color:var(--border-focus);}
+.lista-acao-prioridade{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0;}
+.lista-acao-info{flex:1;min-width:0;}
+.lista-acao-titulo{font-size:13px;font-weight:500;margin-bottom:4px;}
+.lista-acao-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--text2);}
+.lista-acao-status{flex-shrink:0;}
+/* Prioridade cores */
+.pr-Baixa{background:#1a4a38;color:#2dd4a0;}
+.pr-Média{background:#1a2540;color:#7aabf7;}
+.pr-Alta{background:#4a3a10;color:#e0a855;}
+.pr-Crítica{background:#4a2020;color:#e05555;}
+/* Status cores */
+.st-Pendente{background:#1e2333;color:var(--text2);}
+.st-Em-andamento{background:#1a2540;color:#7aabf7;}
+.st-Concluída{background:#0e2820;color:#2dd4a0;}
+.st-Cancelada{background:#2a1515;color:#e05555;}
+.st-Atrasada{background:#4a2020;color:#ff6b6b;}
+.st-Arquivada{background:#1e2333;color:var(--text3);}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:680px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-field{margin-bottom:0;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;transition:border-color .15s;}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+.modal-field textarea{resize:vertical;min-height:72px;}
+/* Historico */
+.historico-wrap{margin-top:20px;border-top:1px solid var(--border);padding-top:16px;}
+.historico-titulo{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+.hist-item{display:flex;gap:10px;margin-bottom:12px;}
+.hist-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.hist-info{flex:1;}
+.hist-data{font-size:10px;color:var(--text3);font-family:var(--mono);}
+.hist-comentario{font-size:12px;color:var(--text2);margin-top:2px;}
+.hist-status{font-size:10px;margin-top:3px;}
+.novo-comentario{margin-top:10px;display:flex;gap:8px;}
+.novo-comentario textarea{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;resize:none;height:60px;}
+.novo-comentario textarea:focus{border-color:var(--border-focus);}
+/* Status */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:30px;color:var(--text3);font-size:12px;}
+/* Toggle view */
+.view-toggle{display:flex;gap:4px;background:var(--surface2);border-radius:var(--radius);padding:3px;}
+.view-btn{padding:5px 12px;border-radius:4px;font-size:12px;cursor:pointer;border:none;background:none;color:var(--text2);transition:all .15s;}
+.view-btn.active{background:var(--surface);color:var(--text);}
+@media(max-width:900px){.kanban{grid-template-columns:1fr 1fr;}.stats-grid{grid-template-columns:repeat(3,1fr);}.header-title{display:none;}}
+@media(max-width:600px){.kanban{grid-template-columns:1fr;}.stats-grid{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Central de Ações</span></div>
+</div>
+
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para empresa</a>
+
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#2a1510;border:1px solid #5a3010;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⚡</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Central de Ações</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="view-toggle">
+        <button class="view-btn active" id="btn-kanban" onclick="setView('kanban')">⬛ Kanban</button>
+        <button class="view-btn" id="btn-lista" onclick="setView('lista')">☰ Lista</button>
+      </div>
+      <button class="btn btn-primary" onclick="abrirModalNova()">+ Nova ação</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <input type="text" class="filtro-busca" id="filtro-busca" placeholder="🔍 Buscar ação..." oninput="aplicarFiltros()">
+    <select class="filtro-select" id="filtro-origem" onchange="aplicarFiltros()">
+      <option value="">Todas as origens</option>
+      <option>PGR</option><option>PCMSO</option><option>Checklist</option>
+      <option>Inspeção</option><option>Acidente</option><option>Manual</option>
+    </select>
+    <select class="filtro-select" id="filtro-prioridade" onchange="aplicarFiltros()">
+      <option value="">Todas as prioridades</option>
+      <option>Crítica</option><option>Alta</option><option>Média</option><option>Baixa</option>
+    </select>
+    <select class="filtro-select" id="filtro-setor" onchange="aplicarFiltros()">
+      <option value="">Todos os setores</option>
+    </select>
+    <select class="filtro-select" id="filtro-status" onchange="aplicarFiltros()">
+      <option value="">Todos os status</option>
+      <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
+      <option>Atrasada</option><option>Cancelada</option><option>Arquivada</option>
+    </select>
+  </div>
+
+  <!-- Kanban -->
+  <div class="kanban-view" id="kanban-view"></div>
+
+  <!-- Lista -->
+  <div class="lista-view" id="lista-view"></div>
+</div>
+
+<!-- MODAL AÇÃO -->
+<div class="modal-overlay" id="modal-acao">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-titulo">
+      <span id="modal-acao-titulo">Nova ação</span>
+      <button onclick="fecharModalAcao()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Título <span style="color:var(--accent);">*</span></label>
+        <input type="text" id="acao-titulo" placeholder="Descreva a ação de forma clara e objetiva">
+      </div>
+      <div class="modal-field full">
+        <label>Descrição</label>
+        <textarea id="acao-descricao" placeholder="Detalhes, contexto, critérios de conclusão..."></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Origem</label>
+        <select id="acao-origem">
+          <option>Manual</option><option>PGR</option><option>PCMSO</option>
+          <option>Checklist</option><option>Inspeção</option><option>Acidente</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Prioridade</label>
+        <select id="acao-prioridade">
+          <option>Baixa</option><option selected>Média</option><option>Alta</option><option>Crítica</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Setor</label>
+        <select id="acao-setor" onchange="filtrarFuncoesModal()">
+          <option value="">— Nenhum —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Função</label>
+        <select id="acao-funcao">
+          <option value="">— Nenhuma —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Responsável</label>
+        <input type="text" id="acao-responsavel" placeholder="Nome do responsável">
+      </div>
+      <div class="modal-field">
+        <label>Prazo</label>
+        <input type="date" id="acao-prazo">
+      </div>
+      <div class="modal-field" id="campo-status" style="display:none;">
+        <label>Status</label>
+        <select id="acao-status">
+          <option>Pendente</option><option>Em andamento</option><option>Concluída</option>
+          <option>Cancelada</option><option>Atrasada</option><option>Arquivada</option>
+        </select>
+      </div>
+      <div class="modal-field" id="campo-conclusao" style="display:none;">
+        <label>Data de conclusão</label>
+        <input type="date" id="acao-data-conclusao">
+      </div>
+      <div class="modal-field full" id="campo-evidencia" style="display:none;">
+        <label>Evidência / Observação de conclusão</label>
+        <textarea id="acao-evidencia" placeholder="Descreva como a ação foi concluída..."></textarea>
+      </div>
+    </div>
+
+    <!-- Histórico (só em edição) -->
+    <div class="historico-wrap" id="historico-wrap" style="display:none;">
+      <div class="historico-titulo">Histórico de andamento</div>
+      <div id="lista-historico-acao"></div>
+      <div class="novo-comentario">
+        <textarea id="novo-comentario" placeholder="Adicionar comentário ou atualização..."></textarea>
+        <button class="btn btn-edit btn-sm" onclick="adicionarComentario()" style="align-self:flex-end;">
+          <span class="spinner" id="spinner-comentario"></span>
+          Registrar
+        </button>
+      </div>
+    </div>
+
+    <div class="status-bar" id="status-acao"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+      <div id="modal-acao-esq"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModalAcao()">Cancelar</button>
+        <button class="btn btn-save" id="btn-salvar-acao" onclick="salvarAcao()">
+          <span class="spinner" id="spinner-acao"></span>
+          <span id="label-salvar-acao">Salvar ação</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa={},setores=[],funcoes=[],acoes=[],acoesFiltradas=[];
+let acaoEditando=null;
+let viewAtual='kanban';
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className='status-bar show '+tipo;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]||''}$</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+function fmtDataAtual(){return new Date().toISOString().split('T')[0];}
+function isAtrasada(prazo,status){if(!prazo||status==='Concluída'||status==='Cancelada'||status==='Arquivada')return false;return new Date(prazo)<new Date();}
+
+const PRIORIDADE_COR={'Baixa':'#2dd4a0','Média':'#7aabf7','Alta':'#e0a855','Crítica':'#e05555'};
+const STATUS_COLS=['Pendente','Em andamento','Concluída','Arquivada'];
+const STATUS_COR={'Pendente':'#545e72','Em andamento':'#4a7cdc','Concluída':'#2dd4a0','Cancelada':'#e05555','Atrasada':'#ff6b6b','Arquivada':'#3a3a4a'};
+const ORIGEM_COR={'PGR':'#1a3a6e','PCMSO':'#0d3d2e','Checklist':'#3a2a10','Inspeção':'#3a1a40','Acidente':'#4a2020','Manual':'#1e2333'};
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  try{
+    const [resEmp,resSets,resFuncs,resAcoes]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresa,setores,funcoes,acoes]=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resAcoes.json()]);
+    empresa=empresa[0];
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`Central de Ações — ${nome}`;
+    document.getElementById('header-nome').textContent=nome;
+    // Atualiza ações atrasadas
+    acoes=acoes.map(a=>({...a,status:isAtrasada(a.prazo,a.status)?'Atrasada':a.status}));
+    // Popula filtro de setores
+    const selSetor=document.getElementById('filtro-setor');
+    setores.forEach(s=>selSetor.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+    acoesFiltradas=[...acoes];
+    renderStats();
+    renderView();
+    atualizarHeroSub();
+  }catch(e){console.error(e);}
+}
+
+function atualizarHeroSub(){
+  const total=acoes.length;
+  const pendentes=acoes.filter(a=>a.status==='Pendente').length;
+  const atrasadas=acoes.filter(a=>a.status==='Atrasada').length;
+  const concluidas=acoes.filter(a=>a.status==='Concluída').length;
+  document.getElementById('hero-sub').textContent=`${total} ações · ${pendentes} pendentes · ${atrasadas} atrasadas · ${concluidas} concluídas`;
+}
+
+function renderStats(){
+  const counts={
+    'Total':acoes.length,
+    'Pendente':acoes.filter(a=>a.status==='Pendente').length,
+    'Em andamento':acoes.filter(a=>a.status==='Em andamento').length,
+    'Atrasada':acoes.filter(a=>a.status==='Atrasada').length,
+    'Concluída':acoes.filter(a=>a.status==='Concluída').length,
+    'Arquivada':acoes.filter(a=>a.status==='Arquivada').length,
+  };
+  const cores={'Total':'var(--text)','Pendente':'var(--text2)','Em andamento':'var(--accent)','Atrasada':'var(--danger)','Concluída':'var(--accent2)','Arquivada':'var(--text3)'};
+  document.getElementById('stats-grid').innerHTML=Object.entries(counts).map(([k,v])=>`
+    <div class="stat-card" onclick="filtrarPorStatus('${k}')">
+      <div class="stat-label">${k}</div>
+      <div class="stat-value" style="color:${cores[k]||'var(--text)'};">${v}</div>
+    </div>`).join('');
+}
+
+function filtrarPorStatus(status){
+  const sel=document.getElementById('filtro-status');
+  sel.value=status==='Total'?'':status;
+  aplicarFiltros();
+}
+
+function aplicarFiltros(){
+  const busca=document.getElementById('filtro-busca').value.toLowerCase();
+  const origem=document.getElementById('filtro-origem').value;
+  const prioridade=document.getElementById('filtro-prioridade').value;
+  const setor=document.getElementById('filtro-setor').value;
+  const status=document.getElementById('filtro-status').value;
+  acoesFiltradas=acoes.filter(a=>{
+    if(busca&&!a.titulo.toLowerCase().includes(busca)&&!(a.responsavel||'').toLowerCase().includes(busca))return false;
+    if(origem&&a.origem!==origem)return false;
+    if(prioridade&&a.prioridade!==prioridade)return false;
+    if(setor&&a.setor_id!=setor)return false;
+    if(status&&a.status!==status)return false;
+    return true;
+  });
+  renderView();
+}
+
+function setView(v){
+  viewAtual=v;
+  document.getElementById('btn-kanban').classList.toggle('active',v==='kanban');
+  document.getElementById('btn-lista').classList.toggle('active',v==='lista');
+  document.getElementById('kanban-view').classList.toggle('hide',v!=='kanban');
+  document.getElementById('lista-view').classList.toggle('show',v==='lista');
+  renderView();
+}
+
+function renderView(){
+  if(viewAtual==='kanban')renderKanban();
+  else renderLista();
+}
+
+function renderKanban(){
+  const cols=STATUS_COLS;
+  document.getElementById('kanban-view').innerHTML=cols.map(status=>{
+    const items=acoesFiltradas.filter(a=>a.status===status||(status==='Pendente'&&a.status==='Atrasada'&&!STATUS_COLS.includes('Atrasada')));
+    const itemsCol=acoesFiltradas.filter(a=>a.status===status);
+    return`<div class="kanban-col">
+      <div class="kanban-col-header">
+        <span class="kanban-col-titulo" style="color:${STATUS_COR[status]||'var(--text2)'};">${status}</span>
+        <span class="kanban-col-count" style="color:${STATUS_COR[status]||'var(--text2)'};">${itemsCol.length}</span>
+      </div>
+      <div class="kanban-col-body">
+        ${itemsCol.length?itemsCol.map(a=>renderAcaoCard(a)).join(''):`<div class="empty">Nenhuma ação</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAcaoCard(a){
+  const cor=PRIORIDADE_COR[a.prioridade]||'#888';
+  const setor=setores.find(s=>s.id===a.setor_id);
+  const atrasada=isAtrasada(a.prazo,a.status);
+  const prazoClass=atrasada?'atrasado':'';
+  return`<div class="acao-card" onclick="abrirModalEditar(${a.id})">
+    <div class="acao-card-prioridade" style="background:${cor};"></div>
+    <div class="acao-card-titulo">${escHtml(a.titulo)}</div>
+    <div class="acao-card-meta">
+      <span class="mini-badge" style="background:${ORIGEM_COR[a.origem]||'#1e2333'};color:var(--text2);">${a.origem||'Manual'}</span>
+      ${a.prioridade?`<span class="mini-badge pr-${a.prioridade}">${a.prioridade}</span>`:''}
+      ${setor?`<span class="mini-badge mb-info">${escHtml(setor.nome_setor)}</span>`:''}
+      ${a.prazo?`<span class="acao-card-prazo ${prazoClass}">📅 ${fmtData(a.prazo)}</span>`:''}
+      ${a.responsavel?`<span class="acao-card-prazo">👤 ${escHtml(a.responsavel)}</span>`:''}
+    </div>
+  </div>`;
+}
+
+function renderLista(){
+  if(!acoesFiltradas.length){
+    document.getElementById('lista-view').innerHTML=`<div class="empty" style="padding:40px;">Nenhuma ação encontrada.</div>`;
+    return;
+  }
+  document.getElementById('lista-view').innerHTML=acoesFiltradas.map(a=>{
+    const cor=PRIORIDADE_COR[a.prioridade]||'#888';
+    const setor=setores.find(s=>s.id===a.setor_id);
+    const atrasada=isAtrasada(a.prazo,a.status);
+    return`<div class="lista-item-acao" onclick="abrirModalEditar(${a.id})">
+      <div class="lista-acao-prioridade" style="background:${cor};"></div>
+      <div class="lista-acao-info">
+        <div class="lista-acao-titulo">${escHtml(a.titulo)}</div>
+        <div class="lista-acao-meta">
+          <span style="color:${PRIORIDADE_COR[a.prioridade]||'var(--text2)'};">● ${a.prioridade||'—'}</span>
+          <span>📋 ${a.origem||'Manual'}</span>
+          ${setor?`<span>🗂️ ${escHtml(setor.nome_setor)}</span>`:''}
+          ${a.responsavel?`<span>👤 ${escHtml(a.responsavel)}</span>`:''}
+          ${a.prazo?`<span style="${atrasada?'color:var(--danger);':''}">📅 ${fmtData(a.prazo)}${atrasada?' ⚠️ Atrasada':''}</span>`:''}
+        </div>
+      </div>
+      <div class="lista-acao-status">
+        <span class="mini-badge st-${a.status.replace(' ','-')}" style="font-size:10px;padding:3px 8px;">${a.status}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL NOVA AÇÃO ───────────────────────────────────
+function abrirModalNova(){
+  acaoEditando=null;
+  document.getElementById('modal-acao-titulo').textContent='Nova ação';
+  document.getElementById('acao-titulo').value='';
+  document.getElementById('acao-descricao').value='';
+  document.getElementById('acao-origem').value='Manual';
+  document.getElementById('acao-prioridade').value='Média';
+  document.getElementById('acao-setor').value='';
+  document.getElementById('acao-funcao').value='';
+  document.getElementById('acao-responsavel').value='';
+  document.getElementById('acao-prazo').value='';
+  document.getElementById('campo-status').style.display='none';
+  document.getElementById('campo-conclusao').style.display='none';
+  document.getElementById('campo-evidencia').style.display='none';
+  document.getElementById('historico-wrap').style.display='none';
+  document.getElementById('modal-acao-esq').innerHTML='';
+  document.getElementById('label-salvar-acao').textContent='Salvar ação';
+  clearStatus('status-acao');
+  popularSelectsModal();
+  document.getElementById('modal-acao').classList.add('show');
+  setTimeout(()=>document.getElementById('acao-titulo').focus(),100);
+}
+
+async function abrirModalEditar(acaoId){
+  const a=acoes.find(x=>x.id===acaoId);
+  if(!a)return;
+  acaoEditando=a;
+  document.getElementById('modal-acao-titulo').textContent='Editar ação';
+  document.getElementById('acao-titulo').value=a.titulo||'';
+  document.getElementById('acao-descricao').value=a.descricao||'';
+  document.getElementById('acao-origem').value=a.origem||'Manual';
+  document.getElementById('acao-prioridade').value=a.prioridade||'Média';
+  document.getElementById('acao-responsavel').value=a.responsavel||'';
+  document.getElementById('acao-prazo').value=a.prazo||'';
+  document.getElementById('campo-status').style.display='block';
+  document.getElementById('acao-status').value=a.status||'Pendente';
+  document.getElementById('campo-conclusao').style.display='block';
+  document.getElementById('acao-data-conclusao').value=a.data_conclusao||'';
+  document.getElementById('campo-evidencia').style.display='block';
+  document.getElementById('acao-evidencia').value=a.evidencia||'';
+  document.getElementById('historico-wrap').style.display='block';
+  document.getElementById('label-salvar-acao').textContent='Salvar alterações';
+  document.getElementById('modal-acao-esq').innerHTML=`<button class="btn btn-danger btn-sm" onclick="excluirAcao(${a.id})">Excluir</button>`;
+  clearStatus('status-acao');
+  popularSelectsModal(a.setor_id,a.funcao_id);
+  await carregarHistoricoAcao(acaoId);
+  document.getElementById('modal-acao').classList.add('show');
+}
+
+function popularSelectsModal(setorId=null,funcaoId=null){
+  const selSetor=document.getElementById('acao-setor');
+  const selFuncao=document.getElementById('acao-funcao');
+  selSetor.innerHTML='<option value="">— Nenhum —</option>'+setores.map(s=>`<option value="${s.id}" ${setorId==s.id?'selected':''}>${escHtml(s.nome_setor)}</option>`).join('');
+  selFuncao.innerHTML='<option value="">— Nenhuma —</option>'+funcoes.map(f=>`<option value="${f.id}" ${funcaoId==f.id?'selected':''}>${escHtml(f.nome_funcao)}</option>`).join('');
+}
+
+function filtrarFuncoesModal(){
+  // Futuramente pode filtrar funções por setor
+}
+
+function fecharModalAcao(){
+  document.getElementById('modal-acao').classList.remove('show');
+  acaoEditando=null;
+}
+
+async function salvarAcao(){
+  const titulo=document.getElementById('acao-titulo').value.trim();
+  if(!titulo){alert('Informe o título da ação.');return;}
+  document.getElementById('btn-salvar-acao').disabled=true;
+  document.getElementById('spinner-acao').className='spinner show';
+  document.getElementById('label-salvar-acao').textContent='Salvando...';
+
+  const payload={
+    empresa_id:parseInt(empresaId),
+    titulo,
+    descricao:document.getElementById('acao-descricao').value.trim()||null,
+    origem:document.getElementById('acao-origem').value,
+    prioridade:document.getElementById('acao-prioridade').value,
+    setor_id:parseInt(document.getElementById('acao-setor').value)||null,
+    funcao_id:parseInt(document.getElementById('acao-funcao').value)||null,
+    responsavel:document.getElementById('acao-responsavel').value.trim()||null,
+    prazo:document.getElementById('acao-prazo').value||null,
+    ativo:true,
+  };
+
+  if(acaoEditando){
+    const novoStatus=document.getElementById('acao-status').value;
+    payload.status=novoStatus;
+    payload.data_conclusao=document.getElementById('acao-data-conclusao').value||null;
+    payload.evidencia=document.getElementById('acao-evidencia').value.trim()||null;
+    if(novoStatus==='Concluída'&&!payload.data_conclusao)payload.data_conclusao=fmtDataAtual();
+  }
+
+  try{
+    let res,data;
+    if(acaoEditando){
+      const statusAnterior=acaoEditando.status;
+      res=await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${acaoEditando.id}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify(payload)
+      });
+      if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar');}
+      data=await res.json();
+      // Registra no histórico se status mudou
+      if(payload.status&&payload.status!==statusAnterior){
+        await registrarHistorico(acaoEditando.id,statusAnterior,payload.status,'Status atualizado');
+      }
+      const idx=acoes.findIndex(x=>x.id===acaoEditando.id);
+      if(idx>=0)acoes[idx]={...acoes[idx],...data[0]};
+    }else{
+      res=await fetch(`${SUPA_URL}/rest/v1/acoes`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify({...payload,status:'Pendente'})
+      });
+      if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar');}
+      data=await res.json();
+      // Registra criação no histórico
+      await registrarHistorico(data[0].id,null,'Pendente','Ação criada');
+      acoes.unshift(data[0]);
+    }
+    acoesFiltradas=[...acoes];
+    renderStats();
+    renderView();
+    atualizarHeroSub();
+    fecharModalAcao();
+  }catch(e){
+    setStatus('status-acao','error',e.message);
+  }finally{
+    document.getElementById('btn-salvar-acao').disabled=false;
+    document.getElementById('spinner-acao').className='spinner';
+    document.getElementById('label-salvar-acao').textContent=acaoEditando?'Salvar alterações':'Salvar ação';
+  }
+}
+
+async function excluirAcao(id){
+  if(!confirm('Excluir esta ação? Esta ação não pode ser desfeita.'))return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${id}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({ativo:false})
+    });
+    acoes=acoes.filter(x=>x.id!==id);
+    acoesFiltradas=acoesFiltradas.filter(x=>x.id!==id);
+    renderStats();renderView();atualizarHeroSub();
+    fecharModalAcao();
+  }catch(e){alert('Erro ao excluir: '+e.message);}
+}
+
+// ── HISTÓRICO ─────────────────────────────────────────
+async function registrarHistorico(acaoId,statusAnterior,statusNovo,comentario){
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/acoes_historico`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({acao_id:acaoId,empresa_id:parseInt(empresaId),status_anterior:statusAnterior,status_novo:statusNovo,comentario})
+    });
+  }catch(e){console.error(e);}
+}
+
+async function carregarHistoricoAcao(acaoId){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/acoes_historico?acao_id=eq.${acaoId}&order=criado_em.desc&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const data=await res.json();
+    const lista=document.getElementById('lista-historico-acao');
+    if(!data.length){lista.innerHTML=`<div style="font-size:12px;color:var(--text3);">Nenhum registro ainda.</div>`;return;}
+    lista.innerHTML=data.map(h=>{
+      const cor=STATUS_COR[h.status_novo]||'#888';
+      const data_fmt=new Date(h.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      return`<div class="hist-item">
+        <div class="hist-dot" style="background:${cor};"></div>
+        <div class="hist-info">
+          <div class="hist-data">${data_fmt}</div>
+          ${h.status_anterior?`<div class="hist-status" style="color:${cor};">
+            ${h.status_anterior} → ${h.status_novo}
+          </div>`:''}
+          ${h.comentario?`<div class="hist-comentario">${escHtml(h.comentario)}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){console.error(e);}
+}
+
+async function adicionarComentario(){
+  const txt=document.getElementById('novo-comentario').value.trim();
+  if(!txt||!acaoEditando)return;
+  document.getElementById('spinner-comentario').className='spinner show';
+  try{
+    const statusAtual=document.getElementById('acao-status').value||acaoEditando.status;
+    await registrarHistorico(acaoEditando.id,statusAtual,statusAtual,txt);
+    document.getElementById('novo-comentario').value='';
+    await carregarHistoricoAcao(acaoEditando.id);
+  }catch(e){console.error(e);}
+  finally{document.getElementById('spinner-comentario').className='spinner';}
+}
+
+// Fecha modal ao clicar fora
+document.getElementById('modal-acao').addEventListener('click',e=>{
+  if(e.target===document.getElementById('modal-acao'))fecharModalAcao();
+});
+
+inicializar();
+</script>
+</body>
+</html>
