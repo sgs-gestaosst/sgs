@@ -171,6 +171,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <span style="font-size:13px;color:var(--text2);">Visualização do documento</span>
   <div class="screen-actions">
     <button class="btn btn-edit" onclick="toggleElaboradora()" id="btn-elab">✏️ Empresa elaboradora</button>
+    <button class="btn btn-edit" onclick="abrirModalPlanoAcao()" id="btn-plano">📋 Revisar plano de ação</button>
     <a id="btn-voltar" href="#" class="btn btn-edit" style="text-decoration:none;">← Voltar</a>
     <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
   </div>
@@ -209,6 +210,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     </div>
     <div style="margin-top:8px;font-size:11px;color:var(--text3);">
       ℹ️ Estes dados aparecem na capa e rodapé. Não são salvos no banco — preencha antes de imprimir.
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REVISAR PLANO DE AÇÃO -->
+<div id="modal-plano" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:700px;width:100%;margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div>
+        <div style="font-size:16px;font-weight:500;">📋 Revisar Plano de Ação</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px;">Selecione as ações que aparecerão no documento</div>
+      </div>
+      <button onclick="fecharModalPlanoAcao()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+      <input type="checkbox" id="plano-check-all" onchange="toggleTodasAcoes(this.checked)" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+      <label for="plano-check-all" style="font-size:12px;color:var(--text2);cursor:pointer;">Selecionar todas</label>
+      <span id="plano-count" style="margin-left:auto;font-size:12px;color:var(--text3);"></span>
+    </div>
+    <div id="lista-plano-acoes" style="max-height:450px;overflow-y:auto;"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+      <button onclick="fecharModalPlanoAcao()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;cursor:pointer;">Cancelar</button>
+      <button onclick="aplicarSelecaoPlano()" style="background:var(--accent2);color:#0f1117;border:none;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;">✓ Aplicar ao documento</button>
     </div>
   </div>
 </div>
@@ -277,6 +301,9 @@ async function carregar(){
     const resSESMT=await fetch(`${SUPA_URL}/rest/v1/dimensionamento_sesmt?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const sesmtData=await resSESMT.json();
     window.sesmtData=sesmtData[0]||null;
+    // Carrega ações da empresa para o plano de ação
+    const resAcoes=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=prioridade.asc,prazo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    window.acoesData=await resAcoes.json();
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro ao carregar: ${e.message}</div>`;
@@ -758,10 +785,94 @@ function renderInventarioRiscos(){
 }
 
 // ── PLANO DE AÇÃO ─────────────────────────────────────
+let acoesSelecionadasIds=null; // null = todas
+
+function abrirModalPlanoAcao(){
+  const acoes=window.acoesData||[];
+  if(!acoes.length){
+    alert('Nenhuma ação cadastrada para esta empresa. Crie ações na Central de Ações.');
+    return;
+  }
+  const PRIOR_COR={'Crítica':'#e05555','Alta':'#e0a855','Média':'#7aabf7','Baixa':'#2dd4a0'};
+  const STATUS_COR={'Pendente':'#545e72','Em andamento':'#4a7cdc','Concluída':'#2dd4a0','Atrasada':'#e05555','Cancelada':'#e05555','Arquivada':'#3a3a4a'};
+  const grupos={'Crítica':[],'Alta':[],'Média':[],'Baixa':[]};
+  acoes.filter(a=>a.status!=='Arquivada'&&a.status!=='Cancelada').forEach(a=>{
+    if(grupos[a.prioridade])grupos[a.prioridade].push(a);
+    else grupos['Média'].push(a);
+  });
+  const ids=acoesSelecionadasIds||acoes.map(a=>a.id);
+  document.getElementById('lista-plano-acoes').innerHTML=Object.entries(grupos).map(([prioridade,items])=>{
+    if(!items.length)return'';
+    return`<div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:600;color:${PRIOR_COR[prioridade]||'var(--text2)'};text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);">
+        ${prioridade} (${items.length})
+      </div>
+      ${items.map(a=>`
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="plano-acao-${a.id}" ${ids.includes(a.id)?'checked':''} onchange="atualizarCountPlano()"
+          style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin-top:2px;flex-shrink:0;">
+        <label for="plano-acao-${a.id}" style="flex:1;cursor:pointer;">
+          <div style="font-size:13px;font-weight:500;color:var(--text);">${escHtml(a.titulo)}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;">
+            <span style="color:${STATUS_COR[a.status]||'var(--text3)'};">● ${a.status||'Pendente'}</span>
+            <span>📋 ${a.origem||'Manual'}</span>
+            ${a.responsavel?`<span>👤 ${escHtml(a.responsavel)}</span>`:''}
+            ${a.prazo?`<span>📅 ${new Date(a.prazo+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}
+          </div>
+        </label>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+  atualizarCountPlano();
+  document.getElementById('modal-plano').style.display='flex';
+}
+
+function atualizarCountPlano(){
+  const acoes=window.acoesData||[];
+  const total=acoes.filter(a=>a.status!=='Arquivada'&&a.status!=='Cancelada').length;
+  const sel=acoes.filter(a=>document.getElementById(`plano-acao-${a.id}`)?.checked).length;
+  document.getElementById('plano-count').textContent=`${sel} de ${total} selecionada(s)`;
+  document.getElementById('plano-check-all').checked=sel===total;
+}
+
+function toggleTodasAcoes(checked){
+  const acoes=window.acoesData||[];
+  acoes.forEach(a=>{
+    const el=document.getElementById(`plano-acao-${a.id}`);
+    if(el)el.checked=checked;
+  });
+  atualizarCountPlano();
+}
+
+function fecharModalPlanoAcao(){
+  document.getElementById('modal-plano').style.display='none';
+}
+
+function aplicarSelecaoPlano(){
+  const acoes=window.acoesData||[];
+  acoesSelecionadasIds=acoes.filter(a=>document.getElementById(`plano-acao-${a.id}`)?.checked).map(a=>a.id);
+  fecharModalPlanoAcao();
+  // Re-renderiza só o plano de ação
+  const wrap=document.getElementById('pages-wrap');
+  const pages=wrap.querySelectorAll('.page');
+  const ultimaPagina=pages[pages.length-1];
+  const novaPlano=renderPlanoAcao();
+  wrap.replaceChild(novaPlano,ultimaPagina);
+}
+
 function renderPlanoAcao(){
-  const pg=document.createElement('div');
-  pg.className='page';
-  const medidas=medidas_setor.filter(m=>m.nivel!=='EPI');
+  const pg=document.createElement('div');pg.className='page';
+  const todasAcoes=window.acoesData||[];
+  const idsAtivos=acoesSelecionadasIds||todasAcoes.map(a=>a.id);
+  const acoes=todasAcoes.filter(a=>idsAtivos.includes(a.id)&&a.status!=='Arquivada'&&a.status!=='Cancelada');
+
+  const PRIOR_COR={'Crítica':'#991b1b','Alta':'#9a3412','Média':'#854d0e','Baixa':'#166534'};
+  const PRIOR_BG={'Crítica':'#fee2e2','Alta':'#ffedd5','Média':'#fef9c3','Baixa':'#dcfce7'};
+  const STATUS_PT={'Pendente':'Pendente','Em andamento':'Em andamento','Concluída':'Concluída','Atrasada':'Atrasada','Cancelada':'Cancelada','Arquivada':'Arquivada'};
+
+  const setoresMap={};
+  setores.forEach(s=>{setoresMap[s.id]=s.nome_setor;});
+
   pg.innerHTML=`
   <div class="page-header">
     <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
@@ -770,26 +881,48 @@ function renderPlanoAcao(){
 
   <div class="doc-section"><span class="num-secao">6</span>Plano de Ação</div>
 
-  <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a serem implementadas, com responsáveis, prazos e indicadores de acompanhamento, seguindo a hierarquia de controle estabelecida pela NR-1.</p>
+  <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a serem implementadas, com responsáveis, prazos e status de acompanhamento, seguindo a hierarquia de controle estabelecida pela NR-1.</p>
 
-  ${medidas.length?`
-  <table class="doc-table">
-    <thead><tr><th>Medida</th><th>Nível</th><th>Responsável</th><th>Prazo</th><th>Status</th></tr></thead>
-    <tbody>
-      ${medidas.map(m=>`<tr>
-        <td>${escHtml(m.descricao||'—')}</td>
-        <td>${escHtml(m.nivel||'—')}</td>
-        <td>${escHtml(m.responsavel||'—')}</td>
-        <td>${m.prazo?fmtData(m.prazo):'—'}</td>
-        <td>${escHtml(m.status||'Pendente')}</td>
-      </tr>`).join('')}
-    </tbody>
-  </table>
-  `:`
+  ${!acoes.length?`
   <div class="em-breve">
     <div class="em-breve-icon">📋</div>
-    <div class="em-breve-label">Cadastre as medidas de controle no módulo de Riscos para gerar o Plano de Ação automaticamente.</div>
-  </div>`}
+    <div class="em-breve-label">Nenhuma ação selecionada para o plano.<br>Clique em "Revisar plano de ação" para selecionar as ações.</div>
+  </div>`:`
+  <table class="doc-table">
+    <thead>
+      <tr>
+        <th style="width:35%;">Ação</th>
+        <th style="width:12%;">Origem</th>
+        <th style="width:10%;text-align:center;">Prioridade</th>
+        <th style="width:15%;">Responsável</th>
+        <th style="width:13%;text-align:center;">Prazo</th>
+        <th style="width:15%;text-align:center;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${acoes.map(a=>{
+        const prior=a.prioridade||'Média';
+        const status=a.status||'Pendente';
+        const prazo=a.prazo?new Date(a.prazo+'T00:00:00').toLocaleDateString('pt-BR'):'—';
+        const setor=a.setor_id?setoresMap[a.setor_id]||'—':'—';
+        return`<tr>
+          <td>
+            <div style="font-weight:500;font-size:9pt;">${escHtml(a.titulo)}</div>
+            ${setor!=='—'?`<div style="font-size:7.5pt;color:#9ca3af;margin-top:2pt;">📁 ${escHtml(setor)}</div>`:''}
+          </td>
+          <td style="font-size:8.5pt;">${escHtml(a.origem||'Manual')}</td>
+          <td style="text-align:center;">
+            <span style="background:${PRIOR_BG[prior]||'#f3f4f6'};color:${PRIOR_COR[prior]||'#374151'};padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${prior}</span>
+          </td>
+          <td style="font-size:8.5pt;">${escHtml(a.responsavel||'—')}</td>
+          <td style="text-align:center;font-size:8.5pt;font-family:'IBM Plex Mono',monospace;">${prazo}</td>
+          <td style="text-align:center;">
+            <span style="font-size:7.5pt;font-weight:500;">${escHtml(status)}</span>
+          </td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>`}
 
   <div class="doc-subsection" style="margin-top:16pt;">Monitoramento e revisão — NR-1</div>
   <p class="doc-text">Conforme a NR-1 (Portaria MTE nº 672/2021), este PGR deverá ser revisado:</p>
@@ -814,7 +947,7 @@ function renderPlanoAcao(){
 
   <div class="page-footer">
     <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="pf-page">Página 6</span>
+    <span class="pf-page">Página 7</span>
   </div>`;
   return pg;
 }
