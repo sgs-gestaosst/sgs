@@ -188,6 +188,7 @@
       <div class="hero-actions" id="hero-actions">
         <a id="btn-riscos" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">⚠️ Riscos</a>
         <a id="btn-exames" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">🩺 Exames</a>
+        <a id="btn-treinamentos" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">🎓 Treinamentos</a>
         <a id="btn-acoes" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">⚡ Ações</a>
         <button class="btn btn-danger" onclick="abrirModal()">Excluir</button>
         <button class="btn btn-edit" onclick="modoEditar()">Editar</button>
@@ -710,6 +711,8 @@ async function carregarEmpresa(){
     if(btnRiscos){btnRiscos.href=`riscos.html?empresa_id=${empresaId}`;btnRiscos.style.display='inline-flex';}
     const btnExames=document.getElementById('btn-exames');
     if(btnExames){btnExames.href=`exames.html?empresa_id=${empresaId}`;btnExames.style.display='inline-flex';}
+    const btnTreinamentos=document.getElementById('btn-treinamentos');
+    if(btnTreinamentos){btnTreinamentos.href=`treinamentos.html?empresa_id=${empresaId}`;btnTreinamentos.style.display='inline-flex';}
     const btnAcoes=document.getElementById('btn-acoes');
     if(btnAcoes){btnAcoes.href=`acoes.html?empresa_id=${empresaId}`;btnAcoes.style.display='inline-flex';}
   }catch(e){console.error(e);}

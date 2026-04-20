@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Treinamentos</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:600;}
+/* Tabs */
+.tabs{display:flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tab{padding:12px 20px;font-size:13px;cursor:pointer;border-right:1px solid var(--border);transition:background .15s;font-weight:500;color:var(--text2);}
+.tab:last-child{border-right:none;}
+.tab:hover{background:var(--surface2);}
+.tab.active{background:var(--surface2);color:var(--text);}
+/* Filtros */
+.filtros{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.filtro-select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.filtro-busca{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;}
+.filtro-busca:focus,.filtro-select:focus{border-color:var(--border-focus);}
+/* Lista */
+.lista-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .15s;}
+.lista-item:hover{border-color:var(--border-focus);}
+.lista-item-info{flex:1;min-width:0;}
+.lista-item-nome{font-size:13px;font-weight:500;margin-bottom:4px;}
+.lista-item-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--text2);}
+/* Badges */
+.mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;display:inline-block;}
+.mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+.mb-blue{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+.mb-green{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.mb-amber{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.mb-red{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.mb-purple{background:#1e1a40;color:#a78bfa;border:1px solid #3a2a80;}
+/* Status vencimento */
+.venc-valido{color:var(--success);}
+.venc-avencer{color:var(--warning);}
+.venc-vencido{color:var(--danger);}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:680px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-field{margin-bottom:0;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+.modal-field textarea{resize:vertical;min-height:60px;}
+/* Upload */
+.upload-area{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:border-color .15s;}
+.upload-area:hover{border-color:var(--accent);}
+.upload-area.dragover{border-color:var(--accent);background:var(--surface2);}
+.upload-preview{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius);margin-top:8px;}
+/* Status bar */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px;color:var(--text3);}
+.empty-icon{font-size:32px;margin-bottom:12px;}
+.section-label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 10px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+/* Progress bar vencimento */
+.venc-bar{height:3px;border-radius:2px;background:var(--border);margin-top:4px;overflow:hidden;}
+.venc-bar-fill{height:100%;border-radius:2px;transition:width .3s;}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(3,1fr);}.modal-grid{grid-template-columns:1fr;}.header-title{display:none;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Treinamentos</span></div>
+</div>
+
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para empresa</a>
+
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#1e1a40;border:1px solid #3a2a80;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🎓</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Gestão de Treinamentos</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-edit" onclick="abrirModalCatalogo()">📚 Catálogo</button>
+      <button class="btn btn-edit" onclick="abrirModalFuncaoTreinamento()">🔗 Vincular à função</button>
+      <button class="btn btn-primary" onclick="abrirModalRegistro()">+ Registrar treinamento</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" id="tab-funcionarios" onclick="mudarTab('funcionarios')">👷 Por funcionário</div>
+    <div class="tab" id="tab-funcoes" onclick="mudarTab('funcoes')">🔧 Por função</div>
+    <div class="tab" id="tab-vencimentos" onclick="mudarTab('vencimentos')">⏰ Vencimentos</div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <input type="text" class="filtro-busca" id="filtro-busca" placeholder="🔍 Buscar..." oninput="aplicarFiltros()">
+    <select class="filtro-select" id="filtro-setor" onchange="filtrarFuncoesPorSetor()">
+      <option value="">Todos os setores</option>
+    </select>
+    <select class="filtro-select" id="filtro-funcao" onchange="aplicarFiltros()">
+      <option value="">Todas as funções</option>
+    </select>
+    <select class="filtro-select" id="filtro-status" onchange="aplicarFiltros()">
+      <option value="">Todos os status</option>
+      <option>Válido</option><option>A vencer</option><option>Vencido</option>
+    </select>
+  </div>
+
+  <div id="conteudo-tab"></div>
+</div>
+
+<!-- MODAL REGISTRO DE TREINAMENTO -->
+<div class="modal-overlay" id="modal-registro">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-titulo">
+      <span id="modal-reg-titulo">Registrar treinamento</span>
+      <button onclick="fecharModalRegistro()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Funcionário <span style="color:var(--accent);">*</span></label>
+        <select id="reg-funcionario" onchange="carregarTreinamentosFuncionario()">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <label>Treinamento <span style="color:var(--accent);">*</span></label>
+        <select id="reg-treinamento" onchange="preencherDadosTreinamento()">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Tipo</label>
+        <select id="reg-tipo">
+          <option>Inicial</option>
+          <option>Reciclagem</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Data de realização <span style="color:var(--accent);">*</span></label>
+        <input type="date" id="reg-data" onchange="calcularVencimento()">
+      </div>
+      <div class="modal-field">
+        <label>Data de vencimento</label>
+        <input type="date" id="reg-vencimento">
+      </div>
+      <div class="modal-field">
+        <label>Carga horária (h)</label>
+        <input type="number" id="reg-carga" placeholder="Ex: 8" min="1">
+      </div>
+      <div class="modal-field">
+        <label>Instrutor</label>
+        <input type="text" id="reg-instrutor" placeholder="Nome do instrutor">
+      </div>
+      <div class="modal-field">
+        <label>Local</label>
+        <input type="text" id="reg-local" placeholder="Local de realização">
+      </div>
+      <div class="modal-field">
+        <label>Nº do certificado</label>
+        <input type="text" id="reg-certificado" placeholder="Número ou código">
+      </div>
+      <div class="modal-field">
+        <label>Ação vinculada</label>
+        <select id="reg-acao">
+          <option value="">— Nenhuma —</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <label>Observação</label>
+        <textarea id="reg-observacao" placeholder="Observações adicionais..."></textarea>
+      </div>
+      <div class="modal-field full">
+        <label>Evidência (lista de presença, certificado...)</label>
+        <div class="upload-area" id="upload-area" onclick="document.getElementById('reg-arquivo').click()" ondragover="dragOver(event)" ondrop="dropArquivo(event)">
+          <div style="font-size:24px;margin-bottom:6px;">📎</div>
+          <div style="font-size:13px;color:var(--text2);">Clique ou arraste um arquivo aqui</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">PDF, JPG, PNG — máx. 10MB</div>
+        </div>
+        <input type="file" id="reg-arquivo" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="selecionarArquivo(this)">
+        <div id="upload-preview" style="display:none;" class="upload-preview">
+          <span style="font-size:18px;">📄</span>
+          <div style="flex:1;">
+            <div id="upload-nome" style="font-size:12px;font-weight:500;"></div>
+            <div id="upload-tamanho" style="font-size:10px;color:var(--text3);"></div>
+          </div>
+          <button onclick="removerArquivo()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="status-bar" id="status-registro"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="fecharModalRegistro()">Cancelar</button>
+      <button class="btn btn-save" id="btn-salvar-registro" onclick="salvarRegistro()">
+        <span class="spinner" id="spinner-registro"></span>
+        <span id="label-registro">Salvar registro</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CATÁLOGO -->
+<div class="modal-overlay" id="modal-catalogo">
+  <div class="modal" style="max-width:800px;">
+    <div class="modal-titulo">
+      <span>📚 Catálogo de treinamentos</span>
+      <button onclick="fecharModalCatalogo()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <input type="text" class="filtro-busca" id="busca-catalogo" placeholder="🔍 Buscar treinamento..." oninput="renderCatalogo()" style="flex:1;">
+      <button class="btn btn-primary btn-sm" onclick="abrirModalNovoTreinamento()">+ Novo</button>
+    </div>
+    <div id="lista-catalogo" style="max-height:500px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- MODAL NOVO TREINAMENTO CUSTOMIZADO -->
+<div class="modal-overlay" id="modal-novo-trei">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span>Novo treinamento</span>
+      <button onclick="fecharModalNovoTreinamento()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Nome <span style="color:var(--accent);">*</span></label>
+        <input type="text" id="novo-trei-nome" placeholder="Nome do treinamento">
+      </div>
+      <div class="modal-field">
+        <label>NR relacionada</label>
+        <input type="text" id="novo-trei-nr" placeholder="Ex: NR-35">
+      </div>
+      <div class="modal-field">
+        <label>Periodicidade de reciclagem</label>
+        <select id="novo-trei-period">
+          <option>Anual</option><option>Bienal</option><option>Trienal</option><option>Quinquenal</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Carga horária inicial (h)</label>
+        <input type="number" id="novo-trei-ch-ini" placeholder="Ex: 8" min="1">
+      </div>
+      <div class="modal-field">
+        <label>Carga horária reciclagem (h)</label>
+        <input type="number" id="novo-trei-ch-rec" placeholder="Ex: 4" min="1">
+      </div>
+      <div class="modal-field full">
+        <label>Conteúdo programático</label>
+        <textarea id="novo-trei-conteudo" placeholder="Tópicos abordados..."></textarea>
+      </div>
+    </div>
+    <div class="status-bar" id="status-novo-trei"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+      <button class="btn btn-cancel" onclick="fecharModalNovoTreinamento()">Cancelar</button>
+      <button class="btn btn-save" onclick="salvarNovoTreinamento()">
+        <span class="spinner" id="spinner-novo-trei"></span>
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VINCULAR FUNÇÃO -->
+<div class="modal-overlay" id="modal-funcao-trei">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span>🔗 Vincular treinamento à função</span>
+      <button onclick="fecharModalFuncaoTreinamento()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Função <span style="color:var(--accent);">*</span></label>
+        <select id="vf-funcao">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <label>Treinamento <span style="color:var(--accent);">*</span></label>
+        <select id="vf-treinamento">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Obrigatório</label>
+        <select id="vf-obrigatorio">
+          <option value="true">Sim</option>
+          <option value="false">Não</option>
+        </select>
+      </div>
+    </div>
+    <div class="status-bar" id="status-vf"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+      <button class="btn btn-cancel" onclick="fecharModalFuncaoTreinamento()">Cancelar</button>
+      <button class="btn btn-save" onclick="salvarVinculoFuncao()">
+        <span class="spinner" id="spinner-vf"></span>
+        Vincular
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const STORAGE_BUCKET='evidencias';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa={},setores=[],funcoes=[],funcionarios=[],catalogo=[],registros=[],acoes=[];
+let funcaoSetoresMap={};
+let tabAtual='funcionarios';
+let arquivoSelecionado=null;
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]||''}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+
+function calcularStatusVencimento(dataVenc){
+  if(!dataVenc)return{status:'Válido',cls:'venc-valido',dias:null};
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const venc=new Date(dataVenc+'T00:00:00');
+  const dias=Math.ceil((venc-hoje)/(1000*60*60*24));
+  if(dias<0)return{status:'Vencido',cls:'venc-vencido',dias};
+  if(dias<=30)return{status:'A vencer',cls:'venc-avencer',dias};
+  return{status:'Válido',cls:'venc-valido',dias};
+}
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  try{
+    const [resEmp,resSets,resFuncs,resFuncs2,resAcoes,resCat,resReg]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,funcao_id,setor_id,matricula&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&ativo=eq.true&status=neq.Concluída&select=id,titulo&order=titulo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/catalogo_treinamentos?ativo=eq.true&select=*&order=nr_relacionada.asc,nome.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcionario_treinamentos?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=data_vencimento.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresa,setores,funcoes,funcionarios,acoes,catalogo,registros]=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resFuncs2.json(),resAcoes.json(),resCat.json(),resReg.json()]);
+    empresa=empresa[0];
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`Treinamentos — ${nome}`;
+    document.getElementById('header-nome').textContent=nome;
+    // Popula filtros
+    const selSetor=document.getElementById('filtro-setor');
+    setores.forEach(s=>selSetor.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+    renderStats();
+    renderTab();
+  }catch(e){console.error(e);}
+}
+
+function renderStats(){
+  const total=registros.length;
+  const validos=registros.filter(r=>calcularStatusVencimento(r.data_vencimento).status==='Válido').length;
+  const avencer=registros.filter(r=>calcularStatusVencimento(r.data_vencimento).status==='A vencer').length;
+  const vencidos=registros.filter(r=>calcularStatusVencimento(r.data_vencimento).status==='Vencido').length;
+  const semVenc=registros.filter(r=>!r.data_vencimento).length;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total registros</div><div class="stat-value" style="color:var(--text);">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Válidos</div><div class="stat-value" style="color:var(--success);">${validos}</div></div>
+    <div class="stat-card"><div class="stat-label">A vencer (30d)</div><div class="stat-value" style="color:var(--warning);">${avencer}</div></div>
+    <div class="stat-card"><div class="stat-label">Vencidos</div><div class="stat-value" style="color:var(--danger);">${vencidos}</div></div>
+    <div class="stat-card"><div class="stat-label">Sem vencimento</div><div class="stat-value" style="color:var(--text3);">${semVenc}</div></div>`;
+}
+
+function mudarTab(tab){
+  tabAtual=tab;
+  ['funcionarios','funcoes','vencimentos'].forEach(t=>{
+    document.getElementById(`tab-${t}`)?.classList.toggle('active',t===tab);
+  });
+  renderTab();
+}
+
+function aplicarFiltros(){renderTab();}
+
+function filtrarFuncoesPorSetor(){
+  const setorId=document.getElementById('filtro-setor').value;
+  const selFuncao=document.getElementById('filtro-funcao');
+  const funcoesFiltradas=setorId?funcoes.filter(f=>funcionarios.some(fu=>fu.funcao_id===f.id&&fu.setor_id==setorId)):funcoes;
+  selFuncao.innerHTML='<option value="">Todas as funções</option>'+funcoesFiltradas.map(f=>`<option value="${f.id}">${escHtml(f.nome_funcao)}</option>`).join('');
+  aplicarFiltros();
+}
+
+function renderTab(){
+  if(tabAtual==='funcionarios')renderPorFuncionario();
+  else if(tabAtual==='funcoes')renderPorFuncao();
+  else renderVencimentos();
+}
+
+function getRegistrosFiltrados(){
+  const busca=document.getElementById('filtro-busca').value.toLowerCase();
+  const setorId=document.getElementById('filtro-setor').value;
+  const funcaoId=document.getElementById('filtro-funcao').value;
+  const statusFiltro=document.getElementById('filtro-status').value;
+  return registros.filter(r=>{
+    const func=funcionarios.find(f=>f.id===r.funcionario_id);
+    const cat=catalogo.find(c=>c.id===r.treinamento_id);
+    if(busca&&!(func?.nome_completo||'').toLowerCase().includes(busca)&&!(cat?.nome||'').toLowerCase().includes(busca))return false;
+    if(setorId&&func?.setor_id!=setorId)return false;
+    if(funcaoId&&func?.funcao_id!=funcaoId)return false;
+    const sv=calcularStatusVencimento(r.data_vencimento);
+    if(statusFiltro&&sv.status!==statusFiltro)return false;
+    return true;
+  });
+}
+
+function renderPorFuncionario(){
+  const regs=getRegistrosFiltrados();
+  const el=document.getElementById('conteudo-tab');
+  if(!regs.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🎓</div>Nenhum treinamento registrado.</div>`;return;}
+  // Agrupa por funcionário
+  const porFunc={};
+  regs.forEach(r=>{
+    const fId=r.funcionario_id;
+    if(!porFunc[fId])porFunc[fId]=[];
+    porFunc[fId].push(r);
+  });
+  el.innerHTML=Object.entries(porFunc).map(([fId,regsFunc])=>{
+    const func=funcionarios.find(f=>f.id==fId);
+    const funcao=funcoes.find(f=>f.id===func?.funcao_id);
+    const iniciais=(func?.nome_completo||'?').trim().split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+    const vencidos=regsFunc.filter(r=>calcularStatusVencimento(r.data_vencimento).status==='Vencido').length;
+    const avencer=regsFunc.filter(r=>calcularStatusVencimento(r.data_vencimento).status==='A vencer').length;
+    return`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;">
+      <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);">
+        <div style="width:36px;height:36px;border-radius:50%;background:#1e1a40;color:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;">${iniciais}</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:500;">${escHtml(func?.nome_completo||'—')}</div>
+          <div style="font-size:11px;color:var(--text2);">${funcao?escHtml(funcao.nome_funcao):'—'} · ${regsFunc.length} treinamento(s)</div>
+        </div>
+        ${vencidos?`<span class="mini-badge mb-red">⚠ ${vencidos} vencido(s)</span>`:''}
+        ${avencer?`<span class="mini-badge mb-amber">⏰ ${avencer} a vencer</span>`:''}
+      </div>
+      <div style="padding:10px 16px;">
+        ${regsFunc.map(r=>renderRegistroItem(r)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderRegistroItem(r){
+  const cat=catalogo.find(c=>c.id===r.treinamento_id);
+  const sv=calcularStatusVencimento(r.data_vencimento);
+  const corStatus={Válido:'var(--success)',Vencido:'var(--danger)','A vencer':'var(--warning)'}[sv.status]||'var(--text3)';
+  return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);" onclick="abrirDetalhesRegistro(${r.id})" style="cursor:pointer;">
+    <div style="flex:1;">
+      <div style="font-size:12px;font-weight:500;">${escHtml(cat?.nome||'—')}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px;">
+        ${r.tipo} · ${fmtData(r.data_realizacao)}
+        ${r.instrutor?` · ${escHtml(r.instrutor)}`:''}
+        ${r.carga_horaria?` · ${r.carga_horaria}h`:''}
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:11px;color:${corStatus};font-weight:500;">${sv.status}</div>
+      ${r.data_vencimento?`<div style="font-size:10px;color:var(--text3);">Vence: ${fmtData(r.data_vencimento)}</div>`:''}
+    </div>
+    ${r.evidencia_url?`<a href="${r.evidencia_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:18px;text-decoration:none;" title="Ver evidência">📎</a>`:''}
+  </div>`;
+}
+
+function renderPorFuncao(){
+  const el=document.getElementById('conteudo-tab');
+  if(!funcoes.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🔧</div>Nenhuma função cadastrada.</div>`;return;}
+  // Busca vínculos função × treinamento
+  fetch(`${SUPA_URL}/rest/v1/funcao_treinamentos?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+  .then(r=>r.json())
+  .then(vinculos=>{
+    if(!vinculos.length){
+      el.innerHTML=`<div class="empty"><div class="empty-icon">🔗</div><div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;">Nenhum treinamento vinculado às funções</div><div>Clique em "Vincular à função" para associar treinamentos.</div></div>`;
+      return;
+    }
+    const funcoesDaEmpresa=funcoes.filter(f=>vinculos.some(v=>v.funcao_id===f.id));
+    el.innerHTML=funcoesDaEmpresa.map(f=>{
+      const vFunc=vinculos.filter(v=>v.funcao_id===f.id);
+      return`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:13px;font-weight:500;">🔧 ${escHtml(f.nome_funcao)}</div>
+          <span class="mini-badge mb-info">${vFunc.length} treinamento(s)</span>
+        </div>
+        <div style="padding:10px 16px;">
+          ${vFunc.map(v=>{
+            const cat=catalogo.find(c=>c.id===v.treinamento_id);
+            return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+              <div style="flex:1;">
+                <div style="font-size:12px;font-weight:500;">${escHtml(cat?.nome||'—')}</div>
+                <div style="font-size:10px;color:var(--text3);">
+                  ${cat?.nr_relacionada||''}
+                  ${cat?.carga_horaria_inicial?` · ${cat.carga_horaria_inicial}h inicial`:''}
+                  ${cat?.periodicidade_reciclagem?` · Reciclagem: ${cat.periodicidade_reciclagem}`:''}
+                </div>
+              </div>
+              ${v.obrigatorio?`<span class="mini-badge mb-amber">Obrigatório</span>`:`<span class="mini-badge mb-info">Opcional</span>`}
+              <button onclick="removerVinculoFuncao(${v.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;" title="Remover">✕</button>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  });
+}
+
+function renderVencimentos(){
+  const el=document.getElementById('conteudo-tab');
+  const regs=getRegistrosFiltrados()
+    .filter(r=>r.data_vencimento)
+    .sort((a,b)=>new Date(a.data_vencimento)-new Date(b.data_vencimento));
+  if(!regs.length){el.innerHTML=`<div class="empty"><div class="empty-icon">⏰</div>Nenhum vencimento registrado.</div>`;return;}
+  // Agrupa por status
+  const vencidos=regs.filter(r=>calcularStatusVencimento(r.data_vencimento).status==='Vencido');
+  const avencer=regs.filter(r=>calcularStatusVencimento(r.data_vencimento).status==='A vencer');
+  const validos=regs.filter(r=>calcularStatusVencimento(r.data_vencimento).status==='Válido');
+  const renderGrupo=(titulo,lista,cor)=>{
+    if(!lista.length)return'';
+    return`<div class="section-label" style="color:${cor};">${titulo} (${lista.length})</div>
+    ${lista.map(r=>{
+      const func=funcionarios.find(f=>f.id===r.funcionario_id);
+      const cat=catalogo.find(c=>c.id===r.treinamento_id);
+      const sv=calcularStatusVencimento(r.data_vencimento);
+      return`<div class="lista-item" onclick="abrirDetalhesRegistro(${r.id})">
+        <div style="width:8px;height:8px;border-radius:50%;background:${cor};flex-shrink:0;"></div>
+        <div class="lista-item-info">
+          <div class="lista-item-nome">${escHtml(func?.nome_completo||'—')}</div>
+          <div class="lista-item-meta">
+            <span>🎓 ${escHtml(cat?.nome||'—')}</span>
+            <span>Realizado: ${fmtData(r.data_realizacao)}</span>
+            <span style="color:${cor};">Vence: ${fmtData(r.data_vencimento)} ${sv.dias!==null?`(${sv.dias>0?'+':''}${sv.dias}d)`:''}</span>
+          </div>
+        </div>
+        <button class="btn btn-edit btn-sm" onclick="event.stopPropagation();renovarTreinamento(${r.id})">↻ Renovar</button>
+      </div>`;
+    }).join('')}`;
+  };
+  el.innerHTML=renderGrupo('⚠️ Vencidos',vencidos,'var(--danger)')+renderGrupo('⏰ A vencer em 30 dias',avencer,'var(--warning)')+renderGrupo('✅ Válidos',validos,'var(--success)');
+}
+
+// ── MODAL REGISTRO ────────────────────────────────────
+function abrirModalRegistro(prefFuncionarioId=null){
+  // Popula funcionários
+  const selFunc=document.getElementById('reg-funcionario');
+  selFunc.innerHTML='<option value="">— Selecione —</option>'+funcionarios.map(f=>`<option value="${f.id}" ${prefFuncionarioId==f.id?'selected':''}>${escHtml(f.nome_completo)}</option>`).join('');
+  // Popula treinamentos
+  const selTrei=document.getElementById('reg-treinamento');
+  selTrei.innerHTML='<option value="">— Selecione —</option>'+catalogo.map(c=>`<option value="${c.id}">${escHtml(c.nome)}${c.nr_relacionada?' ('+c.nr_relacionada+')':''}</option>`).join('');
+  // Popula ações abertas
+  const selAcao=document.getElementById('reg-acao');
+  selAcao.innerHTML='<option value="">— Nenhuma —</option>'+acoes.map(a=>`<option value="${a.id}">${escHtml(a.titulo)}</option>`).join('');
+  // Limpa campos
+  ['reg-tipo','reg-data','reg-vencimento','reg-carga','reg-instrutor','reg-local','reg-certificado','reg-observacao'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'?el.options[0]?.value||'':'';
+  });
+  removerArquivo();
+  clearStatus('status-registro');
+  document.getElementById('modal-registro').classList.add('show');
+}
+
+function fecharModalRegistro(){
+  document.getElementById('modal-registro').classList.remove('show');
+}
+
+function preencherDadosTreinamento(){
+  const tId=parseInt(document.getElementById('reg-treinamento').value);
+  const cat=catalogo.find(c=>c.id===tId);
+  if(!cat)return;
+  document.getElementById('reg-carga').value=cat.carga_horaria_inicial||'';
+  calcularVencimento();
+}
+
+function calcularVencimento(){
+  const tId=parseInt(document.getElementById('reg-treinamento').value);
+  const data=document.getElementById('reg-data').value;
+  const tipo=document.getElementById('reg-tipo').value;
+  const cat=catalogo.find(c=>c.id===tId);
+  if(!data||!cat?.periodicidade_reciclagem)return;
+  const periodos={'Anual':365,'Bienal':730,'Trienal':1095,'Quinquenal':1825};
+  const dias=periodos[cat.periodicidade_reciclagem];
+  if(!dias)return;
+  const venc=new Date(data+'T00:00:00');
+  venc.setDate(venc.getDate()+dias);
+  document.getElementById('reg-vencimento').value=venc.toISOString().split('T')[0];
+  if(tipo==='Reciclagem')document.getElementById('reg-carga').value=cat.carga_horaria_reciclagem||'';
+}
+
+// ── UPLOAD ────────────────────────────────────────────
+function dragOver(e){e.preventDefault();document.getElementById('upload-area').classList.add('dragover');}
+function dropArquivo(e){
+  e.preventDefault();
+  document.getElementById('upload-area').classList.remove('dragover');
+  const file=e.dataTransfer.files[0];
+  if(file)processarArquivo(file);
+}
+function selecionarArquivo(input){
+  const file=input.files[0];
+  if(file)processarArquivo(file);
+}
+function processarArquivo(file){
+  if(file.size>10*1024*1024){alert('Arquivo muito grande. Máximo 10MB.');return;}
+  arquivoSelecionado=file;
+  document.getElementById('upload-area').style.display='none';
+  document.getElementById('upload-preview').style.display='flex';
+  document.getElementById('upload-nome').textContent=file.name;
+  document.getElementById('upload-tamanho').textContent=(file.size/1024).toFixed(1)+' KB';
+}
+function removerArquivo(){
+  arquivoSelecionado=null;
+  document.getElementById('reg-arquivo').value='';
+  document.getElementById('upload-area').style.display='block';
+  document.getElementById('upload-preview').style.display='none';
+}
+
+async function uploadEvidencia(file,funcionarioId,treinamentoId){
+  const ext=file.name.split('.').pop();
+  const path=`${empresaId}/${funcionarioId}/${treinamentoId}_${Date.now()}.${ext}`;
+  const res=await fetch(`${SUPA_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`,{
+    method:'POST',
+    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':file.type},
+    body:file
+  });
+  if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro no upload');}
+  return{url:`${SUPA_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`,nome:file.name};
+}
+
+async function salvarRegistro(){
+  const funcId=parseInt(document.getElementById('reg-funcionario').value);
+  const tId=parseInt(document.getElementById('reg-treinamento').value);
+  const data=document.getElementById('reg-data').value;
+  if(!funcId){alert('Selecione o funcionário.');return;}
+  if(!tId){alert('Selecione o treinamento.');return;}
+  if(!data){alert('Informe a data de realização.');return;}
+  document.getElementById('btn-salvar-registro').disabled=true;
+  document.getElementById('spinner-registro').className='spinner show';
+  document.getElementById('label-registro').textContent='Salvando...';
+  try{
+    let evidenciaUrl=null,evidenciaNome=null;
+    if(arquivoSelecionado){
+      setStatus('status-registro','info','Enviando arquivo...');
+      const up=await uploadEvidencia(arquivoSelecionado,funcId,tId);
+      evidenciaUrl=up.url;evidenciaNome=up.nome;
+    }
+    const acaoId=parseInt(document.getElementById('reg-acao').value)||null;
+    const payload={
+      funcionario_id:funcId,
+      treinamento_id:tId,
+      empresa_id:parseInt(empresaId),
+      funcao_id:funcionarios.find(f=>f.id===funcId)?.funcao_id||null,
+      tipo:document.getElementById('reg-tipo').value,
+      data_realizacao:data,
+      data_vencimento:document.getElementById('reg-vencimento').value||null,
+      carga_horaria:parseInt(document.getElementById('reg-carga').value)||null,
+      instrutor:document.getElementById('reg-instrutor').value.trim()||null,
+      local_realizacao:document.getElementById('reg-local').value.trim()||null,
+      numero_certificado:document.getElementById('reg-certificado').value.trim()||null,
+      evidencia_url:evidenciaUrl,
+      evidencia_nome:evidenciaNome,
+      acao_id:acaoId,
+      status:calcularStatusVencimento(document.getElementById('reg-vencimento').value||null).status,
+      observacao:document.getElementById('reg-observacao').value.trim()||null,
+      ativo:true
+    };
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionario_treinamentos`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar');}
+    const data2=await res.json();
+    registros.unshift(data2[0]);
+    // Se havia ação vinculada, concluí-la e gerar nova ação de reciclagem
+    if(acaoId){
+      await concluirAcaoTreinamento(acaoId,tId,data2[0]);
+    }
+    renderStats();renderTab();
+    fecharModalRegistro();
+    setStatus('status-registro','success','Treinamento registrado!');
+  }catch(e){
+    setStatus('status-registro','error',e.message);
+  }finally{
+    document.getElementById('btn-salvar-registro').disabled=false;
+    document.getElementById('spinner-registro').className='spinner';
+    document.getElementById('label-registro').textContent='Salvar registro';
+  }
+}
+
+async function concluirAcaoTreinamento(acaoId,treinamentoId,registro){
+  try{
+    // Conclui a ação
+    await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${acaoId}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({status:'Concluída',data_conclusao:registro.data_realizacao,evidencia:'Treinamento registrado no módulo de treinamentos.',atualizado_em:new Date().toISOString()})
+    });
+    // Registra no histórico da ação
+    await fetch(`${SUPA_URL}/rest/v1/acoes_historico`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({acao_id:acaoId,empresa_id:parseInt(empresaId),status_anterior:'Em andamento',status_novo:'Concluída',comentario:'Treinamento realizado e registrado automaticamente.'})
+    });
+    // Se tem data de vencimento, gera nova ação de reciclagem
+    if(registro.data_vencimento){
+      const cat=catalogo.find(c=>c.id===treinamentoId);
+      const acao=acoes.find(a=>a.id===acaoId);
+      await fetch(`${SUPA_URL}/rest/v1/acoes`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+        body:JSON.stringify({
+          empresa_id:parseInt(empresaId),
+          titulo:`Reciclagem: ${cat?.nome||'Treinamento'} — ${registro.data_vencimento}`,
+          descricao:`Reciclagem do treinamento ${cat?.nome||''} conforme periodicidade ${cat?.periodicidade_reciclagem||'anual'}.`,
+          origem:'PGR',
+          prioridade:'Média',
+          status:'Pendente',
+          prazo:registro.data_vencimento,
+          ativo:true
+        })
+      });
+    }
+  }catch(e){console.error('Erro ao concluir ação:',e);}
+}
+
+function renovarTreinamento(registroId){
+  const r=registros.find(x=>x.id===registroId);
+  if(!r)return;
+  abrirModalRegistro(r.funcionario_id);
+  setTimeout(()=>{
+    document.getElementById('reg-treinamento').value=r.treinamento_id;
+    document.getElementById('reg-tipo').value='Reciclagem';
+    preencherDadosTreinamento();
+  },100);
+}
+
+function abrirDetalhesRegistro(id){
+  const r=registros.find(x=>x.id===id);
+  if(!r)return;
+  const cat=catalogo.find(c=>c.id===r.treinamento_id);
+  const func=funcionarios.find(f=>f.id===r.funcionario_id);
+  const sv=calcularStatusVencimento(r.data_vencimento);
+  const corStatus={Válido:'var(--success)',Vencido:'var(--danger)','A vencer':'var(--warning)'}[sv.status];
+  alert(`${cat?.nome||'—'}\nFuncionário: ${func?.nome_completo||'—'}\nData: ${fmtData(r.data_realizacao)}\nVencimento: ${fmtData(r.data_vencimento)}\nStatus: ${sv.status}\nInstrutor: ${r.instrutor||'—'}\nCertificado: ${r.numero_certificado||'—'}`);
+  // Futuramente: modal de detalhes completo
+}
+
+// ── CATÁLOGO ──────────────────────────────────────────
+function abrirModalCatalogo(){
+  renderCatalogo();
+  document.getElementById('modal-catalogo').classList.add('show');
+}
+function fecharModalCatalogo(){document.getElementById('modal-catalogo').classList.remove('show');}
+
+function renderCatalogo(){
+  const busca=(document.getElementById('busca-catalogo')?.value||'').toLowerCase();
+  const lista=document.getElementById('lista-catalogo');
+  const filtrado=catalogo.filter(c=>!busca||c.nome.toLowerCase().includes(busca)||(c.nr_relacionada||'').toLowerCase().includes(busca));
+  if(!filtrado.length){lista.innerHTML=`<div class="empty">Nenhum treinamento encontrado.</div>`;return;}
+  // Agrupa por NR
+  const grupos={};
+  filtrado.forEach(c=>{
+    const g=c.nr_relacionada||'Geral';
+    if(!grupos[g])grupos[g]=[];
+    grupos[g].push(c);
+  });
+  lista.innerHTML=Object.entries(grupos).sort().map(([nr,items])=>`
+    <div class="section-label">${nr}</div>
+    ${items.map(c=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:500;">${escHtml(c.nome)}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">
+          ${c.carga_horaria_inicial?`${c.carga_horaria_inicial}h inicial`:''}
+          ${c.carga_horaria_reciclagem?` · ${c.carga_horaria_reciclagem}h reciclagem`:''}
+          ${c.periodicidade_reciclagem?` · ${c.periodicidade_reciclagem}`:''}
+          ${c.customizado?` · <span style="color:var(--accent2);">Customizado</span>`:''}
+        </div>
+      </div>
+      ${c.obrigatorio_esocial?`<span class="mini-badge mb-blue">eSocial</span>`:''}
+    </div>`).join('')}
+  `).join('');
+}
+
+function abrirModalNovoTreinamento(){
+  ['novo-trei-nome','novo-trei-nr','novo-trei-ch-ini','novo-trei-ch-rec','novo-trei-conteudo'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  clearStatus('status-novo-trei');
+  document.getElementById('modal-novo-trei').classList.add('show');
+}
+function fecharModalNovoTreinamento(){document.getElementById('modal-novo-trei').classList.remove('show');}
+
+async function salvarNovoTreinamento(){
+  const nome=document.getElementById('novo-trei-nome').value.trim();
+  if(!nome){alert('Informe o nome do treinamento.');return;}
+  document.getElementById('spinner-novo-trei').className='spinner show';
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/catalogo_treinamentos`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({
+        nome,
+        nr_relacionada:document.getElementById('novo-trei-nr').value.trim()||null,
+        carga_horaria_inicial:parseInt(document.getElementById('novo-trei-ch-ini').value)||null,
+        carga_horaria_reciclagem:parseInt(document.getElementById('novo-trei-ch-rec').value)||null,
+        periodicidade_reciclagem:document.getElementById('novo-trei-period').value,
+        conteudo_programatico:document.getElementById('novo-trei-conteudo').value.trim()||null,
+        customizado:true,ativo:true
+      })
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
+    const data=await res.json();
+    catalogo.push(data[0]);
+    catalogo.sort((a,b)=>a.nome.localeCompare(b.nome));
+    fecharModalNovoTreinamento();
+    renderCatalogo();
+    setStatus('status-novo-trei','success','Treinamento criado!');
+  }catch(e){
+    setStatus('status-novo-trei','error',e.message);
+  }finally{
+    document.getElementById('spinner-novo-trei').className='spinner';
+  }
+}
+
+// ── VINCULAR FUNÇÃO ───────────────────────────────────
+function abrirModalFuncaoTreinamento(){
+  const selF=document.getElementById('vf-funcao');
+  const selT=document.getElementById('vf-treinamento');
+  selF.innerHTML='<option value="">— Selecione —</option>'+funcoes.map(f=>`<option value="${f.id}">${escHtml(f.nome_funcao)}</option>`).join('');
+  selT.innerHTML='<option value="">— Selecione —</option>'+catalogo.map(c=>`<option value="${c.id}">${escHtml(c.nome)}${c.nr_relacionada?' ('+c.nr_relacionada+')':''}</option>`).join('');
+  clearStatus('status-vf');
+  document.getElementById('modal-funcao-trei').classList.add('show');
+}
+function fecharModalFuncaoTreinamento(){document.getElementById('modal-funcao-trei').classList.remove('show');}
+
+async function salvarVinculoFuncao(){
+  const fId=parseInt(document.getElementById('vf-funcao').value);
+  const tId=parseInt(document.getElementById('vf-treinamento').value);
+  if(!fId||!tId){alert('Selecione função e treinamento.');return;}
+  document.getElementById('spinner-vf').className='spinner show';
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_treinamentos`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({funcao_id:fId,treinamento_id:tId,obrigatorio:document.getElementById('vf-obrigatorio').value==='true',ativo:true})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||e.details||'Erro ao vincular');}
+    fecharModalFuncaoTreinamento();
+    if(tabAtual==='funcoes')renderTab();
+    setStatus('status-vf','success','Vínculo criado!');
+  }catch(e){
+    setStatus('status-vf','error',e.message.includes('unique')?'Este treinamento já está vinculado a esta função.':e.message);
+  }finally{
+    document.getElementById('spinner-vf').className='spinner';
+  }
+}
+
+async function removerVinculoFuncao(id){
+  if(!confirm('Remover este vínculo?'))return;
+  await fetch(`${SUPA_URL}/rest/v1/funcao_treinamentos?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});
+  renderTab();
+}
+
+// Fecha modais ao clicar fora
+['modal-registro','modal-catalogo','modal-novo-trei','modal-funcao-trei'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('click',e=>{
+    if(e.target.id===id)document.getElementById(id).classList.remove('show');
+  });
+});
+
+// Atualiza sugestões automáticas para incluir treinamentos
+async function atualizarSugestoesComTreinamentos(){
+  // Será chamado pela Central de Ações automaticamente via nova UNION ALL na função SQL
+}
+
+inicializar();
+</script>
+</body>
+</html>
