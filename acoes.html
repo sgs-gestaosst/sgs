@@ -152,6 +152,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <button class="view-btn active" id="btn-kanban" onclick="setView('kanban')">⬛ Kanban</button>
         <button class="view-btn" id="btn-lista" onclick="setView('lista')">☰ Lista</button>
       </div>
+      <button class="btn btn-edit" onclick="abrirModalGerarAcoes()" style="border-color:#e0a855;color:#e0a855;">🤖 Gerar automáticas</button>
       <button class="btn btn-primary" onclick="abrirModalNova()">+ Nova ação</button>
     </div>
   </div>
@@ -186,6 +187,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <!-- Lista -->
   <div class="lista-view" id="lista-view"></div>
+</div>
+
+<!-- MODAL SUGESTÕES AUTOMÁTICAS -->
+<div class="modal-overlay" id="modal-sugestoes">
+  <div class="modal" style="max-width:740px;">
+    <div class="modal-titulo">
+      <span>⚙️ Ações sugeridas automaticamente</span>
+      <button onclick="fecharModalSugestoes()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">As ações abaixo foram identificadas com base no PGR, PCMSO, SESMT e exames cadastrados. Selecione as que deseja criar:</p>
+    <div id="lista-sugestoes" style="max-height:400px;overflow-y:auto;"></div>
+    <div class="status-bar" id="status-sugestoes"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+      <div style="font-size:12px;color:var(--text2);" id="count-sugestoes"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModalSugestoes()">Cancelar</button>
+        <button class="btn btn-save" id="btn-criar-sugestoes" onclick="criarAcoesSelecionadas()">
+          <span class="spinner" id="spinner-sugestoes"></span>
+          <span id="label-sugestoes">Criar selecionadas</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL AÇÃO -->
@@ -281,7 +305,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   </div>
 </div>
 
-<script>
+<!-- MODAL GERAR AÇÕES AUTOMÁTICAS -->
+<div class="modal-overlay" id="modal-gerar">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-titulo">
+      <span>🤖 Gerar ações automáticas</span>
+      <button onclick="fecharModalGerar()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">
+      Ações sugeridas com base no que está cadastrado no sistema. Desmarque as que não deseja criar. Ações já existentes não serão duplicadas.
+    </div>
+    <div id="lista-acoes-sugeridas" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;"></div>
+    <div class="status-bar" id="status-gerar" style="margin-top:12px;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+      <span id="gerar-count" style="font-size:12px;color:var(--text2);"></span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModalGerar()">Cancelar</button>
+        <button class="btn btn-save" id="btn-confirmar-gerar" onclick="confirmarGerarAcoes()">
+          <span class="spinner" id="spinner-gerar"></span>
+          <span id="label-gerar">Criar ações selecionadas</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
 const token=localStorage.getItem('sgs_token');
@@ -659,6 +706,136 @@ async function adicionarComentario(){
 // Fecha modal ao clicar fora
 document.getElementById('modal-acao').addEventListener('click',e=>{
   if(e.target===document.getElementById('modal-acao'))fecharModalAcao();
+});
+
+// ── SUGESTÕES AUTOMÁTICAS ────────────────────────────
+let sugestoes=[];
+
+async function abrirModalGerarAcoes(){
+  document.getElementById('lista-sugestoes').innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);">↻ Buscando sugestões...</div>`;
+  document.getElementById('modal-sugestoes').classList.add('show');
+  clearStatus('status-sugestoes');
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/rpc/sugerir_acoes_automaticas`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({p_empresa_id:parseInt(empresaId)})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao buscar sugestões');}
+    sugestoes=await res.json();
+    renderSugestoes();
+  }catch(e){
+    document.getElementById('lista-sugestoes').innerHTML=`<div style="color:var(--danger);padding:16px;">Erro: ${e.message}</div>`;
+  }
+}
+
+function renderSugestoes(){
+  const lista=document.getElementById('lista-sugestoes');
+  if(!sugestoes.length){
+    lista.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);">
+      <div style="font-size:24px;margin-bottom:8px;">✅</div>
+      <div>Nenhuma sugestão — todas as ações requeridas já foram criadas!</div>
+    </div>`;
+    document.getElementById('count-sugestoes').textContent='';
+    return;
+  }
+  const ORIG_COR={'PGR':'#1a3a6e','PCMSO':'#0d3d2e','Checklist':'#3a2a10','Manual':'#1e2333'};
+  const PRIOR_COR={'Alta':'#e05555','Média':'#e0a855','Baixa':'#2dd4a0','Crítica':'#ff4444'};
+  lista.innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+      <input type="checkbox" id="check-all" onchange="toggleTodos(this.checked)" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+      <label for="check-all" style="font-size:12px;color:var(--text2);cursor:pointer;">Selecionar todas (${sugestoes.length})</label>
+    </div>
+    ${sugestoes.map((s,i)=>`
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <input type="checkbox" id="sug-${i}" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin-top:2px;flex-shrink:0;">
+      <label for="sug-${i}" style="flex:1;cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+          <span style="font-size:13px;font-weight:500;color:var(--text);">${escHtml(s.titulo)}</span>
+          <span style="font-size:10px;padding:2px 7px;border-radius:3px;background:${ORIG_COR[s.origem]||'#1e2333'};color:var(--text2);">${s.origem}</span>
+          <span style="font-size:10px;padding:2px 7px;border-radius:3px;background:#1e1515;color:${PRIOR_COR[s.prioridade]||'var(--text2)'};">${s.prioridade}</span>
+          ${s.setor_nome?`<span style="font-size:10px;color:var(--text3);">🗂️ ${escHtml(s.setor_nome)}</span>`:''}
+        </div>
+        <div style="font-size:11px;color:var(--text3);">${escHtml(s.descricao||'')}${s.prazo?` · 📅 Prazo: ${fmtData(s.prazo)}`:''}</div>
+      </label>
+    </div>`).join('')}`;
+  atualizarCountSugestoes();
+  // Listener para atualizar count ao mudar checkbox
+  sugestoes.forEach((_,i)=>{
+    document.getElementById(`sug-${i}`)?.addEventListener('change',atualizarCountSugestoes);
+  });
+}
+
+function toggleTodos(checked){
+  sugestoes.forEach((_,i)=>{
+    const el=document.getElementById(`sug-${i}`);
+    if(el)el.checked=checked;
+  });
+  atualizarCountSugestoes();
+}
+
+function atualizarCountSugestoes(){
+  const selecionadas=sugestoes.filter((_,i)=>document.getElementById(`sug-${i}`)?.checked).length;
+  document.getElementById('count-sugestoes').textContent=`${selecionadas} de ${sugestoes.length} selecionada(s)`;
+  // Atualiza check-all
+  const checkAll=document.getElementById('check-all');
+  if(checkAll)checkAll.checked=selecionadas===sugestoes.length;
+}
+
+async function criarAcoesSelecionadas(){
+  const selecionadas=sugestoes.filter((_,i)=>document.getElementById(`sug-${i}`)?.checked);
+  if(!selecionadas.length){alert('Selecione pelo menos uma ação.');return;}
+  document.getElementById('btn-criar-sugestoes').disabled=true;
+  document.getElementById('spinner-sugestoes').className='spinner show';
+  document.getElementById('label-sugestoes').textContent='Criando...';
+  try{
+    let criadas=0;
+    for(const s of selecionadas){
+      const res=await fetch(`${SUPA_URL}/rest/v1/acoes`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify({
+          empresa_id:parseInt(empresaId),
+          titulo:s.titulo,
+          descricao:s.descricao||null,
+          origem:s.origem,
+          prioridade:s.prioridade,
+          setor_id:s.setor_id||null,
+          prazo:s.prazo||null,
+          status:'Pendente',
+          ativo:true
+        })
+      });
+      if(res.ok){
+        const data=await res.json();
+        acoes.unshift(data[0]);
+        // Histórico
+        await registrarHistorico(data[0].id,null,'Pendente','Ação criada automaticamente pelo sistema');
+        criadas++;
+      }
+    }
+    acoesFiltradas=[...acoes];
+    renderStats();renderView();atualizarHeroSub();
+    fecharModalSugestoes();
+    setStatus('status-acao','success',`${criadas} ação(ões) criada(s) com sucesso!`);
+    setTimeout(()=>clearStatus('status-acao'),4000);
+  }catch(e){
+    setStatus('status-sugestoes','error',`Erro: ${e.message}`);
+  }finally{
+    document.getElementById('btn-criar-sugestoes').disabled=false;
+    document.getElementById('spinner-sugestoes').className='spinner';
+    document.getElementById('label-sugestoes').textContent='Criar selecionadas';
+  }
+}
+
+function fecharModalSugestoes(){
+  document.getElementById('modal-sugestoes').classList.remove('show');
+  sugestoes=[];
+}
+
+// Fecha ao clicar fora
+document.getElementById('modal-sugestoes').addEventListener('click',e=>{
+  if(e.target===document.getElementById('modal-sugestoes'))fecharModalSugestoes();
 });
 
 inicializar();
