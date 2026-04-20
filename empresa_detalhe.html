@@ -187,6 +187,7 @@
       </div>
       <div class="hero-actions" id="hero-actions">
         <a id="btn-riscos" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">⚠️ Riscos</a>
+        <a id="btn-pgr" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">📄 PGR</a>
         <button class="btn btn-danger" onclick="abrirModal()">Excluir</button>
         <button class="btn btn-edit" onclick="modoEditar()">Editar</button>
       </div>
@@ -696,6 +697,8 @@ async function carregarEmpresa(){
     // Ativa botão de riscos
     const btnRiscos=document.getElementById('btn-riscos');
     if(btnRiscos){btnRiscos.href=`riscos.html?empresa_id=${empresaId}`;btnRiscos.style.display='inline-flex';}
+    const btnPgr=document.getElementById('btn-pgr');
+    if(btnPgr){btnPgr.href=`pgr.html?empresa_id=${empresaId}`;btnPgr.style.display='inline-flex';}
   }catch(e){console.error(e);}
 }
 
