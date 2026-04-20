@@ -186,6 +186,7 @@
         <div class="hero-badges" id="hero-badges"></div>
       </div>
       <div class="hero-actions" id="hero-actions">
+        <a id="btn-riscos" href="#" class="btn btn-edit" style="display:none;">⚠️ Riscos</a>
         <button class="btn btn-danger" onclick="abrirModal()">Excluir</button>
         <button class="btn btn-edit" onclick="modoEditar()">Editar</button>
       </div>
@@ -692,6 +693,9 @@ async function carregarEmpresa(){
     if(!empData.length){window.location.href='empresas.html';return;}
     empresa=empData[0];cnaes=cnaesData;
     renderHero();renderCampos();renderCNAEs();
+    // Ativa botão de riscos
+    const btnRiscos=document.getElementById('btn-riscos');
+    if(btnRiscos){btnRiscos.href=`riscos.html?empresa_id=${empresaId}`;btnRiscos.style.display='inline-flex';}
   }catch(e){console.error(e);}
 }
 
