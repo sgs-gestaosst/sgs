@@ -170,8 +170,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
   <span style="font-size:13px;color:var(--text2);">Visualização do documento</span>
   <div class="screen-actions">
+    <button class="btn btn-edit" onclick="toggleElaboradora()" id="btn-elab">✏️ Empresa elaboradora</button>
     <a id="btn-voltar" href="#" class="btn btn-edit" style="text-decoration:none;">← Voltar</a>
     <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  </div>
+</div>
+
+<!-- Painel empresa elaboradora -->
+<div id="painel-elaboradora" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:14px 32px;">
+  <div style="max-width:800px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:end;">
+    <div>
+      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Nome da empresa elaboradora</label>
+      <input type="text" id="elab-nome" placeholder="Ex: SST Consultoria Ltda" oninput="atualizarElaboradora()"
+        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+    </div>
+    <div>
+      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">CNPJ da elaboradora</label>
+      <input type="text" id="elab-cnpj" placeholder="00.000.000/0000-00" oninput="atualizarElaboradora()"
+        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+    </div>
+    <div>
+      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Responsável técnico</label>
+      <input type="text" id="elab-responsavel" placeholder="Nome do Técnico / Engenheiro" oninput="atualizarElaboradora()"
+        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+    </div>
+  </div>
+  <div style="max-width:800px;margin:8px auto 0;font-size:11px;color:var(--text3);">
+    ℹ️ Estes dados aparecem na capa e rodapé do documento. Preenchimento opcional — não são salvos no banco.
   </div>
 </div>
 
@@ -251,13 +276,13 @@ function renderCapa(){
   const pg=document.createElement('div');
   pg.className='page';
   const gr=empresa.grau_risco;
-  const cnpjFormatado=empresa.cnpj_raiz?empresa.cnpj_raiz.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'Não informado';
+  const cnpjFormatado=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'Não informado';
   pg.innerHTML=`
   <div class="capa">
     <div class="capa-logo-wrap">
-      <div class="capa-logo-box"><span class="capa-logo-text">SGS</span></div>
+      <div id="doc-elab-logo" class="capa-logo-box"><span class="capa-logo-text">SST</span></div>
       <div>
-        <div style="font-size:10pt;font-weight:700;color:#0d2040;">Sistema de Gestão em SST</div>
+        <div id="doc-elab-nome" style="font-size:10pt;font-weight:700;color:#0d2040;">Empresa Elaboradora</div>
         <div class="capa-sistema">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
       </div>
     </div>
@@ -291,11 +316,11 @@ function renderCapa(){
       </div>
       <div style="text-align:center;">
         <div class="capa-footer-label">Elaboração</div>
-        <div class="capa-footer-value">SGS — Sistema de Gestão em SST</div>
+        <div class="capa-footer-value" id="doc-elab-footer" class="elab-responsavel">—</div>
       </div>
       <div style="text-align:right;">
-        <div class="capa-footer-label">Próxima revisão</div>
-        <div class="capa-footer-value">Anual</div>
+        <div class="capa-footer-label">Periodicidade de revisão</div>
+        <div class="capa-footer-value">Anual ou quando necessário*</div>
       </div>
     </div>
   </div>`;
@@ -350,7 +375,7 @@ function renderSumario(){
 function renderIdentificacao(){
   const pg=document.createElement('div');
   pg.className='page';
-  const cnpjF=empresa.cnpj_raiz?empresa.cnpj_raiz.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'—';
+  const cnpjF=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'—';
   const gr=empresa.grau_risco;
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
   pg.innerHTML=`
@@ -438,7 +463,6 @@ function renderCaracterizacao(){
   const pg=document.createElement('div');
   pg.className='page';
   const totalFunc=empresa.total_funcionarios_previsto||0;
-  const totalCad=empresa.total_funcionarios_cadastrados||0;
   pg.innerHTML=`
   <div class="page-header">
     <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
@@ -611,8 +635,16 @@ function renderPlanoAcao(){
     <div class="em-breve-label">Cadastre as medidas de controle no módulo de Riscos para gerar o Plano de Ação automaticamente.</div>
   </div>`}
 
-  <div class="doc-subsection" style="margin-top:16pt;">Monitoramento e revisão</div>
-  <p class="doc-text">Este PGR deverá ser revisado anualmente ou sempre que houver mudança nos processos produtivos, introdução de novos agentes de risco, ocorrência de acidentes de trabalho ou doenças ocupacionais, ou alteração no quadro de funcionários que impacte a exposição aos riscos identificados.</p>
+  <div class="doc-subsection" style="margin-top:16pt;">Monitoramento e revisão — NR-1</div>
+  <p class="doc-text">Conforme a NR-1 (Portaria MTE nº 672/2021), este PGR deverá ser revisado:</p>
+  <ul style="margin:8pt 0 8pt 16pt;font-size:9.5pt;color:#374151;line-height:1.8;">
+    <li><strong>Anualmente</strong> — revisão periódica obrigatória;</li>
+    <li>Sempre que houver <strong>mudança nos processos produtivos</strong> que implique alteração dos riscos ocupacionais;</li>
+    <li>Após <strong>acidente grave, acidente fatal</strong> ou diagnóstico de doença ocupacional;</li>
+    <li>Quando houver <strong>inclusão de novos agentes de risco</strong> não previstos no inventário;</li>
+    <li>Quando solicitado por <strong>Auditor Fiscal do Trabalho</strong>.</li>
+  </ul>
+  <p class="doc-text">* Independentemente das situações acima, a revisão anual é obrigatória mesmo que não haja alterações nos processos ou riscos identificados.</p>
 
   <div style="margin-top:30pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
     ${['Elaborado por','Revisado por','Aprovado por'].map(label=>`

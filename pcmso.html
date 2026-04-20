@@ -111,8 +111,32 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
   <span style="font-size:13px;color:var(--text2);">Visualização do documento</span>
   <div class="screen-actions">
+    <button class="btn btn-edit" onclick="toggleElaboradora()">✏️ Empresa elaboradora</button>
     <a id="btn-voltar" href="#" class="btn btn-edit" style="text-decoration:none;">← Voltar</a>
     <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  </div>
+</div>
+
+<div id="painel-elaboradora" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:14px 32px;">
+  <div style="max-width:800px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:end;">
+    <div>
+      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Nome da empresa elaboradora</label>
+      <input type="text" id="elab-nome" placeholder="Ex: SST Consultoria Ltda" oninput="atualizarElaboradora()"
+        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+    </div>
+    <div>
+      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">CNPJ da elaboradora</label>
+      <input type="text" id="elab-cnpj" placeholder="00.000.000/0000-00" oninput="atualizarElaboradora()"
+        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+    </div>
+    <div>
+      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Médico responsável / RT</label>
+      <input type="text" id="elab-responsavel" placeholder="Nome + CRM" oninput="atualizarElaboradora()"
+        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+    </div>
+  </div>
+  <div style="max-width:800px;margin:8px auto 0;font-size:11px;color:var(--text3);">
+    ℹ️ Estes dados aparecem na capa e rodapé do documento. Preenchimento opcional — não são salvos no banco.
   </div>
 </div>
 
@@ -169,14 +193,14 @@ function renderDocumento(){
 function renderCapa(){
   const pg=document.createElement('div');pg.className='page';
   const gr=empresa.grau_risco;
-  const cnpjF=empresa.cnpj_raiz?empresa.cnpj_raiz.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'—';
+  const cnpjF=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'—';
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
   pg.innerHTML=`
   <div class="capa">
     <div style="display:flex;align-items:center;gap:12pt;margin-bottom:40pt;">
-      <div class="capa-logo-box"><span class="capa-logo-text">SGS</span></div>
+      <div id="doc-elab-logo" class="capa-logo-box"><span class="capa-logo-text">SST</span></div>
       <div>
-        <div style="font-size:10pt;font-weight:700;color:#062018;">Sistema de Gestão em SST</div>
+        <div id="doc-elab-nome" style="font-size:10pt;font-weight:700;color:#062018;">Empresa Elaboradora</div>
         <div style="font-size:9pt;color:#6b7280;">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
       </div>
     </div>
@@ -199,7 +223,7 @@ function renderCapa(){
     </div>
     <div style="border-top:1pt solid #e5e7eb;padding-top:10pt;display:flex;justify-content:space-between;">
       <div><div style="font-size:8pt;color:#9ca3af;">Versão</div><div style="font-size:9pt;font-weight:500;">1.0 — ${fmtAno()}</div></div>
-      <div style="text-align:center;"><div style="font-size:8pt;color:#9ca3af;">Elaboração</div><div style="font-size:9pt;font-weight:500;">SGS — Sistema de Gestão em SST</div></div>
+      <div style="text-align:center;"><div style="font-size:8pt;color:#9ca3af;">Elaboração</div><div id="doc-elab-footer" style="font-size:9pt;font-weight:500;">—</div></div>
       <div style="text-align:right;"><div style="font-size:8pt;color:#9ca3af;">Revisão</div><div style="font-size:9pt;font-weight:500;">Anual</div></div>
     </div>
   </div>`;
@@ -208,7 +232,7 @@ function renderCapa(){
 
 function renderIdentificacao(){
   const pg=document.createElement('div');pg.className='page';
-  const cnpjF=empresa.cnpj_raiz?empresa.cnpj_raiz.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'—';
+  const cnpjF=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'—';
   const gr=empresa.grau_risco;
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
   pg.innerHTML=`
@@ -231,16 +255,16 @@ function renderIdentificacao(){
   </div>
   <div class="doc-section" style="margin-top:16pt;"><span class="num-secao">2</span>Quadro de Funcionários</div>
   <div class="ficha-grid ficha-grid-3">
-    <div class="ficha-item"><div class="ficha-label">Cobertos pelo programa</div><div class="ficha-value" style="font-size:18pt;color:#062018;font-weight:700;">${empresa.total_funcionarios_previsto||0}</div></div>
-    <div class="ficha-item"><div class="ficha-label">Com cadastro individual</div><div class="ficha-value" style="font-size:18pt;color:#0d6e4f;font-weight:700;">${empresa.total_funcionarios_cadastrados||0}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Funcionários cobertos pelo programa</div><div class="ficha-value" style="font-size:18pt;color:#062018;font-weight:700;">${empresa.total_funcionarios_previsto||0}</div></div>
     <div class="ficha-item"><div class="ficha-label">Setores de trabalho</div><div class="ficha-value" style="font-size:18pt;color:#0d6e4f;font-weight:700;">${setores.length}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Exames vinculados</div><div class="ficha-value" style="font-size:18pt;color:#0d6e4f;font-weight:700;">${setor_exames.length+funcao_exames.length}</div></div>
   </div>
   <div class="doc-section" style="margin-top:16pt;"><span class="num-secao">3</span>Responsável Técnico (Médico do Trabalho)</div>
   <div class="ficha-grid">
-    <div class="ficha-item"><div class="ficha-label">Nome</div><div class="ficha-value" style="color:#9ca3af;font-style:italic;">A ser preenchido</div></div>
-    <div class="ficha-item"><div class="ficha-label">CRM</div><div class="ficha-value" style="color:#9ca3af;font-style:italic;">A ser preenchido</div></div>
-    <div class="ficha-item"><div class="ficha-label">Especialidade</div><div class="ficha-value" style="color:#9ca3af;font-style:italic;">Medicina do Trabalho</div></div>
-    <div class="ficha-item"><div class="ficha-label">Telefone</div><div class="ficha-value" style="color:#9ca3af;font-style:italic;">A ser preenchido</div></div>
+    <div class="ficha-item"><div class="ficha-label">Nome / CRM</div><div class="ficha-value elab-responsavel" style="color:#374151;">—</div></div>
+    <div class="ficha-item"><div class="ficha-label">Empresa responsável</div><div class="ficha-value elab-nome-field" style="color:#374151;">—</div></div>
+    <div class="ficha-item"><div class="ficha-label">Especialidade</div><div class="ficha-value">Medicina do Trabalho</div></div>
+    <div class="ficha-item"><div class="ficha-label">CNPJ da elaboradora</div><div class="ficha-value elab-cnpj-field" style="color:#374151;font-family:monospace;">—</div></div>
   </div>
   <div class="page-footer">
     <span class="pf-label">PCMSO — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
@@ -331,11 +355,18 @@ function renderCronograma(){
   </table>`}
 
   <div class="doc-section" style="margin-top:20pt;"><span class="num-secao">6</span>Disposições Finais</div>
-  <p class="doc-text">Este PCMSO deverá ser revisado anualmente ou sempre que houver alterações no processo produtivo, nos riscos ocupacionais identificados, no quadro de funcionários ou nas normas regulamentadoras aplicáveis.</p>
+  <p class="doc-text">Conforme a NR-7, este PCMSO deverá ser revisado:</p>
+  <ul style="margin:8pt 0 8pt 16pt;font-size:9.5pt;color:#374151;line-height:1.8;">
+    <li><strong>Anualmente</strong> — revisão periódica obrigatória;</li>
+    <li>Sempre que houver <strong>alteração nos processos produtivos</strong> ou nos riscos ocupacionais;</li>
+    <li>Após <strong>acidente de trabalho grave, fatal</strong> ou surto de doença ocupacional;</li>
+    <li>Quando houver <strong>mudança significativa no quadro de funcionários</strong>;</li>
+    <li>Quando determinado pelo <strong>Médico Coordenador</strong> ou por <strong>Auditor Fiscal do Trabalho</strong>.</li>
+  </ul>
   <p class="doc-text" style="margin-top:8pt;">Os resultados dos exames realizados deverão ser registrados em prontuário individual e comunicados ao trabalhador por meio do Atestado de Saúde Ocupacional (ASO), conforme exigido pela NR-7.</p>
 
   <div style="margin-top:30pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
-    ${['Médico do Trabalho (CRM)','Responsável pela empresa','Técnico de SST'].map(label=>`
+    ${['Médico Coordenador / RT','Representante da empresa','Técnico de SST'].map(label=>`
     <div style="text-align:center;">
       <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:40pt;">
         <div style="font-size:8pt;color:#6b7280;">${label}</div>
@@ -349,6 +380,29 @@ function renderCronograma(){
     <span class="pf-page">Página 4</span>
   </div>`;
   return pg;
+}
+
+
+let elaboradora={nome:'',cnpj:'',responsavel:''};
+
+function toggleElaboradora(){
+  const p=document.getElementById('painel-elaboradora');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+
+function atualizarElaboradora(){
+  elaboradora.nome=document.getElementById('elab-nome').value.trim();
+  elaboradora.cnpj=document.getElementById('elab-cnpj').value.trim();
+  elaboradora.responsavel=document.getElementById('elab-responsavel').value.trim();
+  const nomeEl=document.getElementById('doc-elab-nome');
+  const footerEl=document.getElementById('doc-elab-footer');
+  const logoEl=document.getElementById('doc-elab-logo');
+  if(nomeEl)nomeEl.textContent=elaboradora.nome||'Empresa Elaboradora';
+  if(footerEl)footerEl.textContent=elaboradora.nome||'—';
+  if(logoEl)logoEl.innerHTML=`<span class="capa-logo-text">${(elaboradora.nome||'SST').slice(0,3).toUpperCase()}</span>`;
+  document.querySelectorAll('.elab-responsavel').forEach(el=>{el.textContent=elaboradora.responsavel||'—';});
+  document.querySelectorAll('.elab-nome-field').forEach(el=>{el.textContent=elaboradora.nome||'—';});
+  document.querySelectorAll('.elab-cnpj-field').forEach(el=>{el.textContent=elaboradora.cnpj||'—';});
 }
 
 carregar();
