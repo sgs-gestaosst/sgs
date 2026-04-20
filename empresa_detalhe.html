@@ -335,7 +335,7 @@
         <input type="number" id="s-area" placeholder="0" min="0" step="0.01">
       </div>
       <div class="modal-field">
-        <label>Nº de funcionários previsto</label>
+        <label>Nº de funcionários no setor</label>
         <input type="number" id="s-num-funcionarios" placeholder="0" min="0">
       </div>
       <div class="modal-field" style="grid-column:1/-1;">
@@ -475,8 +475,8 @@ function renderCampos(){
     {label:'Estado',key:'estado',type:'select',options:['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']},
     {label:'CEP',key:'cep',type:'text'},
     {label:'Grau de Risco',key:'grau_risco',type:'select',options:[{v:1,l:'GR 1 — Baixo'},{v:2,l:'GR 2 — Médio-Baixo'},{v:3,l:'GR 3 — Médio-Alto'},{v:4,l:'GR 4 — Alto'}]},
-    {label:'Funcionários previstos',key:'total_funcionarios_previsto',type:'number'},
-    {label:'Funcionários cadastrados',key:'total_funcionarios_cadastrados',type:'readonly'},
+    {label:'Func. cobertos pelo programa',key:'total_funcionarios_previsto',type:'number'},
+    {label:'Func. com cadastro individual',key:'total_funcionarios_cadastrados',type:'readonly'},
     {label:'Atividade Rural',key:'atividade_rural',type:'toggle'},
     {label:'Ativa no sistema',key:'ativo',type:'toggle'},
   ];
