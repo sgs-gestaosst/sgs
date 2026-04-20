@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCMSO — Programa de Controle Médico de Saúde Ocupacional</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.screen-header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+.screen-actions{margin-left:auto;display:flex;gap:10px;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-print{background:var(--accent2);color:#0f1117;}
+.btn-print:hover{background:#3de8b4;}
+.screen-body{padding:40px 24px;display:flex;justify-content:center;}
+.pages-wrap{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%;}
+/* ── FOLHA A4 ── */
+.page{
+  background:#fff;width:210mm;min-height:297mm;
+  padding:20mm 20mm 20mm 25mm;
+  box-shadow:0 4px 32px rgba(0,0,0,.5);
+  position:relative;color:#1a1a2e;
+  font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;
+}
+.page::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8mm;background:linear-gradient(180deg,#0d3d2e 0%,#062018 100%);}
+/* Tipografia */
+.doc-title{font-size:22pt;font-weight:700;color:#062018;line-height:1.2;margin-bottom:4pt;}
+.doc-section{font-size:12pt;font-weight:700;color:#062018;text-transform:uppercase;letter-spacing:.06em;border-bottom:2pt solid #0d6e4f;padding-bottom:4pt;margin:16pt 0 10pt;}
+.doc-subsection{font-size:10pt;font-weight:600;color:#0d6e4f;margin:10pt 0 6pt;}
+.doc-text{font-size:9.5pt;color:#374151;line-height:1.6;text-align:justify;}
+.num-secao{color:#0d6e4f;font-family:'IBM Plex Mono',monospace;font-size:9pt;margin-right:6pt;}
+/* Capa */
+.capa{display:flex;flex-direction:column;height:100%;min-height:257mm;}
+.capa-logo-box{width:50pt;height:50pt;background:#062018;display:flex;align-items:center;justify-content:center;border-radius:6pt;}
+.capa-logo-text{font-family:'IBM Plex Mono',monospace;font-size:16pt;font-weight:700;color:#fff;letter-spacing:.05em;}
+.capa-divider{height:3pt;background:linear-gradient(90deg,#062018,#0d6e4f,#2dd4a0);margin:20pt 0;border-radius:2pt;}
+.capa-empresa-box{background:#f0fff8;border-left:4pt solid #0d6e4f;padding:12pt 16pt;margin-bottom:20pt;border-radius:0 4pt 4pt 0;}
+.capa-badge{padding:3pt 10pt;border-radius:20pt;font-size:8pt;font-weight:600;border:1pt solid;}
+.badge-gr1{background:#e6fff9;color:#047857;border-color:#6ee7b7;}
+.badge-gr2{background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;}
+.badge-gr3{background:#fffbeb;color:#92400e;border-color:#fcd34d;}
+.badge-gr4{background:#fff1f2;color:#9f1239;border-color:#fca5a5;}
+.badge-info{background:#f3f4f6;color:#374151;border-color:#d1d5db;}
+/* Header/Footer */
+.page-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1pt solid #e5e7eb;padding-bottom:8pt;margin-bottom:14pt;}
+.ph-empresa{font-size:8pt;font-weight:600;color:#374151;}
+.ph-doc{font-size:8pt;color:#9ca3af;font-family:'IBM Plex Mono',monospace;}
+.page-footer{position:absolute;bottom:15mm;left:25mm;right:20mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #e5e7eb;padding-top:6pt;}
+.pf-label{font-size:7.5pt;color:#9ca3af;}
+.pf-page{font-family:'IBM Plex Mono',monospace;font-size:8pt;color:#6b7280;}
+/* Ficha */
+.ficha-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1pt solid #e5e7eb;border-radius:4pt;overflow:hidden;margin:8pt 0;}
+.ficha-grid-3{grid-template-columns:1fr 1fr 1fr;}
+.ficha-item{padding:8pt 10pt;border-right:1pt solid #e5e7eb;border-bottom:1pt solid #e5e7eb;}
+.ficha-item:nth-child(2n){border-right:none;}
+.ficha-grid-3 .ficha-item:nth-child(3n){border-right:none;}
+.ficha-item:last-child,.ficha-item:nth-last-child(2){border-bottom:none;}
+.ficha-label{font-size:7pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:2pt;}
+.ficha-value{font-size:9.5pt;color:#1a1a2e;font-weight:500;}
+.ficha-full{grid-column:1/-1;border-right:none!important;}
+/* Tabelas */
+.doc-table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9pt;}
+.doc-table th{background:#062018;color:#fff;padding:6pt 8pt;text-align:left;font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.doc-table td{padding:6pt 8pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;}
+.doc-table tr:nth-child(even) td{background:#f9fafb;}
+.doc-table tr:last-child td{border-bottom:none;}
+/* Badges */
+.per-badge{display:inline-block;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:600;}
+.per-Anual{background:#dbeafe;color:#1d4ed8;}
+.per-Semestral{background:#dcfce7;color:#166534;}
+.per-Trimestral{background:#fef9c3;color:#854d0e;}
+.per-Bienal{background:#f3e8ff;color:#6b21a8;}
+.per-Admissional{background:#ffe4e6;color:#9f1239;}
+.obrig-badge{display:inline-block;padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;}
+.obrig-sim{background:#dcfce7;color:#166534;}
+.obrig-esocial{background:#dbeafe;color:#1d4ed8;}
+/* Em breve */
+.em-breve{background:#f9fafb;border:1pt dashed #d1d5db;border-radius:4pt;padding:16pt;text-align:center;margin:10pt 0;}
+.em-breve-icon{font-size:20pt;margin-bottom:6pt;}
+.em-breve-label{font-size:9pt;color:#9ca3af;font-style:italic;}
+/* Categorias */
+.cat-header{background:#f0fff8;border-left:3pt solid #0d6e4f;padding:6pt 10pt;margin:10pt 0 6pt;font-size:10pt;font-weight:600;color:#062018;}
+/* Print */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  body{background:#fff!important;}
+  .screen-header{display:none!important;}
+  .screen-body{padding:0!important;}
+  .pages-wrap{gap:0!important;}
+  .page{box-shadow:none!important;margin:0!important;page-break-after:always;width:210mm!important;min-height:297mm!important;}
+  .page:last-child{page-break-after:avoid;}
+  @page{size:A4;margin:0;}
+}
+@media(max-width:230mm){
+  .page{width:100%;padding:15mm 12mm 15mm 18mm;}
+  .page::before{width:5mm;}
+}
+</style>
+</head>
+<body>
+<div class="screen-header">
+  <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
+  <span style="font-size:13px;color:var(--text2);">Visualização do documento</span>
+  <div class="screen-actions">
+    <a id="btn-voltar" href="#" class="btn btn-edit" style="text-decoration:none;">← Voltar</a>
+    <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  </div>
+</div>
+
+<div class="screen-body">
+  <div class="pages-wrap" id="pages-wrap">
+    <div style="color:var(--text2);text-align:center;padding:40px;">Carregando documento...</div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+document.getElementById('btn-voltar').href=`exames.html?empresa_id=${empresaId}`;
+
+let empresa,cnaes,setores,funcoes,setor_exames,funcao_exames,catalogo;
+const grInfo={1:{label:'GR 1 — Baixo',cls:'badge-gr1'},2:{label:'GR 2 — Médio-Baixo',cls:'badge-gr2'},3:{label:'GR 3 — Médio-Alto',cls:'badge-gr3'},4:{label:'GR 4 — Alto',cls:'badge-gr4'}};
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtDataAtual(){return new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}
+function fmtAno(){return new Date().getFullYear();}
+
+async function carregar(){
+  try{
+    const [resEmp,resCnaes,resSets,resFuncs,resSE,resFE,resCat]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?empresa_id=eq.${empresaId}&select=*&order=tipo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao,cbo&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setor_exames?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcao_exames?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/catalogo_exames?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresa,cnaes,setores,funcoes,setor_exames,funcao_exames,catalogo]=await Promise.all([resEmp.json(),resCnaes.json(),resSets.json(),resFuncs.json(),resSE.json(),resFE.json(),resCat.json()]);
+    empresa=empresa[0];
+    renderDocumento();
+  }catch(e){
+    document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro: ${e.message}</div>`;
+  }
+}
+
+function renderDocumento(){
+  const wrap=document.getElementById('pages-wrap');
+  wrap.innerHTML='';
+  wrap.appendChild(renderCapa());
+  wrap.appendChild(renderIdentificacao());
+  wrap.appendChild(renderProgramaExames());
+  wrap.appendChild(renderCronograma());
+}
+
+function renderCapa(){
+  const pg=document.createElement('div');pg.className='page';
+  const gr=empresa.grau_risco;
+  const cnpjF=empresa.cnpj_raiz?empresa.cnpj_raiz.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'—';
+  const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
+  pg.innerHTML=`
+  <div class="capa">
+    <div style="display:flex;align-items:center;gap:12pt;margin-bottom:40pt;">
+      <div class="capa-logo-box"><span class="capa-logo-text">SGS</span></div>
+      <div>
+        <div style="font-size:10pt;font-weight:700;color:#062018;">Sistema de Gestão em SST</div>
+        <div style="font-size:9pt;color:#6b7280;">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
+      </div>
+    </div>
+    <div class="capa-divider"></div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#0d6e4f;margin-bottom:8pt;">Programa de Controle Médico de Saúde Ocupacional</div>
+      <div style="font-size:28pt;font-weight:700;color:#062018;line-height:1.15;margin-bottom:6pt;">PCMSO</div>
+      <div style="font-size:13pt;color:#0d6e4f;font-weight:400;margin-bottom:24pt;">Conforme NR-7 — Portaria MTE nº 1.031/2018</div>
+      <div class="capa-empresa-box">
+        <div style="font-size:15pt;font-weight:700;color:#062018;margin-bottom:3pt;">${escHtml(empresa.razao_social||empresa.nome_fantasia||'—')}</div>
+        ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#4b5563;margin-bottom:4pt;">${escHtml(empresa.nome_fantasia)}</div>`:''}
+        <div style="font-size:9pt;color:#6b7280;font-family:'IBM Plex Mono',monospace;">CNPJ: ${escHtml(cnpjF)}</div>
+      </div>
+      <div style="display:flex;gap:8pt;flex-wrap:wrap;margin-top:10pt;">
+        ${gr?`<span class="capa-badge ${grInfo[gr]?.cls||'badge-info'}">${grInfo[gr]?.label||''}</span>`:''}
+        ${cnpePrincipal?`<span class="capa-badge badge-info">CNAE: ${escHtml(cnpePrincipal.cnae)}</span>`:''}
+        <span class="capa-badge badge-info">${empresa.total_funcionarios_previsto||0} funcionários cobertos</span>
+        <span class="capa-badge badge-info">${setor_exames.length+funcao_exames.length} exames vinculados</span>
+      </div>
+    </div>
+    <div style="border-top:1pt solid #e5e7eb;padding-top:10pt;display:flex;justify-content:space-between;">
+      <div><div style="font-size:8pt;color:#9ca3af;">Versão</div><div style="font-size:9pt;font-weight:500;">1.0 — ${fmtAno()}</div></div>
+      <div style="text-align:center;"><div style="font-size:8pt;color:#9ca3af;">Elaboração</div><div style="font-size:9pt;font-weight:500;">SGS — Sistema de Gestão em SST</div></div>
+      <div style="text-align:right;"><div style="font-size:8pt;color:#9ca3af;">Revisão</div><div style="font-size:9pt;font-weight:500;">Anual</div></div>
+    </div>
+  </div>`;
+  return pg;
+}
+
+function renderIdentificacao(){
+  const pg=document.createElement('div');pg.className='page';
+  const cnpjF=empresa.cnpj_raiz?empresa.cnpj_raiz.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):'—';
+  const gr=empresa.grau_risco;
+  const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
+  pg.innerHTML=`
+  <div class="page-header">
+    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="ph-doc">PCMSO — ${fmtAno()}</span>
+  </div>
+  <div class="doc-section"><span class="num-secao">1</span>Identificação da Empresa</div>
+  <div class="ficha-grid">
+    <div class="ficha-item ficha-full"><div class="ficha-label">Razão Social</div><div class="ficha-value" style="font-size:11pt;">${escHtml(empresa.razao_social||'—')}</div></div>
+    <div class="ficha-item ficha-full"><div class="ficha-label">Nome Fantasia</div><div class="ficha-value">${escHtml(empresa.nome_fantasia||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">CNPJ</div><div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${escHtml(cnpjF)}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Grau de Risco</div><div class="ficha-value">${gr?grInfo[gr]?.label:'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">CNAE Principal</div><div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${cnpePrincipal?escHtml(cnpePrincipal.cnae):'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Descrição CNAE</div><div class="ficha-value">${cnpePrincipal?escHtml(cnpePrincipal.descricao||'—'):'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Endereço</div><div class="ficha-value">${escHtml(empresa.endereco||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Município / Estado</div><div class="ficha-value">${escHtml([empresa.cidade,empresa.estado].filter(Boolean).join(' / ')||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Telefone</div><div class="ficha-value">${escHtml(empresa.telefone||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">E-mail</div><div class="ficha-value">${escHtml(empresa.email||'—')}</div></div>
+  </div>
+  <div class="doc-section" style="margin-top:16pt;"><span class="num-secao">2</span>Quadro de Funcionários</div>
+  <div class="ficha-grid ficha-grid-3">
+    <div class="ficha-item"><div class="ficha-label">Cobertos pelo programa</div><div class="ficha-value" style="font-size:18pt;color:#062018;font-weight:700;">${empresa.total_funcionarios_previsto||0}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Com cadastro individual</div><div class="ficha-value" style="font-size:18pt;color:#0d6e4f;font-weight:700;">${empresa.total_funcionarios_cadastrados||0}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Setores de trabalho</div><div class="ficha-value" style="font-size:18pt;color:#0d6e4f;font-weight:700;">${setores.length}</div></div>
+  </div>
+  <div class="doc-section" style="margin-top:16pt;"><span class="num-secao">3</span>Responsável Técnico (Médico do Trabalho)</div>
+  <div class="ficha-grid">
+    <div class="ficha-item"><div class="ficha-label">Nome</div><div class="ficha-value" style="color:#9ca3af;font-style:italic;">A ser preenchido</div></div>
+    <div class="ficha-item"><div class="ficha-label">CRM</div><div class="ficha-value" style="color:#9ca3af;font-style:italic;">A ser preenchido</div></div>
+    <div class="ficha-item"><div class="ficha-label">Especialidade</div><div class="ficha-value" style="color:#9ca3af;font-style:italic;">Medicina do Trabalho</div></div>
+    <div class="ficha-item"><div class="ficha-label">Telefone</div><div class="ficha-value" style="color:#9ca3af;font-style:italic;">A ser preenchido</div></div>
+  </div>
+  <div class="page-footer">
+    <span class="pf-label">PCMSO — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="pf-page">Página 2</span>
+  </div>`;
+  return pg;
+}
+
+function renderProgramaExames(){
+  const pg=document.createElement('div');pg.className='page';
+  // Consolida exames por setor
+  const setoresComExames=setores.map(s=>{
+    const exames=setor_exames.filter(se=>se.setor_id===s.id).map(se=>{
+      const cat=catalogo.find(c=>c.id===se.exame_id);
+      return cat?{...se,...cat}:null;
+    }).filter(Boolean);
+    return{...s,exames};
+  }).filter(s=>s.exames.length);
+
+  const totalExames=setor_exames.length+funcao_exames.length;
+
+  pg.innerHTML=`
+  <div class="page-header">
+    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="ph-doc">PCMSO — ${fmtAno()}</span>
+  </div>
+  <div class="doc-section"><span class="num-secao">4</span>Programa de Exames Ocupacionais</div>
+  <p class="doc-text" style="margin-bottom:12pt;">Os exames a seguir foram definidos com base nos riscos ocupacionais identificados, nas exigências legais da NR-7 e nas Normas Regulamentadoras aplicáveis a cada função e setor de trabalho.</p>
+  ${!totalExames?`
+    <div class="em-breve">
+      <div class="em-breve-icon">🩺</div>
+      <div class="em-breve-label">Nenhum exame vinculado ainda.<br>Acesse o módulo de Exames para vincular exames aos setores e funções.</div>
+    </div>`
+  :setoresComExames.map(s=>`
+    <div class="cat-header">🗂️ ${escHtml(s.nome_setor)} <span style="font-weight:400;font-size:9pt;color:#6b7280;">(${s.num_funcionarios_previsto||0} funcionários)</span></div>
+    <table class="doc-table">
+      <thead><tr><th>Exame</th><th>Categoria</th><th>NR</th><th style="text-align:center;">Periodicidade</th><th style="text-align:center;">eSocial</th></tr></thead>
+      <tbody>
+        ${s.exames.map(e=>`<tr>
+          <td style="font-weight:500;">${escHtml(e.nome)}</td>
+          <td style="font-size:8.5pt;color:#6b7280;">${escHtml(e.categoria||'—')}</td>
+          <td style="font-size:8.5pt;font-family:'IBM Plex Mono',monospace;">${escHtml(e.nr_relacionada||'—')}</td>
+          <td style="text-align:center;"><span class="per-badge per-${e.periodicidade||e.periodicidade_padrao||'Anual'}">${e.periodicidade||e.periodicidade_padrao||'Anual'}</span></td>
+          <td style="text-align:center;">${e.obrigatorio_esocial?'<span class="obrig-badge obrig-esocial">Sim</span>':'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`).join('')}
+  <div class="page-footer">
+    <span class="pf-label">PCMSO — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="pf-page">Página 3</span>
+  </div>`;
+  return pg;
+}
+
+function renderCronograma(){
+  const pg=document.createElement('div');pg.className='page';
+  // Monta cronograma consolidado (todos os exames únicos)
+  const examesUnicos=new Map();
+  setor_exames.forEach(se=>{
+    const cat=catalogo.find(c=>c.id===se.exame_id);
+    if(cat&&!examesUnicos.has(se.exame_id))examesUnicos.set(se.exame_id,{...cat,periodicidade:se.periodicidade||cat.periodicidade_padrao});
+  });
+  funcao_exames.forEach(fe=>{
+    const cat=catalogo.find(c=>c.id===fe.exame_id);
+    if(cat&&!examesUnicos.has(fe.exame_id))examesUnicos.set(fe.exame_id,{...cat,periodicidade:fe.periodicidade||cat.periodicidade_padrao});
+  });
+  const listaExames=[...examesUnicos.values()].sort((a,b)=>a.nome.localeCompare(b.nome));
+
+  pg.innerHTML=`
+  <div class="page-header">
+    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="ph-doc">PCMSO — ${fmtAno()}</span>
+  </div>
+  <div class="doc-section"><span class="num-secao">5</span>Cronograma Anual de Exames</div>
+  ${!listaExames.length?`
+    <div class="em-breve"><div class="em-breve-icon">📅</div><div class="em-breve-label">Vincule exames aos setores para gerar o cronograma automaticamente.</div></div>`
+  :`<table class="doc-table">
+    <thead><tr><th>Exame</th><th>Categoria</th><th style="text-align:center;">Periodicidade</th><th>NR Relacionada</th><th style="text-align:center;">eSocial</th></tr></thead>
+    <tbody>
+      ${listaExames.map(e=>`<tr>
+        <td style="font-weight:500;">${escHtml(e.nome)}</td>
+        <td style="font-size:8.5pt;color:#6b7280;">${escHtml(e.categoria||'—')}</td>
+        <td style="text-align:center;"><span class="per-badge per-${e.periodicidade||'Anual'}">${e.periodicidade||'Anual'}</span></td>
+        <td style="font-size:8.5pt;font-family:'IBM Plex Mono',monospace;">${escHtml(e.nr_relacionada||'—')}</td>
+        <td style="text-align:center;">${e.obrigatorio_esocial?'<span class="obrig-badge obrig-esocial">Sim</span>':'—'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`}
+
+  <div class="doc-section" style="margin-top:20pt;"><span class="num-secao">6</span>Disposições Finais</div>
+  <p class="doc-text">Este PCMSO deverá ser revisado anualmente ou sempre que houver alterações no processo produtivo, nos riscos ocupacionais identificados, no quadro de funcionários ou nas normas regulamentadoras aplicáveis.</p>
+  <p class="doc-text" style="margin-top:8pt;">Os resultados dos exames realizados deverão ser registrados em prontuário individual e comunicados ao trabalhador por meio do Atestado de Saúde Ocupacional (ASO), conforme exigido pela NR-7.</p>
+
+  <div style="margin-top:30pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
+    ${['Médico do Trabalho (CRM)','Responsável pela empresa','Técnico de SST'].map(label=>`
+    <div style="text-align:center;">
+      <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:40pt;">
+        <div style="font-size:8pt;color:#6b7280;">${label}</div>
+        <div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">Data: ___/___/______</div>
+      </div>
+    </div>`).join('')}
+  </div>
+
+  <div class="page-footer">
+    <span class="pf-label">PCMSO — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="pf-page">Página 4</span>
+  </div>`;
+  return pg;
+}
+
+carregar();
+</script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Gestão de Exames</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+    --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+    --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+    --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+  .header-title{font-size:13px;color:var(--text2);flex:1;}
+  .header-title span{color:var(--text);font-weight:500;}
+  .container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+  .voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+  .voltar:hover{color:var(--text);}
+  .hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+  .hero-info{flex:1;}
+  .hero-nome{font-size:16px;font-weight:500;}
+  .hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+  .hero-actions{display:flex;gap:8px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+  .btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-edit:hover{border-color:var(--border-focus);}
+  .btn-save{background:var(--accent2);color:#0f1117;}
+  .btn-save:hover{background:#3de8b4;}
+  .btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+  .btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+  .btn-danger:hover{background:#2a1515;}
+  .btn-sm{padding:5px 12px;font-size:12px;}
+  .btn-pcmso{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .btn-pcmso:hover{background:#1a3830;}
+  /* Layout */
+  .layout{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;}
+  .painel-esq{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:sticky;top:80px;}
+  .painel-titulo{padding:14px 16px;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .setor-item{padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;display:flex;align-items:center;gap:10px;}
+  .setor-item:last-child{border-bottom:none;}
+  .setor-item:hover{background:var(--surface2);}
+  .setor-item.active{background:var(--surface2);border-left:3px solid var(--accent2);}
+  .setor-item-nome{font-size:13px;font-weight:500;flex:1;}
+  .setor-item-count{font-size:10px;font-family:var(--mono);padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+  .setor-item.active .setor-item-count{background:#0e2820;color:#2dd4a0;border-color:#1a4a38;}
+  /* Painel direito */
+  .painel-dir{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+  .painel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .painel-body{padding:20px;}
+  /* Context tabs */
+  .ctx-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+  .ctx-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);transition:all .15s;}
+  .ctx-tab:hover{border-color:var(--accent2);color:var(--text);}
+  .ctx-tab.active{background:var(--accent2);border-color:var(--accent2);color:#0f1117;}
+  /* Busca */
+  .busca-wrap{position:relative;margin-bottom:12px;}
+  .busca-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:10px 14px;outline:none;transition:border-color .15s;}
+  .busca-input:focus{border-color:var(--border-focus);}
+  .busca-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border-focus);border-radius:var(--radius);z-index:500;max-height:280px;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.6);}
+  .busca-dropdown.show{display:block;}
+  .busca-option{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
+  .busca-option:last-child{border-bottom:none;}
+  .busca-option:hover,.busca-option.sel{background:var(--surface2);}
+  .busca-option-nome{font-size:13px;font-weight:500;}
+  .busca-option-meta{font-size:11px;color:var(--text3);margin-top:2px;display:flex;gap:8px;}
+  /* Exame card */
+  .exame-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s;}
+  .exame-card:hover{border-color:var(--accent2);}
+  .exame-cat-badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500;font-family:var(--mono);white-space:nowrap;flex-shrink:0;}
+  .cat-Clínico{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .cat-Laboratorial{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+  .cat-Complementar{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+  .cat-Específico{background:#1e1a40;color:#a78bfa;border:1px solid #3a2a80;}
+  .exame-info{flex:1;min-width:0;}
+  .exame-nome{font-size:13px;font-weight:500;}
+  .exame-meta{font-size:11px;color:var(--text3);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;}
+  .exame-config{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+  .period-select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:11px;padding:4px 8px;outline:none;cursor:pointer;}
+  .period-select:focus{border-color:var(--accent2);}
+  /* Status */
+  .status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:12px;align-items:center;gap:8px;}
+  .status-bar.show{display:flex;}
+  .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+  .status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+  .spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f1117;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .spinner.show{display:inline-block;}
+  .spinner-w{border-top-color:#fff!important;border-color:rgba(255,255,255,.2)!important;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .empty{text-align:center;padding:40px 20px;color:var(--text2);}
+  .empty-icon{font-size:32px;margin-bottom:12px;}
+  .empty-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;}
+  /* Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:420px;width:100%;margin:auto;}
+  .modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+  @media(max-width:768px){.layout{grid-template-columns:1fr;}.painel-esq{position:static;}.header-title{display:none;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Exames</span></div>
+</div>
+
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para empresa</a>
+
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#0e2820;border:1px solid #1a4a38;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🩺</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Gestão de Exames Ocupacionais</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <div class="hero-actions">
+      <a id="btn-pcmso" href="#" class="btn btn-pcmso" target="_blank">📋 Gerar PCMSO</a>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="painel-esq">
+      <div class="painel-titulo">
+        <span>Setores</span>
+        <span id="total-setores" style="font-size:11px;color:var(--text3);">—</span>
+      </div>
+      <div id="lista-setores-nav"></div>
+    </div>
+
+    <div class="painel-dir">
+      <div class="painel-header">
+        <div>
+          <div style="font-size:15px;font-weight:500;" id="painel-titulo">Selecione um setor</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;" id="painel-sub">Clique em um setor para gerenciar os exames</div>
+        </div>
+        <div id="painel-actions"></div>
+      </div>
+      <div class="painel-body" id="painel-body">
+        <div class="empty">
+          <div class="empty-icon">🩺</div>
+          <div class="empty-title">Selecione um setor</div>
+          <div>Escolha um setor para vincular exames ocupacionais.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR EXCLUSÃO -->
+<div class="modal-overlay" id="modal-excluir">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-excluir-titulo">Remover exame?</span>
+      <button onclick="fecharModalExcluir()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:20px;">Esta ação não pode ser desfeita.</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-cancel" onclick="fecharModalExcluir()">Cancelar</button>
+      <button class="btn" style="background:var(--danger);color:#fff;" id="btn-confirmar-excluir">
+        <span class="spinner spinner-w" id="spinner-excluir"></span>
+        <span id="label-excluir">Remover</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa,setores=[],funcoes=[],todosExames=[],funcoesSetor=[];
+let setorAtivo=null,contexto='setor',funcaoAtiva=null;
+let examesSetor=[],examesFuncao=[];
+let buscaIdx=-1;
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className='status-bar show '+tipo;el.innerHTML=`<span>${{info:'↻',success:'✓',error:'✕'}[tipo]}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+
+function catClass(cat){
+  if(!cat)return'cat-Clínico';
+  if(cat.includes('Labor'))return'cat-Laboratorial';
+  if(cat.includes('Compl'))return'cat-Complementar';
+  if(cat.includes('Espec')||cat.includes('Específ'))return'cat-Específico';
+  return'cat-Clínico';
+}
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  document.getElementById('btn-pcmso').href=`pcmso.html?empresa_id=${empresaId}`;
+  try{
+    const [resEmp,resSets,resFuncs,resExames]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/catalogo_exames?ativo=eq.true&select=*&order=categoria.asc,nome.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresa,setores,funcoes,todosExames]=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resExames.json()]);
+    empresa=empresa[0];
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`Exames Ocupacionais — ${nome}`;
+    document.getElementById('hero-sub').textContent=`${setores.length} setores · ${funcoes.length} funções · ${todosExames.length} exames no catálogo`;
+    document.getElementById('header-nome').textContent=nome;
+    renderNavSetores();
+  }catch(e){console.error(e);}
+}
+
+async function renderNavSetores(){
+  const nav=document.getElementById('lista-setores-nav');
+  document.getElementById('total-setores').textContent=`${setores.length} setores`;
+  if(!setores.length){nav.innerHTML=`<div style="padding:16px;font-size:12px;color:var(--text3);text-align:center;">Nenhum setor cadastrado</div>`;return;}
+  const counts={};
+  if(setores.length){
+    const ids=setores.map(s=>s.id).join(',');
+    try{
+      const res=await fetch(`${SUPA_URL}/rest/v1/setor_exames?setor_id=in.(${ids})&ativo=eq.true&select=setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const data=await res.json();
+      data.forEach(x=>{counts[x.setor_id]=(counts[x.setor_id]||0)+1;});
+    }catch(e){}
+  }
+  nav.innerHTML=setores.map(s=>`
+    <div class="setor-item ${setorAtivo?.id===s.id?'active':''}" onclick="selecionarSetor(${s.id})">
+      <div class="setor-item-nome">${escHtml(s.nome_setor)}</div>
+      <span class="setor-item-count">${counts[s.id]||0}</span>
+    </div>`).join('');
+}
+
+async function selecionarSetor(setorId){
+  setorAtivo=setores.find(s=>s.id===setorId);
+  funcaoAtiva=null;contexto='setor';
+  document.querySelectorAll('.setor-item').forEach(el=>{
+    el.classList.toggle('active',el.onclick?.toString().includes(`(${setorId})`));
+  });
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&ativo=eq.true&select=funcao_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const data=await res.json();
+    funcoesSetor=data.map(x=>funcoes.find(f=>f.id===x.funcao_id)).filter(Boolean);
+  }catch(e){funcoesSetor=[];}
+  await carregarExamesSetor(setorId);
+  renderPainel();
+}
+
+async function carregarExamesSetor(setorId){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/setor_exames?setor_id=eq.${setorId}&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    examesSetor=await res.json();
+  }catch(e){examesSetor=[];}
+}
+
+async function carregarExamesFuncao(funcaoId){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_exames?funcao_id=eq.${funcaoId}&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    examesFuncao=await res.json();
+  }catch(e){examesFuncao=[];}
+}
+
+async function mudarContextoFuncao(funcaoId){
+  contexto='funcao';
+  funcaoAtiva=funcoes.find(f=>f.id===funcaoId);
+  await carregarExamesFuncao(funcaoId);
+  renderPainel();
+}
+
+function mudarContextoSetor(){
+  contexto='setor';funcaoAtiva=null;
+  renderPainel();
+}
+
+function renderPainel(){
+  if(!setorAtivo)return;
+  const examesAtivos=contexto==='setor'?examesSetor:examesFuncao;
+  const ctxLabel=contexto==='setor'?setorAtivo.nome_setor:funcaoAtiva?.nome_funcao||'';
+  document.getElementById('painel-titulo').textContent=ctxLabel;
+  document.getElementById('painel-sub').textContent=`${examesAtivos.length} exame(s) vinculado(s)`;
+  document.getElementById('painel-actions').innerHTML=`<button class="btn btn-edit btn-sm" onclick="abrirBusca()">+ Adicionar exame</button>`;
+
+  const tabsHtml=`<div class="ctx-tabs">
+    <div class="ctx-tab ${contexto==='setor'?'active':''}" onclick="mudarContextoSetor()">🗂️ ${escHtml(setorAtivo.nome_setor)}</div>
+    ${funcoesSetor.map(f=>`<div class="ctx-tab ${contexto==='funcao'&&funcaoAtiva?.id===f.id?'active':''}" onclick="mudarContextoFuncao(${f.id})">👷 ${escHtml(f.nome_funcao)}</div>`).join('')}
+  </div>`;
+
+  const buscaHtml=`
+    <div class="busca-wrap" id="busca-wrap">
+      <input type="text" class="busca-input" id="busca-input" placeholder="Buscar exame para adicionar..." oninput="filtrarExame()" onkeydown="navBusca(event)" autocomplete="off" style="display:none;">
+      <div class="busca-dropdown" id="busca-dropdown"></div>
+    </div>
+    <div class="status-bar" id="status-exames"></div>`;
+
+  let examesHtml='';
+  if(!examesAtivos.length){
+    examesHtml=`<div class="empty"><div class="empty-icon">🩺</div><div class="empty-title">Nenhum exame vinculado</div><div>Clique em "+ Adicionar exame" para começar.</div></div>`;
+  }else{
+    examesHtml=examesAtivos.map(se=>renderExameCard(se)).join('');
+  }
+  document.getElementById('painel-body').innerHTML=tabsHtml+buscaHtml+examesHtml;
+}
+
+function renderExameCard(se){
+  const exame=todosExames.find(e=>e.id===se.exame_id);
+  if(!exame)return'';
+  const catCls=catClass(exame.categoria);
+  const periods=['Anual','Semestral','Trimestral','Bienal','Admissional'];
+  return`<div class="exame-card">
+    <span class="exame-cat-badge ${catCls}">${exame.categoria||'—'}</span>
+    <div class="exame-info">
+      <div class="exame-nome">${escHtml(exame.nome)}</div>
+      <div class="exame-meta">
+        ${exame.nr_relacionada?`<span>📋 ${escHtml(exame.nr_relacionada)}</span>`:''}
+        ${exame.obrigatorio_esocial?`<span style="color:var(--accent2);">✓ eSocial</span>`:''}
+        ${se.obrigatorio?`<span style="color:var(--warning);">⚠ Obrigatório</span>`:''}
+      </div>
+    </div>
+    <div class="exame-config">
+      <select class="period-select" onchange="atualizarPeriodicidade(${se.id},this.value)" title="Periodicidade">
+        ${periods.map(p=>`<option value="${p}" ${(se.periodicidade||exame.periodicidade_padrao)===p?'selected':''}>${p}</option>`).join('')}
+      </select>
+      <button class="btn btn-danger btn-sm" onclick="confirmarRemover(${se.id},'${escHtml(exame.nome)}')">✕</button>
+    </div>
+  </div>`;
+}
+
+function abrirBusca(){
+  const inp=document.getElementById('busca-input');
+  if(inp){inp.style.display='block';inp.focus();}
+}
+
+function filtrarExame(){
+  const inp=document.getElementById('busca-input');
+  const dd=document.getElementById('busca-dropdown');
+  const termo=inp.value.trim().toLowerCase();
+  buscaIdx=-1;
+  if(!termo||termo.length<2){dd.classList.remove('show');return;}
+  const jaAdicionados=(contexto==='setor'?examesSetor:examesFuncao).map(e=>e.exame_id);
+  const filtrados=todosExames.filter(e=>!jaAdicionados.includes(e.id)&&(e.nome.toLowerCase().includes(termo)||(e.categoria||'').toLowerCase().includes(termo)||(e.nr_relacionada||'').toLowerCase().includes(termo))).slice(0,20);
+  if(!filtrados.length){dd.innerHTML=`<div class="busca-option" style="color:var(--text3);cursor:default;">Nenhum exame encontrado</div>`;dd.classList.add('show');return;}
+  dd.innerHTML=filtrados.map(e=>{
+    const catCls=catClass(e.categoria);
+    return`<div class="busca-option" onclick="adicionarExame(${e.id})">
+      <div class="busca-option-nome">${escHtml(e.nome)}</div>
+      <div class="busca-option-meta">
+        <span>${escHtml(e.categoria||'')}</span>
+        ${e.nr_relacionada?`<span>${escHtml(e.nr_relacionada)}</span>`:''}
+        <span>${e.periodicidade_padrao||''}</span>
+        ${e.obrigatorio_esocial?`<span style="color:var(--accent2);">eSocial</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  dd.classList.add('show');
+}
+
+function navBusca(e){
+  const dd=document.getElementById('busca-dropdown');
+  const opcoes=dd.querySelectorAll('.busca-option[onclick]');
+  if(!dd.classList.contains('show')||!opcoes.length)return;
+  if(e.key==='ArrowDown'){e.preventDefault();buscaIdx=Math.min(buscaIdx+1,opcoes.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();buscaIdx=Math.max(buscaIdx-1,0);}
+  else if(e.key==='Enter'&&buscaIdx>=0){e.preventDefault();opcoes[buscaIdx].click();return;}
+  else if(e.key==='Escape'){dd.classList.remove('show');return;}
+  opcoes.forEach((o,i)=>o.style.background=i===buscaIdx?'var(--surface2)':'');
+  if(buscaIdx>=0)opcoes[buscaIdx].scrollIntoView({block:'nearest'});
+}
+
+async function adicionarExame(exameId){
+  const inp=document.getElementById('busca-input');
+  const dd=document.getElementById('busca-dropdown');
+  if(inp)inp.value='';
+  if(dd)dd.classList.remove('show');
+  const exame=todosExames.find(e=>e.id===exameId);
+  const tabela=contexto==='setor'?'setor_exames':'funcao_exames';
+  const campo=contexto==='setor'?'setor_id':'funcao_id';
+  const ctxId=contexto==='setor'?setorAtivo.id:funcaoAtiva?.id;
+  if(!ctxId)return;
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({[campo]:ctxId,exame_id:exameId,periodicidade:exame?.periodicidade_padrao||'Anual',obrigatorio:exame?.obrigatorio_esocial||false,ativo:true})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
+    const data=await res.json();
+    if(contexto==='setor')examesSetor.push(data[0]);
+    else examesFuncao.push(data[0]);
+    renderPainel();
+    renderNavSetores();
+    setStatus('status-exames','success','Exame adicionado!');
+    setTimeout(()=>clearStatus('status-exames'),2000);
+  }catch(e){setStatus('status-exames','error',e.message);}
+}
+
+async function atualizarPeriodicidade(seId,valor){
+  const tabela=contexto==='setor'?'setor_exames':'funcao_exames';
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${seId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({periodicidade:valor,atualizado_em:new Date().toISOString()})});
+    const lista=contexto==='setor'?examesSetor:examesFuncao;
+    const item=lista.find(x=>x.id===seId);
+    if(item)item.periodicidade=valor;
+  }catch(e){console.error(e);}
+}
+
+let _removerCb=null;
+function confirmarRemover(seId,nome){
+  document.getElementById('modal-excluir-titulo').textContent=`Remover "${nome}"?`;
+  _removerCb=async()=>{
+    const tabela=contexto==='setor'?'setor_exames':'funcao_exames';
+    const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${seId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});
+    if(!res.ok)throw new Error('Erro ao remover');
+    if(contexto==='setor')examesSetor=examesSetor.filter(x=>x.id!==seId);
+    else examesFuncao=examesFuncao.filter(x=>x.id!==seId);
+    fecharModalExcluir();renderPainel();renderNavSetores();
+  };
+  document.getElementById('btn-confirmar-excluir').onclick=async()=>{
+    document.getElementById('spinner-excluir').className='spinner spinner-w show';
+    document.getElementById('label-excluir').textContent='Removendo...';
+    document.getElementById('btn-confirmar-excluir').disabled=true;
+    try{await _removerCb();}catch(e){alert(e.message);}
+    finally{
+      document.getElementById('spinner-excluir').className='spinner spinner-w';
+      document.getElementById('label-excluir').textContent='Remover';
+      document.getElementById('btn-confirmar-excluir').disabled=false;
+    }
+  };
+  document.getElementById('modal-excluir').classList.add('show');
+}
+function fecharModalExcluir(){document.getElementById('modal-excluir').classList.remove('show');}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.busca-wrap'))document.getElementById('busca-dropdown')?.classList.remove('show');
+});
+
+inicializar();
+</script>
+</body>
+</html>
