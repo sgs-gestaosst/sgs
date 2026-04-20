@@ -186,6 +186,11 @@ async function carregar(){
     ]);
     [empresa,cnaes,setores,funcoes,setor_exames,funcao_exames,catalogo]=await Promise.all([resEmp.json(),resCnaes.json(),resSets.json(),resFuncs.json(),resSE.json(),resFE.json(),resCat.json()]);
     empresa=empresa[0];
+    if(setores.length){
+      const sIds=setores.map(s=>s.id).join(',');
+      const resFuncSet=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=in.(${sIds})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      window.funcaoSetoresData=await resFuncSet.json();
+    }else{window.funcaoSetoresData=[];}
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro: ${e.message}</div>`;
@@ -270,6 +275,27 @@ function renderIdentificacao(){
     <div class="ficha-item"><div class="ficha-label">Setores de trabalho</div><div class="ficha-value" style="font-size:18pt;color:#0d6e4f;font-weight:700;">${setores.length}</div></div>
     <div class="ficha-item"><div class="ficha-label">Exames vinculados</div><div class="ficha-value" style="font-size:18pt;color:#0d6e4f;font-weight:700;">${setor_exames.length+funcao_exames.length}</div></div>
   </div>
+  <div class="doc-subsection" style="margin-top:12pt;">Setores e funções expostas</div>
+  <table class="doc-table">
+    <thead>
+      <tr>
+        <th style="width:30%;">Setor</th>
+        <th style="width:15%;text-align:center;">Func. previstos</th>
+        <th>Funções vinculadas</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${setores.map(s=>{
+        const funcsDoSetor=(window.funcaoSetoresData||[]).filter(fs=>fs.setor_id===s.id).map(fs=>{const f=funcoes.find(x=>x.id===fs.funcao_id);return f?f.nome_funcao:null;}).filter(Boolean);
+        const funcsLabel=funcsDoSetor.length?funcsDoSetor.join(', '):'<span style="color:#9ca3af;font-style:italic;">Nenhuma função vinculada</span>';
+        return`<tr>
+          <td style="font-weight:500;">${escHtml(s.nome_setor)}</td>
+          <td style="text-align:center;font-weight:600;color:#062018;">${s.num_funcionarios_previsto||0}</td>
+          <td style="font-size:8.5pt;color:#374151;">${funcsLabel}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>
   <div class="doc-section" style="margin-top:16pt;"><span class="num-secao">3</span>Responsável Técnico (Médico do Trabalho)</div>
   <div class="ficha-grid">
     <div class="ficha-item"><div class="ficha-label">Nome / CRM</div><div class="ficha-value elab-responsavel" style="color:#374151;">—</div></div>

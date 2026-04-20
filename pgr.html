@@ -267,6 +267,12 @@ async function carregar(){
     ]);
     [empresa,cnaes,setores,funcoes,setor_riscos,funcao_riscos,medidas_setor,medidas_funcao,categorias,epis]=await Promise.all([resEmp.json(),resCnaes.json(),resSets.json(),resFuncs.json(),resSR.json(),resFR.json(),resMedS.json(),resMedF.json(),resCats.json(),resEpis.json()]);
     empresa=empresa[0];
+    // Carrega funcao_setores para montar tabela de setores x funções
+    if(setores.length){
+      const sIds=setores.map(s=>s.id).join(',');
+      const resFuncSet=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=in.(${sIds})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      window.funcaoSetoresData=await resFuncSet.json();
+    }else{window.funcaoSetoresData=[];}
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro ao carregar: ${e.message}</div>`;
@@ -476,6 +482,17 @@ function renderCaracterizacao(){
   const pg=document.createElement('div');
   pg.className='page';
   const totalFunc=empresa.total_funcionarios_previsto||0;
+
+  // Monta mapa de funções por setor usando funcao_setores (já carregado)
+  const funcoesPorSetor={};
+  if(window.funcaoSetoresData){
+    window.funcaoSetoresData.forEach(fs=>{
+      if(!funcoesPorSetor[fs.setor_id])funcoesPorSetor[fs.setor_id]=[];
+      const f=funcoes.find(x=>x.id===fs.funcao_id);
+      if(f)funcoesPorSetor[fs.setor_id].push(f.nome_funcao);
+    });
+  }
+
   pg.innerHTML=`
   <div class="page-header">
     <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
@@ -502,14 +519,21 @@ function renderCaracterizacao(){
 
   <div class="doc-subsection" style="margin-top:14pt;">Setores e funções</div>
   <table class="doc-table">
-    <thead><tr><th>Setor</th><th>Funcionários previstos</th><th>Funções vinculadas</th></tr></thead>
+    <thead>
+      <tr>
+        <th style="width:30%;">Setor</th>
+        <th style="width:15%;text-align:center;">Func. previstos</th>
+        <th>Funções vinculadas</th>
+      </tr>
+    </thead>
     <tbody>
       ${setores.map(s=>{
-        // Funções vinculadas ao setor via funcao_setores — apenas nomes disponíveis aqui
+        const funcsDoSetor=(funcoesPorSetor[s.id]||[]);
+        const funcsLabel=funcsDoSetor.length?funcsDoSetor.join(', '):'<span style="color:#9ca3af;font-style:italic;">Nenhuma função vinculada</span>';
         return`<tr>
           <td style="font-weight:500;">${escHtml(s.nome_setor)}</td>
-          <td style="text-align:center;">${s.num_funcionarios_previsto||0}</td>
-          <td style="color:#6b7280;font-size:8.5pt;">${escHtml(s.responsavel_setor||'—')}</td>
+          <td style="text-align:center;font-weight:600;color:#0d2040;">${s.num_funcionarios_previsto||0}</td>
+          <td style="font-size:8.5pt;color:#374151;">${funcsLabel}</td>
         </tr>`;
       }).join('')}
     </tbody>
