@@ -275,7 +275,13 @@
     <div class="tab-content" id="aba-funcionarios">
       <div class="tab-header">
         <div class="tab-header-title">Funcionários cadastrados</div>
-        <a id="btn-novo-funcionario" class="btn btn-edit" href="funcionario_detalhe.html?empresa_id=X&novo=1">+ Novo funcionário</a>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;">
+            <div class="toggle" id="toggle-desligados" onclick="toggleDesligados()"></div>
+            <span id="label-desligados">Ver desligados</span>
+          </label>
+          <a id="btn-novo-funcionario" class="btn btn-edit" href="funcionario_detalhe.html?empresa_id=X&novo=1">+ Novo funcionário</a>
+        </div>
       </div>
       <div class="status-bar" id="status-funcionario"></div>
       <div id="lista-funcionarios"></div>
@@ -1087,15 +1093,26 @@ function excluirFuncaoConfirmar(id,nome){
 }
 
 // ── FUNCIONÁRIOS ─────────────────────────────────────
+let mostrarDesligados=false;
+
+function toggleDesligados(){
+  mostrarDesligados=!mostrarDesligados;
+  const toggle=document.getElementById('toggle-desligados');
+  const label=document.getElementById('label-desligados');
+  toggle.classList.toggle('on',mostrarDesligados);
+  label.textContent=mostrarDesligados?'Ocultar desligados':'Ver desligados';
+  carregarFuncionarios();
+}
+
 async function carregarFuncionarios(){
-  // Atualiza link do botão novo com empresa_id
   const btn=document.getElementById('btn-novo-funcionario');
   if(btn)btn.href=`funcionario_detalhe.html?empresa_id=${empresaId}&novo=1`;
 
   const lista=document.getElementById('lista-funcionarios');
   lista.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);font-size:13px;">Carregando...</div>`;
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,cpf,matricula,data_admissao,tipo_contrato,funcao_id,setor_id&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const filtro=mostrarDesligados?'':`&ativo=eq.true`;
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}${filtro}&select=id,nome_completo,matricula,data_admissao,data_demissao,tipo_contrato,funcao_id,setor_id,ativo&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const data=await res.json();
     renderFuncionarios(data);
   }catch(e){
@@ -1106,30 +1123,55 @@ async function carregarFuncionarios(){
 function renderFuncionarios(funcionarios){
   const lista=document.getElementById('lista-funcionarios');
   if(!funcionarios.length){
-    lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">👷</div><div class="empty-tab-title">Nenhum funcionário cadastrado</div><div>Clique em "+ Novo funcionário" para começar.</div></div>`;
+    const msg=mostrarDesligados?'Nenhum funcionário encontrado.':'Nenhum funcionário ativo. Clique em "+ Novo funcionário" para começar.';
+    lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">👷</div><div class="empty-tab-title">${msg}</div></div>`;
     return;
   }
-  lista.innerHTML=funcionarios.map(f=>{
+
+  // Separa ativos e desligados
+  const ativos=funcionarios.filter(f=>f.ativo);
+  const desligados=funcionarios.filter(f=>!f.ativo);
+
+  function renderItem(f){
     const funcao=funcoes.find(x=>x.id===f.funcao_id);
     const setor=setores.find(x=>x.id===f.setor_id);
     const admissao=f.data_admissao?new Date(f.data_admissao).toLocaleDateString('pt-BR'):'—';
-    const iniciais=f.nome_completo.trim().split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+    const demissao=f.data_demissao?new Date(f.data_demissao).toLocaleDateString('pt-BR'):null;
+    const iniciais=(f.nome_completo||'?').trim().split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+    const opacidade=f.ativo?'1':'0.5';
+    const avatarBg=f.ativo?'#1a2540':'#2a1515';
+    const avatarCor=f.ativo?'#7aabf7':'#e05555';
     return`<a href="funcionario_detalhe.html?id=${f.id}&empresa_id=${empresaId}" style="text-decoration:none;">
-      <div class="lista-item" style="cursor:pointer;">
-        <div style="width:36px;height:36px;border-radius:50%;background:#1a2540;color:#7aabf7;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;">${iniciais}</div>
+      <div class="lista-item" style="cursor:pointer;opacity:${opacidade};">
+        <div style="width:36px;height:36px;border-radius:50%;background:${avatarBg};color:${avatarCor};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;">${iniciais}</div>
         <div class="lista-item-info">
           <div class="lista-item-nome">${escHtml(f.nome_completo)}</div>
           <div class="lista-item-sub">${funcao?escHtml(funcao.nome_funcao):'—'}${setor?' · '+escHtml(setor.nome_setor):''}</div>
           <div style="margin-top:4px;">
-            ${f.matricula?`<span class="mini-badge mb-info">Mat. ${escHtml(f.matricula)}</span>`:''}
-            ${f.tipo_contrato?`<span class="mini-badge mb-blue">${escHtml(f.tipo_contrato)}</span>`:''}
-            <span class="mini-badge mb-info">Adm. ${admissao}</span>
+            ${f.ativo
+              ?`${f.matricula?`<span class="mini-badge mb-info">Mat. ${escHtml(f.matricula)}</span>`:''}
+                ${f.tipo_contrato?`<span class="mini-badge mb-blue">${escHtml(f.tipo_contrato)}</span>`:''}
+                <span class="mini-badge mb-info">Adm. ${admissao}</span>`
+              :`<span class="mini-badge" style="background:#2a1515;color:#e05555;border:1px solid #4a2020;">Desligado</span>
+                ${demissao?`<span class="mini-badge mb-info">Dem. ${demissao}</span>`:''}`
+            }
           </div>
         </div>
         <div style="color:var(--text3);font-size:18px;">›</div>
       </div>
     </a>`;
-  }).join('');
+  }
+
+  let html='';
+  if(ativos.length){
+    html+=`<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Ativos (${ativos.length})</div>`;
+    html+=ativos.map(renderItem).join('');
+  }
+  if(desligados.length){
+    html+=`<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;">Desligados (${desligados.length})</div>`;
+    html+=desligados.map(renderItem).join('');
+  }
+  lista.innerHTML=html;
 }
 
 // ── CBO AUTOCOMPLETE ─────────────────────────────────
