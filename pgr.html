@@ -273,6 +273,10 @@ async function carregar(){
       const resFuncSet=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=in.(${sIds})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
       window.funcaoSetoresData=await resFuncSet.json();
     }else{window.funcaoSetoresData=[];}
+    // Carrega SESMT
+    const resSESMT=await fetch(`${SUPA_URL}/rest/v1/dimensionamento_sesmt?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const sesmtData=await resSESMT.json();
+    window.sesmtData=sesmtData[0]||null;
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro ao carregar: ${e.message}</div>`;
@@ -286,6 +290,7 @@ function renderDocumento(){
   wrap.appendChild(renderSumario());
   wrap.appendChild(renderIdentificacao());
   wrap.appendChild(renderCaracterizacao());
+  wrap.appendChild(renderSESMT());
   wrap.appendChild(renderInventarioRiscos());
   wrap.appendChild(renderPlanoAcao());
 }
@@ -363,13 +368,14 @@ function renderSumario(){
       ${[
         ['1','Identificação da Empresa','3'],
         ['2','Caracterização do Estabelecimento','4'],
-        ['3','Inventário de Riscos Ocupacionais','5'],
-        ['3.1','Riscos por Setor','5'],
-        ['3.2','Riscos por Função','—'],
-        ['4','Avaliação e Classificação dos Riscos','—'],
-        ['5','Medidas de Prevenção e Controle','—'],
-        ['6','Plano de Ação','—'],
-        ['7','Monitoramento e Revisão','—'],
+        ['3','Dimensionamento do SESMT — NR-4','5'],
+        ['4','Inventário de Riscos Ocupacionais','6'],
+        ['4.1','Riscos por Setor','6'],
+        ['4.2','Riscos por Função','—'],
+        ['5','Avaliação e Classificação dos Riscos','—'],
+        ['6','Medidas de Prevenção e Controle','—'],
+        ['7','Plano de Ação','—'],
+        ['8','Monitoramento e Revisão','—'],
       ].map(([n,t,p])=>`<tr>
         <td style="width:30pt;"><span class="num-secao">${n}</span></td>
         <td style="color:#1a1a2e;">${t}</td>
@@ -548,6 +554,119 @@ function renderCaracterizacao(){
   <div class="page-footer">
     <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
     <span class="pf-page">Página 4</span>
+  </div>`;
+  return pg;
+}
+
+// ── SESMT — NR-4 ─────────────────────────────────────
+function renderSESMT(){
+  const pg=document.createElement('div');pg.className='page';
+  const sesmt=window.sesmtData;
+  const gr=empresa.grau_risco||1;
+  const numFunc=empresa.total_funcionarios_previsto||0;
+  const grLabels={1:'GR 1 — Baixo',2:'GR 2 — Médio-Baixo',3:'GR 3 — Médio-Alto',4:'GR 4 — Alto'};
+
+  // Se não tiver dados calculados, mostra tabela NR-4 calculada na hora
+  const tec=sesmt?.tecnico_sst||0;
+  const eng=sesmt?.engenheiro_sst||0;
+  const med=sesmt?.medico_trabalho||0;
+  const enf=sesmt?.enfermeiro||0;
+  const aux=sesmt?.aux_enfermagem||0;
+  const dispensado=(tec+eng+med+enf+aux)===0;
+
+  const profissionais=[
+    {cargo:'Técnico de Segurança do Trabalho',cbo:'3172-05',qtd:tec,regime:sesmt?.regime_tecnico||'—'},
+    {cargo:'Engenheiro de Segurança do Trabalho',cbo:'2149-40',qtd:eng,regime:sesmt?.regime_engenheiro||'—'},
+    {cargo:'Médico do Trabalho',cbo:'2231-38',qtd:med,regime:sesmt?.regime_medico||'—'},
+    {cargo:'Enfermeiro do Trabalho',cbo:'2235-35',qtd:enf,regime:sesmt?.regime_enfermeiro||'—'},
+    {cargo:'Auxiliar de Enfermagem do Trabalho',cbo:'3222-05',qtd:aux,regime:sesmt?.regime_aux_enf||'—'},
+  ];
+
+  // CIPA / CIPATR
+  const requerCipa=sesmt?.requer_cipa||false;
+  const requerCipatr=sesmt?.requer_cipatr||false;
+  const membrosCipa=sesmt?.numero_membros_cipa||0;
+  const membrosCipatr=sesmt?.numero_membros_cipatr||0;
+
+  pg.innerHTML=`
+  <div class="page-header">
+    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="ph-doc">PGR — ${fmtAno()}</span>
+  </div>
+
+  <div class="doc-section"><span class="num-secao">3</span>Dimensionamento do SESMT — NR-4</div>
+
+  <p class="doc-text" style="margin-bottom:12pt;">O dimensionamento do Serviço Especializado em Engenharia de Segurança e em Medicina do Trabalho (SESMT) foi realizado conforme o Quadro I da NR-4, considerando o Grau de Risco da atividade principal e o número de empregados do estabelecimento.</p>
+
+  <div class="ficha-grid ficha-grid-3" style="margin-bottom:14pt;">
+    <div class="ficha-item">
+      <div class="ficha-label">Grau de risco (NR-4)</div>
+      <div class="ficha-value" style="font-size:12pt;color:#0d2040;font-weight:700;">${grLabels[gr]||'—'}</div>
+    </div>
+    <div class="ficha-item">
+      <div class="ficha-label">Nº de empregados (base)</div>
+      <div class="ficha-value" style="font-size:12pt;color:#2a5298;font-weight:700;">${numFunc}</div>
+    </div>
+    <div class="ficha-item">
+      <div class="ficha-label">SESMT centralizado</div>
+      <div class="ficha-value">${sesmt?.sesmt_centralizado?'Sim':'Não'}</div>
+    </div>
+  </div>
+
+  ${dispensado?`
+  <div style="background:#f0fdf4;border:2pt solid #86efac;border-radius:6pt;padding:14pt 16pt;margin-bottom:14pt;">
+    <div style="font-size:11pt;font-weight:700;color:#166534;margin-bottom:4pt;">✓ SESMT Dispensado</div>
+    <div style="font-size:9pt;color:#166534;">Conforme NR-4, o estabelecimento está dispensado da constituição de SESMT com base no Grau de Risco ${gr} e no número de ${numFunc} empregados.</div>
+  </div>`:`
+  <div class="doc-subsection">Profissionais exigidos — Quadro I NR-4</div>
+  <table class="doc-table">
+    <thead>
+      <tr>
+        <th>Profissional</th>
+        <th>CBO</th>
+        <th style="text-align:center;">Quantidade</th>
+        <th style="text-align:center;">Regime</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${profissionais.filter(p=>p.qtd>0).map(p=>`
+      <tr>
+        <td style="font-weight:500;">${p.cargo}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;font-size:8.5pt;">${p.cbo}</td>
+        <td style="text-align:center;font-weight:700;color:#0d2040;">${p.qtd}</td>
+        <td style="text-align:center;">${p.regime}</td>
+      </tr>`).join('')}
+      ${profissionais.filter(p=>p.qtd>0).length===0?`
+      <tr><td colspan="4" style="text-align:center;color:#9ca3af;font-style:italic;">Nenhum profissional dimensionado</td></tr>`:''}
+    </tbody>
+  </table>`}
+
+  <div class="doc-subsection" style="margin-top:14pt;">CIPA / CIPATR — NR-5 / NR-31</div>
+  <div class="ficha-grid">
+    <div class="ficha-item">
+      <div class="ficha-label">Requer CIPA (NR-5)</div>
+      <div class="ficha-value" style="${requerCipa?'color:#166534;font-weight:600;':'color:#6b7280;'}">${requerCipa?'Sim':'Não'}</div>
+    </div>
+    <div class="ficha-item">
+      <div class="ficha-label">Nº de membros CIPA</div>
+      <div class="ficha-value">${requerCipa?(membrosCipa||'—'):'—'}</div>
+    </div>
+    <div class="ficha-item">
+      <div class="ficha-label">Requer CIPATR (NR-31)</div>
+      <div class="ficha-value" style="${requerCipatr?'color:#166534;font-weight:600;':'color:#6b7280;'}">${requerCipatr?'Sim':'Não'}</div>
+    </div>
+    <div class="ficha-item">
+      <div class="ficha-label">Nº de membros CIPATR</div>
+      <div class="ficha-value">${requerCipatr?(membrosCipatr||'—'):'—'}</div>
+    </div>
+  </div>
+
+  <div class="doc-subsection" style="margin-top:14pt;">Base legal</div>
+  <p class="doc-text">O dimensionamento foi realizado conforme o <strong>Quadro I da NR-4</strong> (Portaria MTE nº 3.214/1978, atualizada), considerando o número total de empregados do estabelecimento e o Grau de Risco da atividade econômica principal conforme classificação CNAE. O não cumprimento do dimensionamento do SESMT sujeita o empregador às penalidades previstas no art. 201 da CLT.</p>
+
+  <div class="page-footer">
+    <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="pf-page">Página 5</span>
   </div>`;
   return pg;
 }
