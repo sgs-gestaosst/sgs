@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Checklists e Inspeções</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+.btn-danger:hover{background:#2a1515;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:600;}
+/* Tabs */
+.tabs{display:flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tab{padding:12px 20px;font-size:13px;cursor:pointer;border-right:1px solid var(--border);transition:background .15s;font-weight:500;color:var(--text2);}
+.tab:last-child{border-right:none;}
+.tab:hover{background:var(--surface2);}
+.tab.active{background:var(--surface2);color:var(--text);}
+/* Checklist cards */
+.checklist-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.checklist-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;cursor:pointer;transition:border-color .15s;}
+.checklist-card:hover{border-color:var(--border-focus);}
+.checklist-card-nr{font-size:10px;font-family:var(--mono);color:var(--accent);margin-bottom:8px;}
+.checklist-card-nome{font-size:13px;font-weight:500;margin-bottom:8px;}
+.checklist-card-meta{font-size:11px;color:var(--text3);}
+.checklist-card-ultima{font-size:10px;color:var(--text3);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+/* Inspecão item */
+.insp-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;transition:border-color .15s;}
+.insp-item:hover{border-color:var(--text3);}
+.insp-item-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.insp-item-info{flex:1;}
+.insp-item-num{font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:3px;}
+.insp-item-texto{font-size:13px;color:var(--text);}
+.insp-item-ref{font-size:10px;color:var(--text3);margin-top:2px;}
+/* Resposta buttons */
+.resp-btns{display:flex;gap:6px;flex-shrink:0;}
+.resp-btn{padding:5px 12px;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);transition:all .15s;white-space:nowrap;}
+.resp-btn:hover{border-color:var(--text3);}
+.resp-btn.conforme.active{background:#0e2820;color:#2dd4a0;border-color:#1a4a38;}
+.resp-btn.naoconforme.active{background:#2a1515;color:#e05555;border-color:#4a2020;}
+.resp-btn.na.active{background:#1e2333;color:var(--text3);border-color:var(--border);}
+/* Observação campo */
+.insp-obs{display:none;padding:0 16px 12px;}
+.insp-obs.show{display:block;}
+.insp-obs textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;resize:none;height:60px;}
+.insp-obs textarea:focus{border-color:var(--border-focus);}
+.insp-obs-label{font-size:10px;color:var(--danger);margin-bottom:4px;font-weight:500;}
+/* Progresso */
+.progress-wrap{margin-bottom:20px;}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:6px;}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent2);border-radius:3px;transition:width .3s;}
+/* Lista inspeções */
+.inspecao-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .15s;}
+.inspecao-item:hover{border-color:var(--border-focus);}
+/* Badges */
+.mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;display:inline-block;}
+.mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+.mb-green{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.mb-amber{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.mb-red{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.mb-blue{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+/* Status bar */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px;color:var(--text3);}
+.empty-icon{font-size:32px;margin-bottom:12px;}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:600px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-field{margin-bottom:0;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.modal-field input:focus,.modal-field select:focus{border-color:var(--border-focus);}
+/* Conformidade ring */
+.conform-ring{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;}
+@media(max-width:900px){.checklist-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.checklist-grid{grid-template-columns:1fr;}.stats-grid{grid-template-columns:1fr 1fr;}.header-title{display:none;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Checklists</span></div>
+</div>
+
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para empresa</a>
+
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#1a3a6e;border:1px solid #2a5298;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔍</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Checklists e Inspeções</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" id="tab-checklists" onclick="mudarTab('checklists')">📋 Checklists disponíveis</div>
+    <div class="tab" id="tab-inspecoes" onclick="mudarTab('inspecoes')">🔍 Inspeções realizadas</div>
+  </div>
+
+  <div id="conteudo-tab"></div>
+</div>
+
+<!-- MODAL NOVA INSPEÇÃO -->
+<div class="modal-overlay" id="modal-nova-insp">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-insp-titulo">Nova inspeção</span>
+      <button onclick="fecharModalNovaInsp()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Checklist</label>
+        <input type="text" id="insp-checklist-nome" disabled style="color:var(--text2);">
+      </div>
+      <div class="modal-field">
+        <label>Data da inspeção</label>
+        <input type="date" id="insp-data">
+      </div>
+      <div class="modal-field">
+        <label>Responsável</label>
+        <input type="text" id="insp-responsavel" placeholder="Nome do inspetor">
+      </div>
+      <div class="modal-field full">
+        <label>Setor (opcional)</label>
+        <select id="insp-setor">
+          <option value="">— Geral da empresa —</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="fecharModalNovaInsp()">Cancelar</button>
+      <button class="btn btn-primary" onclick="iniciarInspecao()">
+        <span class="spinner" id="spinner-nova-insp"></span>
+        Iniciar inspeção →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INSPEÇÃO EM ANDAMENTO -->
+<div class="modal-overlay" id="modal-inspecao">
+  <div class="modal" style="max-width:800px;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;">
+      <div>
+        <div style="font-size:16px;font-weight:500;" id="insp-modal-titulo">Inspeção</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px;" id="insp-modal-sub"></div>
+      </div>
+      <button onclick="fecharModalInspecao()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;flex-shrink:0;">×</button>
+    </div>
+    <!-- Progresso -->
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="prog-label">0 de 0 itens respondidos</span>
+        <span id="prog-pct">0%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <!-- Contadores -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <span class="mini-badge mb-green" id="count-conf">✓ 0 Conformes</span>
+      <span class="mini-badge mb-red" id="count-nc">✕ 0 Não conformes</span>
+      <span class="mini-badge mb-info" id="count-na">— 0 N/A</span>
+      <span class="mini-badge mb-amber" id="count-pend">⏳ 0 Pendentes</span>
+    </div>
+    <!-- Itens -->
+    <div id="lista-itens-insp" style="max-height:450px;overflow-y:auto;"></div>
+    <div class="status-bar" id="status-insp"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+      <button class="btn btn-cancel" onclick="fecharModalInspecao()">Salvar e fechar</button>
+      <button class="btn btn-save" id="btn-concluir-insp" onclick="concluirInspecao()">
+        <span class="spinner" id="spinner-concluir"></span>
+        <span id="label-concluir">Concluir inspeção</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa={},setores=[],checklists=[],inspecoes=[];
+let checklistAtivo=null,inspecaoAtiva=null,itensAtivos=[],respostas={};
+let tabAtual='checklists';
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]||''}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  try{
+    const [resEmp,resSets,resCL,resInsp]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/catalogo_checklists?ativo=eq.true&select=*&order=nr_relacionada.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/inspecoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresa,setores,checklists,inspecoes]=await Promise.all([resEmp.json(),resSets.json(),resCL.json(),resInsp.json()]);
+    empresa=empresa[0];
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`Checklists e Inspeções — ${nome}`;
+    document.getElementById('header-nome').textContent=nome;
+    // Popula setor no modal
+    const sel=document.getElementById('insp-setor');
+    setores.forEach(s=>sel.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+    renderStats();
+    renderTab();
+  }catch(e){console.error(e);}
+}
+
+function renderStats(){
+  const total=inspecoes.length;
+  const concluidas=inspecoes.filter(i=>i.status==='Concluída').length;
+  const emAndamento=inspecoes.filter(i=>i.status==='Em andamento').length;
+  const naoConformes=inspecoes.reduce((acc,i)=>acc+(i.total_nao_conformes||0),0);
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Inspeções realizadas</div><div class="stat-value" style="color:var(--text);">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Concluídas</div><div class="stat-value" style="color:var(--success);">${concluidas}</div></div>
+    <div class="stat-card"><div class="stat-label">Em andamento</div><div class="stat-value" style="color:var(--accent);">${emAndamento}</div></div>
+    <div class="stat-card"><div class="stat-label">Não conformidades</div><div class="stat-value" style="color:var(--danger);">${naoConformes}</div></div>`;
+  document.getElementById('hero-sub').textContent=`${checklists.length} checklists disponíveis · ${total} inspeções realizadas · ${naoConformes} não conformidades`;
+}
+
+function mudarTab(tab){
+  tabAtual=tab;
+  ['checklists','inspecoes'].forEach(t=>document.getElementById(`tab-${t}`)?.classList.toggle('active',t===tab));
+  renderTab();
+}
+
+function renderTab(){
+  if(tabAtual==='checklists')renderChecklists();
+  else renderInspecoes();
+}
+
+function renderChecklists(){
+  const el=document.getElementById('conteudo-tab');
+  if(!checklists.length){el.innerHTML=`<div class="empty"><div class="empty-icon">📋</div>Nenhum checklist disponível.</div>`;return;}
+  // Busca última inspeção por checklist
+  const ultimasPorCL={};
+  inspecoes.forEach(i=>{
+    if(!ultimasPorCL[i.checklist_id]||new Date(i.criado_em)>new Date(ultimasPorCL[i.checklist_id].criado_em))
+      ultimasPorCL[i.checklist_id]=i;
+  });
+  el.innerHTML=`<div class="checklist-grid">${checklists.map(cl=>{
+    const ultima=ultimasPorCL[cl.id];
+    const pct=ultima?Math.round(ultima.percentual_conformidade||0):null;
+    const corPct=pct===null?'var(--text3)':pct>=80?'var(--success)':pct>=50?'var(--warning)':'var(--danger)';
+    return`<div class="checklist-card" onclick="abrirModalNovaInsp(${cl.id})">
+      <div class="checklist-card-nr">${cl.nr_relacionada||'Geral'}</div>
+      <div class="checklist-card-nome">${escHtml(cl.nome)}</div>
+      <div class="checklist-card-meta">
+        <span class="mini-badge mb-info">${cl.total_itens||'?'} itens</span>
+      </div>
+      ${ultima?`
+      <div class="checklist-card-ultima">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Última: ${fmtData(ultima.data_inspecao)}</span>
+          <span style="color:${corPct};font-weight:600;">${pct}% conforme</span>
+        </div>
+        ${ultima.total_nao_conformes>0?`<div style="color:var(--danger);margin-top:3px;">⚠ ${ultima.total_nao_conformes} não conformidade(s)</div>`:''}
+      </div>`:`<div class="checklist-card-ultima" style="color:var(--text3);">Nenhuma inspeção realizada</div>`}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderInspecoes(){
+  const el=document.getElementById('conteudo-tab');
+  if(!inspecoes.length){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;">Nenhuma inspeção realizada</div><div>Clique em um checklist para iniciar uma inspeção.</div></div>`;
+    return;
+  }
+  el.innerHTML=inspecoes.map(i=>{
+    const cl=checklists.find(c=>c.id===i.checklist_id);
+    const setor=setores.find(s=>s.id===i.setor_id);
+    const pct=Math.round(i.percentual_conformidade||0);
+    const corPct=pct>=80?'var(--success)':pct>=50?'var(--warning)':'var(--danger)';
+    const corBorda=i.status==='Concluída'?'var(--border)':'var(--accent)';
+    return`<div class="inspecao-item" style="border-color:${corBorda};" onclick="reabrirInspecao(${i.id})">
+      <div class="conform-ring" style="background:${pct>=80?'#0e2820':pct>=50?'#2a2010':'#2a1515'};border:2px solid ${corPct};">
+        <span style="color:${corPct};font-size:13px;">${i.status==='Em andamento'?'…':pct+'%'}</span>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:500;">${escHtml(cl?.nome||'—')}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;">
+          <span>📅 ${fmtData(i.data_inspecao)}</span>
+          ${i.responsavel?`<span>👤 ${escHtml(i.responsavel)}</span>`:''}
+          ${setor?`<span>🗂️ ${escHtml(setor.nome_setor)}</span>`:`<span>🏭 Geral</span>`}
+          ${i.total_nao_conformes>0?`<span style="color:var(--danger);">⚠ ${i.total_nao_conformes} NC</span>`:''}
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <span class="mini-badge ${i.status==='Concluída'?'mb-green':'mb-blue'}">${i.status}</span>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;">${i.total_conformes||0}C · ${i.total_nao_conformes||0}NC · ${i.total_na||0}N/A</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL NOVA INSPEÇÃO ────────────────────────────────
+function abrirModalNovaInsp(checklistId){
+  checklistAtivo=checklists.find(c=>c.id===checklistId);
+  if(!checklistAtivo)return;
+  document.getElementById('modal-insp-titulo').textContent=checklistAtivo.nome;
+  document.getElementById('insp-checklist-nome').value=checklistAtivo.nome;
+  document.getElementById('insp-data').value=new Date().toISOString().split('T')[0];
+  document.getElementById('insp-responsavel').value='';
+  document.getElementById('insp-setor').value='';
+  document.getElementById('modal-nova-insp').classList.add('show');
+}
+function fecharModalNovaInsp(){document.getElementById('modal-nova-insp').classList.remove('show');}
+
+async function iniciarInspecao(){
+  const data=document.getElementById('insp-data').value;
+  const responsavel=document.getElementById('insp-responsavel').value.trim();
+  const setorId=parseInt(document.getElementById('insp-setor').value)||null;
+  if(!data){alert('Informe a data da inspeção.');return;}
+  document.getElementById('spinner-nova-insp').className='spinner show';
+  try{
+    // Busca itens do checklist
+    const resItens=await fetch(`${SUPA_URL}/rest/v1/checklist_itens?checklist_id=eq.${checklistAtivo.id}&ativo=eq.true&select=*&order=ordem.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    itensAtivos=await resItens.json();
+    // Cria inspeção
+    const res=await fetch(`${SUPA_URL}/rest/v1/inspecoes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({empresa_id:parseInt(empresaId),checklist_id:checklistAtivo.id,setor_id:setorId,responsavel:responsavel||null,data_inspecao:data,status:'Em andamento',total_itens:itensAtivos.length,ativo:true})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
+    const data2=await res.json();
+    inspecaoAtiva=data2[0];
+    respostas={};
+    fecharModalNovaInsp();
+    abrirModalInspecao();
+  }catch(e){alert('Erro: '+e.message);}
+  finally{document.getElementById('spinner-nova-insp').className='spinner';}
+}
+
+async function reabrirInspecao(inspecaoId){
+  const insp=inspecoes.find(i=>i.id===inspecaoId);
+  if(!insp)return;
+  inspecaoAtiva=insp;
+  checklistAtivo=checklists.find(c=>c.id===insp.checklist_id);
+  // Carrega itens e respostas existentes
+  const [resItens,resResp]=await Promise.all([
+    fetch(`${SUPA_URL}/rest/v1/checklist_itens?checklist_id=eq.${insp.checklist_id}&ativo=eq.true&select=*&order=ordem.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    fetch(`${SUPA_URL}/rest/v1/inspecao_respostas?inspecao_id=eq.${inspecaoId}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+  ]);
+  itensAtivos=await resItens.json();
+  const respArr=await resResp.json();
+  respostas={};
+  respArr.forEach(r=>{respostas[r.item_id]={resposta:r.resposta,observacao:r.observacao||'',id:r.id};});
+  abrirModalInspecao();
+}
+
+function abrirModalInspecao(){
+  document.getElementById('insp-modal-titulo').textContent=checklistAtivo?.nome||'Inspeção';
+  const setor=setores.find(s=>s.id===inspecaoAtiva?.setor_id);
+  document.getElementById('insp-modal-sub').textContent=
+    `${fmtData(inspecaoAtiva?.data_inspecao)} · ${inspecaoAtiva?.responsavel||'Sem responsável'} · ${setor?setor.nome_setor:'Geral da empresa'}`;
+  renderItens();
+  document.getElementById('modal-inspecao').classList.add('show');
+}
+
+function fecharModalInspecao(){
+  document.getElementById('modal-inspecao').classList.remove('show');
+  // Recarrega inspeções
+  fetch(`${SUPA_URL}/rest/v1/inspecoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+  .then(r=>r.json()).then(data=>{inspecoes=data;renderStats();renderTab();});
+}
+
+function renderItens(){
+  const lista=document.getElementById('lista-itens-insp');
+  lista.innerHTML=itensAtivos.map((item,idx)=>{
+    const resp=respostas[item.id]||{resposta:'',observacao:''};
+    const isNC=resp.resposta==='Não conforme';
+    return`<div class="insp-item" id="item-wrap-${item.id}">
+      <div class="insp-item-header">
+        <div class="insp-item-info">
+          <div class="insp-item-num">Item ${idx+1}</div>
+          <div class="insp-item-texto">${escHtml(item.item)}</div>
+          ${item.referencia_legal?`<div class="insp-item-ref">${escHtml(item.referencia_legal)}</div>`:''}
+        </div>
+        <div class="resp-btns">
+          <button class="resp-btn conforme ${resp.resposta==='Conforme'?'active':''}"
+            onclick="responder(${item.id},'Conforme')">✓ Conforme</button>
+          <button class="resp-btn naoconforme ${resp.resposta==='Não conforme'?'active':''}"
+            onclick="responder(${item.id},'Não conforme')">✕ NC</button>
+          <button class="resp-btn na ${resp.resposta==='N/A'?'active':''}"
+            onclick="responder(${item.id},'N/A')">N/A</button>
+        </div>
+      </div>
+      <div class="insp-obs ${isNC?'show':''}" id="obs-${item.id}">
+        <div class="insp-obs-label">⚠ Descreva a não conformidade e a ação a ser tomada:</div>
+        <textarea id="obs-text-${item.id}" placeholder="Descreva o problema encontrado..."
+          onblur="salvarObservacao(${item.id})">${escHtml(resp.observacao||'')}</textarea>
+      </div>
+    </div>`;
+  }).join('');
+  atualizarProgresso();
+}
+
+async function responder(itemId,resposta){
+  respostas[itemId]=respostas[itemId]||{observacao:''};
+  respostas[itemId].resposta=resposta;
+  // Atualiza UI dos botões
+  const wrap=document.getElementById(`item-wrap-${itemId}`);
+  wrap.querySelectorAll('.resp-btn').forEach(b=>b.classList.remove('active'));
+  const mapa={'Conforme':'conforme','Não conforme':'naoconforme','N/A':'na'};
+  wrap.querySelector(`.resp-btn.${mapa[resposta]}`)?.classList.add('active');
+  // Mostra/oculta campo de observação
+  const obsEl=document.getElementById(`obs-${itemId}`);
+  obsEl?.classList.toggle('show',resposta==='Não conforme');
+  if(resposta==='Não conforme')document.getElementById(`obs-text-${itemId}`)?.focus();
+  atualizarProgresso();
+  // Salva no banco
+  await salvarResposta(itemId,resposta,respostas[itemId].observacao||'');
+}
+
+async function salvarObservacao(itemId){
+  const obs=document.getElementById(`obs-text-${itemId}`)?.value.trim()||'';
+  respostas[itemId]=respostas[itemId]||{};
+  respostas[itemId].observacao=obs;
+  if(respostas[itemId].resposta)
+    await salvarResposta(itemId,respostas[itemId].resposta,obs);
+}
+
+async function salvarResposta(itemId,resposta,observacao){
+  try{
+    const existing=respostas[itemId]?.id;
+    if(existing){
+      await fetch(`${SUPA_URL}/rest/v1/inspecao_respostas?id=eq.${existing}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+        body:JSON.stringify({resposta,observacao:observacao||null,atualizado_em:new Date().toISOString()})
+      });
+    }else{
+      const res=await fetch(`${SUPA_URL}/rest/v1/inspecao_respostas`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify({inspecao_id:inspecaoAtiva.id,item_id:itemId,resposta,observacao:observacao||null})
+      });
+      if(res.ok){const d=await res.json();respostas[itemId].id=d[0].id;}
+    }
+  }catch(e){console.error(e);}
+}
+
+function atualizarProgresso(){
+  const total=itensAtivos.length;
+  const respondidos=Object.values(respostas).filter(r=>r.resposta).length;
+  const conformes=Object.values(respostas).filter(r=>r.resposta==='Conforme').length;
+  const naoConformes=Object.values(respostas).filter(r=>r.resposta==='Não conforme').length;
+  const na=Object.values(respostas).filter(r=>r.resposta==='N/A').length;
+  const pendentes=total-respondidos;
+  const pct=respondidos>0?Math.round((conformes/(respondidos-na||1))*100):0;
+  document.getElementById('prog-label').textContent=`${respondidos} de ${total} itens respondidos`;
+  document.getElementById('prog-pct').textContent=`${pct}% conforme`;
+  document.getElementById('prog-fill').style.width=`${(respondidos/total)*100}%`;
+  document.getElementById('count-conf').textContent=`✓ ${conformes} Conformes`;
+  document.getElementById('count-nc').textContent=`✕ ${naoConformes} Não conformes`;
+  document.getElementById('count-na').textContent=`— ${na} N/A`;
+  document.getElementById('count-pend').textContent=`⏳ ${pendentes} Pendentes`;
+}
+
+async function concluirInspecao(){
+  const total=itensAtivos.length;
+  const respondidos=Object.values(respostas).filter(r=>r.resposta).length;
+  if(respondidos<total){
+    if(!confirm(`Ainda há ${total-respondidos} item(ns) sem resposta. Deseja concluir mesmo assim?`))return;
+  }
+  // Verifica NC sem observação
+  const ncSemObs=itensAtivos.filter(item=>respostas[item.id]?.resposta==='Não conforme'&&!respostas[item.id]?.observacao?.trim());
+  if(ncSemObs.length){
+    alert(`Por favor, descreva as ${ncSemObs.length} não conformidade(s) antes de concluir.`);
+    return;
+  }
+  document.getElementById('btn-concluir-insp').disabled=true;
+  document.getElementById('spinner-concluir').className='spinner show';
+  document.getElementById('label-concluir').textContent='Concluindo...';
+  try{
+    const conformes=Object.values(respostas).filter(r=>r.resposta==='Conforme').length;
+    const naoConformes=Object.values(respostas).filter(r=>r.resposta==='Não conforme').length;
+    const na=Object.values(respostas).filter(r=>r.resposta==='N/A').length;
+    const base=respondidos-na;
+    const pct=base>0?Math.round((conformes/base)*100):0;
+    // Atualiza inspeção
+    await fetch(`${SUPA_URL}/rest/v1/inspecoes?id=eq.${inspecaoAtiva.id}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({status:'Concluída',total_conformes:conformes,total_nao_conformes:naoConformes,total_na:na,percentual_conformidade:pct,atualizado_em:new Date().toISOString()})
+    });
+    // Cria ações para cada NC
+    const naoConformesItens=itensAtivos.filter(item=>respostas[item.id]?.resposta==='Não conforme');
+    for(const item of naoConformesItens){
+      const obs=respostas[item.id]?.observacao||'';
+      const resAcao=await fetch(`${SUPA_URL}/rest/v1/acoes`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify({
+          empresa_id:parseInt(empresaId),
+          setor_id:inspecaoAtiva.setor_id||null,
+          titulo:`NC: ${item.item.slice(0,100)}`,
+          descricao:`Não conformidade identificada na inspeção de ${checklistAtivo?.nome} em ${fmtData(inspecaoAtiva.data_inspecao)}.\n\nItem: ${item.item}\nReferência: ${item.referencia_legal||'—'}\n\nObservação: ${obs}`,
+          origem:'Checklist',
+          prioridade:'Alta',
+          status:'Pendente',
+          ativo:true
+        })
+      });
+      if(resAcao.ok){
+        const acaoData=await resAcao.json();
+        // Vincula ação à resposta
+        if(respostas[item.id]?.id){
+          await fetch(`${SUPA_URL}/rest/v1/inspecao_respostas?id=eq.${respostas[item.id].id}`,{
+            method:'PATCH',
+            headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+            body:JSON.stringify({acao_id:acaoData[0].id})
+          });
+        }
+        // Registra histórico da ação
+        await fetch(`${SUPA_URL}/rest/v1/acoes_historico`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+          body:JSON.stringify({acao_id:acaoData[0].id,empresa_id:parseInt(empresaId),status_anterior:null,status_novo:'Pendente',comentario:`Gerada automaticamente pela inspeção: ${checklistAtivo?.nome}`})
+        });
+      }
+    }
+    setStatus('status-insp','success',`Inspeção concluída! ${naoConformes} ação(ões) criada(s) na Central de Ações.`);
+    setTimeout(()=>fecharModalInspecao(),2500);
+  }catch(e){
+    setStatus('status-insp','error',`Erro: ${e.message}`);
+  }finally{
+    document.getElementById('btn-concluir-insp').disabled=false;
+    document.getElementById('spinner-concluir').className='spinner';
+    document.getElementById('label-concluir').textContent='Concluir inspeção';
+  }
+}
+
+// Fecha modais ao clicar fora
+['modal-nova-insp','modal-inspecao'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('click',e=>{
+    if(e.target.id===id&&id==='modal-nova-insp')fecharModalNovaInsp();
+  });
+});
+
+inicializar();
+</script>
+</body>
+</html>
