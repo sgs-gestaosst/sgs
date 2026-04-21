@@ -173,8 +173,12 @@
       <div class="field"><label>Nº de Funcionários <span class="req">*</span></label><input type="number" id="total_funcionarios" placeholder="0" min="0" oninput="verificarLimiteInput()"></div>
     </div>
     <div class="grid-2">
-      <div class="field"><label>Atividade Rural</label>
-        <div class="toggle-field"><span class="toggle-label">Empresa de atividade rural?</span><div class="toggle" id="toggle-rural" onclick="toggleRural()"></div></div>
+      <div class="field"><label>Tipo de atividade <span class="req">*</span></label>
+        <select id="tipo_atividade" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;" onchange="atualizarTipoAtividade()">
+          <option value="Geral">Geral — CIPA (NR-5)</option>
+          <option value="Rural">Rural — CIPATR (NR-31)</option>
+          <option value="Mineração">Mineração — CIPAMIN (NR-22)</option>
+        </select>
       </div>
       <div class="field"><label>Ativa no sistema</label>
         <div class="toggle-field"><span class="toggle-label">Empresa ativa no SGS?</span><div class="toggle on" id="toggle-ativo" onclick="toggleAtivo()"></div></div>
@@ -493,7 +497,7 @@ function renderCNAEs(){
   }).join('');
 }
 
-function toggleRural(){rural=!rural;document.getElementById('toggle-rural').classList.toggle('on',rural);}
+function atualizarTipoAtividade(){} // placeholder
 function toggleAtivo(){ativo=!ativo;document.getElementById('toggle-ativo').classList.toggle('on',ativo);}
 
 async function salvarEmpresa(){
@@ -617,7 +621,8 @@ async function salvarEmpresa(){
     cep:document.getElementById('cep').value.replace(/\D/g,'')||null,
     grau_risco:gr,
     total_funcionarios_previsto:fn?parseInt(fn):null,
-    atividade_rural:rural,
+    tipo_atividade:document.getElementById('tipo_atividade').value,
+    atividade_rural:document.getElementById('tipo_atividade').value==='Rural',
     ativo:ativo
   };
   const cnaesParaSalvar=cnaes.map(c=>({cnae:c.cnae,descricao:c.descricao,tipo:c.tipo,grau_risco:c.gr||null,ativo:true}));

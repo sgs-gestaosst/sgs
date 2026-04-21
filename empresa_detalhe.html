@@ -480,7 +480,7 @@ function renderHero(){
   document.getElementById('header-nome').textContent=nome;
   let b='';
   if(empresa.grau_risco&&grInfo[empresa.grau_risco])b+=`<span class="badge ${grInfo[empresa.grau_risco].cls}">${grInfo[empresa.grau_risco].label}</span>`;
-  if(empresa.atividade_rural)b+=`<span class="badge badge-rural">Rural</span>`;
+  if(empresa.tipo_atividade&&empresa.tipo_atividade!=='Geral')b+=`<span class="badge badge-rural">${empresa.tipo_atividade}</span>`;
   if(empresa.ativo)b+=`<span class="badge badge-ativa">Ativa</span>`;
   document.getElementById('hero-badges').innerHTML=b;
 }
@@ -496,7 +496,7 @@ function renderCampos(){
     {label:'Grau de Risco',key:'grau_risco',type:'select',options:[{v:1,l:'GR 1 — Baixo'},{v:2,l:'GR 2 — Médio-Baixo'},{v:3,l:'GR 3 — Médio-Alto'},{v:4,l:'GR 4 — Alto'}]},
     {label:'Func. cobertos pelo programa',key:'total_funcionarios_previsto',type:'number'},
     {label:'Func. com cadastro individual',key:'total_funcionarios_cadastrados',type:'readonly'},
-    {label:'Atividade Rural',key:'atividade_rural',type:'toggle'},
+    {label:'Tipo de atividade',key:'tipo_atividade',type:'select',opts:['Geral','Rural','Mineração']},
     {label:'Ativa no sistema',key:'ativo',type:'toggle'},
   ];
   const c=document.getElementById('campos-dados');
@@ -670,10 +670,12 @@ async function salvarEdicao(){
     {key:'telefone',type:'text'},{key:'email',type:'email'},{key:'endereco',type:'text'},
     {key:'cidade',type:'text'},{key:'estado',type:'select'},{key:'cep',type:'text'},
     {key:'grau_risco',type:'select'},{key:'total_funcionarios_previsto',type:'number'},
-    {key:'atividade_rural',type:'toggle'},{key:'ativo',type:'toggle'}
+    {key:'tipo_atividade',type:'select'},{key:'ativo',type:'toggle'}
   ];
   const updates={};
   campos.forEach(c=>{updates[c.key]=getFieldVal(c.key,c.type);});
+  // Sincroniza atividade_rural com tipo_atividade
+  updates.atividade_rural=updates.tipo_atividade==='Rural';
   // Salva base junto com previsto
   if(updates.total_funcionarios_previsto!==null){
     updates.total_funcionarios_previsto_base=updates.total_funcionarios_previsto;
