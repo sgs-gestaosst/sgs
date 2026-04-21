@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Gestão de EPIs</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+.btn-danger:hover{background:#2a1515;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-amber{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.btn-amber:hover{background:#3a3010;}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:600;}
+/* Tabs */
+.tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tab{padding:12px 20px;font-size:13px;cursor:pointer;border-right:1px solid var(--border);font-weight:500;color:var(--text2);transition:background .15s;flex:1;text-align:center;}
+.tab:last-child{border-right:none;}
+.tab:hover{background:var(--surface2);}
+.tab.active{background:var(--surface2);color:var(--text);}
+/* Filtros */
+.filtros{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.filtro-select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.filtro-busca{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;}
+.filtro-busca:focus,.filtro-select:focus{border-color:var(--border-focus);}
+/* Cards funcionário */
+.func-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.func-card-header{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);}
+.func-avatar{width:38px;height:38px;border-radius:50%;background:#1e1a40;color:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;}
+.func-info{flex:1;}
+.func-nome{font-size:13px;font-weight:500;}
+.func-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.func-card-body{padding:12px 16px;}
+/* EPI item */
+.epi-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.epi-item:last-child{border-bottom:none;}
+.epi-item-info{flex:1;min-width:0;}
+.epi-item-nome{font-size:12px;font-weight:500;}
+.epi-item-meta{font-size:10px;color:var(--text3);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;}
+.epi-item-actions{display:flex;gap:6px;flex-shrink:0;}
+/* Badges */
+.mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;display:inline-block;}
+.mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+.mb-green{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.mb-amber{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.mb-red{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.mb-purple{background:#1e1a40;color:#a78bfa;border:1px solid #3a2a80;}
+.mb-gray{background:#1e2333;color:var(--text3);border:1px solid var(--border);}
+/* Status */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px;color:var(--text3);}
+.empty-icon{font-size:32px;margin-bottom:12px;}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:640px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-field{margin-bottom:0;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.modal-field input:focus,.modal-field select:focus{border-color:var(--border-focus);}
+/* Sugestões */
+.sug-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.sug-item:last-child{border-bottom:none;}
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:repeat(3,1fr);}
+  .modal-grid{grid-template-columns:1fr;}
+  .header-title{display:none;}
+  .container{padding:16px 12px 80px;}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">EPIs</span></div>
+</div>
+
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para empresa</a>
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#2a1530;border:1px solid #5a2550;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🥽</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Gestão de EPIs</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-amber" onclick="abrirModalSugestoes()">✨ Sugestões automáticas</button>
+      <button class="btn btn-primary" onclick="abrirModalEntrega()">+ Registrar entrega</button>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-funcionarios" onclick="mudarTab('funcionarios')">👷 Por funcionário</div>
+    <div class="tab" id="tab-epis" onclick="mudarTab('epis')">🥽 Por EPI</div>
+    <div class="tab" id="tab-vencimentos" onclick="mudarTab('vencimentos')">⏰ CA a vencer</div>
+    <div class="tab" id="tab-devolucoes" onclick="mudarTab('devolucoes')">↩️ Devoluções</div>
+  </div>
+
+  <div class="filtros">
+    <input type="text" class="filtro-busca" id="filtro-busca" placeholder="🔍 Buscar..." oninput="renderTab()">
+    <select class="filtro-select" id="filtro-setor" onchange="renderTab()">
+      <option value="">Todos os setores</option>
+    </select>
+    <select class="filtro-select" id="filtro-status" onchange="renderTab()">
+      <option value="">Todos</option>
+      <option value="ativo">Ativos</option>
+      <option value="devolvido">Devolvidos</option>
+    </select>
+  </div>
+
+  <div id="conteudo-tab"></div>
+</div>
+
+<!-- MODAL ENTREGA -->
+<div class="modal-overlay" id="modal-entrega">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-entrega-titulo">Registrar entrega de EPI</span>
+      <button onclick="fecharModalEntrega()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Funcionário <span style="color:var(--accent);">*</span></label>
+        <select id="ent-funcionario">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <label>EPI <span style="color:var(--accent);">*</span></label>
+        <select id="ent-epi">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Data de entrega <span style="color:var(--accent);">*</span></label>
+        <input type="date" id="ent-data">
+      </div>
+      <div class="modal-field">
+        <label>Quantidade</label>
+        <input type="number" id="ent-qtd" value="1" min="1">
+      </div>
+      <div class="modal-field">
+        <label>Nº do CA</label>
+        <input type="text" id="ent-ca" placeholder="Ex: 12345">
+      </div>
+      <div class="modal-field">
+        <label>Validade do CA</label>
+        <input type="date" id="ent-validade-ca">
+      </div>
+      <div class="modal-field full">
+        <label>Motivo</label>
+        <select id="ent-motivo">
+          <option>Admissão</option>
+          <option>Reposição</option>
+          <option>Troca</option>
+          <option>Vencimento CA</option>
+          <option>Desgaste</option>
+          <option>Perda</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <label>Observação</label>
+        <input type="text" id="ent-obs" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="status-bar" id="status-entrega"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="fecharModalEntrega()">Cancelar</button>
+      <button class="btn btn-save" id="btn-salvar-entrega" onclick="salvarEntrega()">
+        <span class="spinner" id="spinner-entrega"></span>
+        <span id="label-entrega">Registrar entrega</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DEVOLUÇÃO -->
+<div class="modal-overlay" id="modal-devolucao">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-titulo">
+      <span>↩️ Registrar devolução</span>
+      <button onclick="fecharModalDevolucao()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;" id="dev-info"></div>
+    <div class="modal-grid">
+      <div class="modal-field">
+        <label>Data de devolução</label>
+        <input type="date" id="dev-data">
+      </div>
+      <div class="modal-field">
+        <label>Motivo</label>
+        <select id="dev-motivo">
+          <option>Demissão</option>
+          <option>Troca</option>
+          <option>Desgaste</option>
+          <option>Perda</option>
+          <option>Vencimento</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="fecharModalDevolucao()">Cancelar</button>
+      <button class="btn btn-save" onclick="confirmarDevolucao()">
+        <span class="spinner" id="spinner-dev"></span>
+        Confirmar devolução
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SUGESTÕES -->
+<div class="modal-overlay" id="modal-sugestoes">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-titulo">
+      <span>✨ EPIs sugeridos por função/setor</span>
+      <button onclick="fecharModalSugestoes()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:16px;">EPIs identificados nos riscos dos setores/funções. Selecione para registrar a entrega em lote.</p>
+    <div class="modal-field" style="margin-bottom:16px;">
+      <label>Funcionário</label>
+      <select id="sug-funcionario" onchange="carregarSugestoes()">
+        <option value="">— Selecione um funcionário —</option>
+      </select>
+    </div>
+    <div id="lista-sugestoes" style="max-height:350px;overflow-y:auto;"></div>
+    <div class="status-bar" id="status-sug"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+      <span id="count-sug" style="font-size:12px;color:var(--text2);"></span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModalSugestoes()">Cancelar</button>
+        <button class="btn btn-save" id="btn-entregar-sug" onclick="entregarSugestoes()">
+          <span class="spinner" id="spinner-sug"></span>
+          <span id="label-sug">Registrar entregas</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa={},setores=[],funcoes=[],funcionarios=[],catalogoEpis=[],entregas=[];
+let tabAtual='funcionarios';
+let entregaDevolvendo=null;
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]||''}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+function hoje(){return new Date().toISOString().split('T')[0];}
+
+function calcVencCA(validade){
+  if(!validade)return null;
+  const dias=Math.ceil((new Date(validade+'T00:00:00')-new Date())/(1000*60*60*24));
+  if(dias<0)return{status:'Vencido',cls:'mb-red',dias};
+  if(dias<=60)return{status:'A vencer',cls:'mb-amber',dias};
+  return{status:'Válido',cls:'mb-green',dias};
+}
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  try{
+    const [resEmp,resSets,resFuncs,resFuncs2,resCat,resEnt]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,funcao_id,setor_id,matricula&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/catalogo_epis?ativo=eq.true&select=id,nome,categoria&order=categoria.asc,nome.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/epi_entregas?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=data_entrega.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresa,setores,funcoes,funcionarios,catalogoEpis,entregas]=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resFuncs2.json(),resCat.json(),resEnt.json()]);
+    empresa=empresa[0];
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`Gestão de EPIs — ${nome}`;
+    document.getElementById('header-nome').textContent=nome;
+    const selSetor=document.getElementById('filtro-setor');
+    setores.forEach(s=>selSetor.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+    renderStats();
+    renderTab();
+  }catch(e){console.error(e);}
+}
+
+function renderStats(){
+  const ativos=entregas.filter(e=>!e.devolvido);
+  const devolvidos=entregas.filter(e=>e.devolvido);
+  const caVencidos=ativos.filter(e=>calcVencCA(e.validade_ca)?.status==='Vencido').length;
+  const caAvencer=ativos.filter(e=>calcVencCA(e.validade_ca)?.status==='A vencer').length;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total entregas</div><div class="stat-value" style="color:var(--text);">${entregas.length}</div></div>
+    <div class="stat-card"><div class="stat-label">EPIs ativos</div><div class="stat-value" style="color:var(--success);">${ativos.length}</div></div>
+    <div class="stat-card"><div class="stat-label">CA vencido</div><div class="stat-value" style="color:var(--danger);">${caVencidos}</div></div>
+    <div class="stat-card"><div class="stat-label">CA a vencer (60d)</div><div class="stat-value" style="color:var(--warning);">${caAvencer}</div></div>
+    <div class="stat-card"><div class="stat-label">Devolvidos</div><div class="stat-value" style="color:var(--text3);">${devolvidos.length}</div></div>`;
+  const total=entregas.length;
+  const atv=ativos.length;
+  document.getElementById('hero-sub').textContent=`${funcionarios.length} funcionários · ${total} entregas registradas · ${atv} EPIs em uso`;
+}
+
+function mudarTab(tab){
+  tabAtual=tab;
+  ['funcionarios','epis','vencimentos','devolucoes'].forEach(t=>{
+    document.getElementById(`tab-${t}`)?.classList.toggle('active',t===tab);
+  });
+  renderTab();
+}
+
+function getFiltros(){
+  return{
+    busca:document.getElementById('filtro-busca').value.toLowerCase(),
+    setor:document.getElementById('filtro-setor').value,
+    status:document.getElementById('filtro-status').value,
+  };
+}
+
+function renderTab(){
+  if(tabAtual==='funcionarios')renderPorFuncionario();
+  else if(tabAtual==='epis')renderPorEPI();
+  else if(tabAtual==='vencimentos')renderVencimentos();
+  else renderDevolucoes();
+}
+
+function renderPorFuncionario(){
+  const el=document.getElementById('conteudo-tab');
+  const {busca,setor,status}=getFiltros();
+  let funcsVisiveis=funcionarios.filter(f=>{
+    if(busca&&!f.nome_completo.toLowerCase().includes(busca))return false;
+    if(setor&&f.setor_id!=setor)return false;
+    return true;
+  });
+  if(!funcsVisiveis.length){el.innerHTML=`<div class="empty"><div class="empty-icon">👷</div>Nenhum funcionário encontrado.</div>`;return;}
+  el.innerHTML=funcsVisiveis.map(f=>{
+    const funcao=funcoes.find(x=>x.id===f.funcao_id);
+    const entregasFunc=entregas.filter(e=>e.funcionario_id===f.id&&(status===''||(status==='ativo'&&!e.devolvido)||(status==='devolvido'&&e.devolvido)));
+    const ativos=entregasFunc.filter(e=>!e.devolvido);
+    const caVenc=ativos.filter(e=>calcVencCA(e.validade_ca)?.status==='Vencido').length;
+    const iniciais=f.nome_completo.trim().split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+    return`<div class="func-card">
+      <div class="func-card-header">
+        <div class="func-avatar">${iniciais}</div>
+        <div class="func-info">
+          <div class="func-nome">${escHtml(f.nome_completo)}</div>
+          <div class="func-sub">${funcao?escHtml(funcao.nome_funcao):'—'} · ${ativos.length} EPI(s) ativo(s)</div>
+        </div>
+        ${caVenc?`<span class="mini-badge mb-red">⚠ ${caVenc} CA vencido(s)</span>`:''}
+        <button class="btn btn-sm btn-edit" onclick="abrirModalEntregaFuncionario(${f.id})">+ Entregar EPI</button>
+      </div>
+      ${entregasFunc.length?`<div class="func-card-body">
+        ${entregasFunc.map(e=>renderEPIItem(e,f)).join('')}
+      </div>`:`<div style="padding:12px 16px;font-size:12px;color:var(--text3);">Nenhum EPI registrado. <button onclick="abrirModalEntregaFuncionario(${f.id})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:12px;">Registrar entrega</button></div>`}
+    </div>`;
+  }).join('');
+}
+
+function renderEPIItem(e,func){
+  const epi=catalogoEpis.find(x=>x.id===e.epi_id);
+  const venc=calcVencCA(e.validade_ca);
+  return`<div class="epi-item">
+    <div style="width:32px;height:32px;border-radius:6px;background:#1e2333;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🥽</div>
+    <div class="epi-item-info">
+      <div class="epi-item-nome">${escHtml(epi?.nome||'—')} ${e.devolvido?'<span class="mini-badge mb-gray">Devolvido</span>':''}</div>
+      <div class="epi-item-meta">
+        <span>📅 ${fmtData(e.data_entrega)}</span>
+        <span>Qtd: ${e.quantidade||1}</span>
+        ${e.ca?`<span>CA: ${escHtml(e.ca)}</span>`:''}
+        ${e.validade_ca?`<span class="${venc?.cls||'mb-info'}">Val: ${fmtData(e.validade_ca)}</span>`:''}
+        ${e.motivo?`<span>${escHtml(e.motivo)}</span>`:''}
+      </div>
+    </div>
+    <div class="epi-item-actions">
+      ${!e.devolvido?`<button class="btn btn-sm btn-amber" onclick="abrirModalDevolucao(${e.id})">↩ Devolver</button>`:''}
+    </div>
+  </div>`;
+}
+
+function renderPorEPI(){
+  const el=document.getElementById('conteudo-tab');
+  const {busca,status}=getFiltros();
+  const episComEntregas={};
+  entregas.forEach(e=>{
+    if(status==='ativo'&&e.devolvido)return;
+    if(status==='devolvido'&&!e.devolvido)return;
+    if(!episComEntregas[e.epi_id])episComEntregas[e.epi_id]=[];
+    episComEntregas[e.epi_id].push(e);
+  });
+  const epiIds=Object.keys(episComEntregas).map(Number);
+  const episFiltrados=catalogoEpis.filter(e=>epiIds.includes(e.id)&&(!busca||e.nome.toLowerCase().includes(busca)));
+  if(!episFiltrados.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🥽</div>Nenhum EPI entregue ainda.</div>`;return;}
+  el.innerHTML=episFiltrados.map(epi=>{
+    const ents=episComEntregas[epi.id]||[];
+    const ativos=ents.filter(e=>!e.devolvido).length;
+    return`<div class="func-card">
+      <div class="func-card-header">
+        <div style="width:38px;height:38px;border-radius:8px;background:#1e2333;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🥽</div>
+        <div class="func-info">
+          <div class="func-nome">${escHtml(epi.nome)}</div>
+          <div class="func-sub">${escHtml(epi.categoria||'—')} · ${ativos} ativo(s) · ${ents.length} entrega(s)</div>
+        </div>
+      </div>
+      <div class="func-card-body">
+        ${ents.map(e=>{
+          const func=funcionarios.find(f=>f.id===e.funcionario_id);
+          const venc=calcVencCA(e.validade_ca);
+          return`<div class="epi-item">
+            <div class="func-avatar" style="width:32px;height:32px;font-size:11px;">${(func?.nome_completo||'?').split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase()}</div>
+            <div class="epi-item-info">
+              <div class="epi-item-nome">${escHtml(func?.nome_completo||'—')} ${e.devolvido?'<span class="mini-badge mb-gray">Devolvido</span>':''}</div>
+              <div class="epi-item-meta">
+                <span>📅 ${fmtData(e.data_entrega)}</span>
+                ${e.ca?`<span>CA: ${escHtml(e.ca)}</span>`:''}
+                ${e.validade_ca?`<span class="${venc?.cls||'mb-info'}">Val: ${fmtData(e.validade_ca)}</span>`:''}
+              </div>
+            </div>
+            ${!e.devolvido?`<button class="btn btn-sm btn-amber" onclick="abrirModalDevolucao(${e.id})">↩</button>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderVencimentos(){
+  const el=document.getElementById('conteudo-tab');
+  const {busca}=getFiltros();
+  const comVenc=entregas.filter(e=>!e.devolvido&&e.validade_ca);
+  const vencidos=comVenc.filter(e=>calcVencCA(e.validade_ca)?.status==='Vencido');
+  const avencer=comVenc.filter(e=>calcVencCA(e.validade_ca)?.status==='A vencer');
+  const renderGrupo=(titulo,lista,cor)=>{
+    if(!lista.length)return'';
+    const filtrado=lista.filter(e=>{
+      const func=funcionarios.find(f=>f.id===e.funcionario_id);
+      const epi=catalogoEpis.find(x=>x.id===e.epi_id);
+      return!busca||(func?.nome_completo||'').toLowerCase().includes(busca)||(epi?.nome||'').toLowerCase().includes(busca);
+    });
+    if(!filtrado.length)return'';
+    return`<div style="font-size:11px;font-weight:600;color:${cor};text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px;">${titulo} (${filtrado.length})</div>
+    ${filtrado.map(e=>{
+      const func=funcionarios.find(f=>f.id===e.funcionario_id);
+      const epi=catalogoEpis.find(x=>x.id===e.epi_id);
+      const venc=calcVencCA(e.validade_ca);
+      return`<div class="func-card" style="margin-bottom:8px;">
+        <div style="padding:12px 16px;display:flex;align-items:center;gap:12px;">
+          <div style="font-size:20px;">🥽</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">${escHtml(func?.nome_completo||'—')}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px;">${escHtml(epi?.nome||'—')} · CA: ${escHtml(e.ca||'—')} · Vence: <span style="color:${cor};">${fmtData(e.validade_ca)} (${venc?.dias>0?'+':''}${venc?.dias}d)</span></div>
+          </div>
+          <button class="btn btn-sm btn-edit" onclick="abrirModalEntregaFuncionario(${e.funcionario_id})">↻ Renovar</button>
+        </div>
+      </div>`;
+    }).join('')}`;
+  };
+  const html=renderGrupo('⚠️ CA Vencido',vencidos,'var(--danger)')+renderGrupo('⏰ A vencer em 60 dias',avencer,'var(--warning)');
+  el.innerHTML=html||`<div class="empty"><div class="empty-icon">✅</div>Nenhum CA vencido ou a vencer.</div>`;
+}
+
+function renderDevolucoes(){
+  const el=document.getElementById('conteudo-tab');
+  const {busca}=getFiltros();
+  const devolvidos=entregas.filter(e=>e.devolvido).filter(e=>{
+    const func=funcionarios.find(f=>f.id===e.funcionario_id);
+    return!busca||(func?.nome_completo||'').toLowerCase().includes(busca);
+  });
+  if(!devolvidos.length){el.innerHTML=`<div class="empty"><div class="empty-icon">↩️</div>Nenhuma devolução registrada.</div>`;return;}
+  el.innerHTML=devolvidos.map(e=>{
+    const func=funcionarios.find(f=>f.id===e.funcionario_id);
+    const epi=catalogoEpis.find(x=>x.id===e.epi_id);
+    return`<div class="func-card" style="margin-bottom:8px;opacity:.7;">
+      <div style="padding:12px 16px;display:flex;align-items:center;gap:12px;">
+        <div style="font-size:20px;">🥽</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:500;">${escHtml(func?.nome_completo||'—')}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px;">${escHtml(epi?.nome||'—')} · Entregue: ${fmtData(e.data_entrega)} · Devolvido: ${fmtData(e.data_devolucao)} · ${escHtml(e.motivo_devolucao||'—')}</div>
+        </div>
+        <span class="mini-badge mb-gray">Devolvido</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL ENTREGA ─────────────────────────────────────
+function popularModalEntrega(funcId=null){
+  const selFunc=document.getElementById('ent-funcionario');
+  selFunc.innerHTML='<option value="">— Selecione —</option>'+funcionarios.map(f=>`<option value="${f.id}" ${funcId==f.id?'selected':''}>${escHtml(f.nome_completo)}</option>`).join('');
+  const selEpi=document.getElementById('ent-epi');
+  // Agrupa por categoria
+  const grupos={};
+  catalogoEpis.forEach(e=>{const g=e.categoria||'Outros';if(!grupos[g])grupos[g]=[];grupos[g].push(e);});
+  selEpi.innerHTML='<option value="">— Selecione —</option>'+Object.entries(grupos).sort().map(([cat,epis])=>`<optgroup label="${escHtml(cat)}">${epis.map(e=>`<option value="${e.id}">${escHtml(e.nome)}</option>`).join('')}</optgroup>`).join('');
+  document.getElementById('ent-data').value=hoje();
+  document.getElementById('ent-qtd').value='1';
+  document.getElementById('ent-ca').value='';
+  document.getElementById('ent-validade-ca').value='';
+  document.getElementById('ent-motivo').value='Admissão';
+  document.getElementById('ent-obs').value='';
+  clearStatus('status-entrega');
+}
+
+function abrirModalEntrega(){
+  document.getElementById('modal-entrega-titulo').textContent='Registrar entrega de EPI';
+  popularModalEntrega();
+  document.getElementById('modal-entrega').classList.add('show');
+}
+
+function abrirModalEntregaFuncionario(funcId){
+  document.getElementById('modal-entrega-titulo').textContent='Registrar entrega de EPI';
+  popularModalEntrega(funcId);
+  document.getElementById('modal-entrega').classList.add('show');
+}
+
+function fecharModalEntrega(){document.getElementById('modal-entrega').classList.remove('show');}
+
+async function salvarEntrega(){
+  const funcId=parseInt(document.getElementById('ent-funcionario').value);
+  const epiId=parseInt(document.getElementById('ent-epi').value);
+  const data=document.getElementById('ent-data').value;
+  if(!funcId){alert('Selecione o funcionário.');return;}
+  if(!epiId){alert('Selecione o EPI.');return;}
+  if(!data){alert('Informe a data de entrega.');return;}
+  document.getElementById('btn-salvar-entrega').disabled=true;
+  document.getElementById('spinner-entrega').className='spinner show';
+  document.getElementById('label-entrega').textContent='Salvando...';
+  try{
+    const payload={
+      empresa_id:parseInt(empresaId),funcionario_id:funcId,epi_id:epiId,
+      data_entrega:data,quantidade:parseInt(document.getElementById('ent-qtd').value)||1,
+      ca:document.getElementById('ent-ca').value.trim()||null,
+      validade_ca:document.getElementById('ent-validade-ca').value||null,
+      motivo:document.getElementById('ent-motivo').value,
+      observacao:document.getElementById('ent-obs').value.trim()||null,
+      devolvido:false,ativo:true
+    };
+    const res=await fetch(`${SUPA_URL}/rest/v1/epi_entregas`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
+    const data2=await res.json();
+    entregas.unshift(data2[0]);
+    renderStats();renderTab();
+    fecharModalEntrega();
+  }catch(e){
+    setStatus('status-entrega','error',e.message);
+  }finally{
+    document.getElementById('btn-salvar-entrega').disabled=false;
+    document.getElementById('spinner-entrega').className='spinner';
+    document.getElementById('label-entrega').textContent='Registrar entrega';
+  }
+}
+
+// ── MODAL DEVOLUÇÃO ───────────────────────────────────
+function abrirModalDevolucao(entregaId){
+  entregaDevolvendo=entregas.find(e=>e.id===entregaId);
+  if(!entregaDevolvendo)return;
+  const func=funcionarios.find(f=>f.id===entregaDevolvendo.funcionario_id);
+  const epi=catalogoEpis.find(e=>e.id===entregaDevolvendo.epi_id);
+  document.getElementById('dev-info').textContent=`${func?.nome_completo||'—'} — ${epi?.nome||'—'} (entregue em ${fmtData(entregaDevolvendo.data_entrega)})`;
+  document.getElementById('dev-data').value=hoje();
+  document.getElementById('modal-devolucao').classList.add('show');
+}
+function fecharModalDevolucao(){document.getElementById('modal-devolucao').classList.remove('show');entregaDevolvendo=null;}
+
+async function confirmarDevolucao(){
+  if(!entregaDevolvendo)return;
+  document.getElementById('spinner-dev').className='spinner show';
+  try{
+    const data=document.getElementById('dev-data').value||hoje();
+    const motivo=document.getElementById('dev-motivo').value;
+    await fetch(`${SUPA_URL}/rest/v1/epi_entregas?id=eq.${entregaDevolvendo.id}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({devolvido:true,data_devolucao:data,motivo_devolucao:motivo,atualizado_em:new Date().toISOString()})
+    });
+    const idx=entregas.findIndex(e=>e.id===entregaDevolvendo.id);
+    if(idx>=0)entregas[idx]={...entregas[idx],devolvido:true,data_devolucao:data,motivo_devolucao:motivo};
+    fecharModalDevolucao();renderStats();renderTab();
+  }catch(e){alert('Erro: '+e.message);}
+  finally{document.getElementById('spinner-dev').className='spinner';}
+}
+
+// ── SUGESTÕES AUTOMÁTICAS ─────────────────────────────
+let sugestoesEpis=[];
+
+function abrirModalSugestoes(){
+  const selFunc=document.getElementById('sug-funcionario');
+  selFunc.innerHTML='<option value="">— Selecione um funcionário —</option>'+funcionarios.map(f=>`<option value="${f.id}">${escHtml(f.nome_completo)}</option>`).join('');
+  document.getElementById('lista-sugestoes').innerHTML='';
+  document.getElementById('count-sug').textContent='';
+  clearStatus('status-sug');
+  document.getElementById('modal-sugestoes').classList.add('show');
+}
+function fecharModalSugestoes(){document.getElementById('modal-sugestoes').classList.remove('show');sugestoesEpis=[];}
+
+async function carregarSugestoes(){
+  const funcId=parseInt(document.getElementById('sug-funcionario').value);
+  const lista=document.getElementById('lista-sugestoes');
+  if(!funcId){lista.innerHTML='';return;}
+  const func=funcionarios.find(f=>f.id===funcId);
+  lista.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);">↻ Buscando EPIs sugeridos...</div>`;
+  try{
+    // Busca EPIs dos riscos do setor e função do funcionário
+    const queries=[];
+    if(func?.setor_id)queries.push(fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=in.(select id from setor_riscos where setor_id=eq.${func.setor_id} and ativo=eq.true)&nivel=eq.EPI&ativo=eq.true&select=epi_id,ca,validade_ca`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}));
+    if(func?.funcao_id)queries.push(fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=in.(select id from funcao_riscos where funcao_id=eq.${func.funcao_id} and ativo=eq.true)&nivel=eq.EPI&ativo=eq.true&select=epi_id,ca,validade_ca`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}));
+    const results=await Promise.all(queries);
+    const medidas=[];
+    for(const r of results){if(r.ok){const d=await r.json();medidas.push(...d);}}
+    // Deduplica por epi_id
+    const epiIdsUnicos=[...new Set(medidas.map(m=>m.epi_id).filter(Boolean))];
+    // Remove EPIs já entregues e não devolvidos
+    const epiJaAtivos=entregas.filter(e=>e.funcionario_id===funcId&&!e.devolvido).map(e=>e.epi_id);
+    const episSugeridos=epiIdsUnicos.filter(id=>!epiJaAtivos.includes(id));
+    sugestoesEpis=episSugeridos.map(id=>{
+      const m=medidas.find(x=>x.epi_id===id)||{};
+      const epi=catalogoEpis.find(e=>e.id===id);
+      return{epi_id:id,nome:epi?.nome||'—',categoria:epi?.categoria||'—',ca:m.ca||'',validade_ca:m.validade_ca||''};
+    });
+    if(!sugestoesEpis.length){
+      lista.innerHTML=`<div class="empty"><div class="empty-icon">✅</div><div>Todos os EPIs sugeridos já foram entregues para este funcionário!</div></div>`;
+      document.getElementById('count-sug').textContent='';
+      return;
+    }
+    lista.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="sug-check-all" onchange="toggleTodasSugestoes(this.checked)" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+        <label for="sug-check-all" style="font-size:12px;color:var(--text2);cursor:pointer;">Selecionar todos (${sugestoesEpis.length})</label>
+      </div>
+      ${sugestoesEpis.map((s,i)=>`
+      <div class="sug-item">
+        <input type="checkbox" id="sug-epi-${i}" checked onchange="atualizarCountSug()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+        <label for="sug-epi-${i}" style="flex:1;cursor:pointer;">
+          <div style="font-size:13px;font-weight:500;">${escHtml(s.nome)}</div>
+          <div style="font-size:11px;color:var(--text3);">
+            ${escHtml(s.categoria)}
+            ${s.ca?` · CA: ${escHtml(s.ca)}`:''}
+            ${s.validade_ca?` · Val: ${fmtData(s.validade_ca)}`:''}
+          </div>
+        </label>
+      </div>`).join('')}`;
+    atualizarCountSug();
+  }catch(e){lista.innerHTML=`<div style="color:var(--danger);padding:16px;">Erro: ${e.message}</div>`;}
+}
+
+function toggleTodasSugestoes(checked){
+  sugestoesEpis.forEach((_,i)=>{const el=document.getElementById(`sug-epi-${i}`);if(el)el.checked=checked;});
+  atualizarCountSug();
+}
+
+function atualizarCountSug(){
+  const sel=sugestoesEpis.filter((_,i)=>document.getElementById(`sug-epi-${i}`)?.checked).length;
+  document.getElementById('count-sug').textContent=`${sel} de ${sugestoesEpis.length} selecionado(s)`;
+  const checkAll=document.getElementById('sug-check-all');
+  if(checkAll)checkAll.checked=sel===sugestoesEpis.length;
+}
+
+async function entregarSugestoes(){
+  const funcId=parseInt(document.getElementById('sug-funcionario').value);
+  if(!funcId){alert('Selecione o funcionário.');return;}
+  const selecionados=sugestoesEpis.filter((_,i)=>document.getElementById(`sug-epi-${i}`)?.checked);
+  if(!selecionados.length){alert('Selecione pelo menos um EPI.');return;}
+  document.getElementById('btn-entregar-sug').disabled=true;
+  document.getElementById('spinner-sug').className='spinner show';
+  document.getElementById('label-sug').textContent='Registrando...';
+  try{
+    let criados=0;
+    for(const s of selecionados){
+      const res=await fetch(`${SUPA_URL}/rest/v1/epi_entregas`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify({empresa_id:parseInt(empresaId),funcionario_id:funcId,epi_id:s.epi_id,data_entrega:hoje(),quantidade:1,ca:s.ca||null,validade_ca:s.validade_ca||null,motivo:'Admissão',devolvido:false,ativo:true})
+      });
+      if(res.ok){const d=await res.json();entregas.unshift(d[0]);criados++;}
+    }
+    setStatus('status-sug','success',`${criados} EPI(s) registrado(s) com sucesso!`);
+    renderStats();renderTab();
+    setTimeout(()=>fecharModalSugestoes(),2000);
+  }catch(e){
+    setStatus('status-sug','error',e.message);
+  }finally{
+    document.getElementById('btn-entregar-sug').disabled=false;
+    document.getElementById('spinner-sug').className='spinner';
+    document.getElementById('label-sug').textContent='Registrar entregas';
+  }
+}
+
+// Fecha modais ao clicar fora
+['modal-entrega','modal-devolucao','modal-sugestoes'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('click',e=>{
+    if(e.target.id===id){
+      if(id==='modal-entrega')fecharModalEntrega();
+      else if(id==='modal-devolucao')fecharModalDevolucao();
+      else fecharModalSugestoes();
+    }
+  });
+});
+
+inicializar();
+</script>
+</body>
+</html>
