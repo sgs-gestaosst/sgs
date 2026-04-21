@@ -200,16 +200,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <input type="text" id="pt-executantes" placeholder="Nomes dos trabalhadores que executarão o serviço">
       </div>
       <div class="modal-field full">
-        <label>Riscos identificados</label>
-        <textarea id="pt-riscos" placeholder="Liste os principais riscos identificados para este serviço..."></textarea>
+        <label>Riscos potenciais identificados</label>
+        <div id="riscos-checks" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
       </div>
       <div class="modal-field full">
-        <label>Medidas de controle</label>
-        <textarea id="pt-medidas" placeholder="Descreva as medidas de controle a serem adotadas..."></textarea>
+        <label>Equipamentos de proteção necessários (EPIs/EPCs)</label>
+        <div id="epis-checks" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
       </div>
       <div class="modal-field full">
-        <label>EPIs necessários</label>
-        <input type="text" id="pt-epis" placeholder="Ex: Capacete, cinto de segurança, luvas...">
+        <label>Medidas de controle / Recomendações adicionais</label>
+        <textarea id="pt-medidas" placeholder="Descreva medidas complementares de controle..."></textarea>
       </div>
       <div class="modal-field full">
         <label>Observações</label>
@@ -309,6 +309,48 @@ const CHECKLISTS_PT={
     {id:7,texto:'Plano de resposta a emergências comunicado'},
   ]
 };
+
+// Riscos e EPIs com checkboxes
+const RISCOS_LISTA=[
+  'Explosão / Incêndio','Queimaduras','Choque elétrico','Queda de diferente nível',
+  'Queda de material / objetos','Prensamento / Cortes','Produtos químicos / Tóxicos',
+  'Ruído no local','Ergonomia','Trabalho em espaço confinado','Trabalho em altura',
+  'Atropelamento / Abalroamento','Desmoronamento / Soterramento','Condições climáticas desfavoráveis',
+  'Projeção de materiais / fagulhas','Piso escorregadio / Umidade','Tubulação e cabos enterrados',
+  'Acúmulo de eletricidade estática','Animais peçonhentos','Influência externa de terceiros',
+  'Cantos vivos / Perfuro-cortante','Içamento de cargas','Outros',
+];
+const EPIS_LISTA=[
+  'Capacete com jugular','Óculos de segurança','Protetor facial','Protetor auricular',
+  'Máscara respiratória','Luva de proteção','Luva isolante / alta tensão','Calçado de segurança',
+  'Bota de PVC','Cinto de segurança paraquedista','Talabarte duplo','Trava-quedas',
+  'Roupa de proteção química','EPI para trabalho a quente','Avental de raspa','Perneira',
+  'Equipamento autônomo de ar respirável','Capa de chuva','Colete refletivo',
+  'Aterramento elétrico temporário','Ferramentas isolantes / anti-faiscantes',
+  'Sinalização e isolamento (cones, fita)','Extintor no local','Manta anti-chama','Iluminação adequada',
+];
+
+function renderChecks(containerId,lista,prefixo){
+  const el=document.getElementById(containerId);
+  el.innerHTML=lista.map((item,i)=>`
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px;color:var(--text2);padding:3px 0;">
+      <input type="checkbox" id="${prefixo}-${i}" value="${escHtml(item)}" style="accent-color:var(--accent);width:14px;height:14px;flex-shrink:0;">
+      ${escHtml(item)}
+    </label>`).join('');
+}
+
+function getChecked(prefixo,lista){
+  return lista.filter((_,i)=>document.getElementById(`${prefixo}-${i}`)?.checked).join(', ');
+}
+
+function setChecked(prefixo,lista,valoresStr){
+  if(!valoresStr)return;
+  const valores=valoresStr.split(', ');
+  lista.forEach((item,i)=>{
+    const el=document.getElementById(`${prefixo}-${i}`);
+    if(el)el.checked=valores.includes(item);
+  });
+}
 
 const TIPO_ICONES={'Trabalho em Altura':'⛰️','Espaço Confinado':'🕳️','Trabalho a Quente':'🔥','Energias Perigosas':'⚡','Geral':'📋'};
 const TIPO_CORES={'Trabalho em Altura':{bg:'#1a2540',brd:'#2a4070'},'Espaço Confinado':{bg:'#2a1530',brd:'#5a2580'},'Trabalho a Quente':{bg:'#2a1510',brd:'#8b3a10'},'Energias Perigosas':{bg:'#2a2010',brd:'#6a5a10'},'Geral':{bg:'#1a3a1a',brd:'#2a6a2a'}};
@@ -438,10 +480,10 @@ function abrirModalNovaPT(){
   document.getElementById('pt-solicitante').value='';
   document.getElementById('pt-responsavel').value='';
   document.getElementById('pt-executantes').value='';
-  document.getElementById('pt-riscos').value='';
   document.getElementById('pt-medidas').value='';
-  document.getElementById('pt-epis').value='';
   document.getElementById('pt-obs').value='';
+  renderChecks('riscos-checks',RISCOS_LISTA,'risco');
+  renderChecks('epis-checks',EPIS_LISTA,'epi');
   atualizarChecklist();
   clearStatus('status-pt');
   document.getElementById('modal-pt').classList.add('show');
@@ -470,10 +512,12 @@ function editarPT(id){
   document.getElementById('pt-solicitante').value=p.solicitante||'';
   document.getElementById('pt-responsavel').value=p.responsavel_emissao||'';
   document.getElementById('pt-executantes').value=p.executantes||'';
-  document.getElementById('pt-riscos').value=p.riscos_identificados||'';
   document.getElementById('pt-medidas').value=p.medidas_controle||'';
-  document.getElementById('pt-epis').value=p.epis_necessarios||'';
   document.getElementById('pt-obs').value=p.observacoes||'';
+  renderChecks('riscos-checks',RISCOS_LISTA,'risco');
+  renderChecks('epis-checks',EPIS_LISTA,'epi');
+  setChecked('risco',RISCOS_LISTA,p.riscos_identificados||'');
+  setChecked('epi',EPIS_LISTA,p.epis_necessarios||'');
   // Carrega respostas do checklist
   atualizarChecklist();
   fetch(`${SUPA_URL}/rest/v1/pt_checklist_respostas?pt_id=eq.${id}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
@@ -505,9 +549,9 @@ async function salvarPT(){
     solicitante:document.getElementById('pt-solicitante').value.trim()||null,
     responsavel_emissao:document.getElementById('pt-responsavel').value.trim()||null,
     executantes:document.getElementById('pt-executantes').value.trim()||null,
-    riscos_identificados:document.getElementById('pt-riscos').value.trim()||null,
+    riscos_identificados:getChecked('risco',RISCOS_LISTA)||null,
     medidas_controle:document.getElementById('pt-medidas').value.trim()||null,
-    epis_necessarios:document.getElementById('pt-epis').value.trim()||null,
+    epis_necessarios:getChecked('epi',EPIS_LISTA)||null,
     observacoes:document.getElementById('pt-obs').value.trim()||null,
     status:ptEditando?ptEditando.status:'Aberta',ativo:true
   };
@@ -626,14 +670,37 @@ async function imprimirPT(id){
       <div class="campo campo-full"><div class="campo-label">Executantes</div><div class="campo-value">${escHtml(p.executantes||'—')}</div></div>
     </div>
 
-    <div class="secao">2. Análise de riscos e controles</div>
-    <div class="grid2">
-      <div class="campo"><div class="campo-label">Riscos identificados</div><div class="campo-value" style="font-size:9pt;">${escHtml(p.riscos_identificados||'—')}</div></div>
-      <div class="campo"><div class="campo-label">Medidas de controle</div><div class="campo-value" style="font-size:9pt;">${escHtml(p.medidas_controle||'—')}</div></div>
-      <div class="campo campo-full"><div class="campo-label">EPIs necessários</div><div class="campo-value">${escHtml(p.epis_necessarios||'—')}</div></div>
+    <div class="secao">2. Riscos potenciais identificados</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4pt;border:1pt solid #e5e7eb;border-radius:3pt;padding:8pt;margin-bottom:8pt;">
+      ${RISCOS_LISTA.map(r=>{
+        const marcado=p.riscos_identificados&&p.riscos_identificados.split(', ').includes(r);
+        return`<div style="display:flex;align-items:center;gap:4pt;font-size:8.5pt;padding:2pt 0;">
+          <span style="width:12pt;height:12pt;border:1pt solid #374151;border-radius:2pt;display:inline-flex;align-items:center;justify-content:center;font-size:9pt;flex-shrink:0;${marcado?'background:#0d2040;color:#fff;':''}">
+            ${marcado?'✓':''}
+          </span>
+          <span style="color:${marcado?'#1a1a2e':'#9ca3af'};">${escHtml(r)}</span>
+        </div>`;
+      }).join('')}
     </div>
 
-    <div class="secao">3. Checklist — ${escHtml(p.tipo)}</div>
+    <div class="secao">3. Equipamentos de proteção necessários</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4pt;border:1pt solid #e5e7eb;border-radius:3pt;padding:8pt;margin-bottom:8pt;">
+      ${EPIS_LISTA.map(e=>{
+        const marcado=p.epis_necessarios&&p.epis_necessarios.split(', ').includes(e);
+        return`<div style="display:flex;align-items:center;gap:4pt;font-size:8.5pt;padding:2pt 0;">
+          <span style="width:12pt;height:12pt;border:1pt solid #374151;border-radius:2pt;display:inline-flex;align-items:center;justify-content:center;font-size:9pt;flex-shrink:0;${marcado?'background:#0d2040;color:#fff;':''}">
+            ${marcado?'✓':''}
+          </span>
+          <span style="color:${marcado?'#1a1a2e':'#9ca3af'};">${escHtml(e)}</span>
+        </div>`;
+      }).join('')}
+    </div>
+
+    ${p.medidas_controle?`
+    <div class="secao">4. Medidas de controle / Recomendações</div>
+    <div style="background:#fffbeb;border:1pt solid #f59e0b;border-radius:3pt;padding:8pt;font-size:9pt;color:#92400e;margin-bottom:8pt;">${escHtml(p.medidas_controle)}</div>`:''}
+
+    <div class="secao">${p.medidas_controle?'5':'4'}. Checklist — ${escHtml(p.tipo)}</div>
     <table class="chk-table">
       <thead><tr><th style="width:70%;">Item de verificação</th><th style="text-align:center;">Resp.</th><th>Observação</th></tr></thead>
       <tbody>
@@ -650,7 +717,7 @@ async function imprimirPT(id){
 
     ${p.observacoes?`<div class="aviso">⚠️ Observações: ${escHtml(p.observacoes)}</div>`:''}
 
-    <div class="secao">4. Assinaturas</div>
+    <div class="secao">${p.medidas_controle?'6':'5'}. Assinaturas</div>
     <div class="ass-grid">
       <div class="ass-box"><div class="ass-linha"><div class="ass-nome">${escHtml(p.solicitante||'_______________________')}</div><div class="ass-label">Solicitante</div></div></div>
       <div class="ass-box"><div class="ass-linha"><div class="ass-nome">${escHtml(p.responsavel_emissao||'_______________________')}</div><div class="ass-label">Responsável pela emissão</div></div></div>
