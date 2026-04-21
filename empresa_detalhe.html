@@ -200,6 +200,7 @@
             <a id="btn-equipamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🧯 Equipamentos</a>
             <a id="btn-pt" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">📋 Permissões de Trabalho</a>
             <a id="btn-inventarios" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🗂️ Inventários Técnicos</a>
+            <a id="btn-aet" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🪑 AET — Ergonomia</a>
             <a id="btn-checklists" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🔍 Checklists</a>
             <a id="btn-acoes" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">⚡ Ações</a>
           </div>
@@ -747,6 +748,8 @@ async function carregarEmpresa(){
     if(btnPT){btnPT.href=`permissoes_trabalho.html?empresa_id=${empresaId}`;btnPT.style.display='flex';}
     const btnInventarios=document.getElementById('btn-inventarios');
     if(btnInventarios){btnInventarios.href=`inventarios.html?empresa_id=${empresaId}`;btnInventarios.style.display='flex';}
+    const btnAet=document.getElementById('btn-aet');
+    if(btnAet){btnAet.href=`aet.html?empresa_id=${empresaId}`;btnAet.style.display='flex';}
     const btnChecklists=document.getElementById('btn-checklists');
     if(btnChecklists){btnChecklists.href=`checklists.html?empresa_id=${empresaId}`;btnChecklists.style.display='flex';}
     const btnAcoes=document.getElementById('btn-acoes');

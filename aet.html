@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Análise Ergonômica do Trabalho</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+.btn-danger:hover{background:#2a1515;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:600;}
+/* AET cards */
+.aet-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;transition:border-color .15s;}
+.aet-card:hover{border-color:var(--border-focus);}
+.aet-info{flex:1;}
+.aet-num{font-size:11px;font-family:var(--mono);color:var(--accent);margin-bottom:3px;}
+.aet-titulo{font-size:13px;font-weight:500;margin-bottom:5px;}
+.aet-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--text2);}
+/* Badges */
+.mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;display:inline-block;}
+.mb-ok{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.mb-warn{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.mb-red{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.mb-blue{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+.mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+/* Status */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px;color:var(--text3);}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:800px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-field{margin-bottom:0;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+.modal-field textarea{resize:vertical;min-height:72px;}
+.sep{grid-column:1/-1;border-top:1px solid var(--border);padding-top:14px;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}
+/* Avaliação itens */
+.cat-section{margin-bottom:20px;}
+.cat-titulo{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;padding:10px 14px;background:var(--surface2);border-radius:var(--radius);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.aet-item-row{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:6px;}
+.aet-item-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.aet-item-texto{flex:1;font-size:12px;color:var(--text);}
+.aet-item-ref{font-size:10px;color:var(--text3);margin-top:2px;}
+.cond-btns{display:flex;gap:6px;flex-shrink:0;}
+.cond-btn{padding:4px 10px;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s;}
+.cond-btn.adequado.active{background:#0e2820;color:#2dd4a0;border-color:#1a4a38;}
+.cond-btn.inadequado.active{background:#2a1515;color:#e05555;border-color:#4a2020;}
+.cond-btn.na.active{background:#1e2333;color:var(--text3);border-color:var(--border);}
+.aet-item-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;display:none;}
+.aet-item-fields.show{display:grid;}
+.aet-item-fields input,.aet-item-fields textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.aet-item-fields textarea{min-height:50px;resize:none;}
+.progresso{height:4px;background:var(--border);border-radius:2px;margin-bottom:16px;overflow:hidden;}
+.progresso-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .3s;}
+@media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr;}.modal-grid{grid-template-columns:1fr;}.cond-btns{flex-direction:column;}.aet-item-fields{grid-template-columns:1fr;}.header-title{display:none;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">AET</span></div>
+</div>
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para empresa</a>
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#1a2030;border:1px solid #3a5070;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🪑</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Análise Ergonômica do Trabalho</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <button class="btn btn-primary" onclick="abrirModalNovaAET()">+ Nova AET</button>
+  </div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div id="lista-aets"></div>
+</div>
+
+<!-- MODAL IDENTIFICAÇÃO AET -->
+<div class="modal-overlay" id="modal-aet">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-aet-titulo">Nova AET</span>
+      <button onclick="fecharModalAET()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field">
+        <label>Número da AET</label>
+        <input type="text" id="aet-numero" placeholder="Ex: AET-2026-001">
+      </div>
+      <div class="modal-field">
+        <label>Data da avaliação</label>
+        <input type="date" id="aet-data">
+      </div>
+      <div class="modal-field">
+        <label>Setor <span style="color:var(--accent);">*</span></label>
+        <select id="aet-setor" onchange="carregarFuncoes()">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Função avaliada <span style="color:var(--accent);">*</span></label>
+        <select id="aet-funcao">
+          <option value="">— Selecione o setor —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Nº trabalhadores avaliados</label>
+        <input type="number" id="aet-num-trab" value="1" min="1">
+      </div>
+      <div class="modal-field">
+        <label>Próxima revisão</label>
+        <input type="date" id="aet-proxima">
+      </div>
+      <div class="sep">Responsável técnico</div>
+      <div class="modal-field">
+        <label>Nome do responsável <span style="color:var(--accent);">*</span></label>
+        <input type="text" id="aet-responsavel" placeholder="Nome completo">
+      </div>
+      <div class="modal-field">
+        <label>Formação</label>
+        <input type="text" id="aet-formacao" placeholder="Ex: Engenheiro de Segurança do Trabalho">
+      </div>
+      <div class="modal-field">
+        <label>Registro profissional</label>
+        <input type="text" id="aet-registro" placeholder="Ex: CREA 123456">
+      </div>
+      <div class="modal-field">
+        <label>Status</label>
+        <select id="aet-status">
+          <option>Rascunho</option>
+          <option>Concluída</option>
+        </select>
+      </div>
+      <div class="sep">Descrição do posto de trabalho</div>
+      <div class="modal-field full">
+        <label>Descrição das atividades</label>
+        <textarea id="aet-descricao" placeholder="Descreva detalhadamente as atividades executadas na função..."></textarea>
+      </div>
+      <div class="modal-field full">
+        <label>Descrição do posto de trabalho</label>
+        <textarea id="aet-posto" placeholder="Descreva o ambiente, equipamentos, layout do posto..."></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Jornada de trabalho</label>
+        <input type="text" id="aet-jornada" placeholder="Ex: 8h/dia, 44h/semana">
+      </div>
+      <div class="modal-field">
+        <label>Turnos</label>
+        <input type="text" id="aet-turnos" placeholder="Ex: Turno único, 07h às 17h">
+      </div>
+      <div class="modal-field full">
+        <label>Pausas e descanso</label>
+        <textarea id="aet-pausas" placeholder="Descreva as pausas concedidas, intervalos..." style="min-height:50px;"></textarea>
+      </div>
+      <div class="modal-field full">
+        <label>Produção e metas</label>
+        <textarea id="aet-metas" placeholder="Há metas de produção? Ritmo de trabalho?" style="min-height:50px;"></textarea>
+      </div>
+      <div class="modal-field full">
+        <label>Observações</label>
+        <input type="text" id="aet-obs" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="status-bar" id="status-aet"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+      <div id="aet-modal-esq"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModalAET()">Cancelar</button>
+        <button class="btn btn-save" id="btn-salvar-aet" onclick="salvarAET()">
+          <span class="spinner" id="spinner-aet"></span>
+          <span id="label-aet">Criar AET</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AVALIAÇÃO (itens por categoria) -->
+<div class="modal-overlay" id="modal-avaliacao">
+  <div class="modal" style="max-width:900px;">
+    <div class="modal-titulo">
+      <div>
+        <div id="aval-titulo" style="font-size:16px;font-weight:500;">Avaliação ergonômica</div>
+        <div id="aval-sub" style="font-size:12px;color:var(--text2);margin-top:2px;"></div>
+      </div>
+      <button onclick="fecharModalAvaliacao()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <!-- Progresso -->
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:6px;">
+      <span id="prog-label-aval">0 de 0 itens avaliados</span>
+      <span id="prog-pct-aval">0%</span>
+    </div>
+    <div class="progresso"><div class="progresso-fill" id="prog-fill-aval" style="width:0%"></div></div>
+    <!-- Contadores -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <span class="mini-badge mb-ok" id="count-adeq">✓ 0 Adequados</span>
+      <span class="mini-badge mb-red" id="count-inad">✕ 0 Inadequados</span>
+      <span class="mini-badge mb-info" id="count-na-aval">— 0 N/A</span>
+    </div>
+    <div id="lista-itens-aval" style="max-height:500px;overflow-y:auto;"></div>
+    <!-- Conclusão -->
+    <div style="margin-top:16px;">
+      <div style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Conclusão técnica</div>
+      <textarea id="aval-conclusao" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;resize:vertical;min-height:80px;" placeholder="Descreva a conclusão técnica da avaliação ergonômica, destacando os principais achados e recomendações gerais..."></textarea>
+    </div>
+    <div class="status-bar" id="status-aval"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+      <button class="btn btn-cancel" onclick="fecharModalAvaliacao()">Fechar</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-edit" onclick="gerarAcoesInadequados()">⚡ Gerar ações</button>
+        <button class="btn btn-save" id="btn-salvar-aval" onclick="salvarAvaliacao()">
+          <span class="spinner" id="spinner-aval"></span>
+          <span id="label-aval">Salvar avaliação</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa={},setores=[],funcoes=[],avaliacoes=[];
+let aetEditando=null,aetAvaliando=null;
+let itensAvaliacao={};
+
+// Itens por categoria NR-17
+const ITENS_AET=[
+  {cat:'🏋️ Levantamento e transporte de cargas',ref:'NR-17.2',itens:[
+    {id:1,txt:'O levantamento manual de cargas está dentro dos limites aceitáveis (máx. 23kg para homens)'},
+    {id:2,txt:'A frequência de levantamento é adequada e não gera sobrecarga'},
+    {id:3,txt:'A postura adotada no levantamento é adequada (sem flexão excessiva de tronco)'},
+    {id:4,txt:'Há auxílio mecânico disponível para cargas pesadas (carrinho, empilhadeira, etc.)'},
+    {id:5,txt:'O transporte manual de cargas é realizado de forma segura e ergonômica'},
+  ]},
+  {cat:'🪑 Mobiliário do posto de trabalho',ref:'NR-17.3',itens:[
+    {id:6,txt:'As superfícies de trabalho estão em altura adequada para o trabalhador'},
+    {id:7,txt:'As cadeiras/assentos possuem ajuste de altura e oferecem suporte lombar'},
+    {id:8,txt:'O espaço para acomodação dos membros inferiores é suficiente'},
+    {id:9,txt:'Os planos de trabalho permitem boa visualização das tarefas sem flexão do pescoço'},
+    {id:10,txt:'As bancadas ou mesas são adequadas para o tipo de atividade realizada'},
+  ]},
+  {cat:'🖥️ Equipamentos e ferramentas',ref:'NR-17.4',itens:[
+    {id:11,txt:'Os equipamentos estão posicionados de forma a evitar posturas inadequadas'},
+    {id:12,txt:'Os teclados, mouses e monitores estão posicionados ergonomicamente (quando aplicável)'},
+    {id:13,txt:'As ferramentas utilizadas são adequadas ao tipo de tarefa e não causam sobrecarga'},
+    {id:14,txt:'Os comandos e controles são de fácil alcance e operação'},
+    {id:15,txt:'Há ausência de vibração excessiva transmitida ao trabalhador pelos equipamentos'},
+  ]},
+  {cat:'🌡️ Condições ambientais',ref:'NR-17.5',itens:[
+    {id:16,txt:'Os níveis de ruído no posto de trabalho estão dentro dos limites aceitáveis'},
+    {id:17,txt:'A temperatura ambiente é confortável e adequada para o tipo de atividade'},
+    {id:18,txt:'A iluminação é suficiente e adequada para a realização das tarefas'},
+    {id:19,txt:'Há ausência de reflexos ou ofuscamentos que prejudiquem a visão'},
+    {id:20,txt:'A ventilação do ambiente é adequada'},
+  ]},
+  {cat:'🔄 Organização do trabalho',ref:'NR-17.6',itens:[
+    {id:21,txt:'O ritmo de trabalho é compatível com a capacidade física e cognitiva do trabalhador'},
+    {id:22,txt:'Há pausas regulares para descanso durante a jornada'},
+    {id:23,txt:'As metas de produção são razoáveis e não induzem a sobrecarga'},
+    {id:24,txt:'Há revezamento de tarefas para evitar movimentos repetitivos prolongados'},
+    {id:25,txt:'O trabalhador possui autonomia adequada sobre o ritmo e organização do trabalho'},
+    {id:26,txt:'Há comunicação clara sobre as tarefas e expectativas de desempenho'},
+  ]},
+  {cat:'🧠 Fatores psicossociais',ref:'NR-17 / NR-1',itens:[
+    {id:27,txt:'O trabalhador não está exposto a situações de assédio moral ou violência'},
+    {id:28,txt:'Há suporte social adequado de supervisores e colegas'},
+    {id:29,txt:'O trabalho permite que o trabalhador utilize suas habilidades'},
+    {id:30,txt:'O nível de pressão psicológica é compatível com a saúde mental'},
+    {id:31,txt:'Há canais de comunicação disponíveis para relato de problemas'},
+  ]},
+  {cat:'🤸 Postura e movimentação',ref:'NR-17',itens:[
+    {id:32,txt:'O trabalho é realizado predominantemente na postura sentada com suporte adequado'},
+    {id:33,txt:'Não há permanência prolongada em postura estática (em pé sem possibilidade de movimentação)'},
+    {id:34,txt:'Não há movimentos repetitivos de membros superiores em frequência elevada'},
+    {id:35,txt:'Não há flexão ou rotação excessiva de tronco durante as atividades'},
+    {id:36,txt:'Não há extensão excessiva de membros superiores acima do nível dos ombros'},
+    {id:37,txt:'Os alcances necessários estão dentro da zona de conforto do trabalhador'},
+  ]},
+];
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]||''}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+function hoje(){return new Date().toISOString().split('T')[0];}
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  try{
+    const [resEmp,resSets,resFuncs,resAvals]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/aet_avaliacoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresa,setores,funcoes,avaliacoes]=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resAvals.json()]);
+    empresa=empresa[0];
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`AET — ${nome}`;
+    document.getElementById('header-nome').textContent=nome;
+    const selSet=document.getElementById('aet-setor');
+    setores.forEach(s=>selSet.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+    renderStats();renderLista();
+  }catch(e){console.error(e);}
+}
+
+function renderStats(){
+  const total=avaliacoes.length;
+  const concluidas=avaliacoes.filter(a=>a.status==='Concluída').length;
+  const rascunhos=avaliacoes.filter(a=>a.status==='Rascunho').length;
+  const totalItens=ITENS_AET.reduce((a,c)=>a+c.itens.length,0);
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total AETs</div><div class="stat-value" style="color:var(--text);">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Concluídas</div><div class="stat-value" style="color:var(--success);">${concluidas}</div></div>
+    <div class="stat-card"><div class="stat-label">Rascunhos</div><div class="stat-value" style="color:var(--warning);">${rascunhos}</div></div>
+    <div class="stat-card"><div class="stat-label">Itens por avaliação</div><div class="stat-value" style="color:var(--accent);">${totalItens}</div></div>`;
+  document.getElementById('hero-sub').textContent=`${total} avaliações · ${concluidas} concluídas · ${ITENS_AET.length} categorias NR-17`;
+}
+
+function renderLista(){
+  const el=document.getElementById('lista-aets');
+  if(!avaliacoes.length){el.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:12px;">🪑</div>Nenhuma AET cadastrada. Clique em "+ Nova AET" para começar.</div>`;return;}
+  el.innerHTML=avaliacoes.map(a=>{
+    const setor=setores.find(s=>s.id===a.setor_id);
+    const funcao=funcoes.find(f=>f.id===a.funcao_id);
+    const stCls=a.status==='Concluída'?'mb-ok':a.status==='Rascunho'?'mb-warn':'mb-info';
+    return`<div class="aet-card">
+      <div style="width:42px;height:42px;border-radius:10px;background:#1a2030;border:1px solid #3a5070;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🪑</div>
+      <div class="aet-info">
+        <div class="aet-num">${escHtml(a.numero_aet||'—')}</div>
+        <div class="aet-titulo">${setor?escHtml(setor.nome_setor):'—'} ${funcao?' — '+escHtml(funcao.nome_funcao):''}</div>
+        <div class="aet-meta">
+          <span class="mini-badge ${stCls}">${a.status}</span>
+          <span>📅 ${fmtData(a.data_avaliacao)}</span>
+          ${a.responsavel_tecnico?`<span>👤 ${escHtml(a.responsavel_tecnico)}</span>`:''}
+          ${a.num_trabalhadores_avaliados?`<span>👷 ${a.num_trabalhadores_avaliados} trabalhador(es)</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+        <button class="btn btn-sm btn-primary" onclick="abrirAvaliacao(${a.id})">📊 Avaliar</button>
+        <button class="btn btn-sm btn-edit" onclick="imprimirAET(${a.id})">🖨️ Imprimir</button>
+        <button class="btn btn-sm btn-edit" onclick="editarAET(${a.id})">✏️ Editar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL AET ─────────────────────────────────────────
+async function carregarFuncoes(){
+  const setorId=parseInt(document.getElementById('aet-setor').value);
+  const sel=document.getElementById('aet-funcao');
+  sel.innerHTML='<option value="">— Carregando... —</option>';
+  if(!setorId){sel.innerHTML='<option value="">— Selecione o setor —</option>';return;}
+  const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&select=funcao_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+  const data=await res.json();
+  const ids=data.map(x=>x.funcao_id);
+  const funcoesFiltradas=funcoes.filter(f=>ids.includes(f.id));
+  sel.innerHTML='<option value="">— Selecione —</option>'+funcoesFiltradas.map(f=>`<option value="${f.id}">${escHtml(f.nome_funcao)}</option>`).join('');
+}
+
+function abrirModalNovaAET(){
+  aetEditando=null;
+  document.getElementById('modal-aet-titulo').textContent='Nova AET';
+  document.getElementById('label-aet').textContent='Criar AET';
+  document.getElementById('aet-modal-esq').innerHTML='';
+  const n=`AET-${new Date().getFullYear()}-${String(avaliacoes.length+1).padStart(3,'0')}`;
+  document.getElementById('aet-numero').value=n;
+  document.getElementById('aet-data').value=hoje();
+  document.getElementById('aet-setor').value='';
+  document.getElementById('aet-funcao').innerHTML='<option value="">— Selecione o setor —</option>';
+  document.getElementById('aet-num-trab').value='1';
+  document.getElementById('aet-proxima').value='';
+  document.getElementById('aet-responsavel').value='';
+  document.getElementById('aet-formacao').value='';
+  document.getElementById('aet-registro').value='';
+  document.getElementById('aet-status').value='Rascunho';
+  document.getElementById('aet-descricao').value='';
+  document.getElementById('aet-posto').value='';
+  document.getElementById('aet-jornada').value='';
+  document.getElementById('aet-turnos').value='';
+  document.getElementById('aet-pausas').value='';
+  document.getElementById('aet-metas').value='';
+  document.getElementById('aet-obs').value='';
+  clearStatus('status-aet');
+  document.getElementById('modal-aet').classList.add('show');
+}
+
+function editarAET(id){
+  const a=avaliacoes.find(x=>x.id===id);
+  if(!a)return;
+  aetEditando=a;
+  document.getElementById('modal-aet-titulo').textContent='Editar AET';
+  document.getElementById('label-aet').textContent='Salvar alterações';
+  document.getElementById('aet-modal-esq').innerHTML=`<button class="btn btn-danger btn-sm" onclick="excluirAET(${id})">Excluir</button>`;
+  document.getElementById('aet-numero').value=a.numero_aet||'';
+  document.getElementById('aet-data').value=a.data_avaliacao||'';
+  document.getElementById('aet-setor').value=a.setor_id||'';
+  document.getElementById('aet-num-trab').value=a.num_trabalhadores_avaliados||1;
+  document.getElementById('aet-proxima').value=a.data_proxima_revisao||'';
+  document.getElementById('aet-responsavel').value=a.responsavel_tecnico||'';
+  document.getElementById('aet-formacao').value=a.formacao_responsavel||'';
+  document.getElementById('aet-registro').value=a.registro_profissional||'';
+  document.getElementById('aet-status').value=a.status||'Rascunho';
+  document.getElementById('aet-descricao').value=a.descricao_atividade||'';
+  document.getElementById('aet-posto').value=a.descricao_posto||'';
+  document.getElementById('aet-jornada').value=a.jornada_trabalho||'';
+  document.getElementById('aet-turnos').value=a.turnos||'';
+  document.getElementById('aet-pausas').value=a.pausas_descanso||'';
+  document.getElementById('aet-metas').value=a.producao_metas||'';
+  document.getElementById('aet-obs').value=a.observacoes||'';
+  carregarFuncoes().then(()=>{document.getElementById('aet-funcao').value=a.funcao_id||'';});
+  clearStatus('status-aet');
+  document.getElementById('modal-aet').classList.add('show');
+}
+
+function fecharModalAET(){document.getElementById('modal-aet').classList.remove('show');aetEditando=null;}
+
+async function salvarAET(){
+  const setorId=parseInt(document.getElementById('aet-setor').value);
+  const responsavel=document.getElementById('aet-responsavel').value.trim();
+  if(!setorId){alert('Selecione o setor.');return;}
+  if(!responsavel){alert('Informe o responsável técnico.');return;}
+  document.getElementById('btn-salvar-aet').disabled=true;
+  document.getElementById('spinner-aet').className='spinner show';
+  const payload={
+    empresa_id:parseInt(empresaId),
+    setor_id:setorId,
+    funcao_id:parseInt(document.getElementById('aet-funcao').value)||null,
+    numero_aet:document.getElementById('aet-numero').value.trim()||null,
+    data_avaliacao:document.getElementById('aet-data').value||hoje(),
+    data_proxima_revisao:document.getElementById('aet-proxima').value||null,
+    num_trabalhadores_avaliados:parseInt(document.getElementById('aet-num-trab').value)||1,
+    responsavel_tecnico:responsavel,
+    formacao_responsavel:document.getElementById('aet-formacao').value.trim()||null,
+    registro_profissional:document.getElementById('aet-registro').value.trim()||null,
+    status:document.getElementById('aet-status').value,
+    descricao_atividade:document.getElementById('aet-descricao').value.trim()||null,
+    descricao_posto:document.getElementById('aet-posto').value.trim()||null,
+    jornada_trabalho:document.getElementById('aet-jornada').value.trim()||null,
+    turnos:document.getElementById('aet-turnos').value.trim()||null,
+    pausas_descanso:document.getElementById('aet-pausas').value.trim()||null,
+    producao_metas:document.getElementById('aet-metas').value.trim()||null,
+    observacoes:document.getElementById('aet-obs').value.trim()||null,
+    ativo:true
+  };
+  try{
+    if(aetEditando){
+      const res=await fetch(`${SUPA_URL}/rest/v1/aet_avaliacoes?id=eq.${aetEditando.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok){const e=await res.json();throw new Error(e.message);}
+      const d=await res.json();
+      const idx=avaliacoes.findIndex(x=>x.id===aetEditando.id);
+      if(idx>=0)avaliacoes[idx]=d[0];
+    }else{
+      const res=await fetch(`${SUPA_URL}/rest/v1/aet_avaliacoes`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok){const e=await res.json();throw new Error(e.message);}
+      const d=await res.json();
+      avaliacoes.unshift(d[0]);
+    }
+    fecharModalAET();renderStats();renderLista();
+  }catch(e){setStatus('status-aet','error',e.message);}
+  finally{document.getElementById('btn-salvar-aet').disabled=false;document.getElementById('spinner-aet').className='spinner';}
+}
+
+async function excluirAET(id){
+  if(!confirm('Excluir esta AET e todos os itens avaliados?'))return;
+  await fetch(`${SUPA_URL}/rest/v1/aet_avaliacoes?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});
+  avaliacoes=avaliacoes.filter(a=>a.id!==id);
+  fecharModalAET();renderStats();renderLista();
+}
+
+// ── MODAL AVALIAÇÃO ───────────────────────────────────
+async function abrirAvaliacao(id){
+  aetAvaliando=avaliacoes.find(a=>a.id===id);
+  if(!aetAvaliando)return;
+  const setor=setores.find(s=>s.id===aetAvaliando.setor_id);
+  const funcao=funcoes.find(f=>f.id===aetAvaliando.funcao_id);
+  document.getElementById('aval-titulo').textContent=`Avaliação — ${setor?.nome_setor||'—'}${funcao?' / '+funcao.nome_funcao:''}`;
+  document.getElementById('aval-sub').textContent=`${aetAvaliando.numero_aet||''} · ${aetAvaliando.responsavel_tecnico||''} · ${fmtData(aetAvaliando.data_avaliacao)}`;
+  document.getElementById('aval-conclusao').value=aetAvaliando.conclusao_tecnica||'';
+  // Carrega respostas existentes
+  itensAvaliacao={};
+  const res=await fetch(`${SUPA_URL}/rest/v1/aet_itens?aet_id=eq.${id}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+  const existing=await res.json();
+  existing.forEach(r=>{itensAvaliacao[r.item_ordem]={condicao:r.condicao,observacao:r.observacao||'',recomendacao:r.recomendacao||'',id:r.id};});
+  renderItensAvaliacao();
+  document.getElementById('modal-avaliacao').classList.add('show');
+}
+
+function fecharModalAvaliacao(){document.getElementById('modal-avaliacao').classList.remove('show');aetAvaliando=null;itensAvaliacao={};}
+
+function renderItensAvaliacao(){
+  const lista=document.getElementById('lista-itens-aval');
+  lista.innerHTML=ITENS_AET.map(cat=>`
+    <div class="cat-section">
+      <div class="cat-titulo"><span>${cat.cat}</span><span class="mini-badge mb-info" style="font-size:9px;">${cat.ref}</span></div>
+      ${cat.itens.map(item=>{
+        const resp=itensAvaliacao[item.id]||{condicao:'',observacao:'',recomendacao:''};
+        const isInad=resp.condicao==='Inadequado';
+        return`<div class="aet-item-row" id="aet-row-${item.id}">
+          <div class="aet-item-header">
+            <div class="aet-item-info">
+              <div class="aet-item-texto">${escHtml(item.txt)}</div>
+            </div>
+            <div class="cond-btns">
+              <button class="cond-btn adequado ${resp.condicao==='Adequado'?'active':''}" onclick="avaliarItem(${item.id},'Adequado')">✓ Adequado</button>
+              <button class="cond-btn inadequado ${resp.condicao==='Inadequado'?'active':''}" onclick="avaliarItem(${item.id},'Inadequado')">✕ Inadequado</button>
+              <button class="cond-btn na ${resp.condicao==='N/A'?'active':''}" onclick="avaliarItem(${item.id},'N/A')">N/A</button>
+            </div>
+          </div>
+          <div class="aet-item-fields ${isInad?'show':''}" id="fields-${item.id}">
+            <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px;">Observação</div>
+              <textarea id="obs-${item.id}" placeholder="Descreva o problema encontrado..." onblur="salvarCampoItem(${item.id})">${escHtml(resp.observacao)}</textarea>
+            </div>
+            <div><div style="font-size:10px;color:var(--text3);margin-bottom:4px;">Recomendação</div>
+              <textarea id="rec-${item.id}" placeholder="Medida corretiva recomendada..." onblur="salvarCampoItem(${item.id})">${escHtml(resp.recomendacao)}</textarea>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+  atualizarProgresso();
+}
+
+function avaliarItem(itemId,condicao){
+  itensAvaliacao[itemId]=itensAvaliacao[itemId]||{observacao:'',recomendacao:''};
+  itensAvaliacao[itemId].condicao=condicao;
+  const row=document.getElementById(`aet-row-${itemId}`);
+  row.querySelectorAll('.cond-btn').forEach(b=>b.classList.remove('active'));
+  const mapa={Adequado:'adequado',Inadequado:'inadequado','N/A':'na'};
+  row.querySelector(`.cond-btn.${mapa[condicao]}`)?.classList.add('active');
+  const fields=document.getElementById(`fields-${itemId}`);
+  if(fields)fields.classList.toggle('show',condicao==='Inadequado');
+  atualizarProgresso();
+}
+
+function salvarCampoItem(itemId){
+  if(!itensAvaliacao[itemId])return;
+  itensAvaliacao[itemId].observacao=document.getElementById(`obs-${itemId}`)?.value.trim()||'';
+  itensAvaliacao[itemId].recomendacao=document.getElementById(`rec-${itemId}`)?.value.trim()||'';
+}
+
+function atualizarProgresso(){
+  const total=ITENS_AET.reduce((a,c)=>a+c.itens.length,0);
+  const respondidos=Object.values(itensAvaliacao).filter(r=>r.condicao).length;
+  const adequados=Object.values(itensAvaliacao).filter(r=>r.condicao==='Adequado').length;
+  const inadequados=Object.values(itensAvaliacao).filter(r=>r.condicao==='Inadequado').length;
+  const na=Object.values(itensAvaliacao).filter(r=>r.condicao==='N/A').length;
+  const pct=total>0?Math.round((respondidos/total)*100):0;
+  document.getElementById('prog-label-aval').textContent=`${respondidos} de ${total} itens avaliados`;
+  document.getElementById('prog-pct-aval').textContent=`${pct}%`;
+  document.getElementById('prog-fill-aval').style.width=`${pct}%`;
+  document.getElementById('count-adeq').textContent=`✓ ${adequados} Adequados`;
+  document.getElementById('count-inad').textContent=`✕ ${inadequados} Inadequados`;
+  document.getElementById('count-na-aval').textContent=`— ${na} N/A`;
+}
+
+async function salvarAvaliacao(){
+  if(!aetAvaliando)return;
+  document.getElementById('btn-salvar-aval').disabled=true;
+  document.getElementById('spinner-aval').className='spinner show';
+  const conclusao=document.getElementById('aval-conclusao').value.trim();
+  try{
+    // Atualiza conclusão na AET
+    await fetch(`${SUPA_URL}/rest/v1/aet_avaliacoes?id=eq.${aetAvaliando.id}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({conclusao_tecnica:conclusao||null,atualizado_em:new Date().toISOString()})
+    });
+    // Salva itens
+    const allItens=ITENS_AET.flatMap(cat=>cat.itens.map(i=>({...i,cat:cat.cat,ref:cat.ref})));
+    for(const item of allItens){
+      const resp=itensAvaliacao[item.id];
+      if(!resp?.condicao)continue;
+      // Coleta campos
+      const obs=document.getElementById(`obs-${item.id}`)?.value.trim()||resp.observacao||'';
+      const rec=document.getElementById(`rec-${item.id}`)?.value.trim()||resp.recomendacao||'';
+      const payload={aet_id:aetAvaliando.id,categoria:item.cat,item_ordem:item.id,item_texto:item.txt,referencia_legal:item.ref,condicao:resp.condicao,observacao:obs||null,recomendacao:rec||null};
+      if(resp.id){
+        await fetch(`${SUPA_URL}/rest/v1/aet_itens?id=eq.${resp.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify(payload)});
+      }else{
+        const r=await fetch(`${SUPA_URL}/rest/v1/aet_itens`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+        if(r.ok){const d=await r.json();itensAvaliacao[item.id].id=d[0].id;}
+      }
+    }
+    // Atualiza local
+    const idx=avaliacoes.findIndex(a=>a.id===aetAvaliando.id);
+    if(idx>=0)avaliacoes[idx].conclusao_tecnica=conclusao;
+    setStatus('status-aval','success','Avaliação salva com sucesso!');
+    renderLista();
+  }catch(e){setStatus('status-aval','error',e.message);}
+  finally{document.getElementById('btn-salvar-aval').disabled=false;document.getElementById('spinner-aval').className='spinner';}
+}
+
+async function gerarAcoesInadequados(){
+  const inadequados=Object.entries(itensAvaliacao).filter(([,v])=>v.condicao==='Inadequado');
+  if(!inadequados.length){alert('Nenhum item inadequado para gerar ações.');return;}
+  document.getElementById('btn-salvar-aval').disabled=true;
+  setStatus('status-aval','info','Gerando ações...');
+  let criadas=0;
+  const allItens=ITENS_AET.flatMap(cat=>cat.itens);
+  for(const [itemId,resp] of inadequados){
+    const item=allItens.find(i=>i.id==itemId);
+    if(!item)continue;
+    const rec=document.getElementById(`rec-${itemId}`)?.value.trim()||resp.recomendacao||'';
+    const titulo=`AET: ${item.txt.slice(0,80)}`;
+    // Verifica duplicata
+    const resExist=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&titulo=eq.${encodeURIComponent(titulo)}&ativo=eq.true`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const exist=await resExist.json();
+    if(exist.length)continue;
+    const res=await fetch(`${SUPA_URL}/rest/v1/acoes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({
+        empresa_id:parseInt(empresaId),
+        setor_id:aetAvaliando.setor_id||null,
+        titulo,
+        descricao:`Não conformidade identificada na AET ${aetAvaliando.numero_aet||''} — ${aetAvaliando.responsavel_tecnico||''}.\n\nItem: ${item.txt}\nObservação: ${resp.observacao||'—'}\nRecomendação: ${rec||'—'}`,
+        origem:'PGR',prioridade:'Alta',status:'Pendente',ativo:true
+      })
+    });
+    if(res.ok){
+      const d=await res.json();
+      // Vincula ação ao item
+      if(resp.id){await fetch(`${SUPA_URL}/rest/v1/aet_itens?id=eq.${resp.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({acao_id:d[0].id})});}
+      criadas++;
+    }
+  }
+  setStatus('status-aval','success',`${criadas} ação(ões) criada(s) na Central de Ações!`);
+  document.getElementById('btn-salvar-aval').disabled=false;
+}
+
+// ── IMPRESSÃO A4 ──────────────────────────────────────
+async function imprimirAET(id){
+  const a=avaliacoes.find(x=>x.id===id);
+  if(!a)return;
+  const setor=setores.find(s=>s.id===a.setor_id);
+  const funcao=funcoes.find(f=>f.id===a.funcao_id);
+  const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+  const res=await fetch(`${SUPA_URL}/rest/v1/aet_itens?aet_id=eq.${id}&select=*&order=item_ordem.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+  const itens=await res.json();
+  const itensPorOrdem={};
+  itens.forEach(i=>{itensPorOrdem[i.item_ordem]={condicao:i.condicao,observacao:i.observacao||'',recomendacao:i.recomendacao||''};});
+  const COND_BG={Adequado:'#dcfce7',Inadequado:'#fee2e2','N/A':'#f3f4f6'};
+  const COND_COR={Adequado:'#166534',Inadequado:'#991b1b','N/A':'#6b7280'};
+  const inadequados=itens.filter(i=>i.condicao==='Inadequado');
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>AET — ${a.numero_aet||''}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Arial,sans-serif;font-size:10pt;color:#1a1a2e;background:#fff;}
+    .page{width:210mm;min-height:297mm;padding:15mm 15mm 15mm 20mm;page-break-after:always;position:relative;}
+    .page:last-child{page-break-after:avoid;}
+    .topo{border-bottom:3pt solid #1a3a6e;padding-bottom:8pt;margin-bottom:12pt;display:flex;justify-content:space-between;align-items:flex-start;}
+    .topo-titulo{font-size:14pt;font-weight:700;color:#1a3a6e;}
+    .topo-sub{font-size:9pt;color:#6b7280;margin-top:2pt;}
+    .secao{font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1a3a6e;border-bottom:1pt solid #e5e7eb;padding-bottom:4pt;margin:12pt 0 8pt;}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1pt solid #e5e7eb;border-radius:3pt;overflow:hidden;margin-bottom:10pt;}
+    .campo{padding:6pt 8pt;border-right:1pt solid #e5e7eb;border-bottom:1pt solid #e5e7eb;}
+    .campo:nth-child(2n){border-right:none;}
+    .campo-full{grid-column:1/-1;border-right:none!important;}
+    .campo-label{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:2pt;}
+    .campo-value{font-size:9.5pt;color:#1a1a2e;}
+    .cat-titulo{background:#f0f4ff;padding:6pt 8pt;font-size:9pt;font-weight:700;color:#1a3a6e;border-left:3pt solid #2a5298;margin-bottom:4pt;}
+    table.chk{width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:10pt;}
+    table.chk th{background:#1a3a6e;color:#fff;padding:5pt 6pt;text-align:left;font-size:8pt;}
+    table.chk td{padding:5pt 6pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;}
+    table.chk tr:nth-child(even) td{background:#f9fafb;}
+    .cond-badge{display:inline-block;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:700;}
+    .rec-box{background:#fef9c3;border-left:2pt solid #f59e0b;padding:6pt 8pt;font-size:8.5pt;color:#92400e;margin:4pt 0;}
+    .conclusao-box{background:#f0f4ff;border:1pt solid #bfdbfe;border-radius:4pt;padding:10pt;font-size:9pt;color:#1e3a5f;margin:10pt 0;}
+    .ass-grid{display:grid;grid-template-columns:1fr 1fr;gap:20pt;margin-top:20pt;}
+    .ass-linha{border-top:1pt solid #374151;padding-top:5pt;margin-top:40pt;text-align:center;font-size:8pt;color:#6b7280;}
+    .footer{position:absolute;bottom:12mm;left:20mm;right:15mm;display:flex;justify-content:space-between;border-top:1pt solid #e5e7eb;padding-top:5pt;font-size:7.5pt;color:#9ca3af;}
+    @media print{@page{size:A4;margin:0;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}}
+  </style></head><body>
+
+  <!-- CAPA -->
+  <div class="page">
+    <div class="topo">
+      <div>
+        <div class="topo-titulo">ANÁLISE ERGONÔMICA DO TRABALHO — AET</div>
+        <div class="topo-sub">Conforme NR-17 (Portaria MTE nº 1.291/2021) · ${escHtml(nome)}</div>
+      </div>
+      <div style="text-align:right;font-size:9pt;color:#6b7280;">
+        <div>${escHtml(a.numero_aet||'—')}</div>
+        <div>Data: ${new Date(a.data_avaliacao+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+      </div>
+    </div>
+
+    <div class="secao">1. Identificação</div>
+    <div class="grid2">
+      <div class="campo campo-full"><div class="campo-label">Empresa</div><div class="campo-value" style="font-size:11pt;font-weight:700;">${escHtml(nome)}</div></div>
+      <div class="campo"><div class="campo-label">Setor avaliado</div><div class="campo-value">${escHtml(setor?.nome_setor||'—')}</div></div>
+      <div class="campo"><div class="campo-label">Função avaliada</div><div class="campo-value">${escHtml(funcao?.nome_funcao||'—')}</div></div>
+      <div class="campo"><div class="campo-label">Nº trabalhadores avaliados</div><div class="campo-value">${a.num_trabalhadores_avaliados||1}</div></div>
+      <div class="campo"><div class="campo-label">Data da avaliação</div><div class="campo-value">${fmtData(a.data_avaliacao)}</div></div>
+      <div class="campo"><div class="campo-label">Próxima revisão</div><div class="campo-value">${fmtData(a.data_proxima_revisao)}</div></div>
+      <div class="campo"><div class="campo-label">Responsável técnico</div><div class="campo-value">${escHtml(a.responsavel_tecnico||'—')}</div></div>
+      <div class="campo"><div class="campo-label">Formação / Registro</div><div class="campo-value">${escHtml([a.formacao_responsavel,a.registro_profissional].filter(Boolean).join(' · ')||'—')}</div></div>
+    </div>
+
+    <div class="secao">2. Descrição do posto de trabalho</div>
+    <div class="grid2">
+      <div class="campo campo-full"><div class="campo-label">Descrição das atividades</div><div class="campo-value">${escHtml(a.descricao_atividade||'—')}</div></div>
+      <div class="campo campo-full"><div class="campo-label">Descrição do posto</div><div class="campo-value">${escHtml(a.descricao_posto||'—')}</div></div>
+      <div class="campo"><div class="campo-label">Jornada de trabalho</div><div class="campo-value">${escHtml(a.jornada_trabalho||'—')}</div></div>
+      <div class="campo"><div class="campo-label">Turnos</div><div class="campo-value">${escHtml(a.turnos||'—')}</div></div>
+      <div class="campo"><div class="campo-label">Pausas e descanso</div><div class="campo-value">${escHtml(a.pausas_descanso||'—')}</div></div>
+      <div class="campo"><div class="campo-label">Produção e metas</div><div class="campo-value">${escHtml(a.producao_metas||'—')}</div></div>
+    </div>
+    <div class="footer"><span>AET — ${escHtml(nome)}</span><span>Página 1</span></div>
+  </div>
+
+  <!-- AVALIAÇÃO -->
+  <div class="page">
+    <div class="topo">
+      <div><div class="topo-titulo">Avaliação ergonômica — Checklist NR-17</div><div class="topo-sub">${escHtml(setor?.nome_setor||'—')} / ${escHtml(funcao?.nome_funcao||'—')}</div></div>
+      <div style="text-align:right;font-size:9pt;color:#6b7280;">${escHtml(a.numero_aet||'—')}</div>
+    </div>
+    <div class="secao">3. Checklist de condições ergonômicas</div>
+    ${ITENS_AET.map(cat=>`
+      <div class="cat-titulo">${cat.cat} <span style="font-size:8pt;font-weight:400;color:#6b7280;">${cat.ref}</span></div>
+      <table class="chk">
+        <thead><tr><th style="width:55%;">Item</th><th style="width:15%;text-align:center;">Condição</th><th>Observação / Recomendação</th></tr></thead>
+        <tbody>
+          ${cat.itens.map(item=>{
+            const r=itensPorOrdem[item.id]||{condicao:'',observacao:'',recomendacao:''};
+            const cond=r.condicao||'—';
+            return`<tr>
+              <td>${escHtml(item.txt)}</td>
+              <td style="text-align:center;"><span class="cond-badge" style="background:${COND_BG[cond]||'#f3f4f6'};color:${COND_COR[cond]||'#6b7280'};">${cond}</span></td>
+              <td style="font-size:8pt;color:#374151;">${escHtml(r.observacao||'')}${r.recomendacao?` · Rec: ${escHtml(r.recomendacao)}`:''}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`).join('')}
+    <div class="footer"><span>AET — ${escHtml(nome)}</span><span>Página 2</span></div>
+  </div>
+
+  <!-- CONCLUSÃO -->
+  <div class="page">
+    <div class="topo">
+      <div><div class="topo-titulo">Recomendações e conclusão</div><div class="topo-sub">${escHtml(a.numero_aet||'')} · ${escHtml(nome)}</div></div>
+    </div>
+    ${inadequados.length?`
+    <div class="secao">4. Itens inadequados — Recomendações</div>
+    <table class="chk">
+      <thead><tr><th style="width:35%;">Item</th><th>Observação</th><th>Recomendação</th></tr></thead>
+      <tbody>
+        ${inadequados.map(i=>`<tr>
+          <td style="font-weight:500;font-size:8pt;">${escHtml(i.item_texto)}</td>
+          <td style="font-size:8pt;">${escHtml(i.observacao||'—')}</td>
+          <td style="font-size:8pt;color:#92400e;">${escHtml(i.recomendacao||'—')}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`:''}
+    <div class="secao">${inadequados.length?'5':'4'}. Conclusão técnica</div>
+    <div class="conclusao-box">${escHtml(a.conclusao_tecnica||'Conclusão técnica não informada.')}</div>
+    <div style="margin-top:10pt;font-size:9pt;color:#374151;">
+      <strong>Resumo da avaliação:</strong> ${itens.filter(i=>i.condicao==='Adequado').length} itens adequados · 
+      <span style="color:#991b1b;">${inadequados.length} inadequados</span> · 
+      ${itens.filter(i=>i.condicao==='N/A').length} não aplicáveis · 
+      ${ITENS_AET.reduce((a,c)=>a+c.itens.length,0)-itens.length} não avaliados
+    </div>
+    <div class="secao" style="margin-top:14pt;">Assinaturas</div>
+    <div class="ass-grid">
+      <div><div class="ass-linha">${escHtml(a.responsavel_tecnico||'_________________________')}<br>${escHtml(a.formacao_responsavel||'Responsável técnico')}<br>${escHtml(a.registro_profissional||'')}</div></div>
+      <div><div class="ass-linha">_________________________<br>Representante da empresa<br>Data: ___/___/______</div></div>
+    </div>
+    <div style="margin-top:12pt;font-size:8pt;color:#9ca3af;text-align:center;border-top:1pt solid #e5e7eb;padding-top:6pt;">
+      Esta AET foi elaborada conforme NR-17 (Portaria MTE nº 1.291/2021). Revisão prevista para: ${fmtData(a.data_proxima_revisao)} · SGS Sistema de Gestão em SST
+    </div>
+    <div class="footer"><span>AET — ${escHtml(nome)}</span><span>Página 3</span></div>
+  </div>
+  </body></html>`;
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload=()=>win.print();
+}
+
+['modal-aet','modal-avaliacao'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('click',e=>{
+    if(e.target.id===id){if(id==='modal-aet')fecharModalAET();else fecharModalAvaliacao();}
+  });
+});
+
+inicializar();
+</script>
+</body>
+</html>
