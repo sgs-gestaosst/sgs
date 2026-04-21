@@ -511,93 +511,10 @@ async function salvarEmpresa(){
   const gr=parseInt(document.getElementById('grau_risco').value)||null;
   const fn=document.getElementById('total_funcionarios').value;
 
-  // Valida limite de funcionários ANTES de mostrar salvando
+  // Sem limite de funcionários — verificação de plano removida
   if (fn) {
     const numFuncs = parseInt(fn);
-    try {
-      // Busca assinatura ativa do usuário com o plano vinculado
-      const resAssin = await fetch(
-        `${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${sgs_user?.id}&ativo=eq.true&select=status,plano_id`,
-        { headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${sgs_token}`} }
-      );
-      const assinaturas = await resAssin.json();
-      const assinatura = assinaturas[0];
-      const status = assinatura?.status || 'Trial';
-      const planoId = assinatura?.plano_id;
-
-      // Busca limite do plano no banco
-      let limiteFuncionarios = 50; // padrão Trial sem assinatura
-      let nomeAssinatura = 'Trial';
-
-      if (planoId) {
-        const resPlano = await fetch(
-          `${SUPA_URL}/rest/v1/planos?id=eq.${planoId}&select=nome,limite_funcionarios`,
-          { headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${sgs_token}`} }
-        );
-        const planos = await resPlano.json();
-        if (planos.length) {
-          limiteFuncionarios = planos[0].limite_funcionarios;
-          nomeAssinatura = planos[0].nome;
-        }
-      } else {
-        // Sem assinatura = Trial → busca limite do plano Trial no banco
-        const resTrialPlano = await fetch(
-          `${SUPA_URL}/rest/v1/planos?nome=eq.Trial&select=nome,limite_funcionarios`,
-          { headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${sgs_token}`} }
-        );
-        const trialPlanos = await resTrialPlano.json();
-        if (trialPlanos.length) {
-          limiteFuncionarios = trialPlanos[0].limite_funcionarios;
-          nomeAssinatura = trialPlanos[0].nome;
-        }
-      }
-
-      const isPago = status === 'Ativo';
-      const isEnterprise = limiteFuncionarios >= 99999;
-
-      // Busca total de funcionários já cadastrados pelo cliente
-      let totalJaCadastrado = 0;
-      try {
-        const resTotal = await fetch(
-          `${SUPA_URL}/rest/v1/empresas?user_id=eq.${sgs_user?.id}&ativo=eq.true&select=total_funcionarios_previsto`,
-          { headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${sgs_token}`} }
-        );
-        const empData = await resTotal.json();
-        totalJaCadastrado = empData.reduce((a, e) => a + (e.total_funcionarios_previsto || 0), 0);
-      } catch(e) { console.log('Erro ao buscar total:', e); }
-
-      const totalComNovo = totalJaCadastrado + numFuncs;
-
-      if (!isEnterprise && totalComNovo > limiteFuncionarios) {
-        const restante = Math.max(0, limiteFuncionarios - totalJaCadastrado);
-        const aviso = document.getElementById('aviso-limite');
-        if (aviso) aviso.remove();
-        const el = document.createElement('div');
-        el.id = 'aviso-limite';
-        el.style.cssText = 'background:#2a1515;border:1px solid #4a2020;border-radius:10px;padding:14px 18px;margin-top:12px;font-size:13px;color:#e05555;';
-        el.innerHTML = !isPago
-          ? `⚠️ No plano <strong style="color:#e8eaf0;">${nomeAssinatura}</strong> o limite total é de <strong style="color:#e8eaf0;">${limiteFuncionarios.toLocaleString('pt-BR')} funcionários</strong> entre todas as empresas. Você já tem <strong style="color:#e8eaf0;">${totalJaCadastrado}</strong> cadastrados — restam <strong style="color:#e8eaf0;">${restante}</strong> disponíveis.
-            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
-              <a href="assinar.html" style="display:inline-block;padding:7px 16px;background:#4a7cdc;color:#fff;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Fazer upgrade do plano</a>
-              <a href="https://wa.me/5594981564271?text=Ol%C3%A1%21%20Preciso%20de%20suporte%20no%20SGS%20%E2%80%94%20Sistema%20de%20Gest%C3%A3o%20em%20SST." target="_blank" style="display:inline-block;padding:7px 16px;background:#1a4a38;color:#2dd4a0;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Falar com suporte</a>
-            </div>`
-          : `⚠️ O limite do plano <strong style="color:#e8eaf0;">${nomeAssinatura}</strong> é de <strong style="color:#e8eaf0;">${limiteFuncionarios.toLocaleString('pt-BR')} funcionários</strong> no total. Você já tem <strong style="color:#e8eaf0;">${totalJaCadastrado}</strong> cadastrados.
-            <div style="margin-top:10px;">
-              <a href="https://wa.me/5594981564271?text=Ol%C3%A1%21%20Preciso%20de%20suporte%20no%20SGS%20%E2%80%94%20Sistema%20de%20Gest%C3%A3o%20em%20SST." target="_blank" style="display:inline-block;padding:7px 16px;background:#1a4a38;color:#2dd4a0;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Falar com suporte via WhatsApp</a>
-            </div>`;
-        document.getElementById('btn-salvar').parentNode.insertBefore(el, document.getElementById('btn-salvar'));
-        document.getElementById('spinner-salvar').className = 'spinner';
-        document.getElementById('btn-salvar').disabled = true;
-        document.getElementById('btn-salvar-label').textContent = 'Limite excedido';
-        document.getElementById('status-salvar').className = 'status-bar';
-        return;
-      }
-
-      // Remove aviso anterior se dentro do limite
-      const avisoAnterior = document.getElementById('aviso-limite');
-      if (avisoAnterior) avisoAnterior.remove();
-
-    } catch(e) { console.log('Erro ao verificar plano:', e); }
+    if (numFuncs < 0) { setStatus('status-salvar','error','Número de funcionários inválido.'); return; }
   }
 
   // Só mostra salvando se passou pela validação
