@@ -196,6 +196,7 @@
             <a id="btn-exames" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🩺 Exames</a>
             <a id="btn-treinamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🎓 Treinamentos</a>
             <a id="btn-epis" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🥽 EPIs</a>
+            <a id="btn-medicoes" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">📊 Medições</a>
             <a id="btn-checklists" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🔍 Checklists</a>
             <a id="btn-acoes" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">⚡ Ações</a>
           </div>
@@ -735,6 +736,8 @@ async function carregarEmpresa(){
     if(btnTreinamentos){btnTreinamentos.href=`treinamentos.html?empresa_id=${empresaId}`;btnTreinamentos.style.display='flex';}
     const btnEpis=document.getElementById('btn-epis');
     if(btnEpis){btnEpis.href=`epis.html?empresa_id=${empresaId}`;btnEpis.style.display='flex';}
+    const btnMedicoes=document.getElementById('btn-medicoes');
+    if(btnMedicoes){btnMedicoes.href=`medicoes.html?empresa_id=${empresaId}`;btnMedicoes.style.display='flex';}
     const btnChecklists=document.getElementById('btn-checklists');
     if(btnChecklists){btnChecklists.href=`checklists.html?empresa_id=${empresaId}`;btnChecklists.style.display='flex';}
     const btnAcoes=document.getElementById('btn-acoes');
