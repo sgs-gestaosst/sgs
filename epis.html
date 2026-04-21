@@ -141,7 +141,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <div class="filtros">
     <input type="text" class="filtro-busca" id="filtro-busca" placeholder="🔍 Buscar..." oninput="renderTab()">
-    <select class="filtro-select" id="filtro-setor" onchange="renderTab()">
+    <select class="filtro-select" id="filtro-funcionario" onchange="renderTab()" style="min-width:180px;">
+      <option value="">Todos os funcionários</option>
+    </select>
+    <select class="filtro-select" id="filtro-setor" onchange="filtrarFuncPorSetor()">
       <option value="">Todos os setores</option>
     </select>
     <select class="filtro-select" id="filtro-status" onchange="renderTab()">
@@ -149,6 +152,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <option value="ativo">Ativos</option>
       <option value="devolvido">Devolvidos</option>
     </select>
+    <button class="btn btn-edit btn-sm" onclick="imprimirFicha()" title="Imprimir ficha para auditor">🖨️ Imprimir ficha</button>
   </div>
 
   <div id="conteudo-tab"></div>
@@ -325,6 +329,7 @@ async function inicializar(){
     document.getElementById('header-nome').textContent=nome;
     const selSetor=document.getElementById('filtro-setor');
     setores.forEach(s=>selSetor.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+    popularFiltroFuncionarios();
     renderStats();
     renderTab();
   }catch(e){console.error(e);}
@@ -354,12 +359,109 @@ function mudarTab(tab){
   renderTab();
 }
 
+function popularFiltroFuncionarios(setorId=null){
+  const sel=document.getElementById('filtro-funcionario');
+  const valAtual=sel.value;
+  const lista=setorId?funcionarios.filter(f=>f.setor_id==setorId):funcionarios;
+  sel.innerHTML='<option value="">Todos os funcionários</option>'+lista.map(f=>`<option value="${f.id}" ${valAtual==f.id?'selected':''}>${escHtml(f.nome_completo)}</option>`).join('');
+}
+
+function filtrarFuncPorSetor(){
+  const setorId=document.getElementById('filtro-setor').value;
+  popularFiltroFuncionarios(setorId||null);
+  renderTab();
+}
+
 function getFiltros(){
   return{
     busca:document.getElementById('filtro-busca').value.toLowerCase(),
+    funcionario:document.getElementById('filtro-funcionario').value,
     setor:document.getElementById('filtro-setor').value,
     status:document.getElementById('filtro-status').value,
   };
+}
+
+function imprimirFicha(){
+  const {funcionario,setor,status}=getFiltros();
+  let funcsPrint=funcionarios.filter(f=>{
+    if(funcionario&&f.id!=funcionario)return false;
+    if(setor&&f.setor_id!=setor)return false;
+    return true;
+  });
+  if(!funcsPrint.length){alert('Nenhum funcionário selecionado. Use os filtros para selecionar.');return;}
+  const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+  const hojeStr=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  let html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Ficha de EPI</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Arial,sans-serif;font-size:10pt;color:#1a1a2e;}
+    .page{width:210mm;min-height:297mm;padding:15mm 15mm 15mm 20mm;page-break-after:always;}
+    .page:last-child{page-break-after:avoid;}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2pt solid #0d2040;padding-bottom:8pt;margin-bottom:12pt;}
+    .h-empresa{font-size:13pt;font-weight:700;color:#0d2040;}
+    .h-titulo{font-size:10pt;color:#6b7280;margin-top:2pt;}
+    .func-box{background:#f0f4ff;border-left:4pt solid #2a5298;padding:10pt 12pt;margin-bottom:12pt;}
+    .func-nome{font-size:12pt;font-weight:700;color:#0d2040;}
+    .func-info{font-size:9pt;color:#6b7280;margin-top:3pt;}
+    table{width:100%;border-collapse:collapse;margin-bottom:16pt;font-size:9pt;}
+    th{background:#0d2040;color:#fff;padding:6pt 8pt;text-align:left;font-size:8pt;text-transform:uppercase;}
+    td{padding:6pt 8pt;border-bottom:1pt solid #e5e7eb;}
+    tr:nth-child(even) td{background:#f9fafb;}
+    .b-ativo{background:#dcfce7;color:#166534;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:600;}
+    .b-dev{background:#f3f4f6;color:#6b7280;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:600;}
+    .b-venc{background:#fee2e2;color:#991b1b;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:600;}
+    .assinatura{margin-top:24pt;display:grid;grid-template-columns:1fr 1fr;gap:30pt;}
+    .ass-line{border-top:1pt solid #374151;padding-top:6pt;margin-top:40pt;text-align:center;font-size:8pt;color:#6b7280;}
+    .empty-msg{color:#9ca3af;font-style:italic;padding:10pt 0;}
+    @media print{@page{size:A4;margin:0;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}}
+  </style></head><body>`;
+
+  funcsPrint.forEach(f=>{
+    const funcao=funcoes.find(x=>x.id===f.funcao_id);
+    const setor=setores.find(x=>x.id===f.setor_id);
+    const entregasFunc=entregas.filter(e=>e.funcionario_id===f.id&&(status===''||(status==='ativo'&&!e.devolvido)||(status==='devolvido'&&e.devolvido)));
+    html+=`<div class="page">
+      <div class="header">
+        <div><div class="h-empresa">${escHtml(nome)}</div><div class="h-titulo">Ficha de Controle de EPIs — NR-6</div></div>
+        <div style="font-size:9pt;color:#6b7280;text-align:right;">Emitido em: ${hojeStr}</div>
+      </div>
+      <div class="func-box">
+        <div class="func-nome">${escHtml(f.nome_completo)}</div>
+        <div class="func-info">${funcao?escHtml(funcao.nome_funcao):'—'} · ${setor?escHtml(setor.nome_setor):'—'}${f.matricula?' · Mat. '+escHtml(f.matricula):''}</div>
+      </div>
+      ${entregasFunc.length?`
+      <table>
+        <thead><tr><th>EPI</th><th>Motivo</th><th>Data entrega</th><th>Qtd</th><th>CA</th><th>Val. CA</th><th>Status</th><th>Devolução</th></tr></thead>
+        <tbody>
+          ${entregasFunc.map(e=>{
+            const epi=catalogoEpis.find(x=>x.id===e.epi_id);
+            const venc=calcVencCA(e.validade_ca);
+            const statusBadge=e.devolvido?`<span class="b-dev">Devolvido</span>`:venc?.status==='Vencido'?`<span class="b-venc">CA Vencido</span>`:`<span class="b-ativo">Ativo</span>`;
+            return`<tr>
+              <td style="font-weight:500;">${escHtml(epi?.nome||'—')}</td>
+              <td>${escHtml(e.motivo||'—')}</td>
+              <td>${fmtData(e.data_entrega)}</td>
+              <td style="text-align:center;">${e.quantidade||1}</td>
+              <td>${escHtml(e.ca||'—')}</td>
+              <td>${fmtData(e.validade_ca)}</td>
+              <td>${statusBadge}</td>
+              <td>${e.devolvido?fmtData(e.data_devolucao)+' ('+escHtml(e.motivo_devolucao||'')+')'  :'—'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`:`<p class="empty-msg">Nenhum EPI registrado para este funcionário.</p>`}
+      <div class="assinatura">
+        <div><div class="ass-line">Assinatura do funcionário<br>${escHtml(f.nome_completo)}</div></div>
+        <div><div class="ass-line">Responsável pela entrega<br>Data: ___/___/______</div></div>
+      </div>
+    </div>`;
+  });
+
+  html+='</body></html>';
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload=()=>win.print();
 }
 
 function renderTab(){
@@ -371,8 +473,9 @@ function renderTab(){
 
 function renderPorFuncionario(){
   const el=document.getElementById('conteudo-tab');
-  const {busca,setor,status}=getFiltros();
+  const {busca,funcionario,setor,status}=getFiltros();
   let funcsVisiveis=funcionarios.filter(f=>{
+    if(funcionario&&f.id!=funcionario)return false;
     if(busca&&!f.nome_completo.toLowerCase().includes(busca))return false;
     if(setor&&f.setor_id!=setor)return false;
     return true;
@@ -648,25 +751,38 @@ async function carregarSugestoes(){
   const func=funcionarios.find(f=>f.id===funcId);
   lista.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);">↻ Buscando EPIs sugeridos...</div>`;
   try{
-    // Busca EPIs dos riscos do setor e função do funcionário
-    const queries=[];
-    if(func?.setor_id)queries.push(fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=in.(select id from setor_riscos where setor_id=eq.${func.setor_id} and ativo=eq.true)&nivel=eq.EPI&ativo=eq.true&select=epi_id,ca,validade_ca`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}));
-    if(func?.funcao_id)queries.push(fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=in.(select id from funcao_riscos where funcao_id=eq.${func.funcao_id} and ativo=eq.true)&nivel=eq.EPI&ativo=eq.true&select=epi_id,ca,validade_ca`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}));
-    const results=await Promise.all(queries);
-    const medidas=[];
-    for(const r of results){if(r.ok){const d=await r.json();medidas.push(...d);}}
-    // Deduplica por epi_id
-    const epiIdsUnicos=[...new Set(medidas.map(m=>m.epi_id).filter(Boolean))];
-    // Remove EPIs já entregues e não devolvidos
+    // 1. Busca setor_riscos do setor do funcionário
+    let epiIds=[];
+    if(func?.setor_id){
+      const resSR=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${func.setor_id}&ativo=eq.true&select=id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const srData=await resSR.json();
+      if(srData.length){
+        const srIds=srData.map(x=>x.id).join(',');
+        const resMed=await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=in.(${srIds})&nivel=eq.EPI&ativo=eq.true&select=epi_id,ca,validade_ca`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+        const medData=await resMed.json();
+        medData.forEach(m=>{if(m.epi_id&&!epiIds.find(x=>x.epi_id===m.epi_id))epiIds.push(m);});
+      }
+    }
+    // 2. Busca funcao_riscos da função do funcionário
+    if(func?.funcao_id){
+      const resFR=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${func.funcao_id}&ativo=eq.true&select=id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const frData=await resFR.json();
+      if(frData.length){
+        const frIds=frData.map(x=>x.id).join(',');
+        const resMed=await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=in.(${frIds})&nivel=eq.EPI&ativo=eq.true&select=epi_id,ca,validade_ca`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+        const medData=await resMed.json();
+        medData.forEach(m=>{if(m.epi_id&&!epiIds.find(x=>x.epi_id===m.epi_id))epiIds.push(m);});
+      }
+    }
+    // 3. Remove EPIs já entregues e não devolvidos
     const epiJaAtivos=entregas.filter(e=>e.funcionario_id===funcId&&!e.devolvido).map(e=>e.epi_id);
-    const episSugeridos=epiIdsUnicos.filter(id=>!epiJaAtivos.includes(id));
-    sugestoesEpis=episSugeridos.map(id=>{
-      const m=medidas.find(x=>x.epi_id===id)||{};
-      const epi=catalogoEpis.find(e=>e.id===id);
-      return{epi_id:id,nome:epi?.nome||'—',categoria:epi?.categoria||'—',ca:m.ca||'',validade_ca:m.validade_ca||''};
+    const episSugeridos=epiIds.filter(m=>!epiJaAtivos.includes(m.epi_id));
+    sugestoesEpis=episSugeridos.map(m=>{
+      const epi=catalogoEpis.find(e=>e.id===m.epi_id);
+      return{epi_id:m.epi_id,nome:epi?.nome||'—',categoria:epi?.categoria||'—',ca:m.ca||'',validade_ca:m.validade_ca||''};
     });
     if(!sugestoesEpis.length){
-      lista.innerHTML=`<div class="empty"><div class="empty-icon">✅</div><div>Todos os EPIs sugeridos já foram entregues para este funcionário!</div></div>`;
+      lista.innerHTML=`<div class="empty"><div class="empty-icon">✅</div><div>${epiIds.length===0?'Nenhum EPI vinculado aos riscos deste funcionário. Cadastre EPIs nos riscos do setor/função.':'Todos os EPIs sugeridos já foram entregues para este funcionário!'}</div></div>`;
       document.getElementById('count-sug').textContent='';
       return;
     }
