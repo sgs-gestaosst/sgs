@@ -153,8 +153,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <label>Número da PT</label>
         <input type="text" id="pt-numero" placeholder="Ex: PT-2026-001">
       </div>
-      <div class="modal-field full">
-        <label>Descrição do serviço <span style="color:var(--accent);">*</span></label>
+      <div class="modal-field full" id="campo-ec" style="display:none;">
+        <label>Espaço confinado (inventário)</label>
+        <select id="pt-ec">
+          <option value="">— Selecione do inventário —</option>
+        </select>
+      </div>
+      <div class="modal-field full" id="campo-anc" style="display:none;">
+        <label>Ponto de ancoragem (inventário)</label>
+        <select id="pt-anc">
+          <option value="">— Selecione do inventário —</option>
+        </select>
+      </div>
         <textarea id="pt-servico" placeholder="Descreva detalhadamente o serviço a ser executado..."></textarea>
       </div>
       <div class="modal-field">
@@ -437,7 +447,7 @@ function renderLista(){
 }
 
 // ── CHECKLIST ─────────────────────────────────────────
-function atualizarChecklist(){
+async function atualizarChecklist(){
   const tipo=document.getElementById('pt-tipo').value;
   document.getElementById('chk-tipo-label').textContent=tipo;
   const itens=CHECKLISTS_PT[tipo]||[];
@@ -451,6 +461,28 @@ function atualizarChecklist(){
         <button class="chk-btn na" onclick="responderChk(${item.id},'N/A')">N/A</button>
       </div>
     </div>`).join('');
+  // Mostra campos de inventário conforme tipo
+  const campoEC=document.getElementById('campo-ec');
+  const campoANC=document.getElementById('campo-anc');
+  if(campoEC)campoEC.style.display=tipo==='Espaço Confinado'?'block':'none';
+  if(campoANC)campoANC.style.display=tipo==='Trabalho em Altura'?'block':'none';
+  // Carrega inventários se necessário
+  if(tipo==='Espaço Confinado'){
+    try{
+      const res=await fetch(`${SUPA_URL}/rest/v1/espacos_confinados?empresa_id=eq.${empresaId}&ativo=eq.true&status=eq.Ativo&select=id,identificacao,nome,localizacao&order=identificacao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const ecs=await res.json();
+      const sel=document.getElementById('pt-ec');
+      sel.innerHTML='<option value="">— Selecione do inventário —</option>'+ecs.map(e=>`<option value="${e.id}">${escHtml(e.identificacao)} — ${escHtml(e.nome)}${e.localizacao?' ('+e.localizacao+')':''}</option>`).join('');
+    }catch(e){console.error(e);}
+  }
+  if(tipo==='Trabalho em Altura'){
+    try{
+      const res=await fetch(`${SUPA_URL}/rest/v1/pontos_ancoragem?empresa_id=eq.${empresaId}&ativo=eq.true&status=eq.Aprovado&select=id,identificacao,localizacao,tipo&order=identificacao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const ancs=await res.json();
+      const sel=document.getElementById('pt-anc');
+      sel.innerHTML='<option value="">— Selecione do inventário —</option>'+ancs.map(a=>`<option value="${a.id}">${escHtml(a.identificacao)} — ${escHtml(a.localizacao)}${a.tipo?' ('+a.tipo+')':''}</option>`).join('');
+    }catch(e){console.error(e);}
+  }
 }
 
 function responderChk(itemId,resp){

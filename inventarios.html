@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Inventários Técnicos</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+.btn-danger:hover{background:#2a1515;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+/* Tabs */
+.tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;overflow-x:auto;}
+.tab{padding:12px 16px;font-size:12px;cursor:pointer;border-right:1px solid var(--border);font-weight:500;color:var(--text2);transition:background .15s;white-space:nowrap;flex-shrink:0;}
+.tab:last-child{border-right:none;}
+.tab:hover{background:var(--surface2);}
+.tab.active{background:var(--surface2);color:var(--text);}
+/* Stats row */
+.stats-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;display:flex;align-items:center;gap:8px;}
+.stat-pill-val{font-weight:600;font-family:var(--mono);}
+/* Filtros */
+.filtros{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.filtro-busca{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;}
+.filtro-select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.filtro-busca:focus,.filtro-select:focus{border-color:var(--border-focus);}
+/* Cards inventário */
+.inv-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;transition:border-color .15s;}
+.inv-card:hover{border-color:var(--border-focus);}
+.inv-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.inv-id{font-size:11px;font-family:var(--mono);color:var(--accent);margin-bottom:3px;}
+.inv-nome{font-size:13px;font-weight:500;margin-bottom:5px;}
+.inv-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--text2);}
+.inv-datas{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.inv-data{background:var(--bg);border-radius:var(--radius);padding:5px 8px;font-size:10px;}
+.inv-data-label{color:var(--text3);text-transform:uppercase;letter-spacing:.04em;}
+.inv-data-val{font-weight:500;margin-top:1px;}
+/* Badges */
+.mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;display:inline-block;}
+.mb-ok{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.mb-warn{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.mb-red{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.mb-blue{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+.mb-purple{background:#1e1a40;color:#a78bfa;border:1px solid #3a2a80;}
+.mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+/* Status */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px;color:var(--text3);}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:700px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-field{margin-bottom:0;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+.modal-field textarea{resize:vertical;min-height:60px;}
+.section-sep{grid-column:1/-1;border-top:1px solid var(--border);padding-top:14px;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
+@media(max-width:768px){.modal-grid{grid-template-columns:1fr;}.header-title{display:none;}.inv-datas{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Inventários Técnicos</span></div>
+</div>
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para empresa</a>
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#1a2030;border:1px solid #2a4060;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🗂️</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Inventários Técnicos</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <button class="btn btn-primary" id="btn-novo" onclick="abrirModalNovo()">+ Novo item</button>
+  </div>
+  <div class="tabs">
+    <div class="tab active" id="tab-ec" onclick="mudarTab('ec')">🕳️ Espaços Confinados</div>
+    <div class="tab" id="tab-pq" onclick="mudarTab('pq')">⚗️ Produtos Químicos</div>
+    <div class="tab" id="tab-maq" onclick="mudarTab('maq')">⚙️ Máquinas (NR-12)</div>
+    <div class="tab" id="tab-anc" onclick="mudarTab('anc')">🪝 Pontos de Ancoragem</div>
+    <div class="tab" id="tab-ac" onclick="mudarTab('ac')">⚡ Áreas Classificadas</div>
+  </div>
+  <div class="filtros">
+    <input type="text" class="filtro-busca" id="filtro-busca" placeholder="🔍 Buscar..." oninput="renderTab()">
+    <select class="filtro-select" id="filtro-setor" onchange="renderTab()">
+      <option value="">Todos os setores</option>
+    </select>
+    <select class="filtro-select" id="filtro-status" onchange="renderTab()">
+      <option value="">Todos os status</option>
+    </select>
+  </div>
+  <div class="stats-row" id="stats-row"></div>
+  <div id="conteudo-tab"></div>
+</div>
+
+<!-- MODAL DINÂMICO -->
+<div class="modal-overlay" id="modal-inv">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-inv-titulo">Novo item</span>
+      <button onclick="fecharModal()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid" id="modal-campos"></div>
+    <div class="status-bar" id="status-inv"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+      <div id="modal-inv-esq"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+        <button class="btn btn-save" id="btn-salvar-inv" onclick="salvarItem()">
+          <span class="spinner" id="spinner-inv"></span>
+          <span id="label-inv">Salvar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa={},setores=[],riscos=[];
+let dados={ec:[],pq:[],maq:[],anc:[],ac:[]};
+let tabAtual='ec';
+let editando=null;
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]||''}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+function hoje(){return new Date().toISOString().split('T')[0];}
+function diasAte(d){if(!d)return null;return Math.ceil((new Date(d+'T00:00:00')-new Date())/(1000*60*60*24));}
+
+// Config de cada aba
+const TABS={
+  ec:{label:'Espaços Confinados',icone:'🕳️',tabela:'espacos_confinados',cor:{bg:'#1e1a40',brd:'#3a2a80'},
+    statusOpts:['Ativo','Inativo','Em manutenção'],
+    getStatus:i=>i.status,
+    getLabel:i=>i.nome,getId:i=>i.identificacao,
+    getMeta:i=>[i.classificacao,i.localizacao].filter(Boolean),
+    getDatas:i=>[{l:'Últ. avaliação',v:fmtData(i.ultima_avaliacao)},{l:'Próx. avaliação',v:fmtData(i.proxima_avaliacao),urgente:i.proxima_avaliacao&&diasAte(i.proxima_avaliacao)<30}],
+    getBadges:i=>[
+      {cls:i.classificacao==='Permissível'?'mb-warn':'mb-red',txt:i.classificacao||'—'},
+      {cls:i.status==='Ativo'?'mb-ok':i.status==='Inativo'?'mb-info':'mb-warn',txt:i.status},
+    ]},
+  pq:{label:'Produtos Químicos',icone:'⚗️',tabela:'produtos_quimicos',cor:{bg:'#2a1010',brd:'#8b2222'},
+    statusOpts:['Ativo','Inativo','Descontinuado'],
+    getStatus:i=>i.status,
+    getLabel:i=>i.nome_produto,getId:i=>i.numero_cas?'CAS: '+i.numero_cas:'—',
+    getMeta:i=>[i.classe_risco,i.local_armazenamento,i.fabricante].filter(Boolean),
+    getDatas:i=>[{l:'Validade FISPQ',v:fmtData(i.data_vencimento_fispq),urgente:i.data_vencimento_fispq&&diasAte(i.data_vencimento_fispq)<60}],
+    getBadges:i=>[
+      {cls:'mb-red',txt:i.classe_risco||'—'},
+      {cls:i.gera_insalubridade?'mb-warn':'mb-info',txt:i.gera_insalubridade?'Insalubre':'Sem insalubridade'},
+      {cls:i.fispq_disponivel?'mb-ok':'mb-warn',txt:i.fispq_disponivel?'FISPQ OK':'Sem FISPQ'},
+    ]},
+  maq:{label:'Máquinas NR-12',icone:'⚙️',tabela:'maquinas_equipamentos',cor:{bg:'#1e2333',brd:'#3a4060'},
+    statusOpts:['Operacional','Em manutenção','Desativado'],
+    getStatus:i=>i.status,
+    getLabel:i=>i.nome,getId:i=>i.identificacao,
+    getMeta:i=>[i.fabricante,i.modelo,i.localizacao].filter(Boolean),
+    getDatas:i=>[
+      {l:'Últ. manutenção',v:fmtData(i.ultima_manutencao)},
+      {l:'Próx. manutenção',v:fmtData(i.proxima_manutencao),urgente:i.proxima_manutencao&&diasAte(i.proxima_manutencao)<30},
+      {l:'Próx. NR-12',v:fmtData(i.proxima_inspecao_nr12),urgente:i.proxima_inspecao_nr12&&diasAte(i.proxima_inspecao_nr12)<30},
+    ],
+    getBadges:i=>[
+      {cls:i.status==='Operacional'?'mb-ok':i.status==='Desativado'?'mb-info':'mb-warn',txt:i.status},
+    ]},
+  anc:{label:'Pontos de Ancoragem',icone:'🪝',tabela:'pontos_ancoragem',cor:{bg:'#1a2030',brd:'#2a4060'},
+    statusOpts:['Aprovado','Reprovado','Vencido','Em análise'],
+    getStatus:i=>i.status,
+    getLabel:i=>i.localizacao,getId:i=>i.identificacao,
+    getMeta:i=>[i.tipo,i.capacidade_kg?i.capacidade_kg+'kg':'',i.altura_trabalho?i.altura_trabalho+'m altura':''].filter(Boolean),
+    getDatas:i=>[
+      {l:'Aprovado por',v:i.aprovado_por||'—'},
+      {l:'Próx. inspeção',v:fmtData(i.proxima_inspecao),urgente:i.proxima_inspecao&&diasAte(i.proxima_inspecao)<30},
+    ],
+    getBadges:i=>[
+      {cls:i.status==='Aprovado'?'mb-ok':i.status==='Reprovado'?'mb-red':'mb-warn',txt:i.status},
+    ]},
+  ac:{label:'Áreas Classificadas',icone:'⚡',tabela:'areas_classificadas',cor:{bg:'#2a2010',brd:'#6a5a10'},
+    statusOpts:['Ativa','Inativa','Em revisão'],
+    getStatus:i=>i.status,
+    getLabel:i=>i.nome,getId:i=>i.identificacao,
+    getMeta:i=>[i.zona_atex?'Zona '+i.zona_atex:'',i.grupo_gas||'',i.agente_inflamavel||''].filter(Boolean),
+    getDatas:i=>[{l:'Próx. revisão',v:fmtData(i.proxima_revisao),urgente:i.proxima_revisao&&diasAte(i.proxima_revisao)<30}],
+    getBadges:i=>[
+      {cls:'mb-warn',txt:i.zona_atex?'Zona '+i.zona_atex:'—'},
+      {cls:i.status==='Ativa'?'mb-ok':'mb-info',txt:i.status},
+    ]},
+};
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  try{
+    const [resEmp,resSets,resRiscos,...resDados]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco&order=nome_risco.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      ...Object.values(TABS).map(t=>fetch(`${SUPA_URL}/rest/v1/${t.tabela}?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}))
+    ]);
+    [empresa,setores,riscos]=await Promise.all([resEmp.json(),resSets.json(),resRiscos.json()]);
+    empresa=empresa[0];
+    const tabKeys=Object.keys(TABS);
+    const dadosArr=await Promise.all(resDados.map(r=>r.json()));
+    tabKeys.forEach((k,i)=>dados[k]=dadosArr[i]);
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`Inventários Técnicos — ${nome}`;
+    document.getElementById('header-nome').textContent=nome;
+    const selSet=document.getElementById('filtro-setor');
+    setores.forEach(s=>selSet.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+    renderStats();renderTab();
+  }catch(e){console.error(e);}
+}
+
+function renderStats(){
+  const row=document.getElementById('stats-row');
+  row.innerHTML=Object.entries(TABS).map(([k,t])=>`
+    <div class="stat-pill">
+      <span>${t.icone}</span>
+      <span style="font-size:11px;color:var(--text2);">${t.label.split(' ')[0]}</span>
+      <span class="stat-pill-val" style="color:var(--accent);">${dados[k].length}</span>
+    </div>`).join('');
+  const total=Object.values(dados).reduce((a,b)=>a+b.length,0);
+  document.getElementById('hero-sub').textContent=`${total} itens catalogados · ${setores.length} setores`;
+}
+
+function mudarTab(tab){
+  tabAtual=tab;
+  Object.keys(TABS).forEach(k=>document.getElementById(`tab-${k}`)?.classList.toggle('active',k===tab));
+  // Atualiza filtro status
+  const sel=document.getElementById('filtro-status');
+  sel.innerHTML='<option value="">Todos os status</option>'+TABS[tab].statusOpts.map(s=>`<option>${s}</option>`).join('');
+  document.getElementById('filtro-busca').value='';
+  document.getElementById('filtro-setor').value='';
+  renderTab();
+}
+
+function renderTab(){
+  const t=TABS[tabAtual];
+  const busca=document.getElementById('filtro-busca').value.toLowerCase();
+  const setor=document.getElementById('filtro-setor').value;
+  const status=document.getElementById('filtro-status').value;
+  const lista=dados[tabAtual].filter(i=>{
+    const label=t.getLabel(i).toLowerCase();
+    const id=(t.getId(i)||'').toLowerCase();
+    if(busca&&!label.includes(busca)&&!id.includes(busca))return false;
+    if(setor&&i.setor_id!=setor)return false;
+    if(status&&t.getStatus(i)!==status)return false;
+    return true;
+  });
+  const el=document.getElementById('conteudo-tab');
+  if(!lista.length){
+    el.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:12px;">${t.icone}</div><div>Nenhum item cadastrado. Clique em "+ Novo item" para começar.</div></div>`;
+    return;
+  }
+  el.innerHTML=lista.map(item=>{
+    const setor=setores.find(s=>s.id===item.setor_id);
+    const badges=t.getBadges(item);
+    const datas=t.getDatas(item);
+    return`<div class="inv-card">
+      <div class="inv-icon" style="background:${t.cor.bg};border:1px solid ${t.cor.brd};">${t.icone}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="inv-id">${escHtml(t.getId(item))}</div>
+        <div class="inv-nome">${escHtml(t.getLabel(item))}</div>
+        <div class="inv-meta">
+          ${badges.map(b=>`<span class="mini-badge ${b.cls}">${escHtml(b.txt)}</span>`).join('')}
+          ${setor?`<span>🗂️ ${escHtml(setor.nome_setor)}</span>`:''}
+          ${t.getMeta(item).map(m=>`<span>${escHtml(m)}</span>`).join('')}
+        </div>
+        <div class="inv-datas">
+          ${datas.map(d=>`<div class="inv-data">
+            <div class="inv-data-label">${d.l}</div>
+            <div class="inv-data-val" style="${d.urgente?'color:var(--warning);':''}">${d.v}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+        <button class="btn btn-sm btn-edit" onclick="editarItem('${tabAtual}',${item.id})">✏️ Editar</button>
+        <button class="btn btn-sm btn-danger" onclick="excluirItem('${tabAtual}',${item.id})" style="font-size:11px;">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CAMPOS POR TIPO ───────────────────────────────────
+const CAMPOS={
+  ec:[
+    {id:'identificacao',label:'Identificação *',tipo:'input',ph:'Ex: EC-01',full:false},
+    {id:'nome',label:'Nome / Descrição *',tipo:'input',ph:'Ex: Caixa d\'água subterrânea',full:false},
+    {id:'setor_id',label:'Setor',tipo:'setor',full:false},
+    {id:'classificacao',label:'Classificação',tipo:'select',opts:['Permissível','Não permissível'],full:false},
+    {id:'localizacao',label:'Localização',tipo:'input',ph:'Ex: Lateral do galpão 1',full:true},
+    {id:'dimensoes',label:'Dimensões',tipo:'input',ph:'Ex: 2m x 3m x 2,5m',full:false},
+    {id:'capacidade_pessoas',label:'Capacidade (pessoas)',tipo:'number',ph:'1',full:false},
+    {id:'agentes_atmosfericos',label:'Agentes atmosféricos',tipo:'textarea',ph:'Ex: Deficiência de O₂, H₂S...',full:true},
+    {id:'agentes_fisicos',label:'Agentes físicos',tipo:'textarea',ph:'Ex: Calor, ruído...',full:true},
+    {id:'meios_acesso',label:'Meios de acesso',tipo:'input',ph:'Ex: Escada vertical, alçapão',full:true},
+    {sep:'Inspeções'},
+    {id:'ultima_avaliacao',label:'Última avaliação',tipo:'date',full:false},
+    {id:'proxima_avaliacao',label:'Próxima avaliação',tipo:'date',full:false},
+    {id:'responsavel_avaliacao',label:'Responsável',tipo:'input',ph:'Nome + cargo',full:false},
+    {id:'status',label:'Status',tipo:'select',opts:['Ativo','Inativo','Em manutenção'],full:false},
+    {id:'observacoes',label:'Observações',tipo:'textarea',ph:'',full:true},
+  ],
+  pq:[
+    {id:'nome_produto',label:'Nome do produto *',tipo:'input',ph:'Ex: Ácido Sulfúrico',full:false},
+    {id:'nome_tecnico',label:'Nome técnico',tipo:'input',ph:'',full:false},
+    {id:'fabricante',label:'Fabricante',tipo:'input',ph:'',full:false},
+    {id:'numero_cas',label:'Nº CAS',tipo:'input',ph:'Ex: 7664-93-9',full:false},
+    {id:'numero_onu',label:'Nº ONU',tipo:'input',ph:'Ex: UN1830',full:false},
+    {id:'classe_risco',label:'Classe de risco',tipo:'select',opts:['Inflamável','Corrosivo','Tóxico','Oxidante','Explosivo','Radioativo','Infectante','Reativo','Perigoso para ambiente','Outro'],full:false},
+    {id:'estado_fisico',label:'Estado físico',tipo:'select',opts:['Líquido','Sólido','Gasoso','Pastoso'],full:false},
+    {id:'setor_id',label:'Setor de uso',tipo:'setor',full:false},
+    {id:'local_armazenamento',label:'Local de armazenamento',tipo:'input',ph:'',full:false},
+    {id:'quantidade_maxima_estoque',label:'Qtd. máxima estoque',tipo:'input',ph:'Ex: 200L',full:false},
+    {id:'limite_exposicao',label:'Limite de exposição (TLV)',tipo:'input',ph:'Ex: 0,02 ppm (TLV-TWA)',full:false},
+    {sep:'FISPQ e Saúde'},
+    {id:'fispq_disponivel',label:'FISPQ disponível?',tipo:'select',opts:['false|Não','true|Sim'],full:false},
+    {id:'data_vencimento_fispq',label:'Validade da FISPQ',tipo:'date',full:false},
+    {id:'gera_insalubridade',label:'Gera insalubridade?',tipo:'select',opts:['false|Não','true|Sim'],full:false},
+    {id:'risco_id',label:'Risco vinculado (PGR)',tipo:'risco',full:false},
+    {id:'epi_necessario',label:'EPIs necessários',tipo:'textarea',ph:'',full:true},
+    {id:'primeiros_socorros',label:'Primeiros socorros',tipo:'textarea',ph:'',full:true},
+    {id:'medidas_emergencia',label:'Medidas de emergência',tipo:'textarea',ph:'',full:true},
+    {id:'status',label:'Status',tipo:'select',opts:['Ativo','Inativo','Descontinuado'],full:false},
+    {id:'observacoes',label:'Observações',tipo:'textarea',ph:'',full:true},
+  ],
+  maq:[
+    {id:'identificacao',label:'Identificação *',tipo:'input',ph:'Ex: MAQ-01',full:false},
+    {id:'nome',label:'Nome da máquina *',tipo:'input',ph:'Ex: Prensa hidráulica',full:false},
+    {id:'setor_id',label:'Setor',tipo:'setor',full:false},
+    {id:'fabricante',label:'Fabricante',tipo:'input',ph:'',full:false},
+    {id:'modelo',label:'Modelo',tipo:'input',ph:'',full:false},
+    {id:'numero_serie',label:'Nº de série',tipo:'input',ph:'',full:false},
+    {id:'ano_fabricacao',label:'Ano de fabricação',tipo:'number',ph:'Ex: 2018',full:false},
+    {id:'localizacao',label:'Localização',tipo:'input',ph:'',full:false},
+    {id:'potencia',label:'Potência',tipo:'input',ph:'Ex: 15kW',full:false},
+    {id:'tensao',label:'Tensão',tipo:'input',ph:'Ex: 220V / 380V',full:false},
+    {sep:'Segurança NR-12'},
+    {id:'riscos_associados',label:'Riscos associados',tipo:'textarea',ph:'',full:true},
+    {id:'dispositivos_seguranca',label:'Dispositivos de segurança',tipo:'textarea',ph:'Ex: Proteção de ponto de operação, parada de emergência...',full:true},
+    {id:'procedimento_loto',label:'Procedimento LOTO',tipo:'textarea',ph:'Descreva o procedimento de bloqueio de energia...',full:true},
+    {id:'treinamento_exigido',label:'Treinamento exigido',tipo:'textarea',ph:'',full:true},
+    {sep:'Manutenção e Inspeção'},
+    {id:'ultima_manutencao',label:'Última manutenção',tipo:'date',full:false},
+    {id:'proxima_manutencao',label:'Próxima manutenção',tipo:'date',full:false},
+    {id:'ultima_inspecao_nr12',label:'Última inspeção NR-12',tipo:'date',full:false},
+    {id:'proxima_inspecao_nr12',label:'Próxima inspeção NR-12',tipo:'date',full:false},
+    {id:'status',label:'Status',tipo:'select',opts:['Operacional','Em manutenção','Desativado'],full:false},
+    {id:'observacoes',label:'Observações',tipo:'textarea',ph:'',full:true},
+  ],
+  anc:[
+    {id:'identificacao',label:'Identificação *',tipo:'input',ph:'Ex: ANC-01',full:false},
+    {id:'localizacao',label:'Localização *',tipo:'input',ph:'Ex: Telhado galpão 2, eixo B3',full:false},
+    {id:'setor_id',label:'Setor',tipo:'setor',full:false},
+    {id:'tipo',label:'Tipo',tipo:'select',opts:['Fixo estrutural','Linha de vida horizontal','Linha de vida vertical','Ponto provisório'],full:false},
+    {id:'capacidade_kg',label:'Capacidade (kg)',tipo:'number',ph:'Ex: 2250',full:false},
+    {id:'material',label:'Material',tipo:'input',ph:'Ex: Aço galvanizado',full:false},
+    {id:'altura_trabalho',label:'Altura de trabalho (m)',tipo:'number',ph:'Ex: 5.5',full:false},
+    {sep:'Aprovação e inspeção'},
+    {id:'aprovado_por',label:'Aprovado por',tipo:'input',ph:'Nome + CREA',full:false},
+    {id:'data_aprovacao',label:'Data da aprovação',tipo:'date',full:false},
+    {id:'ultima_inspecao',label:'Última inspeção',tipo:'date',full:false},
+    {id:'proxima_inspecao',label:'Próxima inspeção',tipo:'date',full:false},
+    {id:'status',label:'Status',tipo:'select',opts:['Aprovado','Reprovado','Vencido','Em análise'],full:false},
+    {id:'observacoes',label:'Observações',tipo:'textarea',ph:'',full:true},
+  ],
+  ac:[
+    {id:'identificacao',label:'Identificação *',tipo:'input',ph:'Ex: AC-01',full:false},
+    {id:'nome',label:'Nome da área *',tipo:'input',ph:'Ex: Casa de bombas',full:false},
+    {id:'setor_id',label:'Setor',tipo:'setor',full:false},
+    {id:'localizacao',label:'Localização',tipo:'input',ph:'',full:true},
+    {sep:'Classificação ATEX'},
+    {id:'zona_atex',label:'Zona ATEX',tipo:'select',opts:['0 — Presença contínua','1 — Presença provável','2 — Presença improvável','20 — Poeira contínua','21 — Poeira provável','22 — Poeira improvável'],full:false},
+    {id:'grupo_gas',label:'Grupo de gás',tipo:'select',opts:['IIA','IIB','IIC'],full:false},
+    {id:'classe_temperatura',label:'Classe de temperatura',tipo:'select',opts:['T1','T2','T3','T4','T5','T6'],full:false},
+    {id:'agente_inflamavel',label:'Agente inflamável',tipo:'input',ph:'Ex: GLP, acetileno...',full:true},
+    {sep:'Restrições e gestão'},
+    {id:'restricoes',label:'Restrições',tipo:'textarea',ph:'O que não pode ser feito nesta área...',full:true},
+    {id:'equipamentos_permitidos',label:'Equipamentos permitidos',tipo:'textarea',ph:'Equipamentos certificados ATEX permitidos...',full:true},
+    {id:'responsavel_classificacao',label:'Responsável pela classificação',tipo:'input',ph:'Nome + CREA',full:false},
+    {id:'data_classificacao',label:'Data da classificação',tipo:'date',full:false},
+    {id:'proxima_revisao',label:'Próxima revisão',tipo:'date',full:false},
+    {id:'status',label:'Status',tipo:'select',opts:['Ativa','Inativa','Em revisão'],full:false},
+    {id:'observacoes',label:'Observações',tipo:'textarea',ph:'',full:true},
+  ],
+};
+
+function gerarCampos(tab,item=null){
+  const setorOpts=setores.map(s=>`<option value="${s.id}" ${item?.setor_id==s.id?'selected':''}>${escHtml(s.nome_setor)}</option>`).join('');
+  const riscoOpts=riscos.map(r=>`<option value="${r.id}" ${item?.risco_id==r.id?'selected':''}>${escHtml(r.nome_risco)}</option>`).join('');
+  return CAMPOS[tab].map(c=>{
+    if(c.sep)return`<div class="section-sep">${c.sep}</div>`;
+    const val=item?.[c.id]??'';
+    const fullCls=c.full?'full':'';
+    if(c.tipo==='setor')return`<div class="modal-field ${fullCls}"><label>${c.label}</label><select id="f-${c.id}"><option value="">— Geral —</option>${setorOpts}</select></div>`;
+    if(c.tipo==='risco')return`<div class="modal-field ${fullCls}"><label>${c.label}</label><select id="f-${c.id}"><option value="">— Nenhum —</option>${riscoOpts}</select></div>`;
+    if(c.tipo==='select'){
+      const opts=c.opts.map(o=>{const[v,l]=o.includes('|')?o.split('|'):[o,o];return`<option value="${v}" ${String(val)===v?'selected':''}>${l}</option>`;}).join('');
+      return`<div class="modal-field ${fullCls}"><label>${c.label}</label><select id="f-${c.id}">${opts}</select></div>`;
+    }
+    if(c.tipo==='textarea')return`<div class="modal-field ${fullCls}"><label>${c.label}</label><textarea id="f-${c.id}" placeholder="${c.ph||''}">${escHtml(val)}</textarea></div>`;
+    if(c.tipo==='date')return`<div class="modal-field ${fullCls}"><label>${c.label}</label><input type="date" id="f-${c.id}" value="${val||''}"></div>`;
+    if(c.tipo==='number')return`<div class="modal-field ${fullCls}"><label>${c.label}</label><input type="number" id="f-${c.id}" value="${val||''}" placeholder="${c.ph||''}"></div>`;
+    return`<div class="modal-field ${fullCls}"><label>${c.label}</label><input type="text" id="f-${c.id}" value="${escHtml(val)}" placeholder="${c.ph||''}"></div>`;
+  }).join('');
+}
+
+function lerCampos(tab){
+  const obj={empresa_id:parseInt(empresaId),ativo:true};
+  CAMPOS[tab].forEach(c=>{
+    if(c.sep)return;
+    const el=document.getElementById(`f-${c.id}`);
+    if(!el)return;
+    const v=el.value.trim();
+    if(c.tipo==='number')obj[c.id]=v?parseFloat(v):null;
+    else if(c.id==='setor_id'||c.id==='risco_id')obj[c.id]=v?parseInt(v):null;
+    else if(c.tipo==='select'&&(v==='true'||v==='false'))obj[c.id]=v==='true';
+    else obj[c.id]=v||null;
+  });
+  return obj;
+}
+
+function abrirModalNovo(){
+  editando=null;
+  const t=TABS[tabAtual];
+  document.getElementById('modal-inv-titulo').textContent=`Novo — ${t.label}`;
+  document.getElementById('label-inv').textContent='Salvar';
+  document.getElementById('modal-inv-esq').innerHTML='';
+  document.getElementById('modal-campos').innerHTML=gerarCampos(tabAtual);
+  clearStatus('status-inv');
+  document.getElementById('modal-inv').classList.add('show');
+}
+
+function editarItem(tab,id){
+  const item=dados[tab].find(x=>x.id===id);
+  if(!item)return;
+  editando={tab,id};
+  const t=TABS[tab];
+  document.getElementById('modal-inv-titulo').textContent=`Editar — ${t.getLabel(item)}`;
+  document.getElementById('label-inv').textContent='Salvar alterações';
+  document.getElementById('modal-inv-esq').innerHTML=`<button class="btn btn-danger btn-sm" onclick="excluirItem('${tab}',${id})">Excluir</button>`;
+  document.getElementById('modal-campos').innerHTML=gerarCampos(tab,item);
+  clearStatus('status-inv');
+  document.getElementById('modal-inv').classList.add('show');
+}
+
+function fecharModal(){document.getElementById('modal-inv').classList.remove('show');editando=null;}
+
+async function salvarItem(){
+  const tab=editando?editando.tab:tabAtual;
+  const t=TABS[tab];
+  const payload=lerCampos(tab);
+  document.getElementById('btn-salvar-inv').disabled=true;
+  document.getElementById('spinner-inv').className='spinner show';
+  try{
+    if(editando){
+      const res=await fetch(`${SUPA_URL}/rest/v1/${t.tabela}?id=eq.${editando.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok){const e=await res.json();throw new Error(e.message);}
+      const d=await res.json();
+      const idx=dados[tab].findIndex(x=>x.id===editando.id);
+      if(idx>=0)dados[tab][idx]=d[0];
+    }else{
+      const res=await fetch(`${SUPA_URL}/rest/v1/${t.tabela}`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok){const e=await res.json();throw new Error(e.message);}
+      const d=await res.json();
+      dados[tab].unshift(d[0]);
+    }
+    fecharModal();renderStats();renderTab();
+  }catch(e){setStatus('status-inv','error',e.message);}
+  finally{document.getElementById('btn-salvar-inv').disabled=false;document.getElementById('spinner-inv').className='spinner';}
+}
+
+async function excluirItem(tab,id){
+  if(!confirm('Excluir este item?'))return;
+  const t=TABS[tab];
+  await fetch(`${SUPA_URL}/rest/v1/${t.tabela}?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});
+  dados[tab]=dados[tab].filter(x=>x.id!==id);
+  fecharModal();renderStats();renderTab();
+}
+
+document.getElementById('modal-inv').addEventListener('click',e=>{if(e.target.id==='modal-inv')fecharModal();});
+inicializar();
+</script>
+</body>
+</html>
