@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Medições Ambientais</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+.btn-ltcat{background:#2a1530;color:#a78bfa;border:1px solid #5a2580;}
+.btn-ltcat:hover{background:#3a2040;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:600;}
+/* Layout */
+.layout{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;}
+.painel-esq{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:sticky;top:80px;}
+.painel-titulo{padding:14px 16px;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.setor-item{padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;display:flex;align-items:center;gap:10px;}
+.setor-item:last-child{border-bottom:none;}
+.setor-item:hover{background:var(--surface2);}
+.setor-item.active{background:var(--surface2);border-left:3px solid #a78bfa;}
+.setor-item-nome{font-size:13px;font-weight:500;flex:1;}
+.setor-item-count{font-size:10px;font-family:var(--mono);padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.setor-item.active .setor-item-count{background:#1e1a40;color:#a78bfa;border-color:#3a2a80;}
+/* Painel direito */
+.painel-dir{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.painel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.painel-body{padding:20px;}
+/* Medição card */
+.med-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;transition:border-color .15s;}
+.med-card:hover{border-color:var(--border-focus);}
+.med-card-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.med-risco-nome{font-size:13px;font-weight:500;flex:1;}
+.med-card-body{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.med-field{background:var(--surface);border-radius:var(--radius);padding:8px 10px;}
+.med-field-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+.med-field-value{font-size:12px;color:var(--text);font-weight:500;}
+.med-conclusao{margin-top:10px;padding:10px;background:var(--surface);border-radius:var(--radius);font-size:12px;color:var(--text2);border-left:3px solid var(--border);}
+/* Resultado badges */
+.res-dentro{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.res-acima{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.res-nq{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+/* Status */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px;color:var(--text3);}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:680px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-field{margin-bottom:0;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+.modal-field textarea{resize:vertical;min-height:72px;}
+.mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;display:inline-block;}
+.mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+@media(max-width:768px){.layout{grid-template-columns:1fr;}.painel-esq{position:static;}.modal-grid{grid-template-columns:1fr;}.header-title{display:none;}.med-card-body{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Medições Ambientais</span></div>
+</div>
+
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para empresa</a>
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#2a1530;border:1px solid #5a2580;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📊</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Medições Ambientais</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <a id="btn-ltcat" href="#" class="btn btn-ltcat" target="_blank">📄 Gerar LTCAT</a>
+      <button class="btn btn-primary" onclick="abrirModalMedicao()">+ Nova medição</button>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <div class="layout">
+    <div class="painel-esq">
+      <div class="painel-titulo">
+        <span>Setores</span>
+        <span id="total-setores" style="font-size:11px;color:var(--text3);">—</span>
+      </div>
+      <div id="lista-setores-nav"></div>
+    </div>
+    <div class="painel-dir">
+      <div class="painel-header">
+        <div>
+          <div style="font-size:15px;font-weight:500;" id="painel-titulo">Selecione um setor</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;" id="painel-sub">Clique em um setor para ver as medições</div>
+        </div>
+        <div id="painel-actions"></div>
+      </div>
+      <div class="painel-body" id="painel-body">
+        <div class="empty">
+          <div style="font-size:32px;margin-bottom:12px;">📊</div>
+          Selecione um setor para ver as medições ambientais.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MEDIÇÃO -->
+<div class="modal-overlay" id="modal-medicao">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-med-titulo">Nova medição ambiental</span>
+      <button onclick="fecharModalMedicao()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field">
+        <label>Setor <span style="color:var(--accent);">*</span></label>
+        <select id="med-setor" onchange="carregarRiscosSetor()">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Agente de risco <span style="color:var(--accent);">*</span></label>
+        <select id="med-risco">
+          <option value="">— Selecione o setor primeiro —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Data da medição <span style="color:var(--accent);">*</span></label>
+        <input type="date" id="med-data">
+      </div>
+      <div class="modal-field">
+        <label>Valor medido</label>
+        <input type="number" id="med-valor" placeholder="Ex: 85.5" step="0.01">
+      </div>
+      <div class="modal-field">
+        <label>Unidade</label>
+        <select id="med-unidade">
+          <option value="">— Selecione —</option>
+          <option>dB(A) — Ruído</option>
+          <option>°C — Temperatura</option>
+          <option>IBUTG — Calor</option>
+          <option>ppm — Concentração</option>
+          <option>mg/m³ — Poeira</option>
+          <option>f/cm³ — Fibras</option>
+          <option>lux — Iluminação</option>
+          <option>m/s² — Vibração</option>
+          <option>mSv/ano — Radiação</option>
+          <option>Qualitativo</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Duração exposição (h/dia)</label>
+        <input type="number" id="med-duracao" placeholder="Ex: 8" step="0.5" min="0" max="24">
+      </div>
+      <div class="modal-field">
+        <label>Resultado</label>
+        <select id="med-resultado">
+          <option>Dentro do limite</option>
+          <option>Acima do limite</option>
+          <option>Não quantitativo</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Gera insalubridade?</label>
+        <select id="med-insalubridade" onchange="toggleInsalubridade()">
+          <option value="false">Não</option>
+          <option value="true">Sim</option>
+        </select>
+      </div>
+      <div class="modal-field" id="campo-pct-insal" style="display:none;">
+        <label>Percentual insalubridade</label>
+        <select id="med-pct-insal">
+          <option value="10">10% — Mínimo</option>
+          <option value="20">20% — Médio</option>
+          <option value="40">40% — Máximo</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Gera aposentadoria especial?</label>
+        <select id="med-apos">
+          <option value="false">Não</option>
+          <option value="true">Sim</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <label>Equipamento utilizado</label>
+        <input type="text" id="med-equipamento" placeholder="Ex: Dosímetro Quest NoisePro DLX">
+      </div>
+      <div class="modal-field">
+        <label>Responsável técnico</label>
+        <input type="text" id="med-responsavel" placeholder="Nome + registro">
+      </div>
+      <div class="modal-field">
+        <label>Nº ART</label>
+        <input type="text" id="med-art" placeholder="Número da ART">
+      </div>
+      <div class="modal-field full">
+        <label>Conclusão técnica</label>
+        <textarea id="med-conclusao" placeholder="Descreva a conclusão técnica da medição, metodologia utilizada e recomendações..."></textarea>
+      </div>
+      <div class="modal-field full">
+        <label>Observação</label>
+        <input type="text" id="med-obs" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="status-bar" id="status-med"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+      <div id="modal-med-esq"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModalMedicao()">Cancelar</button>
+        <button class="btn btn-save" id="btn-salvar-med" onclick="salvarMedicao()">
+          <span class="spinner" id="spinner-med"></span>
+          <span id="label-med">Salvar medição</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa={},setores=[],riscos=[],medicoes=[],setor_riscos_data=[];
+let setorAtivo=null;
+let medicaoEditando=null;
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]||''}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+function hoje(){return new Date().toISOString().split('T')[0];}
+
+const CAT_ESTILOS={
+  'Físico':{bg:'#2a2010',color:'#e0a855',border:'#4a3a10'},
+  'Químico':{bg:'#2a1010',color:'#e05555',border:'#4a2020'},
+  'Biológico':{bg:'#1e1a40',color:'#a78bfa',border:'#3a2a80'},
+  'Ergonômico':{bg:'#1a2540',color:'#7aabf7',border:'#2a4070'},
+  'Acidente':{bg:'#2a1515',color:'#ff9f43',border:'#5a3010'},
+  'Psicossocial':{bg:'#2a1530',color:'#f472b6',border:'#5a2550'},
+};
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  document.getElementById('btn-ltcat').href=`ltcat.html?empresa_id=${empresaId}`;
+  try{
+    const [resEmp,resSets,resMed,resRiscos]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/medicoes_ambientais?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=data_medicao.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,categoria_risco_id,limite_tolerancia,limite_tolerancia_esocial,metodologia_avaliacao,codigo_tabela24_esocial&order=nome_risco.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresa,setores,medicoes,riscos]=await Promise.all([resEmp.json(),resSets.json(),resMed.json(),resRiscos.json()]);
+    empresa=empresa[0];
+    // Carrega categorias
+    const resCats=await fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    window.categorias=await resCats.json();
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`Medições Ambientais — ${nome}`;
+    document.getElementById('header-nome').textContent=nome;
+    renderStats();
+    renderNavSetores();
+  }catch(e){console.error(e);}
+}
+
+function getCatNome(catId){return window.categorias?.find(x=>x.id===catId)?.nome||'—';}
+function getCatEstilo(catId){const n=getCatNome(catId);return CAT_ESTILOS[n]||{bg:'#1e2333',color:'#888',border:'#2a3044'};}
+
+function renderStats(){
+  const total=medicoes.length;
+  const acima=medicoes.filter(m=>m.resultado==='Acima do limite').length;
+  const insalubridade=medicoes.filter(m=>m.gera_insalubridade).length;
+  const aposEspecial=medicoes.filter(m=>m.gera_aposentadoria_especial).length;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total medições</div><div class="stat-value" style="color:var(--text);">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Acima do limite</div><div class="stat-value" style="color:var(--danger);">${acima}</div></div>
+    <div class="stat-card"><div class="stat-label">Geram insalubridade</div><div class="stat-value" style="color:var(--warning);">${insalubridade}</div></div>
+    <div class="stat-card"><div class="stat-label">Aposen. especial</div><div class="stat-value" style="color:#a78bfa;">${aposEspecial}</div></div>`;
+  document.getElementById('hero-sub').textContent=`${setores.length} setores · ${total} medições · ${acima} acima do limite · ${insalubridade} agentes insalubres`;
+}
+
+async function renderNavSetores(){
+  const nav=document.getElementById('lista-setores-nav');
+  document.getElementById('total-setores').textContent=`${setores.length} setores`;
+  const counts={};
+  medicoes.forEach(m=>{counts[m.setor_id]=(counts[m.setor_id]||0)+1;});
+  nav.innerHTML=setores.map(s=>`
+    <div class="setor-item ${setorAtivo?.id===s.id?'active':''}" onclick="selecionarSetor(${s.id})">
+      <div class="setor-item-nome">${escHtml(s.nome_setor)}</div>
+      <span class="setor-item-count">${counts[s.id]||0}</span>
+    </div>`).join('');
+}
+
+async function selecionarSetor(setorId){
+  setorAtivo=setores.find(s=>s.id===setorId);
+  document.querySelectorAll('.setor-item').forEach(el=>{
+    el.classList.toggle('active',el.onclick?.toString().includes(`(${setorId})`));
+  });
+  document.getElementById('painel-titulo').textContent=setorAtivo.nome_setor;
+  // Carrega setor_riscos para esse setor
+  const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${setorId}&ativo=eq.true&select=risco_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+  setor_riscos_data=await res.json();
+  const medicoesDosetor=medicoes.filter(m=>m.setor_id===setorId);
+  document.getElementById('painel-sub').textContent=`${medicoesDosetor.length} medição(ões) registrada(s)`;
+  document.getElementById('painel-actions').innerHTML=`<button class="btn btn-edit btn-sm" onclick="abrirModalMedicao(${setorId})">+ Nova medição</button>`;
+  renderMedicoes(setorId);
+}
+
+function renderMedicoes(setorId){
+  const body=document.getElementById('painel-body');
+  const medsSetor=medicoes.filter(m=>m.setor_id===setorId);
+  if(!medsSetor.length){
+    body.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:12px;">📊</div><div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;">Nenhuma medição registrada</div><div>Clique em "+ Nova medição" para registrar.</div></div>`;
+    return;
+  }
+  body.innerHTML=medsSetor.map(m=>{
+    const risco=riscos.find(r=>r.id===m.risco_id);
+    const estilo=getCatEstilo(risco?.categoria_risco_id);
+    const catNome=getCatNome(risco?.categoria_risco_id);
+    const resCls=m.resultado==='Acima do limite'?'res-acima':m.resultado==='Dentro do limite'?'res-dentro':'res-nq';
+    return`<div class="med-card">
+      <div class="med-card-header">
+        <span class="mini-badge" style="background:${estilo.bg};color:${estilo.color};border:1px solid ${estilo.border};">${catNome}</span>
+        <div class="med-risco-nome">${escHtml(risco?.nome_risco||'—')}</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+          <span class="mini-badge ${resCls}">${m.resultado||'—'}</span>
+          ${m.gera_insalubridade?`<span class="mini-badge mb-amber">Insal. ${m.percentual_insalubridade||''}%</span>`:''}
+          ${m.gera_aposentadoria_especial?`<span class="mini-badge" style="background:#1e1a40;color:#a78bfa;border:1px solid #3a2a80;">Apos. Esp.</span>`:''}
+          <button class="btn btn-sm btn-edit" onclick="editarMedicao(${m.id})" style="padding:3px 8px;font-size:11px;">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="excluirMedicao(${m.id})" style="padding:3px 8px;font-size:11px;">✕</button>
+        </div>
+      </div>
+      <div class="med-card-body">
+        <div class="med-field"><div class="med-field-label">Data</div><div class="med-field-value">${fmtData(m.data_medicao)}</div></div>
+        <div class="med-field"><div class="med-field-label">Valor medido</div><div class="med-field-value">${m.valor_medido?m.valor_medido+' '+(m.unidade||''):'—'}</div></div>
+        <div class="med-field"><div class="med-field-label">Exposição</div><div class="med-field-value">${m.duracao_exposicao?m.duracao_exposicao+'h/dia':'—'}</div></div>
+        <div class="med-field"><div class="med-field-label">Equipamento</div><div class="med-field-value" style="font-size:11px;">${escHtml(m.equipamento_utilizado||'—')}</div></div>
+        <div class="med-field"><div class="med-field-label">Responsável</div><div class="med-field-value" style="font-size:11px;">${escHtml(m.responsavel_tecnico||'—')}</div></div>
+        <div class="med-field"><div class="med-field-label">ART</div><div class="med-field-value" style="font-size:11px;">${escHtml(m.numero_art||'—')}</div></div>
+      </div>
+      ${m.conclusao_tecnica?`<div class="med-conclusao">💬 ${escHtml(m.conclusao_tecnica)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL MEDIÇÃO ─────────────────────────────────────
+function toggleInsalubridade(){
+  const val=document.getElementById('med-insalubridade').value==='true';
+  document.getElementById('campo-pct-insal').style.display=val?'block':'none';
+}
+
+async function carregarRiscosSetor(){
+  const setorId=parseInt(document.getElementById('med-setor').value);
+  const sel=document.getElementById('med-risco');
+  sel.innerHTML='<option value="">↻ Carregando...</option>';
+  if(!setorId){sel.innerHTML='<option value="">— Selecione o setor primeiro —</option>';return;}
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${setorId}&ativo=eq.true&select=risco_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const data=await res.json();
+    const riscosSetor=data.map(x=>riscos.find(r=>r.id===x.risco_id)).filter(Boolean);
+    if(!riscosSetor.length){sel.innerHTML='<option value="">Nenhum risco cadastrado neste setor</option>';return;}
+    sel.innerHTML='<option value="">— Selecione o agente —</option>'+riscosSetor.map(r=>`<option value="${r.id}">${escHtml(r.nome_risco)}</option>`).join('');
+  }catch(e){sel.innerHTML='<option value="">Erro ao carregar riscos</option>';}
+}
+
+function abrirModalMedicao(setorId=null){
+  medicaoEditando=null;
+  document.getElementById('modal-med-titulo').textContent='Nova medição ambiental';
+  document.getElementById('label-med').textContent='Salvar medição';
+  document.getElementById('modal-med-esq').innerHTML='';
+  // Popula setores
+  const sel=document.getElementById('med-setor');
+  sel.innerHTML='<option value="">— Selecione —</option>'+setores.map(s=>`<option value="${s.id}" ${setorId==s.id?'selected':''}>${escHtml(s.nome_setor)}</option>`).join('');
+  document.getElementById('med-risco').innerHTML='<option value="">— Selecione o setor primeiro —</option>';
+  document.getElementById('med-data').value=hoje();
+  document.getElementById('med-valor').value='';
+  document.getElementById('med-unidade').value='';
+  document.getElementById('med-duracao').value='';
+  document.getElementById('med-resultado').value='Não quantitativo';
+  document.getElementById('med-insalubridade').value='false';
+  document.getElementById('campo-pct-insal').style.display='none';
+  document.getElementById('med-apos').value='false';
+  document.getElementById('med-equipamento').value='';
+  document.getElementById('med-responsavel').value='';
+  document.getElementById('med-art').value='';
+  document.getElementById('med-conclusao').value='';
+  document.getElementById('med-obs').value='';
+  clearStatus('status-med');
+  if(setorId)carregarRiscosSetor();
+  document.getElementById('modal-medicao').classList.add('show');
+}
+
+async function editarMedicao(id){
+  const m=medicoes.find(x=>x.id===id);
+  if(!m)return;
+  medicaoEditando=m;
+  document.getElementById('modal-med-titulo').textContent='Editar medição';
+  document.getElementById('label-med').textContent='Salvar alterações';
+  document.getElementById('modal-med-esq').innerHTML=`<button class="btn btn-danger btn-sm" onclick="excluirMedicao(${id})">Excluir</button>`;
+  const sel=document.getElementById('med-setor');
+  sel.innerHTML='<option value="">— Selecione —</option>'+setores.map(s=>`<option value="${s.id}" ${m.setor_id==s.id?'selected':''}>${escHtml(s.nome_setor)}</option>`).join('');
+  await carregarRiscosSetor();
+  document.getElementById('med-risco').value=m.risco_id;
+  document.getElementById('med-data').value=m.data_medicao||'';
+  document.getElementById('med-valor').value=m.valor_medido||'';
+  document.getElementById('med-unidade').value=m.unidade||'';
+  document.getElementById('med-duracao').value=m.duracao_exposicao||'';
+  document.getElementById('med-resultado').value=m.resultado||'Não quantitativo';
+  document.getElementById('med-insalubridade').value=m.gera_insalubridade?'true':'false';
+  document.getElementById('campo-pct-insal').style.display=m.gera_insalubridade?'block':'none';
+  document.getElementById('med-pct-insal').value=m.percentual_insalubridade||'10';
+  document.getElementById('med-apos').value=m.gera_aposentadoria_especial?'true':'false';
+  document.getElementById('med-equipamento').value=m.equipamento_utilizado||'';
+  document.getElementById('med-responsavel').value=m.responsavel_tecnico||'';
+  document.getElementById('med-art').value=m.numero_art||'';
+  document.getElementById('med-conclusao').value=m.conclusao_tecnica||'';
+  document.getElementById('med-obs').value=m.observacao||'';
+  clearStatus('status-med');
+  document.getElementById('modal-medicao').classList.add('show');
+}
+
+function fecharModalMedicao(){document.getElementById('modal-medicao').classList.remove('show');medicaoEditando=null;}
+
+async function salvarMedicao(){
+  const setorId=parseInt(document.getElementById('med-setor').value);
+  const riscoId=parseInt(document.getElementById('med-risco').value);
+  const data=document.getElementById('med-data').value;
+  if(!setorId){alert('Selecione o setor.');return;}
+  if(!riscoId){alert('Selecione o agente de risco.');return;}
+  if(!data){alert('Informe a data da medição.');return;}
+  document.getElementById('btn-salvar-med').disabled=true;
+  document.getElementById('spinner-med').className='spinner show';
+  document.getElementById('label-med').textContent='Salvando...';
+  const insal=document.getElementById('med-insalubridade').value==='true';
+  const payload={
+    empresa_id:parseInt(empresaId),setor_id:setorId,risco_id:riscoId,
+    data_medicao:data,
+    valor_medido:parseFloat(document.getElementById('med-valor').value)||null,
+    unidade:document.getElementById('med-unidade').value||null,
+    duracao_exposicao:parseFloat(document.getElementById('med-duracao').value)||null,
+    resultado:document.getElementById('med-resultado').value,
+    gera_insalubridade:insal,
+    percentual_insalubridade:insal?parseFloat(document.getElementById('med-pct-insal').value)||null:null,
+    gera_aposentadoria_especial:document.getElementById('med-apos').value==='true',
+    equipamento_utilizado:document.getElementById('med-equipamento').value.trim()||null,
+    responsavel_tecnico:document.getElementById('med-responsavel').value.trim()||null,
+    numero_art:document.getElementById('med-art').value.trim()||null,
+    conclusao_tecnica:document.getElementById('med-conclusao').value.trim()||null,
+    observacao:document.getElementById('med-obs').value.trim()||null,
+    ativo:true
+  };
+  try{
+    let res;
+    if(medicaoEditando){
+      res=await fetch(`${SUPA_URL}/rest/v1/medicoes_ambientais?id=eq.${medicaoEditando.id}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify(payload)
+      });
+      if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
+      const d=await res.json();
+      const idx=medicoes.findIndex(x=>x.id===medicaoEditando.id);
+      if(idx>=0)medicoes[idx]=d[0];
+    }else{
+      res=await fetch(`${SUPA_URL}/rest/v1/medicoes_ambientais`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify(payload)
+      });
+      if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
+      const d=await res.json();
+      medicoes.unshift(d[0]);
+    }
+    fecharModalMedicao();
+    renderStats();
+    renderNavSetores();
+    if(setorAtivo?.id===setorId)renderMedicoes(setorId);
+    else selecionarSetor(setorId);
+  }catch(e){
+    setStatus('status-med','error',e.message);
+  }finally{
+    document.getElementById('btn-salvar-med').disabled=false;
+    document.getElementById('spinner-med').className='spinner';
+    document.getElementById('label-med').textContent=medicaoEditando?'Salvar alterações':'Salvar medição';
+  }
+}
+
+async function excluirMedicao(id){
+  if(!confirm('Excluir esta medição?'))return;
+  await fetch(`${SUPA_URL}/rest/v1/medicoes_ambientais?id=eq.${id}`,{
+    method:'PATCH',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+    body:JSON.stringify({ativo:false})
+  });
+  medicoes=medicoes.filter(m=>m.id!==id);
+  fecharModalMedicao();
+  renderStats();
+  renderNavSetores();
+  if(setorAtivo)renderMedicoes(setorAtivo.id);
+}
+
+document.getElementById('modal-medicao').addEventListener('click',e=>{
+  if(e.target.id==='modal-medicao')fecharModalMedicao();
+});
+
+inicializar();
+</script>
+</body>
+</html>
