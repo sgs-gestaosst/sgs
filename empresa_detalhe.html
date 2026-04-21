@@ -186,11 +186,19 @@
         <div class="hero-badges" id="hero-badges"></div>
       </div>
       <div class="hero-actions" id="hero-actions">
-        <a id="btn-riscos" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">⚠️ Riscos</a>
-        <a id="btn-exames" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">🩺 Exames</a>
-        <a id="btn-treinamentos" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">🎓 Treinamentos</a>
-        <a id="btn-checklists" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">🔍 Checklists</a>
-        <a id="btn-acoes" href="#" class="btn btn-edit" style="display:none;text-decoration:none;">⚡ Ações</a>
+        <!-- Dropdown módulos -->
+        <div style="position:relative;" id="menu-modulos">
+          <button onclick="toggleModulos()" class="btn btn-edit" id="btn-modulos" style="display:none;">
+            🧭 Módulos ▾
+          </button>
+          <div id="dropdown-modulos" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:200px;z-index:999;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.6);">
+            <a id="btn-riscos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">⚠️ Riscos</a>
+            <a id="btn-exames" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🩺 Exames</a>
+            <a id="btn-treinamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🎓 Treinamentos</a>
+            <a id="btn-checklists" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🔍 Checklists</a>
+            <a id="btn-acoes" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">⚡ Ações</a>
+          </div>
+        </div>
         <button class="btn btn-danger" onclick="abrirModal()">Excluir</button>
         <button class="btn btn-edit" onclick="modoEditar()">Editar</button>
       </div>
@@ -696,6 +704,16 @@ async function salvarEdicao(){
   }
 }
 
+function toggleModulos(){
+  const d=document.getElementById('dropdown-modulos');
+  d.style.display=d.style.display==='none'?'block':'none';
+}
+document.addEventListener('click',function(e){
+  if(!document.getElementById('menu-modulos')?.contains(e.target)){
+    document.getElementById('dropdown-modulos').style.display='none';
+  }
+});
+
 async function carregarEmpresa(){
   try{
     const [resEmp,resCnaes]=await Promise.all([
@@ -709,15 +727,17 @@ async function carregarEmpresa(){
     renderHero();renderCampos();renderCNAEs();
     // Ativa botão de riscos
     const btnRiscos=document.getElementById('btn-riscos');
-    if(btnRiscos){btnRiscos.href=`riscos.html?empresa_id=${empresaId}`;btnRiscos.style.display='inline-flex';}
+    if(btnRiscos){btnRiscos.href=`riscos.html?empresa_id=${empresaId}`;btnRiscos.style.display='flex';}
     const btnExames=document.getElementById('btn-exames');
-    if(btnExames){btnExames.href=`exames.html?empresa_id=${empresaId}`;btnExames.style.display='inline-flex';}
+    if(btnExames){btnExames.href=`exames.html?empresa_id=${empresaId}`;btnExames.style.display='flex';}
     const btnTreinamentos=document.getElementById('btn-treinamentos');
-    if(btnTreinamentos){btnTreinamentos.href=`treinamentos.html?empresa_id=${empresaId}`;btnTreinamentos.style.display='inline-flex';}
+    if(btnTreinamentos){btnTreinamentos.href=`treinamentos.html?empresa_id=${empresaId}`;btnTreinamentos.style.display='flex';}
     const btnChecklists=document.getElementById('btn-checklists');
-    if(btnChecklists){btnChecklists.href=`checklists.html?empresa_id=${empresaId}`;btnChecklists.style.display='inline-flex';}
+    if(btnChecklists){btnChecklists.href=`checklists.html?empresa_id=${empresaId}`;btnChecklists.style.display='flex';}
     const btnAcoes=document.getElementById('btn-acoes');
-    if(btnAcoes){btnAcoes.href=`acoes.html?empresa_id=${empresaId}`;btnAcoes.style.display='inline-flex';}
+    if(btnAcoes){btnAcoes.href=`acoes.html?empresa_id=${empresaId}`;btnAcoes.style.display='flex';}
+    const btnModulos=document.getElementById('btn-modulos');
+    if(btnModulos)btnModulos.style.display='inline-flex';
   }catch(e){console.error(e);}
 }
 
