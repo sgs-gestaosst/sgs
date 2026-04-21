@@ -198,6 +198,7 @@
             <a id="btn-epis" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🥽 EPIs</a>
             <a id="btn-medicoes" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">📊 Medições</a>
             <a id="btn-equipamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🧯 Equipamentos</a>
+            <a id="btn-pt" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">📋 Permissões de Trabalho</a>
             <a id="btn-checklists" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🔍 Checklists</a>
             <a id="btn-acoes" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">⚡ Ações</a>
           </div>
@@ -741,6 +742,8 @@ async function carregarEmpresa(){
     if(btnMedicoes){btnMedicoes.href=`medicoes.html?empresa_id=${empresaId}`;btnMedicoes.style.display='flex';}
     const btnEquipamentos=document.getElementById('btn-equipamentos');
     if(btnEquipamentos){btnEquipamentos.href=`equipamentos_seg.html?empresa_id=${empresaId}`;btnEquipamentos.style.display='flex';}
+    const btnPT=document.getElementById('btn-pt');
+    if(btnPT){btnPT.href=`permissoes_trabalho.html?empresa_id=${empresaId}`;btnPT.style.display='flex';}
     const btnChecklists=document.getElementById('btn-checklists');
     if(btnChecklists){btnChecklists.href=`checklists.html?empresa_id=${empresaId}`;btnChecklists.style.display='flex';}
     const btnAcoes=document.getElementById('btn-acoes');
