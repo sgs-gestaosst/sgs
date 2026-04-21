@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Equipamentos de Segurança</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
+.btn-danger:hover{background:#2a1515;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-warn{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.btn-warn:hover{background:#3a3010;}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.stat-value{font-size:20px;font-weight:600;}
+/* Tabs */
+.tabs{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tab{padding:12px 20px;font-size:13px;cursor:pointer;border-right:1px solid var(--border);font-weight:500;color:var(--text2);transition:background .15s;flex:1;text-align:center;}
+.tab:last-child{border-right:none;}
+.tab:hover{background:var(--surface2);}
+.tab.active{background:var(--surface2);color:var(--text);}
+/* Filtros */
+.filtros{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.filtro-select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.filtro-busca{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;}
+.filtro-busca:focus,.filtro-select:focus{border-color:var(--border-focus);}
+/* Cards equipamento */
+.equip-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start;transition:border-color .15s;}
+.equip-card:hover{border-color:var(--border-focus);}
+.equip-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.equip-info{flex:1;min-width:0;}
+.equip-id{font-size:11px;font-family:var(--mono);color:var(--accent);margin-bottom:3px;}
+.equip-nome{font-size:13px;font-weight:500;margin-bottom:4px;}
+.equip-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--text2);}
+.equip-datas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
+.equip-data-item{background:var(--bg);border-radius:var(--radius);padding:7px 10px;}
+.equip-data-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+.equip-data-value{font-size:11px;font-weight:500;}
+.equip-actions{display:flex;gap:6px;flex-shrink:0;flex-direction:column;}
+/* Badges */
+.mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;display:inline-block;}
+.mb-ok{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.mb-venc{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.mb-warn{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.mb-def{background:#2a1515;color:#ff9f43;border:1px solid #5a3010;}
+.mb-manut{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+.mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+/* Status bar */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px;color:var(--text3);}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:680px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-field{margin-bottom:0;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+/* Histórico */
+.hist-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.hist-item:last-child{border-bottom:none;}
+.hist-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.hist-info{flex:1;}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(3,1fr);}.modal-grid{grid-template-columns:1fr;}.header-title{display:none;}.equip-datas{grid-template-columns:1fr 1fr;}.equip-actions{flex-direction:row;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Equipamentos de Segurança</span></div>
+</div>
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para empresa</a>
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#2a1010;border:1px solid #8b2222;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🧯</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Equipamentos de Segurança</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-warn" onclick="gerarAcoesVencimento()">⚡ Gerar alertas</button>
+      <button class="btn btn-primary" onclick="abrirModalEquipamento()">+ Novo equipamento</button>
+    </div>
+  </div>
+  <div class="stats-grid" id="stats-grid"></div>
+  <div class="tabs">
+    <div class="tab active" id="tab-todos" onclick="mudarTab('todos')">🧯 Todos</div>
+    <div class="tab" id="tab-vencidos" onclick="mudarTab('vencidos')">⚠️ Vencidos</div>
+    <div class="tab" id="tab-avencer" onclick="mudarTab('avencer')">⏰ A vencer (30d)</div>
+    <div class="tab" id="tab-categoria" onclick="mudarTab('categoria')">📂 Por categoria</div>
+  </div>
+  <div class="filtros">
+    <input type="text" class="filtro-busca" id="filtro-busca" placeholder="🔍 Buscar ID ou nome..." oninput="renderTab()">
+    <select class="filtro-select" id="filtro-categoria" onchange="renderTab()">
+      <option value="">Todas as categorias</option>
+    </select>
+    <select class="filtro-select" id="filtro-setor" onchange="renderTab()">
+      <option value="">Todos os setores</option>
+    </select>
+    <select class="filtro-select" id="filtro-status" onchange="renderTab()">
+      <option value="">Todos os status</option>
+      <option>Ok</option><option>Vencido</option><option>Defeituoso</option><option>Em manutenção</option>
+    </select>
+  </div>
+  <div id="conteudo-tab"></div>
+</div>
+
+<!-- MODAL EQUIPAMENTO -->
+<div class="modal-overlay" id="modal-equip">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-equip-titulo">Novo equipamento</span>
+      <button onclick="fecharModalEquipamento()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Tipo de equipamento <span style="color:var(--accent);">*</span></label>
+        <select id="eq-catalogo" onchange="preencherCatalogo()">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Identificação <span style="color:var(--accent);">*</span></label>
+        <input type="text" id="eq-id" placeholder="Ex: EXT-01">
+      </div>
+      <div class="modal-field">
+        <label>Setor</label>
+        <select id="eq-setor">
+          <option value="">— Geral —</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <label>Localização</label>
+        <input type="text" id="eq-local" placeholder="Ex: Corredor principal, próximo ao RH">
+      </div>
+      <div class="modal-field">
+        <label>Capacidade / Especificação</label>
+        <input type="text" id="eq-cap" placeholder="Ex: 4kg, 10L">
+      </div>
+      <div class="modal-field">
+        <label>Agente extintor</label>
+        <select id="eq-agente">
+          <option value="">— N/A —</option>
+          <option>PQS — Pó Químico Seco</option>
+          <option>CO2 — Gás Carbônico</option>
+          <option>AP — Água Pressurizada</option>
+          <option>Espuma Mecânica</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Data instalação</label>
+        <input type="date" id="eq-instalacao">
+      </div>
+      <div class="modal-field">
+        <label>Status</label>
+        <select id="eq-status">
+          <option>Ok</option><option>Vencido</option><option>Defeituoso</option><option>Em manutenção</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Última inspeção</label>
+        <input type="date" id="eq-ult-insp" onchange="calcProximaInsp()">
+      </div>
+      <div class="modal-field">
+        <label>Próxima inspeção</label>
+        <input type="date" id="eq-prox-insp">
+      </div>
+      <div class="modal-field">
+        <label>Última recarga</label>
+        <input type="date" id="eq-ult-rec" onchange="calcProximaRec()">
+      </div>
+      <div class="modal-field">
+        <label>Próxima recarga</label>
+        <input type="date" id="eq-prox-rec">
+      </div>
+      <div class="modal-field full">
+        <label>Validade</label>
+        <input type="date" id="eq-validade">
+      </div>
+      <div class="modal-field full">
+        <label>Observação</label>
+        <input type="text" id="eq-obs" placeholder="Opcional">
+      </div>
+    </div>
+    <div class="status-bar" id="status-equip"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+      <div id="equip-modal-esq"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModalEquipamento()">Cancelar</button>
+        <button class="btn btn-save" id="btn-salvar-equip" onclick="salvarEquipamento()">
+          <span class="spinner" id="spinner-equip"></span>
+          <span id="label-equip">Salvar equipamento</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MANUTENÇÃO/HISTÓRICO -->
+<div class="modal-overlay" id="modal-manut">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-titulo">
+      <span id="modal-manut-titulo">Manutenção / Histórico</span>
+      <button onclick="fecharModalManut()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <!-- Formulário novo serviço -->
+    <div style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;">Registrar novo serviço</div>
+      <div class="modal-grid">
+        <div class="modal-field">
+          <label>Tipo <span style="color:var(--accent);">*</span></label>
+          <select id="manut-tipo">
+            <option>Inspeção</option><option>Recarga</option><option>Manutenção</option><option>Substituição</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Data <span style="color:var(--accent);">*</span></label>
+          <input type="date" id="manut-data">
+        </div>
+        <div class="modal-field">
+          <label>Responsável</label>
+          <input type="text" id="manut-resp" placeholder="Nome do técnico">
+        </div>
+        <div class="modal-field">
+          <label>Empresa responsável</label>
+          <input type="text" id="manut-empresa" placeholder="Nome da empresa">
+        </div>
+        <div class="modal-field">
+          <label>Resultado</label>
+          <select id="manut-resultado">
+            <option>Aprovado</option><option>Reprovado</option><option>Substituído</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Próxima data</label>
+          <input type="date" id="manut-proxima">
+        </div>
+        <div class="modal-field full">
+          <label>Observação</label>
+          <input type="text" id="manut-obs" placeholder="Opcional">
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+        <button class="btn btn-save btn-sm" onclick="salvarManutencao()">
+          <span class="spinner" id="spinner-manut"></span>
+          Registrar serviço
+        </button>
+      </div>
+    </div>
+    <!-- Histórico -->
+    <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;">Histórico</div>
+    <div id="lista-historico" style="max-height:300px;overflow-y:auto;"></div>
+    <div class="status-bar" id="status-manut"></div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa={},setores=[],catalogo=[],equipamentos=[];
+let tabAtual='todos';
+let equipEditando=null,equipManutAtivo=null;
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]||''}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+function hoje(){return new Date().toISOString().split('T')[0];}
+function diasAte(d){if(!d)return null;return Math.ceil((new Date(d+'T00:00:00')-new Date())/(1000*60*60*24));}
+
+const CAT_ICONES={Extintor:'🧯',Sprinkler:'💧',Alarme:'🔔',Hidrante:'🚒','Primeiros Socorros':'🩺',Iluminação:'💡',Sinalização:'🪧',Estrutural:'🚪'};
+const CAT_CORES={Extintor:{bg:'#2a1010',brd:'#8b2222'},Sprinkler:{bg:'#1a2540',brd:'#2a4070'},Alarme:{bg:'#2a2010',brd:'#4a3a10'},Hidrante:{bg:'#1a2030',brd:'#2a3060'},'Primeiros Socorros':{bg:'#0e2820',brd:'#1a4a38'},Iluminação:{bg:'#2a2010',brd:'#5a4a10'},Sinalização:{bg:'#1e1a40',brd:'#3a2a80'},Estrutural:{bg:'#1e2333',brd:'#2a3044'}};
+
+function getStatusVenc(equip){
+  const diasInsp=diasAte(equip.data_proxima_inspecao);
+  const diasRec=diasAte(equip.data_proxima_recarga);
+  const diasVal=diasAte(equip.data_validade);
+  const minDias=[diasInsp,diasRec,diasVal].filter(d=>d!==null).reduce((a,b)=>Math.min(a,b),Infinity);
+  if(equip.status==='Defeituoso')return{cls:'mb-def',label:'Defeituoso',urgente:true};
+  if(equip.status==='Em manutenção')return{cls:'mb-manut',label:'Em manutenção',urgente:false};
+  if(minDias<0||equip.status==='Vencido')return{cls:'mb-venc',label:'Vencido',urgente:true};
+  if(minDias<=30)return{cls:'mb-warn',label:`Vence em ${minDias}d`,urgente:false};
+  return{cls:'mb-ok',label:'Ok',urgente:false};
+}
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  try{
+    const [resEmp,resSets,resCat,resEq]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/catalogo_equipamentos_seg?ativo=eq.true&select=*&order=categoria.asc,nome.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/equipamentos_seg?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=identificacao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresa,setores,catalogo,equipamentos]=await Promise.all([resEmp.json(),resSets.json(),resCat.json(),resEq.json()]);
+    empresa=empresa[0];
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`Equipamentos de Segurança — ${nome}`;
+    document.getElementById('header-nome').textContent=nome;
+    // Popula filtros
+    const cats=[...new Set(catalogo.map(c=>c.categoria).filter(Boolean))];
+    const selCat=document.getElementById('filtro-categoria');
+    cats.forEach(c=>selCat.innerHTML+=`<option value="${c}">${escHtml(c)}</option>`);
+    const selSet=document.getElementById('filtro-setor');
+    setores.forEach(s=>selSet.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+    renderStats();renderTab();
+  }catch(e){console.error(e);}
+}
+
+function renderStats(){
+  const total=equipamentos.length;
+  const ok=equipamentos.filter(e=>getStatusVenc(e).label==='Ok').length;
+  const vencidos=equipamentos.filter(e=>getStatusVenc(e).cls==='mb-venc').length;
+  const avencer=equipamentos.filter(e=>getStatusVenc(e).cls==='mb-warn').length;
+  const defeituosos=equipamentos.filter(e=>e.status==='Defeituoso').length;
+  document.getElementById('stats-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" style="color:var(--text);">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Ok</div><div class="stat-value" style="color:var(--success);">${ok}</div></div>
+    <div class="stat-card"><div class="stat-label">Vencidos</div><div class="stat-value" style="color:var(--danger);">${vencidos}</div></div>
+    <div class="stat-card"><div class="stat-label">A vencer (30d)</div><div class="stat-value" style="color:var(--warning);">${avencer}</div></div>
+    <div class="stat-card"><div class="stat-label">Defeituosos</div><div class="stat-value" style="color:#ff9f43;">${defeituosos}</div></div>`;
+  document.getElementById('hero-sub').textContent=`${total} equipamentos · ${vencidos} vencidos · ${avencer} a vencer · ${defeituosos} defeituosos`;
+}
+
+function mudarTab(tab){
+  tabAtual=tab;
+  ['todos','vencidos','avencer','categoria'].forEach(t=>document.getElementById(`tab-${t}`)?.classList.toggle('active',t===tab));
+  renderTab();
+}
+
+function getFiltros(){
+  return{
+    busca:document.getElementById('filtro-busca').value.toLowerCase(),
+    categoria:document.getElementById('filtro-categoria').value,
+    setor:document.getElementById('filtro-setor').value,
+    status:document.getElementById('filtro-status').value,
+  };
+}
+
+function filtrarEquip(){
+  const {busca,categoria,setor,status}=getFiltros();
+  return equipamentos.filter(e=>{
+    const cat=catalogo.find(c=>c.id===e.catalogo_id);
+    if(busca&&!e.identificacao.toLowerCase().includes(busca)&&!(cat?.nome||'').toLowerCase().includes(busca))return false;
+    if(categoria&&cat?.categoria!==categoria)return false;
+    if(setor&&e.setor_id!=setor)return false;
+    if(status&&e.status!==status)return false;
+    return true;
+  });
+}
+
+function renderTab(){
+  let lista=filtrarEquip();
+  if(tabAtual==='vencidos')lista=lista.filter(e=>getStatusVenc(e).cls==='mb-venc');
+  else if(tabAtual==='avencer')lista=lista.filter(e=>getStatusVenc(e).cls==='mb-warn');
+  const el=document.getElementById('conteudo-tab');
+  if(!lista.length){el.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:12px;">🧯</div>${tabAtual==='todos'?'Nenhum equipamento cadastrado. Clique em "+ Novo equipamento" para começar.':'Nenhum equipamento nesta categoria.'}</div>`;return;}
+  if(tabAtual==='categoria'){
+    const grupos={};
+    lista.forEach(e=>{const cat=catalogo.find(c=>c.id===e.catalogo_id);const g=cat?.categoria||'Outros';if(!grupos[g])grupos[g]=[];grupos[g].push(e);});
+    el.innerHTML=Object.entries(grupos).map(([cat,items])=>`
+      <div style="margin-bottom:20px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+          <span>${CAT_ICONES[cat]||'📦'}</span><span>${cat}</span><span style="font-size:10px;color:var(--text3);">(${items.length})</span>
+          <div style="flex:1;height:1px;background:var(--border);"></div>
+        </div>
+        ${items.map(e=>renderEquipCard(e)).join('')}
+      </div>`).join('');
+  }else{
+    el.innerHTML=lista.map(e=>renderEquipCard(e)).join('');
+  }
+}
+
+function renderEquipCard(e){
+  const cat=catalogo.find(c=>c.id===e.catalogo_id);
+  const setor=setores.find(s=>s.id===e.setor_id);
+  const sv=getStatusVenc(e);
+  const corCat=CAT_CORES[cat?.categoria]||{bg:'#1e2333',brd:'#2a3044'};
+  const icone=CAT_ICONES[cat?.categoria]||'📦';
+  return`<div class="equip-card" style="${sv.urgente?'border-color:var(--danger);':''}">
+    <div class="equip-icon" style="background:${corCat.bg};border:1px solid ${corCat.brd};">${icone}</div>
+    <div class="equip-info">
+      <div class="equip-id">${escHtml(e.identificacao)}</div>
+      <div class="equip-nome">${escHtml(cat?.nome||'—')}</div>
+      <div class="equip-meta">
+        <span class="mini-badge ${sv.cls}">${sv.label}</span>
+        ${setor?`<span>🗂️ ${escHtml(setor.nome_setor)}</span>`:''}
+        ${e.localizacao?`<span>📍 ${escHtml(e.localizacao)}</span>`:''}
+        ${e.capacidade?`<span>⚖️ ${escHtml(e.capacidade)}</span>`:''}
+        ${e.agente_extintor?`<span>${escHtml(e.agente_extintor)}</span>`:''}
+      </div>
+      <div class="equip-datas">
+        <div class="equip-data-item">
+          <div class="equip-data-label">Últ. inspeção</div>
+          <div class="equip-data-value">${fmtData(e.data_ultima_inspecao)}</div>
+        </div>
+        <div class="equip-data-item" style="${diasAte(e.data_proxima_inspecao)!==null&&diasAte(e.data_proxima_inspecao)<=30?'border-left:2px solid var(--warning);':''}">
+          <div class="equip-data-label">Próx. inspeção</div>
+          <div class="equip-data-value" style="${diasAte(e.data_proxima_inspecao)!==null&&diasAte(e.data_proxima_inspecao)<0?'color:var(--danger);':diasAte(e.data_proxima_inspecao)<=30?'color:var(--warning);':''}">${fmtData(e.data_proxima_inspecao)}</div>
+        </div>
+        <div class="equip-data-item" style="${diasAte(e.data_proxima_recarga)!==null&&diasAte(e.data_proxima_recarga)<=30?'border-left:2px solid var(--warning);':''}">
+          <div class="equip-data-label">Próx. recarga</div>
+          <div class="equip-data-value" style="${diasAte(e.data_proxima_recarga)!==null&&diasAte(e.data_proxima_recarga)<0?'color:var(--danger);':diasAte(e.data_proxima_recarga)<=30?'color:var(--warning);':''}">${fmtData(e.data_proxima_recarga)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="equip-actions">
+      <button class="btn btn-sm btn-edit" onclick="abrirModalManut(${e.id})">🔧 Manutenção</button>
+      <button class="btn btn-sm btn-edit" onclick="editarEquipamento(${e.id})">✏️ Editar</button>
+    </div>
+  </div>`;
+}
+
+// ── MODAL EQUIPAMENTO ─────────────────────────────────
+function preencherCatalogo(){
+  const catId=parseInt(document.getElementById('eq-catalogo').value);
+  const cat=catalogo.find(c=>c.id===catId);
+  if(!cat)return;
+  // Sugere próxima inspeção
+  const ultInsp=document.getElementById('eq-ult-insp').value;
+  if(ultInsp&&cat.periodicidade_inspecao_meses){
+    const d=new Date(ultInsp+'T00:00:00');
+    d.setMonth(d.getMonth()+cat.periodicidade_inspecao_meses);
+    document.getElementById('eq-prox-insp').value=d.toISOString().split('T')[0];
+  }
+}
+
+function calcProximaInsp(){
+  const catId=parseInt(document.getElementById('eq-catalogo').value);
+  const cat=catalogo.find(c=>c.id===catId);
+  const data=document.getElementById('eq-ult-insp').value;
+  if(!data||!cat?.periodicidade_inspecao_meses)return;
+  const d=new Date(data+'T00:00:00');
+  d.setMonth(d.getMonth()+cat.periodicidade_inspecao_meses);
+  document.getElementById('eq-prox-insp').value=d.toISOString().split('T')[0];
+}
+
+function calcProximaRec(){
+  const catId=parseInt(document.getElementById('eq-catalogo').value);
+  const cat=catalogo.find(c=>c.id===catId);
+  const data=document.getElementById('eq-ult-rec').value;
+  if(!data||!cat?.periodicidade_recarga_meses)return;
+  const d=new Date(data+'T00:00:00');
+  d.setMonth(d.getMonth()+cat.periodicidade_recarga_meses);
+  document.getElementById('eq-prox-rec').value=d.toISOString().split('T')[0];
+}
+
+function popularModalEquip(){
+  const selCat=document.getElementById('eq-catalogo');
+  const grupos={};
+  catalogo.forEach(c=>{const g=c.categoria||'Outros';if(!grupos[g])grupos[g]=[];grupos[g].push(c);});
+  selCat.innerHTML='<option value="">— Selecione —</option>'+Object.entries(grupos).sort().map(([cat,items])=>`<optgroup label="${escHtml(cat)}">${items.map(c=>`<option value="${c.id}">${escHtml(c.nome)}</option>`).join('')}</optgroup>`).join('');
+  const selSet=document.getElementById('eq-setor');
+  selSet.innerHTML='<option value="">— Geral —</option>'+setores.map(s=>`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`).join('');
+}
+
+function abrirModalEquipamento(){
+  equipEditando=null;
+  popularModalEquip();
+  ['eq-id','eq-local','eq-cap','eq-obs','eq-instalacao','eq-ult-insp','eq-prox-insp','eq-ult-rec','eq-prox-rec','eq-validade'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('eq-catalogo').value='';
+  document.getElementById('eq-setor').value='';
+  document.getElementById('eq-status').value='Ok';
+  document.getElementById('eq-agente').value='';
+  document.getElementById('modal-equip-titulo').textContent='Novo equipamento';
+  document.getElementById('label-equip').textContent='Salvar equipamento';
+  document.getElementById('equip-modal-esq').innerHTML='';
+  clearStatus('status-equip');
+  document.getElementById('modal-equip').classList.add('show');
+}
+
+function editarEquipamento(id){
+  const e=equipamentos.find(x=>x.id===id);
+  if(!e)return;
+  equipEditando=e;
+  popularModalEquip();
+  document.getElementById('eq-catalogo').value=e.catalogo_id;
+  document.getElementById('eq-setor').value=e.setor_id||'';
+  document.getElementById('eq-id').value=e.identificacao||'';
+  document.getElementById('eq-local').value=e.localizacao||'';
+  document.getElementById('eq-cap').value=e.capacidade||'';
+  document.getElementById('eq-agente').value=e.agente_extintor||'';
+  document.getElementById('eq-status').value=e.status||'Ok';
+  document.getElementById('eq-instalacao').value=e.data_instalacao||'';
+  document.getElementById('eq-ult-insp').value=e.data_ultima_inspecao||'';
+  document.getElementById('eq-prox-insp').value=e.data_proxima_inspecao||'';
+  document.getElementById('eq-ult-rec').value=e.data_ultima_recarga||'';
+  document.getElementById('eq-prox-rec').value=e.data_proxima_recarga||'';
+  document.getElementById('eq-validade').value=e.data_validade||'';
+  document.getElementById('eq-obs').value=e.observacao||'';
+  document.getElementById('modal-equip-titulo').textContent='Editar equipamento';
+  document.getElementById('label-equip').textContent='Salvar alterações';
+  document.getElementById('equip-modal-esq').innerHTML=`<button class="btn btn-danger btn-sm" onclick="excluirEquipamento(${id})">Excluir</button>`;
+  clearStatus('status-equip');
+  document.getElementById('modal-equip').classList.add('show');
+}
+
+function fecharModalEquipamento(){document.getElementById('modal-equip').classList.remove('show');equipEditando=null;}
+
+async function salvarEquipamento(){
+  const catId=parseInt(document.getElementById('eq-catalogo').value);
+  const identificacao=document.getElementById('eq-id').value.trim();
+  if(!catId){alert('Selecione o tipo de equipamento.');return;}
+  if(!identificacao){alert('Informe a identificação do equipamento.');return;}
+  document.getElementById('btn-salvar-equip').disabled=true;
+  document.getElementById('spinner-equip').className='spinner show';
+  const payload={
+    empresa_id:parseInt(empresaId),catalogo_id:catId,
+    setor_id:parseInt(document.getElementById('eq-setor').value)||null,
+    identificacao,localizacao:document.getElementById('eq-local').value.trim()||null,
+    capacidade:document.getElementById('eq-cap').value.trim()||null,
+    agente_extintor:document.getElementById('eq-agente').value||null,
+    status:document.getElementById('eq-status').value,
+    data_instalacao:document.getElementById('eq-instalacao').value||null,
+    data_ultima_inspecao:document.getElementById('eq-ult-insp').value||null,
+    data_proxima_inspecao:document.getElementById('eq-prox-insp').value||null,
+    data_ultima_recarga:document.getElementById('eq-ult-rec').value||null,
+    data_proxima_recarga:document.getElementById('eq-prox-rec').value||null,
+    data_validade:document.getElementById('eq-validade').value||null,
+    observacao:document.getElementById('eq-obs').value.trim()||null,
+    ativo:true
+  };
+  try{
+    let res;
+    if(equipEditando){
+      res=await fetch(`${SUPA_URL}/rest/v1/equipamentos_seg?id=eq.${equipEditando.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok){const e=await res.json();throw new Error(e.message);}
+      const d=await res.json();
+      const idx=equipamentos.findIndex(x=>x.id===equipEditando.id);
+      if(idx>=0)equipamentos[idx]=d[0];
+    }else{
+      res=await fetch(`${SUPA_URL}/rest/v1/equipamentos_seg`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok){const e=await res.json();throw new Error(e.message);}
+      const d=await res.json();
+      equipamentos.push(d[0]);
+    }
+    fecharModalEquipamento();renderStats();renderTab();
+  }catch(e){setStatus('status-equip','error',e.message);}
+  finally{document.getElementById('btn-salvar-equip').disabled=false;document.getElementById('spinner-equip').className='spinner';document.getElementById('label-equip').textContent=equipEditando?'Salvar alterações':'Salvar equipamento';}
+}
+
+async function excluirEquipamento(id){
+  if(!confirm('Excluir este equipamento e todo seu histórico?'))return;
+  await fetch(`${SUPA_URL}/rest/v1/equipamentos_seg?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});
+  equipamentos=equipamentos.filter(e=>e.id!==id);
+  fecharModalEquipamento();renderStats();renderTab();
+}
+
+// ── MODAL MANUTENÇÃO ──────────────────────────────────
+async function abrirModalManut(equipId){
+  equipManutAtivo=equipamentos.find(e=>e.id===equipId);
+  if(!equipManutAtivo)return;
+  const cat=catalogo.find(c=>c.id===equipManutAtivo.catalogo_id);
+  document.getElementById('modal-manut-titulo').textContent=`🔧 ${escHtml(equipManutAtivo.identificacao)} — ${escHtml(cat?.nome||'—')}`;
+  document.getElementById('manut-tipo').value='Inspeção';
+  document.getElementById('manut-data').value=hoje();
+  document.getElementById('manut-resp').value='';
+  document.getElementById('manut-empresa').value='';
+  document.getElementById('manut-resultado').value='Aprovado';
+  document.getElementById('manut-proxima').value='';
+  document.getElementById('manut-obs').value='';
+  clearStatus('status-manut');
+  await carregarHistorico(equipId);
+  document.getElementById('modal-manut').classList.add('show');
+}
+function fecharModalManut(){document.getElementById('modal-manut').classList.remove('show');equipManutAtivo=null;}
+
+async function carregarHistorico(equipId){
+  const lista=document.getElementById('lista-historico');
+  lista.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);">Carregando...</div>';
+  const res=await fetch(`${SUPA_URL}/rest/v1/equipamentos_seg_historico?equipamento_id=eq.${equipId}&select=*&order=data_servico.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+  const hist=await res.json();
+  if(!hist.length){lista.innerHTML='<div class="empty" style="padding:16px;">Nenhum serviço registrado.</div>';return;}
+  const TIPO_COR={Inspeção:'var(--accent)',Recarga:'var(--warning)',Manutenção:'#ff9f43',Substituição:'var(--danger)'};
+  const RES_COR={Aprovado:'var(--success)',Reprovado:'var(--danger)',Substituído:'var(--warning)'};
+  lista.innerHTML=hist.map(h=>`
+    <div class="hist-item">
+      <div class="hist-dot" style="background:${TIPO_COR[h.tipo]||'var(--text3)'}"></div>
+      <div class="hist-info">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:3px;">
+          <span style="font-size:12px;font-weight:500;">${h.tipo}</span>
+          <span style="font-size:11px;color:${RES_COR[h.resultado]||'var(--text3)'};">● ${h.resultado||'—'}</span>
+          <span style="font-size:11px;color:var(--text3);">${fmtData(h.data_servico)}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);">
+          ${h.responsavel?escHtml(h.responsavel):''}
+          ${h.empresa_responsavel?' · '+escHtml(h.empresa_responsavel):''}
+          ${h.proxima_data?` · Próximo: ${fmtData(h.proxima_data)}`:''}
+        </div>
+        ${h.observacao?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">${escHtml(h.observacao)}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+async function salvarManutencao(){
+  if(!equipManutAtivo)return;
+  const data=document.getElementById('manut-data').value;
+  if(!data){alert('Informe a data do serviço.');return;}
+  document.getElementById('spinner-manut').className='spinner show';
+  try{
+    const tipo=document.getElementById('manut-tipo').value;
+    const proxima=document.getElementById('manut-proxima').value||null;
+    const resultado=document.getElementById('manut-resultado').value;
+    await fetch(`${SUPA_URL}/rest/v1/equipamentos_seg_historico`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({
+        equipamento_id:equipManutAtivo.id,empresa_id:parseInt(empresaId),
+        tipo,data_servico:data,
+        responsavel:document.getElementById('manut-resp').value.trim()||null,
+        empresa_responsavel:document.getElementById('manut-empresa').value.trim()||null,
+        resultado,proxima_data:proxima,
+        observacao:document.getElementById('manut-obs').value.trim()||null
+      })
+    });
+    // Atualiza datas do equipamento
+    const update={atualizado_em:new Date().toISOString()};
+    if(tipo==='Inspeção'){update.data_ultima_inspecao=data;if(proxima)update.data_proxima_inspecao=proxima;}
+    if(tipo==='Recarga'){update.data_ultima_recarga=data;if(proxima)update.data_proxima_recarga=proxima;}
+    if(resultado==='Aprovado'&&equipManutAtivo.status!=='Ok')update.status='Ok';
+    if(resultado==='Reprovado')update.status='Defeituoso';
+    await fetch(`${SUPA_URL}/rest/v1/equipamentos_seg?id=eq.${equipManutAtivo.id}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify(update)
+    });
+    // Atualiza local
+    const idx=equipamentos.findIndex(e=>e.id===equipManutAtivo.id);
+    if(idx>=0)Object.assign(equipamentos[idx],update);
+    equipManutAtivo=equipamentos.find(e=>e.id===equipManutAtivo.id);
+    setStatus('status-manut','success','Serviço registrado com sucesso!');
+    await carregarHistorico(equipManutAtivo.id);
+    renderStats();renderTab();
+  }catch(e){setStatus('status-manut','error',e.message);}
+  finally{document.getElementById('spinner-manut').className='spinner';}
+}
+
+// ── GERAR ALERTAS NA CENTRAL ──────────────────────────
+async function gerarAcoesVencimento(){
+  const urgentes=equipamentos.filter(e=>{
+    const sv=getStatusVenc(e);
+    return sv.cls==='mb-venc'||sv.cls==='mb-warn'||sv.cls==='mb-def';
+  });
+  if(!urgentes.length){alert('Nenhum equipamento vencido ou a vencer nos próximos 30 dias!');return;}
+  if(!confirm(`Gerar ${urgentes.length} ação(ões) na Central de Ações para equipamentos que precisam de atenção?`))return;
+  let criadas=0;
+  for(const e of urgentes){
+    const cat=catalogo.find(c=>c.id===e.catalogo_id);
+    const sv=getStatusVenc(e);
+    const setor=setores.find(s=>s.id===e.setor_id);
+    const titulo=`${sv.cls==='mb-def'?'Defeito':'Vencimento'}: ${e.identificacao} — ${cat?.nome||'Equipamento'}`;
+    const res=await fetch(`${SUPA_URL}/rest/v1/acoes?titulo=eq.${encodeURIComponent(titulo)}&empresa_id=eq.${empresaId}&ativo=eq.true`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const exist=await res.json();
+    if(exist.length)continue;
+    await fetch(`${SUPA_URL}/rest/v1/acoes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({
+        empresa_id:parseInt(empresaId),
+        setor_id:e.setor_id||null,
+        titulo,
+        descricao:`${sv.cls==='mb-def'?'Equipamento com defeito':'Equipamento vencido ou a vencer'}: ${cat?.nome||''} (${e.identificacao})${e.localizacao?' — '+e.localizacao:''}${setor?' · Setor: '+setor.nome_setor:''}.`,
+        origem:'PGR',prioridade:sv.urgente?'Alta':'Média',
+        status:'Pendente',
+        prazo:e.data_proxima_inspecao||e.data_proxima_recarga||null,
+        ativo:true
+      })
+    });
+    criadas++;
+  }
+  alert(`${criadas} ação(ões) criada(s) na Central de Ações!`);
+}
+
+['modal-equip','modal-manut'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('click',e=>{
+    if(e.target.id===id){if(id==='modal-equip')fecharModalEquipamento();else fecharModalManut();}
+  });
+});
+
+inicializar();
+</script>
+</body>
+</html>
