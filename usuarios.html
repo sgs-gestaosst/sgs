@@ -199,25 +199,26 @@ const userRaw = localStorage.getItem('sgs_user');
 if (!token) { window.location.href = 'login.html'; }
 const user = userRaw ? JSON.parse(userRaw) : {};
 
-const LIMITE_USUARIOS = 10;
+const LIMITE_USUARIOS = 20;
 const MODULOS = [
-  {key:'empresas', nome:'Empresas'},
-  {key:'funcionarios', nome:'Funcionários'},
-  {key:'epi', nome:'Gestão de EPIs'},
-  {key:'treinamentos', nome:'Treinamentos'},
-  {key:'equipamentos_seguranca', nome:'Equip. Segurança'},
-  {key:'equipamentos_criticos', nome:'Equip. Críticos'},
-  {key:'medicoes', nome:'Medições Ambientais'},
-  {key:'brigada', nome:'Brigada e Emergência'},
-  {key:'documentos', nome:'Documentos e Laudos'},
-  {key:'alertas', nome:'Alertas e Notificações'},
-  {key:'docs_colaborador', nome:'Documentos do Colaborador'},
-  {key:'requisitos', nome:'Gestão de Requisitos'},
-  {key:'checklists', nome:'Inspeções e Checklists'},
-  {key:'cipa', nome:'CIPA / CIPATR'},
-  {key:'acoes', nome:'Gestão de Ações'},
-  {key:'esocial', nome:'eSocial SST'},
-  {key:'permissao_trabalho', nome:'Permissão de Trabalho'},
+  {key:'empresas',          nome:'🏢 Empresas'},
+  {key:'funcionarios',      nome:'👷 Funcionários'},
+  {key:'riscos',            nome:'⚠️ Riscos / PGR'},
+  {key:'exames',            nome:'🩺 Exames / PCMSO'},
+  {key:'treinamentos',      nome:'🎓 Treinamentos'},
+  {key:'epi',               nome:'🥽 Gestão de EPIs'},
+  {key:'medicoes',          nome:'📊 Medições / LTCAT'},
+  {key:'checklists',        nome:'🔍 Checklists e Inspeções'},
+  {key:'acoes',             nome:'⚡ Central de Ações'},
+  {key:'equipamentos_seg',  nome:'🧯 Equipamentos de Segurança'},
+  {key:'permissao_trabalho',nome:'📋 Permissões de Trabalho'},
+  {key:'inventarios',       nome:'🗂️ Inventários Técnicos'},
+  {key:'aet',               nome:'🪑 AET — Ergonomia'},
+  {key:'pgr',               nome:'📄 Documento PGR'},
+  {key:'pcmso',             nome:'📄 Documento PCMSO'},
+  {key:'ltcat',             nome:'📄 Documento LTCAT'},
+  {key:'cipa',              nome:'👥 CIPA / CIPATR / CIPAMIN'},
+  {key:'usuarios',          nome:'🔐 Gestão de Usuários'},
 ];
 
 let usuariosCadastrados = [];
@@ -250,7 +251,8 @@ async function carregarDados() {
     usuariosCadastrados = resUsu.ok ? await resUsu.json() : [];
     empresasDoCliente = resEmp.ok ? await resEmp.json() : [];
 
-    const usuarios = usuariosCadastrados.filter(u => u.perfil !== 'SGS_ADMIN');
+    // Exibe apenas ADMIN e USUARIO (não SUPERADMIN)
+    const usuarios = usuariosCadastrados.filter(u => u.perfil !== 'SUPERADMIN');
     const ativos = usuarios.filter(u => u.ativo);
     const pendentes = usuarios.filter(u => !u.ativo);
     const disponivel = LIMITE_USUARIOS - ativos.length;
@@ -258,11 +260,11 @@ async function carregarDados() {
     document.getElementById('stat-ativos').textContent = ativos.length;
     document.getElementById('stat-pendentes').textContent = pendentes.length;
     document.getElementById('stat-limite').textContent = `${disponivel} de ${LIMITE_USUARIOS}`;
-    document.getElementById('page-sub').textContent = `${ativos.length} usuário${ativos.length !== 1 ? 's' : ''} ativo${ativos.length !== 1 ? 's' : ''}`;
+    document.getElementById('page-sub').textContent = `${ativos.length} usuário${ativos.length !== 1 ? 's' : ''} ativo${ativos.length !== 1 ? 's' : ''} · limite de ${LIMITE_USUARIOS}`;
 
     if (disponivel <= 0) {
       document.getElementById('btn-convidar').disabled = true;
-      document.getElementById('btn-convidar').title = 'Limite de 10 usuários atingido';
+      document.getElementById('btn-convidar').title = `Limite de ${LIMITE_USUARIOS} usuários atingido`;
     }
 
     renderUsuarios(usuarios);
@@ -276,15 +278,16 @@ function renderUsuarios(usuarios) {
   if (!usuarios.length) {
     lista.innerHTML = `<div class="empty">
       <div class="empty-icon">👥</div>
-      <div class="empty-title">Nenhum usuário cadastrado</div>
+      <div class="empty-title">Nenhum usuário convidado ainda</div>
       <div class="empty-desc">Convide usuários para colaborar na gestão SST das suas empresas.</div>
     </div>`;
     return;
   }
   lista.innerHTML = usuarios.map(u => {
     const ini = iniciais(u.nome_completo || u.email);
-    const badgeClass = u.perfil === 'CLIENT_ADMIN' ? 'badge-admin' : 'badge-usuario';
-    const badgeLabel = u.perfil === 'CLIENT_ADMIN' ? 'Admin' : 'Usuário';
+    const isAdmin = u.perfil === 'ADMIN';
+    const badgeClass = isAdmin ? 'badge-admin' : 'badge-usuario';
+    const badgeLabel = isAdmin ? 'Admin' : 'Usuário';
     const statusBadge = !u.ativo ? '<span class="badge badge-pendente">Pendente</span>' : '';
     return `<div class="lista-row">
       <div class="avatar">${ini}</div>
@@ -294,7 +297,7 @@ function renderUsuarios(usuarios) {
       </div>
       <span class="badge ${badgeClass}">${badgeLabel}</span>
       ${statusBadge}
-      ${u.perfil !== 'CLIENT_ADMIN' ? `<button class="btn btn-danger" onclick="revogarAcesso(${u.id})">Revogar</button>` : ''}
+      ${!isAdmin ? `<button class="btn btn-danger" onclick="revogarAcesso(${u.id})">Revogar</button>` : ''}
     </div>`;
   }).join('');
 }
@@ -378,7 +381,7 @@ async function enviarConvite() {
   setStatus('status-convite','info','Enviando convite...');
 
   try {
-    // Envia convite pelo Supabase Auth
+    // 1. Envia convite pelo Supabase Auth
     const resConvite = await fetch(`${SUPA_URL}/auth/v1/invite`, {
       method: 'POST',
       headers: {
@@ -397,7 +400,7 @@ async function enviarConvite() {
     const conviteData = await resConvite.json();
     const novoUserId = conviteData.id;
 
-    // Cadastra o usuário na tabela usuarios
+    // 2. Cadastra na tabela usuarios
     const resUsu = await fetch(`${SUPA_URL}/rest/v1/usuarios`, {
       method: 'POST',
       headers: {
@@ -411,9 +414,7 @@ async function enviarConvite() {
         nome_completo: nome,
         email,
         perfil: 'USUARIO',
-        cliente_admin_id: null,
-        ativo: false,
-        senha_hash: 'supabase_auth'
+        ativo: false
       })
     });
 
@@ -421,7 +422,7 @@ async function enviarConvite() {
     const usuData = await resUsu.json();
     const usuarioId = usuData[0].id;
 
-    // Salva permissões
+    // 3. Salva permissões por empresa e módulo
     const permissoes = [];
     empresasSelecionadas.forEach(empId => {
       modulosSelecionados.forEach(m => {
@@ -447,11 +448,13 @@ async function enviarConvite() {
       });
     }
 
-    setStatus('status-convite','success',`Convite enviado para ${email}!`);
-    setTimeout(() => { fecharConvite(); carregarDados(); }, 2000);
+    setStatus('status-convite','success',`Convite enviado para ${email}! O usuário receberá um e-mail para definir sua senha.`);
+    setTimeout(() => { fecharConvite(); carregarDados(); }, 2500);
 
   } catch(e) {
-    setStatus('status-convite','error', e.message.includes('already') ? 'Este e-mail já possui uma conta no sistema.' : `Erro: ${e.message}`);
+    setStatus('status-convite','error',
+      e.message.includes('already') ? 'Este e-mail já possui uma conta no sistema.' : `Erro: ${e.message}`
+    );
     document.getElementById('btn-enviar').disabled = false;
     document.getElementById('spinner-convite').className = 'spinner';
     document.getElementById('label-convite').textContent = 'Enviar convite';
