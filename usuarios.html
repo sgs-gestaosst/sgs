@@ -239,10 +239,21 @@ function setStatus(id, tipo, msg) {
 
 async function carregarDados() {
   try {
+    // Verifica perfil do usuário atual
+    const resMeu = await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${user.id}&select=id,perfil`, {
+      headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}`}
+    });
+    const meuUsuario = await resMeu.json();
+    const meuPerfil = meuUsuario[0]?.perfil;
+
+    // SUPERADMIN vê todos os ADMIN e USUARIO
+    // ADMIN vê só os USUARIO que ele criou
+    const urlUsuarios = meuPerfil === 'SUPERADMIN'
+      ? `${SUPA_URL}/rest/v1/usuarios?perfil=neq.SUPERADMIN&select=*&order=criado_em.asc`
+      : `${SUPA_URL}/rest/v1/usuarios?perfil=eq.USUARIO&owner_id=eq.${user.id}&select=*&order=criado_em.asc`;
+
     const [resUsu, resEmp] = await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/usuarios?select=*&order=criado_em.asc`, {
-        headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}`}
-      }),
+      fetch(urlUsuarios, {headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}`}}),
       fetch(`${SUPA_URL}/rest/v1/empresas?ativo=eq.true&select=id,razao_social,nome_fantasia,cidade,estado&order=razao_social.asc`, {
         headers: {'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}`}
       })
@@ -251,29 +262,32 @@ async function carregarDados() {
     usuariosCadastrados = resUsu.ok ? await resUsu.json() : [];
     empresasDoCliente = resEmp.ok ? await resEmp.json() : [];
 
-    // Exibe apenas ADMIN e USUARIO (não SUPERADMIN)
-    const usuarios = usuariosCadastrados.filter(u => u.perfil !== 'SUPERADMIN');
-    const ativos = usuarios.filter(u => u.ativo);
-    const pendentes = usuarios.filter(u => !u.ativo);
-    const disponivel = LIMITE_USUARIOS - ativos.length;
+    const ativos = usuariosCadastrados.filter(u => u.ativo);
+    const pendentes = usuariosCadastrados.filter(u => !u.ativo);
+    const disponivel = LIMITE_USUARIOS - usuariosCadastrados.length;
 
     document.getElementById('stat-ativos').textContent = ativos.length;
     document.getElementById('stat-pendentes').textContent = pendentes.length;
-    document.getElementById('stat-limite').textContent = `${disponivel} de ${LIMITE_USUARIOS}`;
-    document.getElementById('page-sub').textContent = `${ativos.length} usuário${ativos.length !== 1 ? 's' : ''} ativo${ativos.length !== 1 ? 's' : ''} · limite de ${LIMITE_USUARIOS}`;
+    document.getElementById('stat-limite').textContent = meuPerfil === 'SUPERADMIN' ? '∞' : `${disponivel} de ${LIMITE_USUARIOS}`;
+    document.getElementById('page-sub').textContent = `${ativos.length} usuário(s) ativo(s)${meuPerfil !== 'SUPERADMIN' ? ' · limite de '+LIMITE_USUARIOS : ''}`;
 
-    if (disponivel <= 0) {
+    if (meuPerfil !== 'SUPERADMIN' && disponivel <= 0) {
       document.getElementById('btn-convidar').disabled = true;
       document.getElementById('btn-convidar').title = `Limite de ${LIMITE_USUARIOS} usuários atingido`;
     }
 
-    renderUsuarios(usuarios);
+    // SUPERADMIN não convida usuários por aqui
+    if (meuPerfil === 'SUPERADMIN') {
+      document.getElementById('btn-convidar').style.display = 'none';
+    }
+
+    renderUsuarios(usuariosCadastrados, meuPerfil);
   } catch(e) {
     console.error(e);
   }
 }
 
-function renderUsuarios(usuarios) {
+function renderUsuarios(usuarios, meuPerfil) {
   const lista = document.getElementById('lista-usuarios');
   if (!usuarios.length) {
     lista.innerHTML = `<div class="empty">
@@ -289,6 +303,7 @@ function renderUsuarios(usuarios) {
     const badgeClass = isAdmin ? 'badge-admin' : 'badge-usuario';
     const badgeLabel = isAdmin ? 'Admin' : 'Usuário';
     const statusBadge = !u.ativo ? '<span class="badge badge-pendente">Pendente</span>' : '';
+    const podeCancelar = meuPerfil === 'SUPERADMIN' || !isAdmin;
     return `<div class="lista-row">
       <div class="avatar">${ini}</div>
       <div class="user-info">
@@ -297,7 +312,7 @@ function renderUsuarios(usuarios) {
       </div>
       <span class="badge ${badgeClass}">${badgeLabel}</span>
       ${statusBadge}
-      ${!isAdmin ? `<button class="btn btn-danger" onclick="revogarAcesso(${u.id})">Revogar</button>` : ''}
+      ${podeCancelar ? `<button class="btn btn-danger" onclick="revogarAcesso(${u.id})">Revogar</button>` : ''}
     </div>`;
   }).join('');
 }
@@ -414,6 +429,7 @@ async function enviarConvite() {
         nome_completo: nome,
         email,
         perfil: 'USUARIO',
+        owner_id: user.id,
         ativo: false
       })
     });
