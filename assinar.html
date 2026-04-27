@@ -342,25 +342,27 @@ async function assinar(){
   document.getElementById('label-assinar').textContent='Processando...';
   setStatus('info','Criando sua assinatura...');
   try{
-    // Chama Edge Function do Mercado Pago
     const res=await fetch(`${SUPA_URL}/functions/v1/criar-assinatura`,{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${token}`,
+        'apikey':SUPA_KEY
+      },
       body:JSON.stringify({
-        user_id:user.id,
         plano_id:planoEssencialId,
-        valor:valorFinal,
         cupom_codigo:cupomAtivo?cupomAtivo.codigo:null
       })
     });
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Erro ao criar assinatura.');
-    if(data.init_point){
+    // Usa sandbox em teste, init_point em produção
+    const url=data.mp_init_point||data.init_point;
+    if(url){
       setStatus('success','Redirecionando para o pagamento...');
-      setTimeout(()=>{window.location.href=data.init_point;},1500);
+      setTimeout(()=>{window.location.href=url;},1500);
     }else{
-      setStatus('success','Assinatura criada! Redirecionando...');
-      setTimeout(()=>{window.location.href='index.html';},2000);
+      throw new Error('URL de pagamento não retornada.');
     }
   }catch(e){
     setStatus('error',`Erro: ${e.message}`);
