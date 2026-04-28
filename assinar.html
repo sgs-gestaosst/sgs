@@ -177,11 +177,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <!-- Botões -->
   <div id="area-botao">
-    <button class="btn-assinar" id="btn-assinar" onclick="assinar()">
-      <span class="spinner" id="spinner-assinar"></span>
-      <span id="label-assinar">Assinar agora — 30 dias grátis</span>
-    </button>
-    <div style="margin-top:12px;text-align:center;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <button class="btn-assinar" id="btn-cartao" onclick="assinar('recorrente')" style="flex-direction:column;gap:4px;padding:16px;">
+        <span style="font-size:20px;">💳</span>
+        <span class="spinner" id="spinner-cartao"></span>
+        <span id="label-cartao" style="font-size:14px;">Cartão recorrente</span>
+        <span style="font-size:11px;font-weight:400;opacity:.8;">Cobrança automática mensal</span>
+      </button>
+      <button class="btn-assinar" id="btn-pix" onclick="assinar('avulso')" style="flex-direction:column;gap:4px;padding:16px;background:#1a3a6e;">
+        <span style="font-size:20px;">⚡</span>
+        <span class="spinner" id="spinner-pix"></span>
+        <span id="label-pix" style="font-size:14px;">Pix / Boleto</span>
+        <span style="font-size:11px;font-weight:400;opacity:.8;">Pagamento manual mensal</span>
+      </button>
+    </div>
+    <div style="margin-top:8px;text-align:center;">
       <a href="https://wa.me/5594981564271?text=Olá!%20Tenho%20interesse%20no%20plano%20Enterprise%20do%20SGS." 
          target="_blank" class="btn-enterprise">
         💬 Falar sobre Enterprise
@@ -335,11 +345,15 @@ function setStatus(tipo,msg){
   el.innerHTML=`<span>${icons[tipo]}</span><span>${msg}</span>`;
 }
 
-async function assinar(){
+async function assinar(tipo){
   if(!planoEssencialId){alert('Erro ao carregar plano. Recarregue a página.');return;}
-  document.getElementById('btn-assinar').disabled=true;
-  document.getElementById('spinner-assinar').className='spinner show';
-  document.getElementById('label-assinar').textContent='Processando...';
+  const btnId=tipo==='recorrente'?'btn-cartao':'btn-pix';
+  const spinnerId=tipo==='recorrente'?'spinner-cartao':'spinner-pix';
+  const labelId=tipo==='recorrente'?'label-cartao':'label-pix';
+  document.getElementById('btn-cartao').disabled=true;
+  document.getElementById('btn-pix').disabled=true;
+  document.getElementById(spinnerId).className='spinner show';
+  document.getElementById(labelId).textContent='Processando...';
   setStatus('info','Criando sua assinatura...');
   try{
     const res=await fetch(`${SUPA_URL}/functions/v1/criar-assinatura`,{
@@ -351,24 +365,24 @@ async function assinar(){
       },
       body:JSON.stringify({
         plano_id:planoEssencialId,
-        cupom_codigo:cupomAtivo?cupomAtivo.codigo:null
+        cupom_codigo:cupomAtivo?cupomAtivo.codigo:null,
+        tipo
       })
     });
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Erro ao criar assinatura.');
-    // Usa sandbox em teste, init_point em produção
-    const url=data.mp_init_point||data.init_point;
-    if(url){
+    if(data.mp_init_point){
       setStatus('success','Redirecionando para o pagamento...');
-      setTimeout(()=>{window.location.href=url;},1500);
+      setTimeout(()=>{window.location.href=data.mp_init_point;},1500);
     }else{
       throw new Error('URL de pagamento não retornada.');
     }
   }catch(e){
     setStatus('error',`Erro: ${e.message}`);
-    document.getElementById('btn-assinar').disabled=false;
-    document.getElementById('spinner-assinar').className='spinner';
-    document.getElementById('label-assinar').textContent='Assinar agora — 30 dias grátis';
+    document.getElementById('btn-cartao').disabled=false;
+    document.getElementById('btn-pix').disabled=false;
+    document.getElementById(spinnerId).className='spinner';
+    document.getElementById(labelId).textContent=tipo==='recorrente'?'Cartão recorrente':'Pix / Boleto';
   }
 }
 
