@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SGS — Assinar Plano</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://sdk.mercadopago.com/js/v2"></script>
 <style>
 :root{
   --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
@@ -36,10 +37,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
 /* Planos */
 .planos-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
-.plano-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:border-color .2s,background .2s;position:relative;}
+.plano-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:border-color .2s;position:relative;}
 .plano-card:hover{border-color:var(--border-focus);}
 .plano-card.selecionado{border-color:var(--accent2);background:#0a1f18;}
-.plano-card.enterprise{border-color:var(--border);cursor:default;opacity:.8;}
+.plano-card.enterprise{cursor:default;opacity:.8;}
 .plano-badge{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:12px;}
 .badge-popular{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
 .badge-consulta{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
@@ -49,18 +50,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .plano-desc{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5;}
 .plano-recursos{list-style:none;}
 .plano-recursos li{font-size:12px;color:var(--text2);padding:4px 0;display:flex;align-items:center;gap:6px;}
-.plano-recursos li::before{content:'✓';color:var(--success);font-weight:700;flex-shrink:0;}
+.plano-recursos li::before{content:'✓';color:var(--success);font-weight:700;}
 .plano-recursos li.enterprise-item::before{content:'★';color:#e0a855;}
 .plano-selecionado-badge{position:absolute;top:14px;right:14px;font-size:10px;background:var(--accent2);color:#0f1117;padding:2px 8px;border-radius:10px;font-weight:600;}
 
 /* Cupom */
 .cupom-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;}
 .cupom-row{display:flex;gap:10px;}
-.cupom-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;padding:10px 14px;outline:none;transition:border-color .15s;text-transform:uppercase;letter-spacing:.06em;}
+.cupom-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;padding:10px 14px;outline:none;text-transform:uppercase;letter-spacing:.06em;}
 .cupom-input:focus{border-color:var(--border-focus);}
 .cupom-input.valido{border-color:var(--success);color:var(--success);}
 .cupom-input.invalido{border-color:var(--danger);}
-.btn-cupom{padding:10px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;transition:border-color .15s;white-space:nowrap;}
+.btn-cupom{padding:10px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;}
 .btn-cupom:hover{border-color:var(--border-focus);}
 .cupom-status{margin-top:10px;font-size:12px;display:none;}
 .cupom-status.show{display:block;}
@@ -77,11 +78,32 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .resumo-total{font-size:18px;color:var(--accent2);font-family:var(--mono);}
 .resumo-extra{font-size:11px;color:var(--text3);margin-top:8px;text-align:right;}
 
+/* Tabs pagamento */
+.tabs-pagamento{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tab-pgto{flex:1;padding:14px;text-align:center;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.tab-pgto:first-child{border-right:1px solid var(--border);}
+.tab-pgto.active{background:var(--surface2);color:var(--text);}
+.tab-pgto span{font-size:20px;}
+
+/* Formulário cartão */
+.card-form{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;}
+.form-field{margin-bottom:16px;}
+.form-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.form-field input,.form-field select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:10px 12px;outline:none;}
+.form-field input:focus,.form-field select:focus{border-color:var(--border-focus);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.card-brand{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;}
+.card-field-wrap{position:relative;}
+
+/* PIX info */
+.pix-info{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;text-align:center;}
+.pix-info p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px;}
+
 /* Botão */
 .btn-assinar{width:100%;padding:14px;background:var(--accent2);color:#0f1117;font-family:var(--sans);font-size:15px;font-weight:600;border:none;border-radius:var(--radius);cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn-assinar:hover{background:#3de8b4;}
 .btn-assinar:disabled{opacity:.4;cursor:not-allowed;}
-.btn-enterprise{width:100%;padding:14px;background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:15px;font-weight:600;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;}
+.btn-enterprise{width:100%;padding:14px;background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:15px;font-weight:600;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;margin-top:10px;}
 .btn-enterprise:hover{border-color:var(--border-focus);}
 .spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f1117;border-radius:50%;animation:spin .7s linear infinite;display:none;}
 .spinner.show{display:inline-block;}
@@ -91,7 +113,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
 .status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
 .status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
-@media(max-width:600px){.planos-grid{grid-template-columns:1fr;}.header-title{display:none;}.container{padding:20px 12px 60px;}}
+.seguro-badge{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--text3);margin-top:12px;}
+@media(max-width:600px){.planos-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}.header-title{display:none;}.tabs-pagamento{flex-direction:column;}}
 </style>
 </head>
 <body>
@@ -103,7 +126,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 <div class="container">
   <a href="index.html" class="voltar">← Voltar ao início</a>
 
-  <!-- Status do trial -->
+  <!-- Status trial -->
   <div class="section-label">Status da sua conta</div>
   <div class="trial-box" id="trial-box">
     <div class="trial-icon">⏳</div>
@@ -113,7 +136,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <!-- Planos -->
   <div class="section-label">Escolha seu plano</div>
   <div class="planos-grid">
-    <!-- Plano Essencial -->
     <div class="plano-card selecionado" id="card-essencial" onclick="selecionarPlano('essencial')">
       <span class="plano-selecionado-badge" id="badge-essencial">✓ Selecionado</span>
       <div class="plano-badge badge-popular">Mais popular</div>
@@ -127,11 +149,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <li>Até 20 usuários</li>
         <li>PGR, PCMSO, LTCAT</li>
         <li>Suporte via WhatsApp</li>
-        <li>30 dias grátis para testar</li>
+        <li>30 dias grátis</li>
       </ul>
     </div>
-    <!-- Enterprise -->
-    <div class="plano-card enterprise" id="card-enterprise">
+    <div class="plano-card enterprise">
       <div class="plano-badge badge-consulta">Sob consulta</div>
       <div class="plano-nome">Enterprise</div>
       <div class="plano-preco" style="font-size:20px;color:var(--text2);">Personalizado</div>
@@ -141,8 +162,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <li class="enterprise-item">Usuários ilimitados</li>
         <li class="enterprise-item">Suporte dedicado</li>
         <li class="enterprise-item">Implantação assistida</li>
-        <li class="enterprise-item">Treinamento da equipe</li>
-        <li class="enterprise-item">SLA garantido</li>
       </ul>
     </div>
   </div>
@@ -159,7 +178,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <!-- Resumo -->
   <div class="section-label">Resumo</div>
-  <div class="resumo-card" id="resumo-card">
+  <div class="resumo-card">
     <div class="resumo-linha">
       <span class="resumo-label">Plano Essencial</span>
       <span class="resumo-valor">R$ 999,00/mês</span>
@@ -172,69 +191,124 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <span class="resumo-label" style="font-weight:500;">Total/mês</span>
       <span class="resumo-total" id="valor-total">R$ 999,00</span>
     </div>
-    <div class="resumo-extra">Cobrança mensal recorrente via Mercado Pago · Cancele quando quiser</div>
+    <div class="resumo-extra">Cobrança mensal · Cancele quando quiser</div>
   </div>
 
-  <!-- Botões -->
-  <div id="area-botao">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-      <button class="btn-assinar" id="btn-cartao" onclick="assinar('recorrente')" style="flex-direction:column;gap:4px;padding:16px;">
-        <span style="font-size:20px;">💳</span>
+  <!-- Tabs pagamento -->
+  <div id="area-pagamento">
+    <div class="section-label">Forma de pagamento</div>
+    <div class="tabs-pagamento">
+      <div class="tab-pgto active" id="tab-cartao" onclick="mudarTab('cartao')">
+        <span>💳</span>
+        <div>Cartão de crédito</div>
+        <div style="font-size:10px;color:var(--text3);">Recorrente automático</div>
+      </div>
+      <div class="tab-pgto" id="tab-pix" onclick="mudarTab('pix')">
+        <span>⚡</span>
+        <div>Pix / Boleto</div>
+        <div style="font-size:10px;color:var(--text3);">Pagamento mensal manual</div>
+      </div>
+    </div>
+
+    <!-- Formulário cartão -->
+    <div id="form-cartao" class="card-form">
+      <div class="form-field">
+        <label>Número do cartão</label>
+        <div class="card-field-wrap">
+          <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatarCartao(this)" autocomplete="cc-number">
+          <span class="card-brand" id="card-brand">💳</span>
+        </div>
+      </div>
+      <div class="form-field">
+        <label>Nome no cartão</label>
+        <input type="text" id="cardholderName" placeholder="Como está impresso no cartão" autocomplete="cc-name" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Validade</label>
+          <input type="text" id="cardExpiration" placeholder="MM/AA" maxlength="5" oninput="formatarValidade(this)" autocomplete="cc-exp">
+        </div>
+        <div class="form-field">
+          <label>CVV</label>
+          <input type="text" id="securityCode" placeholder="123" maxlength="4" autocomplete="cc-csc">
+        </div>
+      </div>
+      <div class="form-field">
+        <label>CPF do titular</label>
+        <input type="text" id="cardholderCPF" placeholder="000.000.000-00" maxlength="14" oninput="formatarCPF(this)">
+      </div>
+      <div class="form-field">
+        <label>Parcelas</label>
+        <select id="installments">
+          <option value="1">1x sem juros</option>
+        </select>
+      </div>
+      <button class="btn-assinar" id="btn-cartao" onclick="pagarCartao()">
         <span class="spinner" id="spinner-cartao"></span>
-        <span id="label-cartao" style="font-size:14px;">Cartão recorrente</span>
-        <span style="font-size:11px;font-weight:400;opacity:.8;">Cobrança automática mensal</span>
-      </button>
-      <button class="btn-assinar" id="btn-pix" onclick="assinar('avulso')" style="flex-direction:column;gap:4px;padding:16px;background:#1a3a6e;">
-        <span style="font-size:20px;">⚡</span>
-        <span class="spinner" id="spinner-pix"></span>
-        <span id="label-pix" style="font-size:14px;">Pix / Boleto</span>
-        <span style="font-size:11px;font-weight:400;opacity:.8;">Pagamento manual mensal</span>
+        <span id="label-cartao">💳 Assinar com cartão — <span id="valor-btn-cartao">R$ 999,00</span>/mês</span>
       </button>
     </div>
-    <div style="margin-top:8px;text-align:center;">
-      <a href="https://wa.me/5594981564271?text=Olá!%20Tenho%20interesse%20no%20plano%20Enterprise%20do%20SGS." 
-         target="_blank" class="btn-enterprise">
-        💬 Falar sobre Enterprise
-      </a>
-    </div>
-  </div>
-  <div class="status-bar" id="status-assinar"></div>
 
-  <div style="margin-top:20px;text-align:center;font-size:12px;color:var(--text3);">
-    Ao assinar você concorda com os <a href="#" style="color:var(--text2);">Termos de Uso</a> do SGS.
-    Os 30 dias gratuitos começam a partir do cadastro.
+    <!-- PIX/Boleto -->
+    <div id="form-pix" style="display:none;">
+      <div class="pix-info">
+        <div style="font-size:40px;margin-bottom:12px;">⚡</div>
+        <p>Clique em <strong>Gerar Pix/Boleto</strong> para ser redirecionado ao Mercado Pago.<br>
+        Após o pagamento sua assinatura será ativada automaticamente.</p>
+        <p style="font-size:11px;color:var(--text3);">Você precisará renovar manualmente todo mês.</p>
+      </div>
+      <button class="btn-assinar" id="btn-pix" onclick="pagarPix()" style="background:#1a3a6e;color:#7aabf7;">
+        <span class="spinner" id="spinner-pix"></span>
+        <span id="label-pix">⚡ Gerar Pix/Boleto — <span id="valor-btn-pix">R$ 999,00</span></span>
+      </button>
+    </div>
+
+    <div class="seguro-badge">🔒 Pagamento seguro via Mercado Pago</div>
+    <div class="status-bar" id="status-assinar"></div>
+
+    <a href="https://wa.me/5594981564271?text=Olá!%20Tenho%20interesse%20no%20plano%20Enterprise%20do%20SGS." target="_blank" class="btn-enterprise">
+      💬 Falar sobre Enterprise
+    </a>
   </div>
 </div>
 
 <script>
 const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const MP_PUBLIC_KEY='APP_USR-d0ebe9f3-8bbc-454c-bb5b-4490ed266a4d';
 const token=localStorage.getItem('sgs_token');
 const userRaw=localStorage.getItem('sgs_user');
 if(!token){window.location.href='login.html';}
 const user=userRaw?JSON.parse(userRaw):{};
 
 const BASE=999.00;
-let planoSelecionado='essencial';
 let cupomAtivo=null;
 let valorFinal=BASE;
 let planoEssencialId=null;
 let assinaturaAtual=null;
+let mp=null;
+let tabAtual='cartao';
+
+// Inicializa SDK MP
+function inicializarMP(){
+  try{
+    mp=new MercadoPago(MP_PUBLIC_KEY,{locale:'pt-BR'});
+  }catch(e){console.error('Erro MP SDK:',e);}
+}
 
 function fmt(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 
 async function inicializar(){
+  inicializarMP();
   try{
-    // Busca planos
-    const resPlanos=await fetch(`${SUPA_URL}/rest/v1/planos?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const [resPlanos,resAssin]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/planos?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=*&order=criado_em.desc&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+    ]);
     const planos=await resPlanos.json();
-    planoEssencialId=planos.find(p=>p.nome==='Essencial')?.id;
-
-    // Busca assinatura atual
-    const resAssin=await fetch(`${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=*&order=criado_em.desc&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const assinaturas=await resAssin.json();
+    planoEssencialId=planos.find(p=>p.nome==='Essencial')?.id;
     assinaturaAtual=assinaturas[0]||null;
-
     renderTrialBox();
   }catch(e){console.error(e);}
 }
@@ -252,41 +326,43 @@ function renderTrialBox(){
     const hoje=new Date();hoje.setHours(0,0,0,0);
     const dias=Math.ceil((fim-hoje)/(1000*60*60*24));
     if(dias>7){
-      box.className='trial-box';
-      texto.innerHTML=`🎯 Você está no período de teste. <strong>${dias} dias restantes</strong> até ${fim.toLocaleDateString('pt-BR')}. Assine antes do fim para manter o acesso.`;
+      texto.innerHTML=`🎯 Período de teste ativo. <strong>${dias} dias restantes</strong> até ${fim.toLocaleDateString('pt-BR')}.`;
     }else if(dias>0){
       box.className='trial-box vencendo';
-      texto.innerHTML=`⚠️ Atenção! Seu trial vence em <strong>${dias} dia(s)</strong>. Assine agora para não perder o acesso ao sistema.`;
+      texto.innerHTML=`⚠️ Trial vence em <strong>${dias} dia(s)</strong>! Assine agora para não perder o acesso.`;
     }else{
       box.className='trial-box vencido';
-      texto.innerHTML=`🔴 Seu período de teste <strong>encerrou</strong>. Assine agora para continuar usando o SGS.`;
+      texto.innerHTML=`🔴 Período de teste <strong>encerrado</strong>. Assine para continuar usando o SGS.`;
     }
   }else if(status==='Ativo'){
-    box.className='trial-box';
-    box.style.background='#0e2820';
-    box.style.borderColor='#1a4a38';
+    box.style.background='#0e2820';box.style.borderColor='#1a4a38';
     texto.style.color='#2dd4a0';
-    texto.innerHTML=`✅ Assinatura <strong>ativa</strong>. Próxima cobrança em ${new Date(assinaturaAtual.data_fim_trial).toLocaleDateString('pt-BR')}.`;
-    // Já tem assinatura ativa — oculta botão de assinar
-    document.getElementById('area-botao').innerHTML=`
-      <div style="background:#0e2820;border:1px solid #1a4a38;border-radius:var(--radius);padding:16px;text-align:center;font-size:13px;color:#2dd4a0;">
+    texto.innerHTML=`✅ Assinatura <strong>ativa</strong> até ${new Date(assinaturaAtual.data_fim_trial+'T00:00:00').toLocaleDateString('pt-BR')}.`;
+    document.getElementById('area-pagamento').innerHTML=`
+      <div style="background:#0e2820;border:1px solid #1a4a38;border-radius:10px;padding:20px;text-align:center;color:#2dd4a0;font-size:14px;">
         ✅ Sua assinatura está ativa. Obrigado por assinar o SGS!
       </div>`;
   }
 }
 
-function selecionarPlano(plano){
-  planoSelecionado=plano;
-  document.getElementById('card-essencial').classList.toggle('selecionado',plano==='essencial');
-  document.getElementById('badge-essencial').style.display=plano==='essencial'?'block':'none';
+function mudarTab(tab){
+  tabAtual=tab;
+  document.getElementById('tab-cartao').classList.toggle('active',tab==='cartao');
+  document.getElementById('tab-pix').classList.toggle('active',tab==='pix');
+  document.getElementById('form-cartao').style.display=tab==='cartao'?'block':'none';
+  document.getElementById('form-pix').style.display=tab==='pix'?'block':'none';
+}
+
+function selecionarPlano(p){
   atualizarResumo();
 }
 
 function atualizarResumo(){
-  const base=planoSelecionado==='essencial'?BASE:0;
-  const desconto=cupomAtivo?base*(cupomAtivo.valor_desconto/100):0;
-  valorFinal=Math.max(0,base-desconto);
+  const desconto=cupomAtivo?BASE*(cupomAtivo.valor_desconto/100):0;
+  valorFinal=Math.max(0,BASE-desconto);
   document.getElementById('valor-total').textContent=fmt(valorFinal);
+  document.getElementById('valor-btn-cartao').textContent=fmt(valorFinal);
+  document.getElementById('valor-btn-pix').textContent=fmt(valorFinal);
   const linhaDesc=document.getElementById('linha-desconto');
   if(cupomAtivo&&desconto>0){
     linhaDesc.style.display='flex';
@@ -301,42 +377,50 @@ async function validarCupom(){
   const codigo=document.getElementById('cupom-input').value.trim().toUpperCase();
   const statusEl=document.getElementById('cupom-status');
   const inputEl=document.getElementById('cupom-input');
-  if(!codigo){statusEl.className='cupom-status show err';statusEl.textContent='Digite um código de cupom.';return;}
+  if(!codigo){statusEl.className='cupom-status show err';statusEl.textContent='Digite um código.';return;}
   statusEl.className='cupom-status show';statusEl.style.color='var(--text2)';statusEl.textContent='Validando...';
   try{
     const res=await fetch(`${SUPA_URL}/rest/v1/cupons?codigo=eq.${codigo}&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const data=await res.json();
-    if(!data.length){
-      inputEl.className='cupom-input invalido';
-      statusEl.className='cupom-status show err';
-      statusEl.textContent='✕ Cupom inválido ou expirado.';
-      cupomAtivo=null;atualizarResumo();return;
-    }
+    if(!data.length){inputEl.className='cupom-input invalido';statusEl.className='cupom-status show err';statusEl.textContent='✕ Cupom inválido.';cupomAtivo=null;atualizarResumo();return;}
     const cupom=data[0];
-    if(cupom.data_expiracao&&new Date(cupom.data_expiracao)<new Date()){
-      inputEl.className='cupom-input invalido';
-      statusEl.className='cupom-status show err';
-      statusEl.textContent='✕ Este cupom está expirado.';
-      cupomAtivo=null;atualizarResumo();return;
-    }
-    if(cupom.uso_maximo&&cupom.usos_realizados>=cupom.uso_maximo){
-      inputEl.className='cupom-input invalido';
-      statusEl.className='cupom-status show err';
-      statusEl.textContent='✕ Este cupom atingiu o limite de usos.';
-      cupomAtivo=null;atualizarResumo();return;
-    }
+    if(cupom.data_expiracao&&new Date(cupom.data_expiracao)<new Date()){inputEl.className='cupom-input invalido';statusEl.className='cupom-status show err';statusEl.textContent='✕ Cupom expirado.';cupomAtivo=null;atualizarResumo();return;}
+    if(cupom.uso_maximo&&cupom.usos_realizados>=cupom.uso_maximo){inputEl.className='cupom-input invalido';statusEl.className='cupom-status show err';statusEl.textContent='✕ Cupom esgotado.';cupomAtivo=null;atualizarResumo();return;}
     cupomAtivo=cupom;
     inputEl.className='cupom-input valido';
     statusEl.className='cupom-status show ok';
     statusEl.textContent=`✓ ${cupom.descricao||'Cupom aplicado!'} — ${cupom.valor_desconto}% de desconto`;
     atualizarResumo();
-  }catch(e){
-    statusEl.className='cupom-status show err';
-    statusEl.textContent='Erro ao validar cupom.';
-  }
+  }catch(e){statusEl.className='cupom-status show err';statusEl.textContent='Erro ao validar.';}
 }
 
 document.getElementById('cupom-input').addEventListener('keydown',e=>{if(e.key==='Enter')validarCupom();});
+
+// Formatação campos cartão
+function formatarCartao(el){
+  let v=el.value.replace(/\D/g,'').substring(0,16);
+  el.value=v.replace(/(.{4})/g,'$1 ').trim();
+  // Detecta bandeira
+  const brand=document.getElementById('card-brand');
+  if(v.startsWith('4'))brand.textContent='💙';
+  else if(v.startsWith('5')||v.startsWith('2'))brand.textContent='🔴';
+  else if(v.startsWith('3'))brand.textContent='💚';
+  else brand.textContent='💳';
+}
+
+function formatarValidade(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>=2)v=v.substring(0,2)+'/'+v.substring(2,4);
+  el.value=v;
+}
+
+function formatarCPF(el){
+  let v=el.value.replace(/\D/g,'').substring(0,11);
+  v=v.replace(/(\d{3})(\d)/,'$1.$2');
+  v=v.replace(/(\d{3})(\d)/,'$1.$2');
+  v=v.replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  el.value=v;
+}
 
 function setStatus(tipo,msg){
   const el=document.getElementById('status-assinar');
@@ -345,44 +429,98 @@ function setStatus(tipo,msg){
   el.innerHTML=`<span>${icons[tipo]}</span><span>${msg}</span>`;
 }
 
-async function assinar(tipo){
-  if(!planoEssencialId){alert('Erro ao carregar plano. Recarregue a página.');return;}
-  const btnId=tipo==='recorrente'?'btn-cartao':'btn-pix';
-  const spinnerId=tipo==='recorrente'?'spinner-cartao':'spinner-pix';
-  const labelId=tipo==='recorrente'?'label-cartao':'label-pix';
+// ── PAGAMENTO CARTÃO ──────────────────────────────────
+async function pagarCartao(){
+  const numero=document.getElementById('cardNumber').value.replace(/\s/g,'');
+  const nome=document.getElementById('cardholderName').value.trim();
+  const validade=document.getElementById('cardExpiration').value;
+  const cvv=document.getElementById('securityCode').value.trim();
+  const cpf=document.getElementById('cardholderCPF').value.replace(/\D/g,'');
+
+  if(!numero||numero.length<15){setStatus('error','Número do cartão inválido.');return;}
+  if(!nome){setStatus('error','Informe o nome no cartão.');return;}
+  if(!validade||validade.length<5){setStatus('error','Validade inválida.');return;}
+  if(!cvv||cvv.length<3){setStatus('error','CVV inválido.');return;}
+  if(!cpf||cpf.length<11){setStatus('error','CPF inválido.');return;}
+  if(!planoEssencialId){setStatus('error','Erro ao carregar plano.');return;}
+
   document.getElementById('btn-cartao').disabled=true;
-  document.getElementById('btn-pix').disabled=true;
-  document.getElementById(spinnerId).className='spinner show';
-  document.getElementById(labelId).textContent='Processando...';
-  setStatus('info','Criando sua assinatura...');
+  document.getElementById('spinner-cartao').className='spinner show';
+  document.getElementById('label-cartao').innerHTML='Processando...';
+  setStatus('info','Gerando token do cartão...');
+
   try{
+    const [mes,ano]=validade.split('/');
+    // Gera token do cartão via SDK MP
+    const cardToken=await mp.createCardToken({
+      cardNumber: numero,
+      cardholderName: nome,
+      cardExpirationMonth: mes,
+      cardExpirationYear: '20'+ano,
+      securityCode: cvv,
+      identificationType: 'CPF',
+      identificationNumber: cpf,
+    });
+
+    if(cardToken.error){throw new Error(cardToken.error);}
+
+    setStatus('info','Criando assinatura recorrente...');
+
+    // Envia para Edge Function com o token
     const res=await fetch(`${SUPA_URL}/functions/v1/criar-assinatura`,{
       method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':`Bearer ${token}`,
-        'apikey':SUPA_KEY
-      },
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`,'apikey':SUPA_KEY},
       body:JSON.stringify({
         plano_id:planoEssencialId,
         cupom_codigo:cupomAtivo?cupomAtivo.codigo:null,
-        tipo
+        tipo:'recorrente',
+        card_token_id:cardToken.id,
+        valor:valorFinal,
+        email:user.email,
+        cpf,
       })
     });
+
     const data=await res.json();
     if(!res.ok)throw new Error(data.error||'Erro ao criar assinatura.');
-    if(data.mp_init_point){
-      setStatus('success','Redirecionando para o pagamento...');
-      setTimeout(()=>{window.location.href=data.mp_init_point;},1500);
-    }else{
-      throw new Error('URL de pagamento não retornada.');
-    }
+
+    setStatus('success','Assinatura criada com sucesso! Redirecionando...');
+    setTimeout(()=>{window.location.href='pagamento_sucesso.html';},2000);
+
   }catch(e){
     setStatus('error',`Erro: ${e.message}`);
     document.getElementById('btn-cartao').disabled=false;
+    document.getElementById('spinner-cartao').className='spinner';
+    document.getElementById('label-cartao').innerHTML=`💳 Assinar com cartão — <span id="valor-btn-cartao">${fmt(valorFinal)}</span>/mês`;
+  }
+}
+
+// ── PAGAMENTO PIX/BOLETO ──────────────────────────────
+async function pagarPix(){
+  if(!planoEssencialId){setStatus('error','Erro ao carregar plano.');return;}
+  document.getElementById('btn-pix').disabled=true;
+  document.getElementById('spinner-pix').className='spinner show';
+  document.getElementById('label-pix').innerHTML='Gerando link...';
+  setStatus('info','Criando link de pagamento...');
+  try{
+    const res=await fetch(`${SUPA_URL}/functions/v1/criar-assinatura`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`,'apikey':SUPA_KEY},
+      body:JSON.stringify({plano_id:planoEssencialId,cupom_codigo:cupomAtivo?cupomAtivo.codigo:null,tipo:'avulso'})
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Erro ao criar pagamento.');
+    if(data.mp_init_point){
+      setStatus('success','Redirecionando...');
+      setTimeout(()=>{window.location.href=data.mp_init_point;},1000);
+    }else{
+      throw new Error('Link de pagamento não gerado.');
+    }
+  }catch(e){
+    setStatus('error',`Erro: ${e.message}`);
     document.getElementById('btn-pix').disabled=false;
-    document.getElementById(spinnerId).className='spinner';
-    document.getElementById(labelId).textContent=tipo==='recorrente'?'Cartão recorrente':'Pix / Boleto';
+    document.getElementById('spinner-pix').className='spinner';
+    document.getElementById('label-pix').innerHTML=`⚡ Gerar Pix/Boleto — <span id="valor-btn-pix">${fmt(valorFinal)}</span>`;
   }
 }
 
