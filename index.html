@@ -51,6 +51,7 @@
   .stat-value{font-size:22px;font-weight:500;}
   @media(max-width:600px){.header-title{display:none;}.user-email{display:none;}.menu-grid{grid-template-columns:1fr;}.stats-grid{grid-template-columns:1fr 1fr;}.header{padding:12px 16px;}.container{padding:24px 12px;}}
 </style>
+<script src="trial_check.js"></script>
 </head>
 <body>
 
@@ -96,158 +97,67 @@ document.addEventListener('click', function(e) {
       <div class="stat-value" id="stat-empresas">—</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Func. cobertos pelo programa</div>
+      <div class="stat-label">Funcionários</div>
       <div class="stat-value" id="stat-funcionarios">—</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Func. com cadastro individual</div>
-      <div class="stat-value" id="stat-cadastrados">—</div>
+      <div class="stat-label">Documentos</div>
+      <div class="stat-value">0</div>
     </div>
     <div class="stat">
-      <div class="stat-label">Alertas</div>
-      <div class="stat-value">0</div>
+      <div class="stat-label">Ações pendentes</div>
+      <div class="stat-value" id="stat-acoes">—</div>
     </div>
   </div>
 
-  <div style="background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:16px 20px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+  <div id="bloco-assinatura" style="display:none;background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:16px 20px;margin-bottom:32px;align-items:center;justify-content:space-between;gap:16px;">
     <div>
-      <div style="font-size:14px;font-weight:500;color:#e8eaf0;margin-bottom:4px;">Você está no período Trial</div>
-      <div style="font-size:12px;color:#7aabf7;">30 dias grátis com acesso completo. Assine agora e garanta seu plano.</div>
+      <div id="assin-titulo" style="font-size:14px;font-weight:500;color:#e8eaf0;margin-bottom:4px;">Você está no período Trial</div>
+      <div id="assin-sub" style="font-size:12px;color:#7aabf7;">30 dias grátis com acesso completo.</div>
     </div>
-    <a href="assinar.html" style="background:#4a7cdc;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;">Assinar plano</a>
+    <a href="assinar.html" id="assin-btn" style="background:#4a7cdc;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;">Assinar plano</a>
   </div>
 
   <div class="section-title">Menu principal</div>
-  <div class="menu-grid">
+  <div class="menu-grid" style="grid-template-columns:repeat(3,1fr);">
 
-    <!-- ATIVO -->
     <a href="empresas.html" class="menu-card">
       <div class="menu-icon icon-blue">🏢</div>
       <div class="menu-title">Empresas <span class="badge badge-new">ativo</span></div>
-      <div class="menu-desc">Gerencie empresas, setores, funções e funcionários com consulta automática na Receita Federal.</div>
+      <div class="menu-desc">Gerencie empresas, setores, funções e funcionários com todos os módulos SST integrados.</div>
     </a>
 
-    <!-- EM BREVE — PRÓXIMOS -->
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-amber">⚠️</div>
-      <div class="menu-title">Riscos <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">GRO/PGR — identificação, avaliação e controle de riscos por setor, função e atividade com hierarquia NR-1.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-green">🩺</div>
-      <div class="menu-title">Exames Ocupacionais <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">PCMSO — catálogo de exames por função e setor, controle de ASOs e vencimentos por funcionário.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-blue">👥</div>
-      <div class="menu-title">SESMT <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Dimensionamento automático do SESMT conforme NR-4, grau de risco e número de funcionários.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-amber">🥽</div>
-      <div class="menu-title">Gestão de EPIs <span class="badge badge-new">ativo</span></div>
-      <div class="menu-desc">Ficha de EPI por funcionário, entregas, devoluções, controle de validade de CA e sugestão automática por função.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-blue">🎓</div>
-      <div class="menu-title">Treinamentos <span class="badge badge-new">ativo</span></div>
-      <div class="menu-desc">Catálogo por NR, histórico por funcionário, habilitações especiais, upload de evidências e alertas de vencimento.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-green">📊</div>
-      <div class="menu-title">Medições Ambientais <span class="badge badge-new">ativo</span></div>
-      <div class="menu-desc">Avaliação de agentes físicos, químicos e biológicos por setor, integrado ao LTCAT e PGR.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-amber">🔥</div>
-      <div class="menu-title">Equipamentos de Segurança <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Extintores, sprinklers, iluminação de emergência e kits de primeiros socorros com controle de vistoria.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-gray">⚙️</div>
-      <div class="menu-title">Equipamentos Críticos <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Caldeiras, vasos de pressão, máquinas e equipamentos elétricos com laudos e inspeções periódicas.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-amber">🚒</div>
-      <div class="menu-title">Brigada e Emergência <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Gestão da brigada, simulacros, planos de emergência, PPCI e AVCB.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-gray">📄</div>
-      <div class="menu-title">Documentos e Laudos <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">PGR, PCMSO, LTCAT, laudos de insalubridade, periculosidade e ergonomia com controle de validade.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-blue">🔔</div>
-      <div class="menu-title">Alertas e Notificações <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Central de alertas automáticos de vencimentos e notificações configuráveis por usuário.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-green">📎</div>
-      <div class="menu-title">Documentos do Colaborador <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Upload de documentos por funcionário na nuvem ou link externo (OneDrive, Google Drive).</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-amber">📋</div>
-      <div class="menu-title">Gestão de Requisitos <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Controle de requisitos legais das NRs, ISO 45001, OHSAS e requisitos de clientes com status de conformidade.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-gray">🔍</div>
-      <div class="menu-title">Inspeções e Checklists <span class="badge badge-new">ativo</span></div>
-      <div class="menu-desc">Checklists por NR, inspeções de campo, não conformidades e geração automática de ações corretivas.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-blue">🏛️</div>
-      <div class="menu-title">CIPA / CIPATR <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Gestão completa de eleições, mandatos, atas de reuniões e ações da comissão.</div>
-    </div>
-
-    <div class="menu-card disabled">
+    <a href="acoes_global.html" class="menu-card">
       <div class="menu-icon icon-amber">⚡</div>
-      <div class="menu-title">Gestão de Ações <span class="badge badge-new">ativo</span></div>
-      <div class="menu-desc">Central única de ações corretivas e preventivas com responsável, prazo, histórico de andamento e status.</div>
-    </div>
+      <div class="menu-title">Central de Ações <span class="badge badge-new">ativo</span></div>
+      <div class="menu-desc">Visualize e gerencie todas as ações de todas as suas empresas em um único painel consolidado.</div>
+    </a>
 
-    <div class="menu-card disabled">
+    <a href="relatorios.html" class="menu-card">
       <div class="menu-icon icon-green">📊</div>
-      <div class="menu-title">eSocial SST <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Envio de eventos SST — S-2210 CAT, S-2220 ASO e S-2240 PPP integrados.</div>
-    </div>
-
-    <div class="menu-card disabled">
-      <div class="menu-icon icon-amber">📝</div>
-      <div class="menu-title">Permissão de Trabalho <span class="badge badge-soon">em breve</span></div>
-      <div class="menu-desc">Geração e controle de PT para trabalhos críticos — espaço confinado, altura, eletricidade e inflamáveis.</div>
-    </div>
+      <div class="menu-title">Relatórios <span class="badge badge-new">ativo</span></div>
+      <div class="menu-desc">Gráficos e indicadores SST consolidados — riscos, exames, treinamentos, ações e muito mais.</div>
+    </a>
 
   </div>
+
+  <div class="section-title">Acesso rápido</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;">
+    <a href="empresas.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">🏢 Empresas</a>
+    <a href="acoes_global.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">⚡ Ações</a>
+    <a href="relatorios.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">📊 Relatórios</a>
+    <a href="usuarios.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">👥 Usuários</a>
+    <a href="assinar.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">💳 Assinatura</a>
+  </div>
+
 </div>
 
 <script>
 const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
-
-// Verifica autenticação
 const token = localStorage.getItem('sgs_token');
 const userRaw = localStorage.getItem('sgs_user');
 if (!token) { window.location.href = 'login.html'; }
-
 const user = userRaw ? JSON.parse(userRaw) : {};
 document.getElementById('user-email').textContent = user.email || '';
 const nomeCompleto = user.email?.split('@')[0] || 'usuário';
@@ -255,29 +165,69 @@ const primeiroNome = nomeCompleto.split('.')[0];
 const nomeFmt = primeiroNome.charAt(0).toUpperCase() + primeiroNome.slice(1);
 document.getElementById('user-nome').textContent = nomeFmt;
 
-// Carrega estatísticas
 async function carregarStats() {
   try {
-    const res = await fetch(`${SUPA_URL}/rest/v1/empresas?select=id,total_funcionarios_previsto,total_funcionarios_cadastrados&ativo=eq.true`, {
-      headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    if (res.ok) {
-      const data = await res.json();
+    const [resEmpresas, resAcoes] = await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?select=id,total_funcionarios_cadastrados&ativo=eq.true`, {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/acoes?select=id,status&ativo=eq.true`, {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+    ]);
+    if (resEmpresas.ok) {
+      const data = await resEmpresas.json();
       document.getElementById('stat-empresas').textContent = data.length;
-      const totalPrevistos = data.reduce((acc, e) => acc + (e.total_funcionarios_previsto || 0), 0);
-      const totalCadastrados = data.reduce((acc, e) => acc + (e.total_funcionarios_cadastrados || 0), 0);
-      document.getElementById('stat-funcionarios').textContent = totalPrevistos;
-      document.getElementById('stat-cadastrados').textContent = totalCadastrados;
+      const totalFuncs = data.reduce((acc, e) => acc + (e.total_funcionarios_cadastrados || 0), 0);
+      document.getElementById('stat-funcionarios').textContent = totalFuncs;
     }
-  } catch(e) {
-    console.log('Erro ao carregar stats:', e);
-  }
+    if (resAcoes.ok) {
+      const acoes = await resAcoes.json();
+      const pendentes = acoes.filter(a => a.status === 'Pendente' || a.status === 'Em andamento').length;
+      document.getElementById('stat-acoes').textContent = pendentes;
+    }
+  } catch(e) { console.log('Erro stats:', e); }
+}
+
+async function verificarAssinatura() {
+  try {
+    const resPerfil = await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${user.id}&select=perfil`, {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const perfil = await resPerfil.json();
+    if (perfil[0]?.perfil === 'SUPERADMIN') return;
+
+    const res = await fetch(`${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=status,data_fim_trial&order=criado_em.desc&limit=1`, {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const assinaturas = await res.json();
+    const assin = assinaturas[0];
+    const bloco = document.getElementById('bloco-assinatura');
+    const titulo = document.getElementById('assin-titulo');
+    const sub = document.getElementById('assin-sub');
+    const btn = document.getElementById('assin-btn');
+
+    if (assin?.status === 'Ativo') {
+      bloco.style.display = 'none';
+      return;
+    }
+
+    const fim = assin ? new Date(assin.data_fim_trial + 'T00:00:00') : null;
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const dias = fim ? Math.ceil((fim - hoje) / (1000*60*60*24)) : 0;
+
+    bloco.style.display = 'flex';
+    if (!assin || dias <= 0) {
+      bloco.style.background = '#2a1515'; bloco.style.borderColor = '#4a2020';
+      titulo.textContent = '🔴 Período de teste encerrado';
+      sub.style.color = '#e05555'; sub.textContent = 'Assine agora para continuar.';
+      btn.style.background = '#e05555';
+    } else if (dias <= 7) {
+      bloco.style.background = '#2a2010'; bloco.style.borderColor = '#4a3a10';
+      titulo.textContent = `⚠️ Trial vence em ${dias} dia(s)!`;
+      sub.style.color = '#e0a855'; sub.textContent = 'Assine agora para não perder o acesso.';
+      btn.style.background = '#e0a855'; btn.style.color = '#0f1117';
+    } else {
+      titulo.textContent = `🎯 Período de teste — ${dias} dias restantes`;
+      sub.textContent = '30 dias grátis com acesso completo.';
+    }
+  } catch(e) { console.log('Erro assinatura:', e); }
 }
 
 carregarStats();
+verificarAssinatura();
 
 function sair() {
   localStorage.removeItem('sgs_token');
