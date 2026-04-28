@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Documentos do Funcionário</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="trial_check.js"></script>
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1000px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:5px 10px;}
+.btn-danger:hover{background:#2a1515;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+/* Stats */
+.stats-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;display:flex;align-items:center;gap:8px;}
+.stat-pill-val{font-weight:600;font-family:var(--mono);}
+/* Doc cards */
+.doc-secao{margin-bottom:28px;}
+.doc-secao-titulo{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.doc-secao-titulo::after{content:'';flex:1;height:1px;background:var(--border);}
+.doc-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:8px;display:flex;gap:14px;align-items:flex-start;transition:border-color .15s;}
+.doc-card:hover{border-color:var(--border-focus);}
+.doc-card.pendente{border-left:3px solid var(--warning);}
+.doc-card.vencido{border-left:3px solid var(--danger);}
+.doc-card.vigente{border-left:3px solid var(--success);}
+.doc-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.doc-info{flex:1;min-width:0;}
+.doc-tipo{font-size:13px;font-weight:500;margin-bottom:4px;}
+.doc-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--text2);margin-bottom:6px;}
+.doc-datas{display:flex;gap:8px;flex-wrap:wrap;}
+.doc-data{background:var(--bg);border-radius:var(--radius);padding:4px 8px;font-size:10px;}
+.doc-data-label{color:var(--text3);text-transform:uppercase;letter-spacing:.04em;}
+.doc-data-val{font-weight:500;margin-top:1px;}
+.doc-acoes{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+/* Badges */
+.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);display:inline-block;}
+.badge-pendente{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.badge-vigente{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.badge-vencido{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.badge-substituido{background:#1e2333;color:var(--text3);border:1px solid var(--border);}
+.badge-apto{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.badge-inapto{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.badge-restricao{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+/* Upload area */
+.upload-area{border:2px dashed var(--border);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;transition:border-color .15s;margin-top:8px;}
+.upload-area:hover,.upload-area.drag{border-color:var(--border-focus);background:var(--surface2);}
+.upload-area input{display:none;}
+.upload-progress{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;display:none;}
+.upload-progress-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .3s;}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:640px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{margin-bottom:0;}
+.field.full{grid-column:1/-1;}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--border-focus);}
+.sep{grid-column:1/-1;border-top:1px solid var(--border);padding-top:14px;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
+/* Status bar */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:32px;color:var(--text3);}
+/* PDF viewer */
+.pdf-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:2000;flex-direction:column;}
+.pdf-overlay.show{display:flex;}
+.pdf-header{background:var(--surface);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.pdf-frame{flex:1;width:100%;border:none;}
+@media(max-width:768px){.modal-grid{grid-template-columns:1fr;}.doc-acoes{flex-direction:row;}.header-title{display:none;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Documentos</span></div>
+</div>
+<div class="container">
+  <a id="link-voltar" href="#" class="voltar">← Voltar para funcionário</a>
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#1a2030;border:1px solid #3a5070;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📁</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Documentos do Funcionário</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <button class="btn btn-primary" onclick="abrirModalNovo()">+ Novo documento</button>
+  </div>
+  <div class="stats-row" id="stats-row"></div>
+  <div id="lista-docs"></div>
+</div>
+
+<!-- MODAL DOCUMENTO -->
+<div class="modal-overlay" id="modal-doc">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-titulo">Novo documento</span>
+      <button onclick="fecharModal()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="field">
+        <label>Tipo de documento *</label>
+        <select id="doc-tipo" onchange="atualizarCampos()">
+          <option value="">— Selecione —</option>
+          <option value="ASO">ASO — Atestado de Saúde Ocupacional</option>
+          <option value="NR-10">Certificado NR-10</option>
+          <option value="NR-35">Certificado NR-35</option>
+          <option value="NR-33">Certificado NR-33</option>
+          <option value="NR-20">Certificado NR-20</option>
+          <option value="NR-12">Certificado NR-12</option>
+          <option value="MOPP">MOPP</option>
+          <option value="CNH">CNH</option>
+          <option value="CREA">Registro CREA</option>
+          <option value="CRM">Registro CRM</option>
+          <option value="Certificado">Certificado / Habilitação</option>
+          <option value="CPF">CPF</option>
+          <option value="RG">RG / Identidade</option>
+          <option value="CTPS">Carteira de Trabalho</option>
+          <option value="Outro">Outro documento</option>
+        </select>
+      </div>
+      <!-- Subtipo ASO -->
+      <div class="field" id="campo-subtipo" style="display:none;">
+        <label>Tipo de ASO</label>
+        <select id="doc-subtipo">
+          <option value="Admissional">Admissional</option>
+          <option value="Periódico">Periódico</option>
+          <option value="Retorno ao trabalho">Retorno ao trabalho</option>
+          <option value="Mudança de função">Mudança de função</option>
+          <option value="Demissional">Demissional</option>
+        </select>
+      </div>
+      <div class="field full" id="campo-descricao">
+        <label>Descrição</label>
+        <input type="text" id="doc-descricao" placeholder="Ex: NR-10 Básico + SEP">
+      </div>
+      <div class="field">
+        <label>Data de emissão</label>
+        <input type="date" id="doc-emissao">
+      </div>
+      <div class="field">
+        <label>Data de vencimento</label>
+        <input type="date" id="doc-vencimento">
+      </div>
+      <!-- Campos ASO -->
+      <div class="field" id="campo-resultado" style="display:none;">
+        <label>Resultado</label>
+        <select id="doc-resultado">
+          <option value="">— Selecione —</option>
+          <option value="Apto">Apto</option>
+          <option value="Apto com restrição">Apto com restrição</option>
+          <option value="Inapto">Inapto</option>
+        </select>
+      </div>
+      <div class="field" id="campo-medico" style="display:none;">
+        <label>Médico responsável</label>
+        <input type="text" id="doc-medico" placeholder="Nome do médico">
+      </div>
+      <div class="field" id="campo-crm" style="display:none;">
+        <label>CRM</label>
+        <input type="text" id="doc-crm" placeholder="Ex: CRM/PA 12345">
+      </div>
+      <div class="field" id="campo-entidade">
+        <label>Entidade emissora</label>
+        <input type="text" id="doc-entidade" placeholder="Ex: SENAI, CREA, Hospital...">
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="doc-status">
+          <option value="Pendente">Pendente</option>
+          <option value="Vigente">Vigente</option>
+          <option value="Vencido">Vencido</option>
+          <option value="Substituído">Substituído</option>
+        </select>
+      </div>
+      <!-- Upload -->
+      <div class="sep">Arquivo (PDF, imagem — máx. 10MB)</div>
+      <div class="field full">
+        <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event)">
+          <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" onchange="selecionarArquivo(event)">
+          <div id="upload-label">
+            <div style="font-size:24px;margin-bottom:8px;">📎</div>
+            <div style="font-size:13px;color:var(--text2);">Clique ou arraste o arquivo aqui</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px;">PDF, JPG ou PNG · máx. 10MB</div>
+          </div>
+        </div>
+        <div class="upload-progress" id="upload-progress">
+          <div class="upload-progress-fill" id="upload-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="status-bar" id="status-doc"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+      <div id="modal-esq"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+        <button class="btn btn-save" id="btn-salvar-doc" onclick="salvarDoc()">
+          <span class="spinner" id="spinner-doc"></span>
+          <span id="label-doc">Salvar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PDF VIEWER -->
+<div class="pdf-overlay" id="pdf-overlay">
+  <div class="pdf-header">
+    <span id="pdf-titulo" style="font-size:13px;font-weight:500;">Visualizando documento</span>
+    <div style="display:flex;gap:8px;">
+      <a id="pdf-download" href="#" download class="btn btn-edit btn-sm">⬇️ Baixar</a>
+      <button onclick="fecharPDF()" class="btn btn-cancel btn-sm">✕ Fechar</button>
+    </div>
+  </div>
+  <iframe id="pdf-frame" class="pdf-frame"></iframe>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const BUCKET='documentos-funcionarios';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const funcId=params.get('funcionario_id');
+if(!funcId)window.location.href='empresas.html';
+
+let funcionario={},empresa={},docs=[];
+let editando=null,arquivoSelecionado=null;
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]}</span><span>${msg}</span>`;}
+function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+function diasAte(d){if(!d)return null;return Math.ceil((new Date(d+'T00:00:00')-new Date())/(1000*60*60*24));}
+function fmtBytes(b){if(!b)return'';if(b<1024)return b+'B';if(b<1024*1024)return(b/1024).toFixed(0)+'KB';return(b/(1024*1024)).toFixed(1)+'MB';}
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`funcionario_detalhe.html?id=${funcId}`;
+  try{
+    const [resFunc,resDocs]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}&select=id,nome_completo,empresa_id,matricula`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?funcionario_id=eq.${funcId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+    ]);
+    const funcs=await resFunc.json();
+    funcionario=funcs[0];
+    docs=await resDocs.json();
+    if(!funcionario){window.location.href='empresas.html';return;}
+    // Busca empresa
+    const resEmp=await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${funcionario.empresa_id}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const emps=await resEmp.json();
+    empresa=emps[0];
+    const nomeEmp=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=funcionario.nome_completo;
+    document.getElementById('hero-sub').textContent=`${nomeEmp} · ${docs.length} documento(s)`;
+    document.getElementById('header-nome').textContent=funcionario.nome_completo;
+    // Atualiza status automático de vencidos
+    await atualizarStatusVencidos();
+    renderStats();
+    renderDocs();
+  }catch(e){console.error(e);}
+}
+
+async function atualizarStatusVencidos(){
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const vencidos=docs.filter(d=>d.status==='Vigente'&&d.data_vencimento&&new Date(d.data_vencimento+'T00:00:00')<hoje);
+  for(const d of vencidos){
+    await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?id=eq.${d.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({status:'Vencido'})});
+    d.status='Vencido';
+  }
+}
+
+function renderStats(){
+  const total=docs.length;
+  const pendentes=docs.filter(d=>d.status==='Pendente').length;
+  const vencidos=docs.filter(d=>d.status==='Vencido').length;
+  const vigentes=docs.filter(d=>d.status==='Vigente').length;
+  const vencendo=docs.filter(d=>{const dias=diasAte(d.data_vencimento);return d.status==='Vigente'&&dias!==null&&dias<=30&&dias>0;}).length;
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-pill"><span>📁</span><span style="font-size:11px;color:var(--text2);">Total</span><span class="stat-pill-val">${total}</span></div>
+    <div class="stat-pill"><span style="color:var(--success);">✓</span><span style="font-size:11px;color:var(--text2);">Vigentes</span><span class="stat-pill-val" style="color:var(--success);">${vigentes}</span></div>
+    ${pendentes?`<div class="stat-pill"><span style="color:var(--warning);">⏳</span><span style="font-size:11px;color:var(--text2);">Pendentes</span><span class="stat-pill-val" style="color:var(--warning);">${pendentes}</span></div>`:''}
+    ${vencidos?`<div class="stat-pill"><span style="color:var(--danger);">✕</span><span style="font-size:11px;color:var(--text2);">Vencidos</span><span class="stat-pill-val" style="color:var(--danger);">${vencidos}</span></div>`:''}
+    ${vencendo?`<div class="stat-pill"><span style="color:var(--warning);">⚠️</span><span style="font-size:11px;color:var(--text2);">Vencendo em 30d</span><span class="stat-pill-val" style="color:var(--warning);">${vencendo}</span></div>`:''}`;
+}
+
+const SECOES=[
+  {key:'ASO',titulo:'🩺 ASO — Atestado de Saúde Ocupacional',icone:'🩺',cor:{bg:'#0e2820',brd:'#1a4a38'}},
+  {key:'cert',titulo:'🎓 Certificados e Habilitações',icone:'🎓',cor:{bg:'#1a2540',brd:'#2a4070'}},
+  {key:'docs',titulo:'📄 Documentos Pessoais',icone:'📄',cor:{bg:'#1e2333',brd:'#2a3044'}},
+];
+const TIPOS_CERT=['NR-10','NR-35','NR-33','NR-20','NR-12','MOPP','CNH','CREA','CRM','Certificado'];
+const TIPOS_DOCS=['CPF','RG','CTPS','Outro'];
+
+function renderDocs(){
+  const el=document.getElementById('lista-docs');
+  if(!docs.length){el.innerHTML=`<div class="empty">📁<br><br>Nenhum documento cadastrado.</div>`;return;}
+  const grupos={ASO:docs.filter(d=>d.tipo==='ASO'),cert:docs.filter(d=>TIPOS_CERT.includes(d.tipo)),docs:docs.filter(d=>TIPOS_DOCS.includes(d.tipo)||!['ASO',...TIPOS_CERT,...TIPOS_DOCS].includes(d.tipo))};
+  el.innerHTML=SECOES.map(s=>{
+    const lista=grupos[s.key];
+    if(!lista.length)return'';
+    return`<div class="doc-secao">
+      <div class="doc-secao-titulo">${s.titulo}</div>
+      ${lista.map(d=>renderDocCard(d,s)).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderDocCard(d,s){
+  const statusCls=d.status==='Vigente'?'vigente':d.status==='Vencido'?'vencido':d.status==='Substituído'?'':d.status==='Pendente'?'pendente':'';
+  const badgeCls=`badge-${d.status.toLowerCase().replace(' ','').replace('í','i').replace('ú','u')}`;
+  const dias=diasAte(d.data_vencimento);
+  const urgente=d.status==='Vigente'&&dias!==null&&dias<=30&&dias>0;
+  const resultBadge=d.resultado?`<span class="badge ${d.resultado==='Apto'?'badge-apto':d.resultado==='Inapto'?'badge-inapto':'badge-restricao'}">${escHtml(d.resultado)}</span>`:'';
+  return`<div class="doc-card ${statusCls}">
+    <div class="doc-icon" style="background:${s.cor.bg};border:1px solid ${s.cor.brd};">${s.icone}</div>
+    <div class="doc-info">
+      <div class="doc-tipo">${escHtml(d.tipo)}${d.subtipo?' — '+escHtml(d.subtipo):''}</div>
+      <div class="doc-meta">
+        <span class="badge ${badgeCls}">${d.status}</span>
+        ${resultBadge}
+        ${d.descricao?`<span>${escHtml(d.descricao)}</span>`:''}
+        ${d.medico_responsavel?`<span>👨‍⚕️ ${escHtml(d.medico_responsavel)}</span>`:''}
+        ${d.entidade_emissora?`<span>🏛️ ${escHtml(d.entidade_emissora)}</span>`:''}
+        ${d.arquivo_nome?`<span>📎 ${escHtml(d.arquivo_nome)} ${d.arquivo_tamanho?'('+fmtBytes(d.arquivo_tamanho)+')':''}</span>`:''}
+      </div>
+      <div class="doc-datas">
+        ${d.data_emissao?`<div class="doc-data"><div class="doc-data-label">Emissão</div><div class="doc-data-val">${fmtData(d.data_emissao)}</div></div>`:''}
+        ${d.data_vencimento?`<div class="doc-data"><div class="doc-data-label">Vencimento</div><div class="doc-data-val" style="${urgente?'color:var(--warning);':d.status==='Vencido'?'color:var(--danger);':''}">${fmtData(d.data_vencimento)}${urgente?` (${dias}d)`:''}${d.status==='Vencido'?' ✕':''}</div></div>`:''}
+      </div>
+    </div>
+    <div class="doc-acoes">
+      ${d.arquivo_url?`<button class="btn btn-sm btn-edit" onclick="verDoc(${d.id})">👁️ Ver</button>`:''}
+      <button class="btn btn-sm btn-edit" onclick="editarDoc(${d.id})">✏️ Editar</button>
+      ${d.status==='Vencido'?`<button class="btn btn-sm btn-primary" onclick="renovarDoc(${d.id})">🔄 Renovar</button>`:''}
+      <button class="btn btn-sm btn-danger" onclick="excluirDoc(${d.id})">✕</button>
+    </div>
+  </div>`;
+}
+
+function atualizarCampos(){
+  const tipo=document.getElementById('doc-tipo').value;
+  const isASO=tipo==='ASO';
+  document.getElementById('campo-subtipo').style.display=isASO?'block':'none';
+  document.getElementById('campo-resultado').style.display=isASO?'block':'none';
+  document.getElementById('campo-medico').style.display=isASO?'block':'none';
+  document.getElementById('campo-crm').style.display=isASO?'block':'none';
+  document.getElementById('campo-entidade').style.display=isASO?'none':'block';
+}
+
+// Upload
+function dragOver(e){e.preventDefault();document.getElementById('upload-area').classList.add('drag');}
+function dragLeave(){document.getElementById('upload-area').classList.remove('drag');}
+function drop(e){e.preventDefault();dragLeave();const f=e.dataTransfer.files[0];if(f)processarArquivo(f);}
+function selecionarArquivo(e){const f=e.target.files[0];if(f)processarArquivo(f);}
+
+function processarArquivo(f){
+  if(f.size>10*1024*1024){alert('Arquivo muito grande. Máximo 10MB.');return;}
+  const tipos=['application/pdf','image/jpeg','image/png'];
+  if(!tipos.includes(f.type)){alert('Formato não suportado. Use PDF, JPG ou PNG.');return;}
+  arquivoSelecionado=f;
+  document.getElementById('upload-label').innerHTML=`<div style="font-size:20px;">📎</div><div style="font-size:13px;color:var(--success);">${escHtml(f.name)}</div><div style="font-size:11px;color:var(--text3);">${fmtBytes(f.size)}</div>`;
+}
+
+async function uploadArquivo(docId){
+  if(!arquivoSelecionado)return null;
+  const ext=arquivoSelecionado.name.split('.').pop();
+  const path=`${funcionario.empresa_id}/${funcId}/${docId}.${ext}`;
+  const prog=document.getElementById('upload-progress');
+  const fill=document.getElementById('upload-progress-fill');
+  prog.style.display='block';fill.style.width='30%';
+  try{
+    const res=await fetch(`${SUPA_URL}/storage/v1/object/${BUCKET}/${path}`,{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':arquivoSelecionado.type,'x-upsert':'true'},
+      body:arquivoSelecionado
+    });
+    fill.style.width='100%';
+    if(!res.ok)throw new Error('Erro no upload');
+    return{url:path,nome:arquivoSelecionado.name,tamanho:arquivoSelecionado.size};
+  }catch(e){prog.style.display='none';throw e;}
+}
+
+async function getUrlAssinada(path){
+  const res=await fetch(`${SUPA_URL}/storage/v1/object/sign/${BUCKET}/${path}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+    body:JSON.stringify({expiresIn:3600})
+  });
+  const data=await res.json();
+  return data.signedURL?`${SUPA_URL}/storage/v1${data.signedURL}`:null;
+}
+
+async function verDoc(id){
+  const d=docs.find(x=>x.id===id);
+  if(!d?.arquivo_url){alert('Nenhum arquivo anexado.');return;}
+  setStatus('status-doc','info','Abrindo documento...');
+  try{
+    const url=await getUrlAssinada(d.arquivo_url);
+    if(!url){alert('Erro ao obter URL do arquivo.');return;}
+    document.getElementById('pdf-titulo').textContent=d.arquivo_nome||'Documento';
+    document.getElementById('pdf-download').href=url;
+    document.getElementById('pdf-frame').src=url;
+    document.getElementById('pdf-overlay').classList.add('show');
+  }catch(e){alert('Erro ao abrir documento.');}
+}
+
+function fecharPDF(){
+  document.getElementById('pdf-overlay').classList.remove('show');
+  document.getElementById('pdf-frame').src='';
+}
+
+function abrirModalNovo(){
+  editando=null;arquivoSelecionado=null;
+  document.getElementById('modal-titulo').textContent='Novo documento';
+  document.getElementById('label-doc').textContent='Salvar';
+  document.getElementById('modal-esq').innerHTML='';
+  document.getElementById('doc-tipo').value='';
+  document.getElementById('doc-subtipo').value='Admissional';
+  document.getElementById('doc-descricao').value='';
+  document.getElementById('doc-emissao').value='';
+  document.getElementById('doc-vencimento').value='';
+  document.getElementById('doc-resultado').value='';
+  document.getElementById('doc-medico').value='';
+  document.getElementById('doc-crm').value='';
+  document.getElementById('doc-entidade').value='';
+  document.getElementById('doc-status').value='Pendente';
+  document.getElementById('upload-label').innerHTML=`<div style="font-size:24px;margin-bottom:8px;">📎</div><div style="font-size:13px;color:var(--text2);">Clique ou arraste o arquivo aqui</div><div style="font-size:11px;color:var(--text3);margin-top:4px;">PDF, JPG ou PNG · máx. 10MB</div>`;
+  document.getElementById('upload-progress').style.display='none';
+  document.getElementById('file-input').value='';
+  atualizarCampos();
+  document.getElementById('modal-doc').classList.add('show');
+}
+
+function editarDoc(id){
+  const d=docs.find(x=>x.id===id);
+  if(!d)return;
+  editando=d;arquivoSelecionado=null;
+  document.getElementById('modal-titulo').textContent='Editar documento';
+  document.getElementById('label-doc').textContent='Salvar alterações';
+  document.getElementById('modal-esq').innerHTML=`<button class="btn btn-danger btn-sm" onclick="excluirDoc(${id})">Excluir</button>`;
+  document.getElementById('doc-tipo').value=d.tipo||'';
+  document.getElementById('doc-subtipo').value=d.subtipo||'Admissional';
+  document.getElementById('doc-descricao').value=d.descricao||'';
+  document.getElementById('doc-emissao').value=d.data_emissao||'';
+  document.getElementById('doc-vencimento').value=d.data_vencimento||'';
+  document.getElementById('doc-resultado').value=d.resultado||'';
+  document.getElementById('doc-medico').value=d.medico_responsavel||'';
+  document.getElementById('doc-crm').value=d.crm||'';
+  document.getElementById('doc-entidade').value=d.entidade_emissora||'';
+  document.getElementById('doc-status').value=d.status||'Vigente';
+  if(d.arquivo_nome){
+    document.getElementById('upload-label').innerHTML=`<div style="font-size:20px;">📎</div><div style="font-size:13px;color:var(--success);">${escHtml(d.arquivo_nome)}</div><div style="font-size:11px;color:var(--text3);">Arquivo já anexado — envie outro para substituir</div>`;
+  }
+  atualizarCampos();
+  document.getElementById('modal-doc').classList.add('show');
+}
+
+function renovarDoc(id){
+  const d=docs.find(x=>x.id===id);
+  if(!d)return;
+  // Marca o atual como substituído e abre modal para novo
+  fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({status:'Substituído'})});
+  d.status='Substituído';
+  abrirModalNovo();
+  document.getElementById('doc-tipo').value=d.tipo;
+  document.getElementById('doc-subtipo').value=d.tipo==='ASO'?'Periódico':d.subtipo||'';
+  atualizarCampos();
+  document.getElementById('doc-status').value='Vigente';
+}
+
+function fecharModal(){document.getElementById('modal-doc').classList.remove('show');editando=null;arquivoSelecionado=null;}
+
+async function salvarDoc(){
+  const tipo=document.getElementById('doc-tipo').value;
+  if(!tipo){setStatus('status-doc','error','Selecione o tipo de documento.');return;}
+  document.getElementById('btn-salvar-doc').disabled=true;
+  document.getElementById('spinner-doc').className='spinner show';
+  try{
+    const payload={
+      funcionario_id:parseInt(funcId),
+      empresa_id:parseInt(funcionario.empresa_id),
+      tipo,
+      subtipo:tipo==='ASO'?document.getElementById('doc-subtipo').value:null,
+      descricao:document.getElementById('doc-descricao').value.trim()||null,
+      data_emissao:document.getElementById('doc-emissao').value||null,
+      data_vencimento:document.getElementById('doc-vencimento').value||null,
+      resultado:tipo==='ASO'?document.getElementById('doc-resultado').value||null:null,
+      medico_responsavel:tipo==='ASO'?document.getElementById('doc-medico').value.trim()||null:null,
+      crm:tipo==='ASO'?document.getElementById('doc-crm').value.trim()||null:null,
+      entidade_emissora:tipo!=='ASO'?document.getElementById('doc-entidade').value.trim()||null:null,
+      status:document.getElementById('doc-status').value,
+      ativo:true,
+    };
+    let docId=editando?.id;
+    if(editando){
+      await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?id=eq.${editando.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify(payload)});
+    }else{
+      const res=await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      const d=await res.json();docId=d[0].id;
+    }
+    // Upload do arquivo
+    if(arquivoSelecionado){
+      setStatus('status-doc','info','Enviando arquivo...');
+      const upd=await uploadArquivo(docId);
+      if(upd){
+        await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?id=eq.${docId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({arquivo_url:upd.url,arquivo_nome:upd.nome,arquivo_tamanho:upd.tamanho})});
+      }
+    }
+    // Recarrega docs
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?funcionario_id=eq.${funcId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    docs=await res.json();
+    fecharModal();renderStats();renderDocs();
+  }catch(e){setStatus('status-doc','error',e.message);}
+  finally{document.getElementById('btn-salvar-doc').disabled=false;document.getElementById('spinner-doc').className='spinner';}
+}
+
+async function excluirDoc(id){
+  if(!confirm('Excluir este documento?'))return;
+  await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});
+  docs=docs.filter(d=>d.id!==id);
+  fecharModal();renderStats();renderDocs();
+}
+
+document.getElementById('modal-doc').addEventListener('click',e=>{if(e.target.id==='modal-doc')fecharModal();});
+inicializar();
+</script>
+</body>
+</html>
