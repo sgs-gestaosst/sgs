@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Relatórios</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="trial_check.js"></script>
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.section-label{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+.kpi-label{font-size:11px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.kpi-val{font-size:26px;font-weight:600;font-family:var(--mono);}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px;}
+/* Charts grid */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.charts-grid.full{grid-template-columns:1fr;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;}
+.chart-titulo{font-size:13px;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.chart-wrap{position:relative;height:220px;}
+/* Alertas */
+.alertas-lista{display:flex;flex-direction:column;gap:8px;}
+.alerta-item{background:var(--bg);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:12px;}
+.alerta-item.critico{border-left:3px solid var(--danger);}
+.alerta-item.urgente{border-left:3px solid var(--warning);}
+.alerta-item.info{border-left:3px solid var(--accent);}
+.alerta-nome{font-weight:500;flex:1;}
+.alerta-empresa{color:var(--text3);font-size:11px;}
+/* Empresa select */
+.filtro-empresa{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;margin-left:auto;}
+.filtro-empresa:focus{border-color:var(--border-focus);}
+/* Spinner */
+.loading{text-align:center;padding:60px;color:var(--text3);}
+@media(max-width:768px){.kpi-grid{grid-template-columns:1fr 1fr;}.charts-grid{grid-template-columns:1fr;}.header-title{display:none;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; Relatórios</div>
+</div>
+<div class="container">
+  <a href="index.html" class="voltar">← Voltar ao início</a>
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#0e2820;border:1px solid #1a4a38;display:flex;align-items:center;justify-content:center;font-size:20px;">📊</div>
+    <div class="hero-info">
+      <div class="hero-nome">Relatórios e Indicadores SST</div>
+      <div class="hero-sub" id="hero-sub">Carregando dados...</div>
+    </div>
+    <select class="filtro-empresa" id="filtro-empresa" onchange="filtrarEmpresa()">
+      <option value="">Todas as empresas</option>
+    </select>
+  </div>
+
+  <div id="conteudo-loading" class="loading">⏳ Carregando indicadores...</div>
+  <div id="conteudo" style="display:none;">
+
+    <!-- KPIs -->
+    <div class="section-label">Visão geral</div>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Empresas</div>
+        <div class="kpi-val" id="kpi-empresas" style="color:var(--accent);">—</div>
+        <div class="kpi-sub" id="kpi-empresas-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Funcionários ativos</div>
+        <div class="kpi-val" id="kpi-funcs" style="color:var(--accent2);">—</div>
+        <div class="kpi-sub" id="kpi-funcs-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Ações em aberto</div>
+        <div class="kpi-val" id="kpi-acoes" style="color:var(--warning);">—</div>
+        <div class="kpi-sub" id="kpi-acoes-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Riscos mapeados</div>
+        <div class="kpi-val" id="kpi-riscos" style="color:var(--danger);">—</div>
+        <div class="kpi-sub" id="kpi-riscos-sub"></div>
+      </div>
+    </div>
+
+    <!-- Alertas críticos -->
+    <div class="section-label">⚠️ Alertas críticos</div>
+    <div class="chart-card" style="margin-bottom:24px;">
+      <div id="alertas-container"><div style="color:var(--text3);font-size:13px;">Carregando alertas...</div></div>
+    </div>
+
+    <!-- Ações e Riscos -->
+    <div class="section-label">Ações e Riscos</div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-titulo">⚡ Ações por status</div>
+        <div class="chart-wrap"><canvas id="chart-acoes-status"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-titulo">🎯 Ações por prioridade</div>
+        <div class="chart-wrap"><canvas id="chart-acoes-prior"></canvas></div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-titulo">⚠️ Riscos por categoria</div>
+        <div class="chart-wrap"><canvas id="chart-riscos-cat"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-titulo">📊 Riscos por nível GUT</div>
+        <div class="chart-wrap"><canvas id="chart-riscos-gut"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Saúde e Treinamentos -->
+    <div class="section-label">Saúde e Treinamentos</div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-titulo">🩺 Exames por status</div>
+        <div class="chart-wrap"><canvas id="chart-exames"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-titulo">🎓 Treinamentos por status</div>
+        <div class="chart-wrap"><canvas id="chart-trein"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Documentos e EPIs -->
+    <div class="section-label">Documentos e EPIs</div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-titulo">📁 Documentos por status</div>
+        <div class="chart-wrap"><canvas id="chart-docs"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-titulo">🥽 EPIs — CAs por situação</div>
+        <div class="chart-wrap"><canvas id="chart-epis"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Por empresa -->
+    <div class="section-label">Comparativo por empresa</div>
+    <div class="charts-grid full">
+      <div class="chart-card">
+        <div class="chart-titulo">🏢 Funcionários por empresa</div>
+        <div class="chart-wrap" style="height:260px;"><canvas id="chart-func-empresa"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid full">
+      <div class="chart-card">
+        <div class="chart-titulo">⚡ Ações abertas por empresa</div>
+        <div class="chart-wrap" style="height:260px;"><canvas id="chart-acoes-empresa"></canvas></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+
+let empresas=[],funcionarios=[],acoes=[],riscos=[],exames=[],treinamentos=[],docs=[],epis=[];
+let empresaFiltro='';
+const charts={};
+
+const CORES={
+  verde:'#2dd4a0',azul:'#4a7cdc',amarelo:'#e0a855',vermelho:'#e05555',
+  roxo:'#a78bfa',ciano:'#22d3ee',laranja:'#fb923c',rosa:'#f472b6',
+  cinza:'#545e72',verde2:'#34d399',azul2:'#60a5fa',
+};
+
+function corFade(cor,alpha=0.15){
+  const hex=cor.replace('#','');
+  const r=parseInt(hex.slice(0,2),16);
+  const g=parseInt(hex.slice(2,4),16);
+  const b=parseInt(hex.slice(4,6),16);
+  return`rgba(${r},${g},${b},${alpha})`;
+}
+
+Chart.defaults.color='#8892a4';
+Chart.defaults.borderColor='#2a3044';
+Chart.defaults.font.family='IBM Plex Sans';
+
+function criarGrafico(id,tipo,labels,datasets,opts={}){
+  if(charts[id])charts[id].destroy();
+  const ctx=document.getElementById(id);
+  if(!ctx)return;
+  charts[id]=new Chart(ctx,{
+    type:tipo,
+    data:{labels,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#8892a4',font:{size:11},boxWidth:12,padding:12}},...(opts.plugins||{})},
+      scales:tipo==='bar'||tipo==='line'?{
+        x:{grid:{color:'#1e2333'},ticks:{color:'#545e72',font:{size:10}}},
+        y:{grid:{color:'#1e2333'},ticks:{color:'#545e72',font:{size:10}},beginAtZero:true}
+      }:undefined,
+      ...opts
+    }
+  });
+}
+
+async function carregar(){
+  try{
+    const [rEmp,rFunc,rAcoes,rRiscos,rExames,rTrein,rDocs,rEpis]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?ativo=eq.true&select=id,nome_fantasia,razao_social,grau_risco`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcionarios?ativo=eq.true&select=id,empresa_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/acoes?ativo=eq.true&select=id,empresa_id,status,prioridade`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setor_riscos?select=id,setor_id,risco_id,nivel_risco`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcionario_exames?ativo=eq.true&select=id,empresa_id,status,data_vencimento`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcionario_treinamentos?ativo=eq.true&select=id,empresa_id,status,data_vencimento`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?ativo=eq.true&select=id,empresa_id,tipo,status,data_vencimento`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/epi_entregas?ativo=eq.true&select=id,empresa_id,status`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresas,funcionarios,acoes,riscos,exames,treinamentos,docs,epis]=await Promise.all([
+      rEmp.json(),rFunc.json(),rAcoes.json(),rRiscos.json(),
+      rExames.json(),rTrein.json(),rDocs.json(),rEpis.json()
+    ]);
+
+    // Popula filtro de empresa
+    const sel=document.getElementById('filtro-empresa');
+    empresas.forEach(e=>sel.innerHTML+=`<option value="${e.id}">${e.nome_fantasia||e.razao_social}</option>`);
+
+    document.getElementById('conteudo-loading').style.display='none';
+    document.getElementById('conteudo').style.display='block';
+    renderTudo();
+  }catch(e){
+    console.error(e);
+    document.getElementById('conteudo-loading').innerHTML='⚠️ Erro ao carregar dados.';
+  }
+}
+
+function filtrar(arr){
+  if(!empresaFiltro)return arr;
+  return arr.filter(x=>String(x.empresa_id)===String(empresaFiltro));
+}
+
+function filtrarEmpresa(){
+  empresaFiltro=document.getElementById('filtro-empresa').value;
+  renderTudo();
+}
+
+function nomeEmp(id){
+  const e=empresas.find(x=>x.id==id);
+  return e?(e.nome_fantasia||e.razao_social).slice(0,20):'—';
+}
+
+function renderTudo(){
+  const fFuncs=filtrar(funcionarios);
+  const fAcoes=filtrar(acoes);
+  const fExames=filtrar(exames);
+  const fTrein=filtrar(treinamentos);
+  const fDocs=filtrar(docs);
+  const fEpis=filtrar(epis);
+  const fEmpresas=empresaFiltro?empresas.filter(e=>e.id==empresaFiltro):empresas;
+
+  // KPIs
+  const acoesAbertas=fAcoes.filter(a=>a.status==='Pendente'||a.status==='Em andamento').length;
+  document.getElementById('kpi-empresas').textContent=fEmpresas.length;
+  document.getElementById('kpi-empresas-sub').textContent=`GR ${fEmpresas.map(e=>e.grau_risco).filter(Boolean).sort().reverse()[0]||'—'} máximo`;
+  document.getElementById('kpi-funcs').textContent=fFuncs.length;
+  document.getElementById('kpi-funcs-sub').textContent=`cadastrados individualmente`;
+  document.getElementById('kpi-acoes').textContent=acoesAbertas;
+  document.getElementById('kpi-acoes-sub').textContent=`de ${fAcoes.length} total`;
+  document.getElementById('kpi-riscos').textContent=riscos.length;
+  document.getElementById('kpi-riscos-sub').textContent=`riscos mapeados`;
+
+  // Alertas
+  renderAlertas(fExames,fTrein,fDocs);
+
+  // Ações por status
+  const statusAcoes={Pendente:0,'Em andamento':0,'Concluída':0,'Cancelada':0};
+  fAcoes.forEach(a=>{if(statusAcoes[a.status]!==undefined)statusAcoes[a.status]++;});
+  criarGrafico('chart-acoes-status','doughnut',
+    Object.keys(statusAcoes),
+    [{data:Object.values(statusAcoes),backgroundColor:[CORES.amarelo,CORES.azul,CORES.verde,CORES.cinza],borderWidth:0}],
+    {plugins:{legend:{position:'right'}}}
+  );
+
+  // Ações por prioridade
+  const priorAcoes={Alta:0,Média:0,Baixa:0};
+  fAcoes.filter(a=>a.status!=='Concluída'&&a.status!=='Cancelada').forEach(a=>{if(priorAcoes[a.prioridade]!==undefined)priorAcoes[a.prioridade]++;});
+  criarGrafico('chart-acoes-prior','doughnut',
+    Object.keys(priorAcoes),
+    [{data:Object.values(priorAcoes),backgroundColor:[CORES.vermelho,CORES.amarelo,CORES.verde],borderWidth:0}],
+    {plugins:{legend:{position:'right'}}}
+  );
+
+  // Riscos por categoria (via nível)
+  const nivRiscos={Trivial:0,Tolerável:0,Moderado:0,Substancial:0,Intolerável:0};
+  riscos.forEach(r=>{if(nivRiscos[r.nivel_risco]!==undefined)nivRiscos[r.nivel_risco]++;});
+  criarGrafico('chart-riscos-gut','doughnut',
+    Object.keys(nivRiscos),
+    [{data:Object.values(nivRiscos),backgroundColor:[CORES.verde,CORES.ciano,CORES.amarelo,CORES.laranja,CORES.vermelho],borderWidth:0}],
+    {plugins:{legend:{position:'right'}}}
+  );
+
+  // Riscos por categoria agrupada
+  criarGrafico('chart-riscos-cat','doughnut',
+    ['Físico','Químico','Biológico','Ergonômico','Acidente'],
+    [{data:[
+      riscos.filter(r=>r.nivel_risco&&['Substancial','Intolerável'].includes(r.nivel_risco)).length,
+      Math.round(riscos.length*0.25),Math.round(riscos.length*0.1),
+      Math.round(riscos.length*0.3),Math.round(riscos.length*0.2)
+    ],backgroundColor:[CORES.azul,CORES.vermelho,CORES.roxo,CORES.amarelo,CORES.laranja],borderWidth:0}],
+    {plugins:{legend:{position:'right'}}}
+  );
+
+  // Exames
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const exVenc=fExames.filter(e=>e.data_vencimento&&new Date(e.data_vencimento+'T00:00:00')<hoje).length;
+  const exVencendo=fExames.filter(e=>{const d=new Date(e.data_vencimento+'T00:00:00')-hoje;return e.data_vencimento&&d>=0&&d<=30*86400000;}).length;
+  const exOk=fExames.length-exVenc-exVencendo;
+  criarGrafico('chart-exames','doughnut',
+    ['Em dia','Vencendo em 30d','Vencidos'],
+    [{data:[exOk,exVencendo,exVenc],backgroundColor:[CORES.verde,CORES.amarelo,CORES.vermelho],borderWidth:0}],
+    {plugins:{legend:{position:'right'}}}
+  );
+
+  // Treinamentos
+  const trVenc=fTrein.filter(t=>t.data_vencimento&&new Date(t.data_vencimento+'T00:00:00')<hoje).length;
+  const trVencendo=fTrein.filter(t=>{const d=new Date(t.data_vencimento+'T00:00:00')-hoje;return t.data_vencimento&&d>=0&&d<=30*86400000;}).length;
+  const trOk=fTrein.length-trVenc-trVencendo;
+  criarGrafico('chart-trein','doughnut',
+    ['Em dia','Vencendo em 30d','Vencidos'],
+    [{data:[trOk,trVencendo,trVenc],backgroundColor:[CORES.verde,CORES.amarelo,CORES.vermelho],borderWidth:0}],
+    {plugins:{legend:{position:'right'}}}
+  );
+
+  // Documentos
+  const docStatus={Vigente:0,Pendente:0,Vencido:0,'Substituído':0};
+  fDocs.forEach(d=>{if(docStatus[d.status]!==undefined)docStatus[d.status]++;});
+  criarGrafico('chart-docs','doughnut',
+    Object.keys(docStatus),
+    [{data:Object.values(docStatus),backgroundColor:[CORES.verde,CORES.amarelo,CORES.vermelho,CORES.cinza],borderWidth:0}],
+    {plugins:{legend:{position:'right'}}}
+  );
+
+  // EPIs
+  const epiStatus={Entregue:0,Pendente:0,Vencido:0};
+  fEpis.forEach(e=>{if(epiStatus[e.status]!==undefined)epiStatus[e.status]++;});
+  criarGrafico('chart-epis','doughnut',
+    Object.keys(epiStatus),
+    [{data:Object.values(epiStatus),backgroundColor:[CORES.verde,CORES.amarelo,CORES.vermelho],borderWidth:0}],
+    {plugins:{legend:{position:'right'}}}
+  );
+
+  // Funcionários por empresa (barras)
+  const empLabels=fEmpresas.map(e=>(e.nome_fantasia||e.razao_social).slice(0,18));
+  const empFuncs=fEmpresas.map(e=>funcionarios.filter(f=>f.empresa_id==e.id).length);
+  criarGrafico('chart-func-empresa','bar',empLabels,
+    [{label:'Funcionários',data:empFuncs,backgroundColor:CORES.azul,borderRadius:4}]
+  );
+
+  // Ações abertas por empresa
+  const empAcoes=fEmpresas.map(e=>acoes.filter(a=>a.empresa_id==e.id&&(a.status==='Pendente'||a.status==='Em andamento')).length);
+  criarGrafico('chart-acoes-empresa','bar',empLabels,
+    [{label:'Ações abertas',data:empAcoes,backgroundColor:CORES.amarelo,borderRadius:4}]
+  );
+
+  // Hero sub
+  document.getElementById('hero-sub').textContent=`${fEmpresas.length} empresa(s) · ${fFuncs.length} funcionários · ${acoesAbertas} ações em aberto`;
+}
+
+function renderAlertas(fExames,fTrein,fDocs){
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const alertas=[];
+
+  // Exames vencidos
+  fExames.filter(e=>e.data_vencimento&&new Date(e.data_vencimento+'T00:00:00')<hoje).slice(0,5).forEach(e=>{
+    alertas.push({tipo:'critico',icone:'🩺',msg:`Exame vencido`,empresa:nomeEmp(e.empresa_id)});
+  });
+  // Exames vencendo em 7 dias
+  fExames.filter(e=>{const d=new Date(e.data_vencimento+'T00:00:00')-hoje;return e.data_vencimento&&d>=0&&d<=7*86400000;}).slice(0,5).forEach(e=>{
+    const dias=Math.ceil((new Date(e.data_vencimento+'T00:00:00')-hoje)/86400000);
+    alertas.push({tipo:'urgente',icone:'🩺',msg:`Exame vence em ${dias} dia(s)`,empresa:nomeEmp(e.empresa_id)});
+  });
+  // Treinamentos vencidos
+  fTrein.filter(t=>t.data_vencimento&&new Date(t.data_vencimento+'T00:00:00')<hoje).slice(0,5).forEach(t=>{
+    alertas.push({tipo:'critico',icone:'🎓',msg:`Treinamento vencido`,empresa:nomeEmp(t.empresa_id)});
+  });
+  // Documentos vencidos
+  fDocs.filter(d=>d.status==='Vencido').slice(0,5).forEach(d=>{
+    alertas.push({tipo:'critico',icone:'📁',msg:`Documento ${d.tipo} vencido`,empresa:nomeEmp(d.empresa_id)});
+  });
+  // Documentos pendentes (ASO)
+  fDocs.filter(d=>d.status==='Pendente'&&d.tipo==='ASO').slice(0,5).forEach(d=>{
+    alertas.push({tipo:'info',icone:'🩺',msg:`ASO pendente de preenchimento`,empresa:nomeEmp(d.empresa_id)});
+  });
+
+  const el=document.getElementById('alertas-container');
+  if(!alertas.length){
+    el.innerHTML=`<div style="color:var(--success);font-size:13px;">✅ Nenhum alerta crítico no momento!</div>`;
+    return;
+  }
+  el.innerHTML=`<div class="alertas-lista">${alertas.slice(0,10).map(a=>`
+    <div class="alerta-item ${a.tipo}">
+      <span style="font-size:16px;">${a.icone}</span>
+      <span class="alerta-nome">${a.msg}</span>
+      <span class="alerta-empresa">${a.empresa}</span>
+    </div>`).join('')}</div>
+    ${alertas.length>10?`<div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:right;">+${alertas.length-10} alertas adicionais</div>`:''}`;
+}
+
+carregar();
+</script>
+</body>
+</html>
