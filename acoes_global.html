@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Central de Ações</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="trial_check.js"></script>
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+.hero-info{flex:1;}
+.hero-nome{font-size:16px;font-weight:500;}
+.hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+.section-label{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;cursor:pointer;transition:border-color .15s;}
+.stat:hover,.stat.active{border-color:var(--border-focus);}
+.stat.active{background:var(--surface2);}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;}
+.stat-val{font-size:20px;font-weight:600;font-family:var(--mono);}
+/* Filtros */
+.filtros{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.filtro-busca{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;}
+.filtro-busca:focus{border-color:var(--border-focus);}
+.filtro-select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.filtro-select:focus{border-color:var(--border-focus);}
+/* Acao cards */
+.acao-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s;}
+.acao-card:hover{border-color:var(--border-focus);}
+.acao-card.alta{border-left:3px solid var(--danger);}
+.acao-card.media{border-left:3px solid var(--warning);}
+.acao-card.baixa{border-left:3px solid var(--accent);}
+.acao-card.concluida{opacity:.6;}
+.acao-info{flex:1;min-width:0;}
+.acao-titulo{font-size:13px;font-weight:500;margin-bottom:5px;}
+.acao-meta{display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--text2);margin-bottom:6px;}
+.acao-empresa{font-size:11px;color:var(--accent);font-weight:500;}
+.acao-prazo{font-size:11px;}
+.acao-btns{display:flex;flex-direction:column;gap:5px;flex-shrink:0;}
+/* Badges */
+.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);display:inline-block;white-space:nowrap;}
+.b-pend{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.b-and{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+.b-conc{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.b-canc{background:#1e2333;color:var(--text3);border:1px solid var(--border);}
+.b-alta{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.b-media{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.b-baixa{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:680px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{margin-bottom:0;}
+.field.full{grid-column:1/-1;}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--border-focus);}
+.field textarea{resize:vertical;min-height:80px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-sm{padding:5px 10px;font-size:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;white-space:nowrap;}
+.btn-sm:hover{border-color:var(--border-focus);}
+.btn-conc{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.btn-conc:hover{background:#1a4a38;}
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f1117;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:40px;color:var(--text3);}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(3,1fr);}.modal-grid{grid-template-columns:1fr;}.header-title{display:none;}.acao-btns{flex-direction:row;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; Central de Ações</div>
+</div>
+<div class="container">
+  <a href="index.html" class="voltar">← Voltar ao início</a>
+  <div class="hero">
+    <div style="width:44px;height:44px;border-radius:10px;background:#2a2010;border:1px solid #4a3a10;display:flex;align-items:center;justify-content:center;font-size:20px;">⚡</div>
+    <div class="hero-info">
+      <div class="hero-nome">Central de Ações Global</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
+    </div>
+    <button class="btn btn-save" onclick="abrirModalNovo()">+ Nova ação</button>
+  </div>
+
+  <div class="section-label">Resumo</div>
+  <div class="stats-grid">
+    <div class="stat" id="stat-todas" onclick="filtrarStatus('')">
+      <div class="stat-label">Total</div>
+      <div class="stat-val" id="val-todas" style="color:var(--text);">—</div>
+    </div>
+    <div class="stat active" id="stat-pendente" onclick="filtrarStatus('Pendente')">
+      <div class="stat-label">Pendentes</div>
+      <div class="stat-val" id="val-pendente" style="color:var(--warning);">—</div>
+    </div>
+    <div class="stat" id="stat-andamento" onclick="filtrarStatus('Em andamento')">
+      <div class="stat-label">Em andamento</div>
+      <div class="stat-val" id="val-andamento" style="color:var(--accent);">—</div>
+    </div>
+    <div class="stat" id="stat-concluida" onclick="filtrarStatus('Concluída')">
+      <div class="stat-label">Concluídas</div>
+      <div class="stat-val" id="val-concluida" style="color:var(--success);">—</div>
+    </div>
+    <div class="stat" id="stat-alta" onclick="filtrarPrioridade('Alta')">
+      <div class="stat-label">Alta prioridade</div>
+      <div class="stat-val" id="val-alta" style="color:var(--danger);">—</div>
+    </div>
+  </div>
+
+  <div class="filtros">
+    <input type="text" class="filtro-busca" id="filtro-busca" placeholder="🔍 Buscar por título, responsável..." oninput="renderLista()">
+    <select class="filtro-select" id="filtro-empresa" onchange="renderLista()">
+      <option value="">Todas as empresas</option>
+    </select>
+    <select class="filtro-select" id="filtro-origem" onchange="renderLista()">
+      <option value="">Todas as origens</option>
+      <option>PGR</option>
+      <option>PCMSO</option>
+      <option>Checklist</option>
+      <option>Inspeção</option>
+      <option>Acidente</option>
+      <option>Manual</option>
+    </select>
+    <select class="filtro-select" id="filtro-prioridade" onchange="renderLista()">
+      <option value="">Todas as prioridades</option>
+      <option>Alta</option>
+      <option>Média</option>
+      <option>Baixa</option>
+    </select>
+  </div>
+
+  <div id="lista-acoes"></div>
+</div>
+
+<!-- MODAL AÇÃO -->
+<div class="modal-overlay" id="modal-acao">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-titulo">Nova ação</span>
+      <button onclick="fecharModal()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="field full">
+        <label>Título *</label>
+        <input type="text" id="ac-titulo" placeholder="Descreva a ação a ser executada">
+      </div>
+      <div class="field full">
+        <label>Descrição</label>
+        <textarea id="ac-descricao" placeholder="Detalhes, contexto, causa raiz..."></textarea>
+      </div>
+      <div class="field">
+        <label>Empresa *</label>
+        <select id="ac-empresa">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Setor</label>
+        <select id="ac-setor">
+          <option value="">— Geral —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Prioridade</label>
+        <select id="ac-prioridade">
+          <option>Alta</option>
+          <option selected>Média</option>
+          <option>Baixa</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select id="ac-status">
+          <option>Pendente</option>
+          <option>Em andamento</option>
+          <option>Concluída</option>
+          <option>Cancelada</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Origem</label>
+        <select id="ac-origem">
+          <option>Manual</option>
+          <option>PGR</option>
+          <option>PCMSO</option>
+          <option>Checklist</option>
+          <option>Inspeção</option>
+          <option>Acidente</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Prazo</label>
+        <input type="date" id="ac-prazo">
+      </div>
+      <div class="field full">
+        <label>Responsável</label>
+        <input type="text" id="ac-responsavel" placeholder="Nome do responsável pela execução">
+      </div>
+      <div class="field full">
+        <label>Observações / Evidência de conclusão</label>
+        <textarea id="ac-obs" placeholder="Registre aqui o que foi feito, evidências..." style="min-height:60px;"></textarea>
+      </div>
+    </div>
+    <div class="status-bar" id="status-modal"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
+      <div id="modal-esq"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+        <button class="btn btn-save" id="btn-salvar" onclick="salvarAcao()">
+          <span class="spinner" id="spinner-ac"></span>
+          <span id="label-ac">Salvar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+
+let empresas=[],setores=[],acoes=[];
+let filtroStatus='',filtroPrioridade='';
+let editando=null;
+
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]}</span><span>${msg}</span>`;}
+function fmtData(d){if(!d)return null;return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
+function diasAte(d){if(!d)return null;return Math.ceil((new Date(d+'T00:00:00')-new Date())/(1000*60*60*24));}
+
+async function inicializar(){
+  try{
+    const [rEmp,rSets,rAcoes]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?ativo=eq.true&select=id,nome_fantasia,razao_social&order=nome_fantasia.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/setores?ativo=eq.true&select=id,nome_setor,empresa_id&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/acoes?ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    ]);
+    [empresas,setores,acoes]=await Promise.all([rEmp.json(),rSets.json(),rAcoes.json()]);
+
+    // Popula filtro empresa
+    const selFE=document.getElementById('filtro-empresa');
+    empresas.forEach(e=>selFE.innerHTML+=`<option value="${e.id}">${escHtml(e.nome_fantasia||e.razao_social)}</option>`);
+
+    // Popula modal empresa
+    const selAE=document.getElementById('ac-empresa');
+    empresas.forEach(e=>selAE.innerHTML+=`<option value="${e.id}">${escHtml(e.nome_fantasia||e.razao_social)}</option>`);
+
+    document.getElementById('ac-empresa').addEventListener('change',()=>carregarSetoresModal());
+
+    renderStats();
+    renderLista();
+  }catch(e){console.error(e);}
+}
+
+function nomeEmp(id){const e=empresas.find(x=>x.id==id);return e?(e.nome_fantasia||e.razao_social):'—';}
+function nomeSet(id){const s=setores.find(x=>x.id==id);return s?s.nome_setor:null;}
+
+function carregarSetoresModal(){
+  const empId=parseInt(document.getElementById('ac-empresa').value);
+  const sel=document.getElementById('ac-setor');
+  sel.innerHTML='<option value="">— Geral —</option>';
+  setores.filter(s=>s.empresa_id===empId).forEach(s=>sel.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+}
+
+function renderStats(){
+  const total=acoes.length;
+  const pend=acoes.filter(a=>a.status==='Pendente').length;
+  const and=acoes.filter(a=>a.status==='Em andamento').length;
+  const conc=acoes.filter(a=>a.status==='Concluída').length;
+  const alta=acoes.filter(a=>a.prioridade==='Alta'&&a.status!=='Concluída'&&a.status!=='Cancelada').length;
+  document.getElementById('val-todas').textContent=total;
+  document.getElementById('val-pendente').textContent=pend;
+  document.getElementById('val-andamento').textContent=and;
+  document.getElementById('val-concluida').textContent=conc;
+  document.getElementById('val-alta').textContent=alta;
+  document.getElementById('hero-sub').textContent=`${total} ações · ${pend} pendentes · ${alta} alta prioridade`;
+}
+
+function filtrarStatus(st){
+  filtroStatus=st;filtroPrioridade='';
+  document.querySelectorAll('.stat').forEach(s=>s.classList.remove('active'));
+  const map={'':'stat-todas','Pendente':'stat-pendente','Em andamento':'stat-andamento','Concluída':'stat-concluida'};
+  if(map[st])document.getElementById(map[st])?.classList.add('active');
+  document.getElementById('filtro-prioridade').value='';
+  renderLista();
+}
+
+function filtrarPrioridade(pr){
+  filtroPrioridade=pr;filtroStatus='';
+  document.querySelectorAll('.stat').forEach(s=>s.classList.remove('active'));
+  document.getElementById('stat-alta').classList.add('active');
+  renderLista();
+}
+
+function renderLista(){
+  const busca=document.getElementById('filtro-busca').value.toLowerCase();
+  const empresa=document.getElementById('filtro-empresa').value;
+  const origem=document.getElementById('filtro-origem').value;
+  const prior=document.getElementById('filtro-prioridade').value||filtroPrioridade;
+  const status=filtroStatus;
+
+  let lista=acoes.filter(a=>{
+    if(status&&a.status!==status)return false;
+    if(prior&&a.prioridade!==prior)return false;
+    if(empresa&&String(a.empresa_id)!==empresa)return false;
+    if(origem&&a.origem!==origem)return false;
+    if(busca&&!a.titulo?.toLowerCase().includes(busca)&&!a.responsavel?.toLowerCase().includes(busca))return false;
+    return true;
+  });
+
+  const el=document.getElementById('lista-acoes');
+  if(!lista.length){
+    el.innerHTML=`<div class="empty">⚡<br><br>Nenhuma ação encontrada.</div>`;
+    return;
+  }
+
+  // Ordena: Alta primeiro, depois por prazo
+  lista.sort((a,b)=>{
+    const p={Alta:0,Média:1,Baixa:2};
+    if(a.status==='Concluída'&&b.status!=='Concluída')return 1;
+    if(b.status==='Concluída'&&a.status!=='Concluída')return -1;
+    return(p[a.prioridade]||1)-(p[b.prioridade]||1);
+  });
+
+  el.innerHTML=lista.map(a=>{
+    const dias=diasAte(a.prazo);
+    const prazoCls=dias!==null?(dias<0?'color:var(--danger);':dias<=7?'color:var(--warning);':''):'';
+    const prazoTxt=a.prazo?(dias<0?`Vencido há ${Math.abs(dias)}d`:dias===0?'Vence hoje':`${fmtData(a.prazo)} (${dias}d)`):'Sem prazo';
+    const stBadge=a.status==='Pendente'?'b-pend':a.status==='Em andamento'?'b-and':a.status==='Concluída'?'b-conc':'b-canc';
+    const prBadge=a.prioridade==='Alta'?'b-alta':a.prioridade==='Média'?'b-media':'b-baixa';
+    const prCls=a.prioridade==='Alta'?'alta':a.prioridade==='Média'?'media':'baixa';
+    const setor=nomeSet(a.setor_id);
+    return`<div class="acao-card ${prCls} ${a.status==='Concluída'?'concluida':''}">
+      <div class="acao-info">
+        <div class="acao-titulo">${escHtml(a.titulo)}</div>
+        <div class="acao-meta">
+          <span class="badge ${stBadge}">${a.status}</span>
+          <span class="badge ${prBadge}">${a.prioridade}</span>
+          <span class="acao-empresa">🏢 ${escHtml(nomeEmp(a.empresa_id))}</span>
+          ${setor?`<span>🗂️ ${escHtml(setor)}</span>`:''}
+          ${a.origem?`<span>📌 ${escHtml(a.origem)}</span>`:''}
+          ${a.responsavel?`<span>👤 ${escHtml(a.responsavel)}</span>`:''}
+        </div>
+        <div class="acao-prazo" style="${prazoCls}">📅 ${prazoTxt}</div>
+        ${a.descricao?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">${escHtml(a.descricao.slice(0,120))}${a.descricao.length>120?'...':''}</div>`:''}
+      </div>
+      <div class="acao-btns">
+        ${a.status!=='Concluída'?`<button class="btn-sm btn-conc" onclick="concluirRapido(${a.id})">✓ Concluir</button>`:''}
+        <button class="btn-sm" onclick="editarAcao(${a.id})">✏️ Editar</button>
+        <a href="acoes.html?empresa_id=${a.empresa_id}" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;">🏢 Ver empresa</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirModalNovo(){
+  editando=null;
+  document.getElementById('modal-titulo').textContent='Nova ação';
+  document.getElementById('label-ac').textContent='Salvar';
+  document.getElementById('modal-esq').innerHTML='';
+  document.getElementById('ac-titulo').value='';
+  document.getElementById('ac-descricao').value='';
+  document.getElementById('ac-empresa').value='';
+  document.getElementById('ac-setor').innerHTML='<option value="">— Geral —</option>';
+  document.getElementById('ac-prioridade').value='Média';
+  document.getElementById('ac-status').value='Pendente';
+  document.getElementById('ac-origem').value='Manual';
+  document.getElementById('ac-prazo').value='';
+  document.getElementById('ac-responsavel').value='';
+  document.getElementById('ac-obs').value='';
+  document.getElementById('status-modal').className='status-bar';
+  document.getElementById('modal-acao').classList.add('show');
+}
+
+function editarAcao(id){
+  const a=acoes.find(x=>x.id===id);
+  if(!a)return;
+  editando=a;
+  document.getElementById('modal-titulo').textContent='Editar ação';
+  document.getElementById('label-ac').textContent='Salvar alterações';
+  document.getElementById('modal-esq').innerHTML=`<button onclick="excluirAcao(${id})" style="background:transparent;color:var(--danger);border:1px solid var(--danger);border-radius:var(--radius);padding:6px 12px;font-size:12px;cursor:pointer;">Excluir</button>`;
+  document.getElementById('ac-titulo').value=a.titulo||'';
+  document.getElementById('ac-descricao').value=a.descricao||'';
+  document.getElementById('ac-empresa').value=a.empresa_id||'';
+  carregarSetoresModal();
+  setTimeout(()=>document.getElementById('ac-setor').value=a.setor_id||'',100);
+  document.getElementById('ac-prioridade').value=a.prioridade||'Média';
+  document.getElementById('ac-status').value=a.status||'Pendente';
+  document.getElementById('ac-origem').value=a.origem||'Manual';
+  document.getElementById('ac-prazo').value=a.prazo||'';
+  document.getElementById('ac-responsavel').value=a.responsavel||'';
+  document.getElementById('ac-obs').value=a.observacoes||'';
+  document.getElementById('status-modal').className='status-bar';
+  document.getElementById('modal-acao').classList.add('show');
+}
+
+function fecharModal(){document.getElementById('modal-acao').classList.remove('show');editando=null;}
+
+async function salvarAcao(){
+  const titulo=document.getElementById('ac-titulo').value.trim();
+  const empId=parseInt(document.getElementById('ac-empresa').value);
+  if(!titulo){setStatus('status-modal','error','Informe o título.');return;}
+  if(!empId){setStatus('status-modal','error','Selecione a empresa.');return;}
+  document.getElementById('btn-salvar').disabled=true;
+  document.getElementById('spinner-ac').className='spinner show';
+  const payload={
+    empresa_id:empId,
+    setor_id:parseInt(document.getElementById('ac-setor').value)||null,
+    titulo,
+    descricao:document.getElementById('ac-descricao').value.trim()||null,
+    prioridade:document.getElementById('ac-prioridade').value,
+    status:document.getElementById('ac-status').value,
+    origem:document.getElementById('ac-origem').value,
+    prazo:document.getElementById('ac-prazo').value||null,
+    responsavel:document.getElementById('ac-responsavel').value.trim()||null,
+    observacoes:document.getElementById('ac-obs').value.trim()||null,
+    ativo:true,
+  };
+  try{
+    if(editando){
+      const res=await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${editando.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok)throw new Error((await res.json()).message);
+      const d=await res.json();
+      const idx=acoes.findIndex(x=>x.id===editando.id);
+      if(idx>=0)acoes[idx]=d[0];
+    }else{
+      const res=await fetch(`${SUPA_URL}/rest/v1/acoes`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok)throw new Error((await res.json()).message);
+      const d=await res.json();
+      acoes.unshift(d[0]);
+    }
+    fecharModal();renderStats();renderLista();
+  }catch(e){setStatus('status-modal','error',e.message);}
+  finally{document.getElementById('btn-salvar').disabled=false;document.getElementById('spinner-ac').className='spinner';}
+}
+
+async function concluirRapido(id){
+  await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({status:'Concluída',data_conclusao:new Date().toISOString().split('T')[0]})});
+  const a=acoes.find(x=>x.id===id);
+  if(a)a.status='Concluída';
+  renderStats();renderLista();
+}
+
+async function excluirAcao(id){
+  if(!confirm('Excluir esta ação?'))return;
+  await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});
+  acoes=acoes.filter(a=>a.id!==id);
+  fecharModal();renderStats();renderLista();
+}
+
+document.getElementById('modal-acao').addEventListener('click',e=>{if(e.target.id==='modal-acao')fecharModal();});
+inicializar();
+</script>
+</body>
+</html>
