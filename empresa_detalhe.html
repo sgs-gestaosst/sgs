@@ -1174,6 +1174,27 @@ async function carregarFuncionarios(){
   const btn=document.getElementById('btn-novo-funcionario');
   if(btn)btn.href=`funcionario_detalhe.html?empresa_id=${empresaId}&novo=1`;
 
+  // Verifica limite de 1.000 funcionários cadastrados individualmente
+  try{
+    const resTotal=await fetch(`${SUPA_URL}/rest/v1/funcionarios?select=id&ativo=eq.true`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'count=exact','Range':'0-0'}});
+    const totalCadastrados=parseInt(resTotal.headers.get('content-range')?.split('/')[1]||'0');
+    if(btn){
+      if(totalCadastrados>=1000){
+        btn.style.pointerEvents='none';
+        btn.style.opacity='.4';
+        btn.title='Limite de 1.000 funcionários cadastrados atingido. Faça upgrade para o plano Enterprise.';
+        btn.textContent='Limite atingido';
+        // Mostra aviso
+        const aviso=document.createElement('div');
+        aviso.style.cssText='background:#2a2010;border:1px solid #4a3a10;border-radius:8px;padding:10px 14px;font-size:12px;color:#e0a855;margin-bottom:10px;';
+        aviso.innerHTML=`⚠️ Limite de <strong>1.000 funcionários</strong> cadastrados individualmente atingido no plano Essencial. <a href="assinar.html" style="color:#e0a855;font-weight:600;">Fale conosco para o plano Enterprise →</a>`;
+        btn.parentNode.insertBefore(aviso,btn);
+      }else if(totalCadastrados>=900){
+        btn.title=`${totalCadastrados}/1.000 funcionários cadastrados — ${1000-totalCadastrados} restantes`;
+      }
+    }
+  }catch(e){console.log('Erro ao verificar limite:',e);}
+
   const lista=document.getElementById('lista-funcionarios');
   lista.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);font-size:13px;">Carregando...</div>`;
   try{
