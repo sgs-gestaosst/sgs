@@ -86,6 +86,7 @@
   .hint{font-size:11px;color:var(--text3);margin-top:4px;}
   @media(max-width:600px){.header-title{display:none;}.user-email{display:none;}.grid-2,.grid-3{grid-template-columns:1fr;}.cnpj-row{flex-direction:column;}.cnpj-row .field{width:100%;}.header{padding:10px 12px;}.container{padding:16px 12px 60px;}}
 </style>
+<script src="trial_check.js"></script>
 </head>
 <body>
 <div class="header">
@@ -353,7 +354,10 @@ async function buscarCNPJ(){
     set('endereco',log);set('cidade',d.municipio);set('cep',fmtCEP(d.cep));
     if(d.uf)document.getElementById('estado').value=d.uf;
     const pw=['rural','carvao','carvão','madeira','florestal','agricultura','pecuaria','pecuária','pesca','plantio','silvicultura'];
-    if(pw.some(w=>(d.cnae_fiscal_descricao||'').toLowerCase().includes(w))){rural=true;document.getElementById('toggle-rural').classList.add('on');}
+    if(pw.some(w=>(d.cnae_fiscal_descricao||'').toLowerCase().includes(w))){
+      const selTipo=document.getElementById('tipo_atividade');
+      if(selTipo)selTipo.value='Rural';
+    }
     cnaes=[];
     if(d.cnae_fiscal&&d.cnae_fiscal_descricao){
       const gr=buscarGR(d.cnae_fiscal.toString());
@@ -525,6 +529,7 @@ async function salvarEmpresa(){
   const empresa={
     razao_social:razao,
     user_id:sgs_user?.id||null,
+    owner_id:sgs_user?.id||null,
     empresa_mae_id:(_maeId||window._maeIdDinamico)||null,
     tipo_empresa:(_maeId||window._maeIdDinamico)?'FILIAL':'MATRIZ',
     nome_fantasia:document.getElementById('nome_fantasia').value||null,
@@ -560,8 +565,9 @@ async function salvarEmpresa(){
 function limparTudo(){ window.location.reload(); return;
   document.querySelectorAll('input').forEach(e=>{e.value='';e.classList.remove('filled','error');});
   document.querySelectorAll('select').forEach(e=>e.selectedIndex=0);
-  cnaes=[];rural=false;ativo=true;
-  document.getElementById('toggle-rural').classList.remove('on');
+  cnaes=[];ativo=true;
+  const selTipo=document.getElementById('tipo_atividade');
+  if(selTipo)selTipo.value='Geral';
   document.getElementById('toggle-ativo').classList.add('on');
   document.getElementById('gr-box').style.display='none';
   document.getElementById('gr-hint').textContent='Preenchido automaticamente pela tabela NR-4 após busca do CNPJ.';
