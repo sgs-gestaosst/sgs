@@ -16,16 +16,27 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+
+/* ── HEADER ── */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;}
 .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
 .header-title{font-size:13px;color:var(--text2);flex:1;}
+.header-title span{color:var(--text);font-weight:500;}
+.user-info{display:flex;align-items:center;gap:12px;margin-left:auto;}
+.user-email{font-size:12px;color:var(--text2);}
+.btn-logout{font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;font-family:var(--sans);transition:border-color .15s,color .15s;}
+.btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+
+/* ── CONTAINER ── */
 .container{max-width:720px;margin:0 auto;padding:40px 24px 80px;}
-.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:24px;transition:color .15s;}
 .voltar:hover{color:var(--text);}
+
+/* ── SECTION LABEL ── */
 .section-label{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
 .section-label::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* Trial box */
+/* ── TRIAL BOX ── */
 .trial-box{background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:16px;margin-bottom:28px;display:flex;gap:12px;align-items:flex-start;}
 .trial-box.vencendo{background:#2a2010;border-color:#4a3a10;}
 .trial-box.vencido{background:#2a1515;border-color:#4a2020;}
@@ -35,7 +46,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .trial-box.vencido .trial-texto{color:#e05555;}
 .trial-texto strong{color:#e8eaf0;}
 
-/* Planos */
+/* ── PLANOS ── */
 .planos-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
 .plano-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:border-color .2s;position:relative;}
 .plano-card:hover{border-color:var(--border-focus);}
@@ -54,21 +65,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .plano-recursos li.enterprise-item::before{content:'★';color:#e0a855;}
 .plano-selecionado-badge{position:absolute;top:14px;right:14px;font-size:10px;background:var(--accent2);color:#0f1117;padding:2px 8px;border-radius:10px;font-weight:600;}
 
-/* Cupom */
+/* ── CUPOM ── */
 .cupom-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;}
 .cupom-row{display:flex;gap:10px;}
-.cupom-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;padding:10px 14px;outline:none;text-transform:uppercase;letter-spacing:.06em;}
+.cupom-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:14px;padding:10px 14px;outline:none;text-transform:uppercase;letter-spacing:.06em;transition:border-color .15s;}
 .cupom-input:focus{border-color:var(--border-focus);}
 .cupom-input.valido{border-color:var(--success);color:var(--success);}
 .cupom-input.invalido{border-color:var(--danger);}
-.btn-cupom{padding:10px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;}
+.btn-cupom{padding:10px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:border-color .15s;}
 .btn-cupom:hover{border-color:var(--border-focus);}
 .cupom-status{margin-top:10px;font-size:12px;display:none;}
 .cupom-status.show{display:block;}
 .cupom-status.ok{color:var(--success);}
 .cupom-status.err{color:var(--danger);}
 
-/* Resumo */
+/* ── RESUMO ── */
 .resumo-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;}
 .resumo-linha{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:14px;}
 .resumo-linha:not(:last-child){border-bottom:1px solid var(--border);}
@@ -78,49 +89,70 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .resumo-total{font-size:18px;color:var(--accent2);font-family:var(--mono);}
 .resumo-extra{font-size:11px;color:var(--text3);margin-top:8px;text-align:right;}
 
-/* Tabs pagamento */
+/* ── TABS PAGAMENTO ── */
 .tabs-pagamento{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
 .tab-pgto{flex:1;padding:14px;text-align:center;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;}
 .tab-pgto:first-child{border-right:1px solid var(--border);}
 .tab-pgto.active{background:var(--surface2);color:var(--text);}
 .tab-pgto span{font-size:20px;}
 
-/* Formulário cartão */
+/* ── FORM CARTÃO ── */
 .card-form{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;}
 .form-field{margin-bottom:16px;}
 .form-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
-.form-field input,.form-field select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:10px 12px;outline:none;}
+.form-field input,.form-field select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:10px 12px;outline:none;transition:border-color .15s;}
 .form-field input:focus,.form-field select:focus{border-color:var(--border-focus);}
+.form-field select option{background:var(--surface2);}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .card-brand{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:18px;}
 .card-field-wrap{position:relative;}
 
-/* PIX info */
+/* ── PIX ── */
 .pix-info{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;text-align:center;}
 .pix-info p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px;}
 
-/* Botão */
+/* ── BOTÕES ── */
 .btn-assinar{width:100%;padding:14px;background:var(--accent2);color:#0f1117;font-family:var(--sans);font-size:15px;font-weight:600;border:none;border-radius:var(--radius);cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
 .btn-assinar:hover{background:#3de8b4;}
 .btn-assinar:disabled{opacity:.4;cursor:not-allowed;}
-.btn-enterprise{width:100%;padding:14px;background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:15px;font-weight:600;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;margin-top:10px;}
+.btn-enterprise{width:100%;padding:14px;background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:15px;font-weight:600;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;margin-top:10px;transition:border-color .15s;}
 .btn-enterprise:hover{border-color:var(--border-focus);}
+
+/* ── SPINNER ── */
 .spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f1117;border-radius:50%;animation:spin .7s linear infinite;display:none;}
 .spinner.show{display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── STATUS BAR ── */
 .status-bar{display:none;padding:12px 16px;border-radius:var(--radius);font-size:13px;margin-top:14px;align-items:center;gap:8px;}
 .status-bar.show{display:flex;}
 .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
 .status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
 .status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+
+/* ── MISC ── */
 .seguro-badge{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--text3);margin-top:12px;}
-@media(max-width:600px){.planos-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}.header-title{display:none;}.tabs-pagamento{flex-direction:column;}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .planos-grid{grid-template-columns:1fr;}
+  .form-row{grid-template-columns:1fr;}
+  .header-title{display:none;}
+  .user-email{display:none;}
+  .tabs-pagamento{flex-direction:column;}
+  .header{padding:12px 16px;}
+}
 </style>
 </head>
 <body>
+
 <div class="header">
   <a href="index.html" class="header-logo">SGS</a>
   <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span>Assinar Plano</span></div>
+  <div class="user-info">
+    <span class="user-email" id="user-email"></span>
+    <button class="btn-logout" onclick="sair()">Sair</button>
+  </div>
 </div>
 
 <div class="container">
@@ -136,7 +168,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <!-- Planos -->
   <div class="section-label">Escolha seu plano</div>
   <div class="planos-grid">
-    <div class="plano-card selecionado" id="card-essencial" onclick="selecionarPlano('essencial')">
+    <div class="plano-card selecionado" id="card-essencial">
       <span class="plano-selecionado-badge" id="badge-essencial">✓ Selecionado</span>
       <div class="plano-badge badge-popular">Mais popular</div>
       <div class="plano-nome">Essencial</div>
@@ -194,7 +226,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     <div class="resumo-extra">Cobrança mensal · Cancele quando quiser</div>
   </div>
 
-  <!-- Tabs pagamento -->
+  <!-- Pagamento -->
   <div id="area-pagamento">
     <div class="section-label">Forma de pagamento</div>
     <div class="tabs-pagamento">
@@ -215,27 +247,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <div class="form-field">
         <label>Número do cartão</label>
         <div class="card-field-wrap">
-          <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatarCartao(this)" autocomplete="cc-number">
+          <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19"
+            oninput="formatarCartao(this)" autocomplete="cc-number" inputmode="numeric">
           <span class="card-brand" id="card-brand">💳</span>
         </div>
       </div>
       <div class="form-field">
         <label>Nome no cartão</label>
-        <input type="text" id="cardholderName" placeholder="Como está impresso no cartão" autocomplete="cc-name" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+        <input type="text" id="cardholderName" placeholder="Como está impresso no cartão"
+          autocomplete="cc-name" style="text-transform:uppercase;"
+          oninput="this.value=this.value.toUpperCase()">
       </div>
       <div class="form-row">
         <div class="form-field">
           <label>Validade</label>
-          <input type="text" id="cardExpiration" placeholder="MM/AA" maxlength="5" oninput="formatarValidade(this)" autocomplete="cc-exp">
+          <input type="text" id="cardExpiration" placeholder="MM/AA" maxlength="5"
+            oninput="formatarValidade(this)" autocomplete="cc-exp" inputmode="numeric">
         </div>
         <div class="form-field">
           <label>CVV</label>
-          <input type="text" id="securityCode" placeholder="123" maxlength="4" autocomplete="cc-csc">
+          <input type="text" id="securityCode" placeholder="123" maxlength="4"
+            autocomplete="cc-csc" inputmode="numeric">
         </div>
       </div>
       <div class="form-field">
         <label>CPF do titular</label>
-        <input type="text" id="cardholderCPF" placeholder="000.000.000-00" maxlength="14" oninput="formatarCPF(this)">
+        <input type="text" id="cardholderCPF" placeholder="000.000.000-00" maxlength="14"
+          oninput="formatarCPF(this)" inputmode="numeric">
       </div>
       <div class="form-field">
         <label>Parcelas</label>
@@ -245,7 +283,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       </div>
       <button class="btn-assinar" id="btn-cartao" onclick="pagarCartao()">
         <span class="spinner" id="spinner-cartao"></span>
-        <span id="label-cartao">💳 Assinar com cartão — <span id="valor-btn-cartao">R$ 999,00</span>/mês</span>
+        <span id="label-cartao">💳 Assinar com cartão — <strong id="valor-btn-cartao">R$ 999,00</strong>/mês</span>
       </button>
     </div>
 
@@ -259,268 +297,393 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       </div>
       <button class="btn-assinar" id="btn-pix" onclick="pagarPix()" style="background:#1a3a6e;color:#7aabf7;">
         <span class="spinner" id="spinner-pix"></span>
-        <span id="label-pix">⚡ Gerar Pix/Boleto — <span id="valor-btn-pix">R$ 999,00</span></span>
+        <span id="label-pix">⚡ Gerar Pix/Boleto — <strong id="valor-btn-pix">R$ 999,00</strong></span>
       </button>
     </div>
 
     <div class="seguro-badge">🔒 Pagamento seguro via Mercado Pago</div>
     <div class="status-bar" id="status-assinar"></div>
 
-    <a href="https://wa.me/5594981564271?text=Olá!%20Tenho%20interesse%20no%20plano%20Enterprise%20do%20SGS." target="_blank" class="btn-enterprise">
+    <a href="https://wa.me/5594981564271?text=Olá!%20Tenho%20interesse%20no%20plano%20Enterprise%20do%20SGS."
+       target="_blank" rel="noopener" class="btn-enterprise">
       💬 Falar sobre Enterprise
     </a>
   </div>
 </div>
 
 <script>
-const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
-const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
-const MP_PUBLIC_KEY='APP_USR-d0ebe9f3-8bbc-454c-bb5b-4490ed266a4d';
-const token=localStorage.getItem('sgs_token');
-const userRaw=localStorage.getItem('sgs_user');
-if(!token){window.location.href='login.html';}
-const user=userRaw?JSON.parse(userRaw):{};
+const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const MP_PUBLIC_KEY = 'APP_USR-d0ebe9f3-8bbc-454c-bb5b-4490ed266a4d';
+const token = localStorage.getItem('sgs_token');
+const userRaw = localStorage.getItem('sgs_user');
 
-const BASE=999.00;
-let cupomAtivo=null;
-let valorFinal=BASE;
-let planoEssencialId=null;
-let assinaturaAtual=null;
-let mp=null;
-let tabAtual='cartao';
+if (!token) { window.location.href = 'login.html'; }
 
-// Inicializa SDK MP
-function inicializarMP(){
-  try{
-    mp=new MercadoPago(MP_PUBLIC_KEY,{locale:'pt-BR'});
-  }catch(e){console.error('Erro MP SDK:',e);}
+const user = userRaw ? JSON.parse(userRaw) : {};
+
+// Exibe e-mail no header
+document.getElementById('user-email').textContent = user.email || '';
+
+const BASE = 999.00;
+let cupomAtivo = null;
+let valorFinal = BASE;
+let planoEssencialId = null;
+let assinaturaAtual = null;
+let mp = null;
+let tabAtual = 'cartao';
+
+// ── Logout ───────────────────────────────────────────
+function sair() {
+  localStorage.removeItem('sgs_token');
+  localStorage.removeItem('sgs_user');
+  window.location.href = 'login.html';
 }
 
-function fmt(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+// ── Inicializa SDK MP ────────────────────────────────
+function inicializarMP() {
+  try {
+    mp = new MercadoPago(MP_PUBLIC_KEY, { locale: 'pt-BR' });
+  } catch(e) {
+    console.error('Erro MP SDK:', e);
+  }
+}
 
-async function inicializar(){
+function fmt(v) {
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// ── Init principal ───────────────────────────────────
+async function inicializar() {
   inicializarMP();
-  try{
-    const [resPlanos,resAssin]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/planos?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=*&order=criado_em.desc&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+  try {
+    const headers = { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` };
+    const [resPlanos, resAssin] = await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/planos?ativo=eq.true&select=*`, { headers }),
+      fetch(`${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=*&order=criado_em.desc&limit=1`, { headers })
     ]);
-    const planos=await resPlanos.json();
-    const assinaturas=await resAssin.json();
-    planoEssencialId=planos.find(p=>p.nome==='Essencial')?.id;
-    assinaturaAtual=assinaturas[0]||null;
+    const planos = await resPlanos.json();
+    const assinaturas = await resAssin.json();
+    planoEssencialId = planos.find(p => p.nome === 'Essencial')?.id;
+    assinaturaAtual = assinaturas[0] || null;
     renderTrialBox();
-  }catch(e){console.error(e);}
+  } catch(e) {
+    console.error('Erro inicializar:', e);
+  }
 }
 
-function renderTrialBox(){
-  const box=document.getElementById('trial-box');
-  const texto=document.getElementById('trial-texto');
-  if(!assinaturaAtual){
-    texto.innerHTML='Nenhuma assinatura ativa. Assine agora e ganhe <strong>30 dias grátis</strong>!';
+// ── Render Trial Box ─────────────────────────────────
+function renderTrialBox() {
+  const box   = document.getElementById('trial-box');
+  const texto = document.getElementById('trial-texto');
+
+  if (!assinaturaAtual) {
+    texto.innerHTML = 'Nenhuma assinatura ativa. Assine agora e ganhe <strong>30 dias grátis</strong>!';
     return;
   }
-  const status=assinaturaAtual.status;
-  if(status==='Trial'){
-    const fim=new Date(assinaturaAtual.data_fim_trial+'T00:00:00');
-    const hoje=new Date();hoje.setHours(0,0,0,0);
-    const dias=Math.ceil((fim-hoje)/(1000*60*60*24));
-    if(dias>7){
-      texto.innerHTML=`🎯 Período de teste ativo. <strong>${dias} dias restantes</strong> até ${fim.toLocaleDateString('pt-BR')}.`;
-    }else if(dias>0){
-      box.className='trial-box vencendo';
-      texto.innerHTML=`⚠️ Trial vence em <strong>${dias} dia(s)</strong>! Assine agora para não perder o acesso.`;
-    }else{
-      box.className='trial-box vencido';
-      texto.innerHTML=`🔴 Período de teste <strong>encerrado</strong>. Assine para continuar usando o SGS.`;
-    }
-  }else if(status==='Ativo'){
-    box.style.background='#0e2820';box.style.borderColor='#1a4a38';
-    texto.style.color='#2dd4a0';
-    texto.innerHTML=`✅ Assinatura <strong>ativa</strong> até ${new Date(assinaturaAtual.data_fim_trial+'T00:00:00').toLocaleDateString('pt-BR')}.`;
-    document.getElementById('area-pagamento').innerHTML=`
+
+  const status = assinaturaAtual.status;
+
+  if (status === 'Ativo') {
+    // Usa data_proximo_vencimento se disponível; fallback para data_fim_trial
+    const dataVenc = assinaturaAtual.data_proximo_vencimento || assinaturaAtual.data_fim_trial;
+    const dataFmt  = dataVenc
+      ? new Date(dataVenc + 'T00:00:00').toLocaleDateString('pt-BR')
+      : '—';
+
+    box.style.background   = '#0e2820';
+    box.style.borderColor  = '#1a4a38';
+    texto.style.color      = '#2dd4a0';
+    texto.innerHTML        = `✅ Assinatura <strong>ativa</strong> — próximo vencimento: ${dataFmt}.`;
+
+    document.getElementById('area-pagamento').innerHTML = `
       <div style="background:#0e2820;border:1px solid #1a4a38;border-radius:10px;padding:20px;text-align:center;color:#2dd4a0;font-size:14px;">
         ✅ Sua assinatura está ativa. Obrigado por assinar o SGS!
       </div>`;
+    return;
+  }
+
+  if (status === 'Trial') {
+    const fim  = new Date(assinaturaAtual.data_fim_trial + 'T00:00:00');
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    const dias = Math.ceil((fim - hoje) / (1000 * 60 * 60 * 24));
+
+    if (dias > 7) {
+      texto.innerHTML = `🎯 Período de teste ativo. <strong>${dias} dias restantes</strong> até ${fim.toLocaleDateString('pt-BR')}.`;
+    } else if (dias > 0) {
+      box.className = 'trial-box vencendo';
+      texto.innerHTML = `⚠️ Trial vence em <strong>${dias} dia(s)</strong>! Assine agora para não perder o acesso.`;
+    } else {
+      box.className = 'trial-box vencido';
+      texto.innerHTML = `🔴 Período de teste <strong>encerrado</strong>. Assine para continuar usando o SGS.`;
+    }
   }
 }
 
-function mudarTab(tab){
-  tabAtual=tab;
-  document.getElementById('tab-cartao').classList.toggle('active',tab==='cartao');
-  document.getElementById('tab-pix').classList.toggle('active',tab==='pix');
-  document.getElementById('form-cartao').style.display=tab==='cartao'?'block':'none';
-  document.getElementById('form-pix').style.display=tab==='pix'?'block':'none';
+// ── Tabs ─────────────────────────────────────────────
+function mudarTab(tab) {
+  tabAtual = tab;
+  document.getElementById('tab-cartao').classList.toggle('active', tab === 'cartao');
+  document.getElementById('tab-pix').classList.toggle('active', tab === 'pix');
+  document.getElementById('form-cartao').style.display = tab === 'cartao' ? 'block' : 'none';
+  document.getElementById('form-pix').style.display    = tab === 'pix'    ? 'block' : 'none';
 }
 
-function selecionarPlano(p){
-  atualizarResumo();
-}
+// ── Resumo ───────────────────────────────────────────
+function atualizarResumo() {
+  const desconto = cupomAtivo ? BASE * (cupomAtivo.valor_desconto / 100) : 0;
+  valorFinal = Math.max(0, BASE - desconto);
 
-function atualizarResumo(){
-  const desconto=cupomAtivo?BASE*(cupomAtivo.valor_desconto/100):0;
-  valorFinal=Math.max(0,BASE-desconto);
-  document.getElementById('valor-total').textContent=fmt(valorFinal);
-  document.getElementById('valor-btn-cartao').textContent=fmt(valorFinal);
-  document.getElementById('valor-btn-pix').textContent=fmt(valorFinal);
-  const linhaDesc=document.getElementById('linha-desconto');
-  if(cupomAtivo&&desconto>0){
-    linhaDesc.style.display='flex';
-    document.getElementById('valor-desconto').textContent=`-${fmt(desconto)}`;
-    document.getElementById('label-desconto').textContent=`Cupom ${cupomAtivo.codigo} (-${cupomAtivo.valor_desconto}%)`;
-  }else{
-    linhaDesc.style.display='none';
+  document.getElementById('valor-total').textContent      = fmt(valorFinal);
+  document.getElementById('valor-btn-cartao').textContent = fmt(valorFinal);
+  document.getElementById('valor-btn-pix').textContent    = fmt(valorFinal);
+
+  const linhaDesc = document.getElementById('linha-desconto');
+  if (cupomAtivo && desconto > 0) {
+    linhaDesc.style.display = 'flex';
+    document.getElementById('valor-desconto').textContent  = `-${fmt(desconto)}`;
+    document.getElementById('label-desconto').textContent  = `Cupom ${cupomAtivo.codigo} (-${cupomAtivo.valor_desconto}%)`;
+  } else {
+    linhaDesc.style.display = 'none';
   }
 }
 
-async function validarCupom(){
-  const codigo=document.getElementById('cupom-input').value.trim().toUpperCase();
-  const statusEl=document.getElementById('cupom-status');
-  const inputEl=document.getElementById('cupom-input');
-  if(!codigo){statusEl.className='cupom-status show err';statusEl.textContent='Digite um código.';return;}
-  statusEl.className='cupom-status show';statusEl.style.color='var(--text2)';statusEl.textContent='Validando...';
-  try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/cupons?codigo=eq.${codigo}&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-    const data=await res.json();
-    if(!data.length){inputEl.className='cupom-input invalido';statusEl.className='cupom-status show err';statusEl.textContent='✕ Cupom inválido.';cupomAtivo=null;atualizarResumo();return;}
-    const cupom=data[0];
-    if(cupom.data_expiracao&&new Date(cupom.data_expiracao)<new Date()){inputEl.className='cupom-input invalido';statusEl.className='cupom-status show err';statusEl.textContent='✕ Cupom expirado.';cupomAtivo=null;atualizarResumo();return;}
-    if(cupom.uso_maximo&&cupom.usos_realizados>=cupom.uso_maximo){inputEl.className='cupom-input invalido';statusEl.className='cupom-status show err';statusEl.textContent='✕ Cupom esgotado.';cupomAtivo=null;atualizarResumo();return;}
-    cupomAtivo=cupom;
-    inputEl.className='cupom-input valido';
-    statusEl.className='cupom-status show ok';
-    statusEl.textContent=`✓ ${cupom.descricao||'Cupom aplicado!'} — ${cupom.valor_desconto}% de desconto`;
+// ── Cupom ────────────────────────────────────────────
+async function validarCupom() {
+  const codigo   = document.getElementById('cupom-input').value.trim().toUpperCase();
+  const statusEl = document.getElementById('cupom-status');
+  const inputEl  = document.getElementById('cupom-input');
+
+  if (!codigo) {
+    statusEl.className = 'cupom-status show err';
+    statusEl.textContent = 'Digite um código.';
+    return;
+  }
+
+  statusEl.className = 'cupom-status show';
+  statusEl.style.color = 'var(--text2)';
+  statusEl.textContent = 'Validando...';
+
+  try {
+    const res  = await fetch(`${SUPA_URL}/rest/v1/cupons?codigo=eq.${codigo}&ativo=eq.true&select=*`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    if (!data.length) {
+      inputEl.className    = 'cupom-input invalido';
+      statusEl.className   = 'cupom-status show err';
+      statusEl.textContent = '✕ Cupom inválido.';
+      cupomAtivo = null;
+      atualizarResumo();
+      return;
+    }
+
+    const cupom = data[0];
+
+    if (cupom.data_expiracao && new Date(cupom.data_expiracao) < new Date()) {
+      inputEl.className    = 'cupom-input invalido';
+      statusEl.className   = 'cupom-status show err';
+      statusEl.textContent = '✕ Cupom expirado.';
+      cupomAtivo = null;
+      atualizarResumo();
+      return;
+    }
+
+    if (cupom.uso_maximo && cupom.usos_realizados >= cupom.uso_maximo) {
+      inputEl.className    = 'cupom-input invalido';
+      statusEl.className   = 'cupom-status show err';
+      statusEl.textContent = '✕ Cupom esgotado.';
+      cupomAtivo = null;
+      atualizarResumo();
+      return;
+    }
+
+    cupomAtivo = cupom;
+    inputEl.className    = 'cupom-input valido';
+    statusEl.className   = 'cupom-status show ok';
+    statusEl.textContent = `✓ ${cupom.descricao || 'Cupom aplicado!'} — ${cupom.valor_desconto}% de desconto`;
     atualizarResumo();
-  }catch(e){statusEl.className='cupom-status show err';statusEl.textContent='Erro ao validar.';}
+
+  } catch(e) {
+    statusEl.className   = 'cupom-status show err';
+    statusEl.textContent = 'Erro ao validar. Tente novamente.';
+  }
 }
 
-document.getElementById('cupom-input').addEventListener('keydown',e=>{if(e.key==='Enter')validarCupom();});
+document.getElementById('cupom-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') validarCupom();
+});
 
-// Formatação campos cartão
-function formatarCartao(el){
-  let v=el.value.replace(/\D/g,'').substring(0,16);
-  el.value=v.replace(/(.{4})/g,'$1 ').trim();
-  // Detecta bandeira
-  const brand=document.getElementById('card-brand');
-  if(v.startsWith('4'))brand.textContent='💙';
-  else if(v.startsWith('5')||v.startsWith('2'))brand.textContent='🔴';
-  else if(v.startsWith('3'))brand.textContent='💚';
-  else brand.textContent='💳';
+// ── Formatação campos ────────────────────────────────
+function formatarCartao(el) {
+  let v = el.value.replace(/\D/g, '').substring(0, 16);
+  el.value = v.replace(/(.{4})/g, '$1 ').trim();
+  const brand = document.getElementById('card-brand');
+  if (v.startsWith('4'))                        brand.textContent = '💙'; // Visa
+  else if (v.startsWith('5') || v.startsWith('2')) brand.textContent = '🔴'; // Mastercard
+  else if (v.startsWith('3'))                   brand.textContent = '💚'; // Amex
+  else                                          brand.textContent = '💳';
 }
 
-function formatarValidade(el){
-  let v=el.value.replace(/\D/g,'');
-  if(v.length>=2)v=v.substring(0,2)+'/'+v.substring(2,4);
-  el.value=v;
+function formatarValidade(el) {
+  let v = el.value.replace(/\D/g, '');
+  if (v.length >= 2) v = v.substring(0, 2) + '/' + v.substring(2, 4);
+  el.value = v;
 }
 
-function formatarCPF(el){
-  let v=el.value.replace(/\D/g,'').substring(0,11);
-  v=v.replace(/(\d{3})(\d)/,'$1.$2');
-  v=v.replace(/(\d{3})(\d)/,'$1.$2');
-  v=v.replace(/(\d{3})(\d{1,2})$/,'$1-$2');
-  el.value=v;
+function formatarCPF(el) {
+  let v = el.value.replace(/\D/g, '').substring(0, 11);
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+  el.value = v;
 }
 
-function setStatus(tipo,msg){
-  const el=document.getElementById('status-assinar');
-  const icons={success:'✓',error:'✕',info:'↻'};
-  el.className='status-bar show '+tipo;
-  el.innerHTML=`<span>${icons[tipo]}</span><span>${msg}</span>`;
+// ── Status bar ───────────────────────────────────────
+function setStatus(tipo, msg) {
+  const el = document.getElementById('status-assinar');
+  const icons = { success: '✓', error: '✕', info: '↻' };
+  el.className = 'status-bar show ' + tipo;
+  el.innerHTML = `<span>${icons[tipo]}</span><span>${msg}</span>`;
 }
 
-// ── PAGAMENTO CARTÃO ──────────────────────────────────
-async function pagarCartao(){
-  const numero=document.getElementById('cardNumber').value.replace(/\s/g,'');
-  const nome=document.getElementById('cardholderName').value.trim();
-  const validade=document.getElementById('cardExpiration').value;
-  const cvv=document.getElementById('securityCode').value.trim();
-  const cpf=document.getElementById('cardholderCPF').value.replace(/\D/g,'');
+function resetBotaoCartao() {
+  const btn = document.getElementById('btn-cartao');
+  btn.disabled = false;
+  document.getElementById('spinner-cartao').className = 'spinner';
+  document.getElementById('label-cartao').innerHTML =
+    `💳 Assinar com cartão — <strong id="valor-btn-cartao">${fmt(valorFinal)}</strong>/mês`;
+}
 
-  if(!numero||numero.length<15){setStatus('error','Número do cartão inválido.');return;}
-  if(!nome){setStatus('error','Informe o nome no cartão.');return;}
-  if(!validade||validade.length<5){setStatus('error','Validade inválida.');return;}
-  if(!cvv||cvv.length<3){setStatus('error','CVV inválido.');return;}
-  if(!cpf||cpf.length<11){setStatus('error','CPF inválido.');return;}
-  if(!planoEssencialId){setStatus('error','Erro ao carregar plano.');return;}
+function resetBotaoPix() {
+  const btn = document.getElementById('btn-pix');
+  btn.disabled = false;
+  document.getElementById('spinner-pix').className = 'spinner';
+  document.getElementById('label-pix').innerHTML =
+    `⚡ Gerar Pix/Boleto — <strong id="valor-btn-pix">${fmt(valorFinal)}</strong>`;
+}
 
-  document.getElementById('btn-cartao').disabled=true;
-  document.getElementById('spinner-cartao').className='spinner show';
-  document.getElementById('label-cartao').innerHTML='Processando...';
-  setStatus('info','Gerando token do cartão...');
+// ── Validações ───────────────────────────────────────
+function validarMesValidade(mes) {
+  const m = parseInt(mes, 10);
+  return m >= 1 && m <= 12;
+}
 
-  try{
-    const [mes,ano]=validade.split('/');
-    // Gera token do cartão via SDK MP
-    const cardToken=await mp.createCardToken({
+function validarAnoValidade(ano) {
+  const anoAtual = new Date().getFullYear() % 100; // últimos 2 dígitos
+  return parseInt(ano, 10) >= anoAtual;
+}
+
+// ── Pagamento cartão ─────────────────────────────────
+async function pagarCartao() {
+  const numero   = document.getElementById('cardNumber').value.replace(/\s/g, '');
+  const nome     = document.getElementById('cardholderName').value.trim();
+  const validade = document.getElementById('cardExpiration').value;
+  const cvv      = document.getElementById('securityCode').value.trim();
+  const cpf      = document.getElementById('cardholderCPF').value.replace(/\D/g, '');
+
+  // Validações
+  if (!numero || numero.length < 15) { setStatus('error', 'Número do cartão inválido.'); return; }
+  if (!nome)                          { setStatus('error', 'Informe o nome no cartão.'); return; }
+  if (!validade || validade.length < 5){ setStatus('error', 'Validade inválida.'); return; }
+
+  const [mes, ano] = validade.split('/');
+  if (!validarMesValidade(mes))       { setStatus('error', 'Mês de validade inválido (01–12).'); return; }
+  if (!validarAnoValidade(ano))       { setStatus('error', 'Ano de validade inválido.'); return; }
+
+  if (!cvv || cvv.length < 3)         { setStatus('error', 'CVV inválido.'); return; }
+  if (!cpf  || cpf.length < 11)       { setStatus('error', 'CPF inválido.'); return; }
+  if (!planoEssencialId)              { setStatus('error', 'Erro ao carregar plano. Recarregue a página.'); return; }
+  if (!mp)                            { setStatus('error', 'SDK de pagamento não inicializado.'); return; }
+
+  document.getElementById('btn-cartao').disabled = true;
+  document.getElementById('spinner-cartao').className = 'spinner show';
+  document.getElementById('label-cartao').innerHTML = 'Processando...';
+  setStatus('info', 'Gerando token do cartão...');
+
+  try {
+    const cardToken = await mp.createCardToken({
       cardNumber: numero,
       cardholderName: nome,
       cardExpirationMonth: mes,
-      cardExpirationYear: '20'+ano,
+      cardExpirationYear: '20' + ano,
       securityCode: cvv,
       identificationType: 'CPF',
       identificationNumber: cpf,
     });
 
-    if(cardToken.error){throw new Error(cardToken.error);}
+    if (cardToken.error) throw new Error(cardToken.error);
 
-    setStatus('info','Criando assinatura recorrente...');
+    setStatus('info', 'Criando assinatura recorrente...');
 
-    // Envia para Edge Function com o token
-    const res=await fetch(`${SUPA_URL}/functions/v1/criar-assinatura`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`,'apikey':SUPA_KEY},
-      body:JSON.stringify({
-        plano_id:planoEssencialId,
-        cupom_codigo:cupomAtivo?cupomAtivo.codigo:null,
-        tipo:'recorrente',
-        card_token_id:cardToken.id,
-        valor:valorFinal,
-        email:user.email,
+    const res = await fetch(`${SUPA_URL}/functions/v1/criar-assinatura`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'apikey': SUPA_KEY
+      },
+      body: JSON.stringify({
+        plano_id:      planoEssencialId,
+        cupom_codigo:  cupomAtivo ? cupomAtivo.codigo : null,
+        tipo:          'recorrente',
+        card_token_id: cardToken.id,
+        valor:         valorFinal,
+        email:         user.email,
         cpf,
       })
     });
 
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.error||'Erro ao criar assinatura.');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erro ao criar assinatura.');
 
-    setStatus('success','Assinatura criada com sucesso! Redirecionando...');
-    setTimeout(()=>{window.location.href='pagamento_sucesso.html';},2000);
+    setStatus('success', 'Assinatura criada com sucesso! Redirecionando...');
+    setTimeout(() => { window.location.href = 'pagamento_sucesso.html'; }, 2000);
 
-  }catch(e){
-    setStatus('error',`Erro: ${e.message}`);
-    document.getElementById('btn-cartao').disabled=false;
-    document.getElementById('spinner-cartao').className='spinner';
-    document.getElementById('label-cartao').innerHTML=`💳 Assinar com cartão — <span id="valor-btn-cartao">${fmt(valorFinal)}</span>/mês`;
+  } catch(e) {
+    setStatus('error', `Erro: ${e.message}`);
+    resetBotaoCartao();
   }
 }
 
-// ── PAGAMENTO PIX/BOLETO ──────────────────────────────
-async function pagarPix(){
-  if(!planoEssencialId){setStatus('error','Erro ao carregar plano.');return;}
-  document.getElementById('btn-pix').disabled=true;
-  document.getElementById('spinner-pix').className='spinner show';
-  document.getElementById('label-pix').innerHTML='Gerando link...';
-  setStatus('info','Criando link de pagamento...');
-  try{
-    const res=await fetch(`${SUPA_URL}/functions/v1/criar-assinatura`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`,'apikey':SUPA_KEY},
-      body:JSON.stringify({plano_id:planoEssencialId,cupom_codigo:cupomAtivo?cupomAtivo.codigo:null,tipo:'avulso'})
+// ── Pagamento PIX ────────────────────────────────────
+async function pagarPix() {
+  if (!planoEssencialId) { setStatus('error', 'Erro ao carregar plano. Recarregue a página.'); return; }
+
+  document.getElementById('btn-pix').disabled = true;
+  document.getElementById('spinner-pix').className = 'spinner show';
+  document.getElementById('label-pix').innerHTML = 'Gerando link...';
+  setStatus('info', 'Criando link de pagamento...');
+
+  try {
+    const res = await fetch(`${SUPA_URL}/functions/v1/criar-assinatura`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'apikey': SUPA_KEY
+      },
+      body: JSON.stringify({
+        plano_id:     planoEssencialId,
+        cupom_codigo: cupomAtivo ? cupomAtivo.codigo : null,
+        tipo:         'avulso'
+      })
     });
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.error||'Erro ao criar pagamento.');
-    if(data.mp_init_point){
-      setStatus('success','Redirecionando...');
-      setTimeout(()=>{window.location.href=data.mp_init_point;},1000);
-    }else{
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erro ao criar pagamento.');
+
+    if (data.mp_init_point) {
+      setStatus('success', 'Redirecionando...');
+      setTimeout(() => { window.location.href = data.mp_init_point; }, 1000);
+    } else {
       throw new Error('Link de pagamento não gerado.');
     }
-  }catch(e){
-    setStatus('error',`Erro: ${e.message}`);
-    document.getElementById('btn-pix').disabled=false;
-    document.getElementById('spinner-pix').className='spinner';
-    document.getElementById('label-pix').innerHTML=`⚡ Gerar Pix/Boleto — <span id="valor-btn-pix">${fmt(valorFinal)}</span>`;
+
+  } catch(e) {
+    setStatus('error', `Erro: ${e.message}`);
+    resetBotaoPix();
   }
 }
 

@@ -17,18 +17,50 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+
+  /* ── HEADER ── */
   .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
-  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
   .header-title{font-size:13px;color:var(--text2);flex:1;}
   .header-title span{color:var(--text);font-weight:500;}
   .user-info{display:flex;align-items:center;gap:12px;margin-left:auto;}
   .user-email{font-size:12px;color:var(--text2);}
-  .btn-logout{font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;font-family:var(--sans);}
+  .btn-logout{font-size:12px;padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;font-family:var(--sans);transition:border-color .15s,color .15s;}
   .btn-logout:hover{border-color:var(--danger);color:var(--danger);}
+
+  /* ── CONFIG DROPDOWN ── */
+  #menu-config{position:relative;}
+  .btn-config{font-size:18px;padding:6px 8px;color:var(--text2);border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;line-height:1;}
+  .dropdown-config{display:none;position:fixed;top:56px;right:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:200px;max-width:calc(100vw - 16px);z-index:9999;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.6);}
+  .dropdown-label{padding:8px 12px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);}
+  .dropdown-item{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;}
+  .dropdown-item:hover{background:var(--surface2);}
+
+  /* ── CONTAINER ── */
   .container{max-width:960px;margin:0 auto;padding:40px 24px;}
   .welcome{margin-bottom:40px;}
   .welcome h1{font-size:24px;font-weight:500;margin-bottom:8px;}
   .welcome p{color:var(--text2);font-size:14px;}
+
+  /* ── SECTION TITLE ── */
+  .section-title{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* ── STATS ── */
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:40px;}
+  .stat{background:var(--surface2);border-radius:var(--radius);padding:16px;}
+  .stat-label{font-size:12px;color:var(--text2);margin-bottom:4px;}
+  .stat-value{font-size:22px;font-weight:500;font-family:var(--mono);}
+
+  /* ── ASSINATURA BLOCO ── */
+  .bloco-assinatura{display:none;background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:16px 20px;margin-bottom:32px;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .assin-info{}
+  .assin-titulo{font-size:14px;font-weight:500;color:#e8eaf0;margin-bottom:4px;}
+  .assin-sub{font-size:12px;color:#7aabf7;}
+  .assin-btn{background:#4a7cdc;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;transition:background .15s;}
+  .assin-btn:hover{background:#5d8fe8;}
+
+  /* ── MENU CARDS ── */
   .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px;}
   .menu-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:border-color .15s,transform .15s;text-decoration:none;display:block;}
   .menu-card:hover{border-color:var(--border-focus);transform:translateY(-2px);}
@@ -37,49 +69,49 @@
   .icon-blue{background:#1a2540;border:1px solid #2a4070;}
   .icon-green{background:#0e2820;border:1px solid #1a4a38;}
   .icon-amber{background:#2a2010;border:1px solid #4a3a10;}
-  .icon-gray{background:#1e2333;border:1px solid var(--border);}
   .menu-title{font-size:14px;font-weight:500;margin-bottom:4px;}
   .menu-desc{font-size:12px;color:var(--text2);}
+
+  /* ── BADGES ── */
   .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;margin-left:8px;font-family:var(--mono);}
   .badge-new{background:#0e2820;color:var(--success);border:1px solid #1a4a38;}
-  .badge-soon{background:#1e2333;color:var(--text3);border:1px solid var(--border);}
-  .section-title{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-  .section-title::after{content:'';flex:1;height:1px;background:var(--border);}
-  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:40px;}
-  .stat{background:var(--surface2);border-radius:var(--radius);padding:16px;}
-  .stat-label{font-size:12px;color:var(--text2);margin-bottom:4px;}
-  .stat-value{font-size:22px;font-weight:500;}
-  @media(max-width:600px){.header-title{display:none;}.user-email{display:none;}.menu-grid{grid-template-columns:1fr;}.stats-grid{grid-template-columns:1fr 1fr;}.header{padding:12px 16px;}.container{padding:24px 12px;}}
+
+  /* ── QUICK ACCESS ── */
+  .quick-access{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;}
+  .quick-link{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;transition:border-color .15s,color .15s;}
+  .quick-link:hover{border-color:var(--border-focus);color:var(--text);}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:600px){
+    .header-title{display:none;}
+    .user-email{display:none;}
+    .menu-grid{grid-template-columns:1fr;}
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    .header{padding:12px 16px;}
+    .container{padding:24px 12px;}
+  }
 </style>
 <script src="trial_check.js"></script>
 </head>
 <body>
 
 <div class="header">
-  <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
+  <a href="index.html" class="header-logo">SGS</a>
   <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="page-title">Início</span></div>
   <div class="user-info">
     <span class="user-email" id="user-email"></span>
-    <div style="position:relative;" id="menu-config">
-  <button onclick="toggleConfig()" style="font-size:18px;padding:6px 8px;color:var(--text2);border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;line-height:1;" title="Configurações">⚙️</button>
-  <div id="dropdown-config" style="display:none;position:fixed;top:56px;right:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:200px;max-width:calc(100vw - 16px);z-index:9999;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.6);">
-    <div style="padding:8px 12px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);">Configurações</div>
-    <a href="usuarios.html" style="display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
-      <span style="font-size:15px;">👥</span> Gerenciar usuários
-    </a>
-  </div>
-</div>
-<script>
-function toggleConfig() {
-  const d = document.getElementById('dropdown-config');
-  d.style.display = d.style.display === 'none' ? 'block' : 'none';
-}
-document.addEventListener('click', function(e) {
-  if (!document.getElementById('menu-config').contains(e.target)) {
-    document.getElementById('dropdown-config').style.display = 'none';
-  }
-});
-</script>
+
+    <!-- Config dropdown -->
+    <div id="menu-config">
+      <button class="btn-config" onclick="toggleConfig()" title="Configurações">⚙️</button>
+      <div class="dropdown-config" id="dropdown-config">
+        <div class="dropdown-label">Configurações</div>
+        <a href="usuarios.html" class="dropdown-item">
+          <span style="font-size:15px;">👥</span> Gerenciar usuários
+        </a>
+      </div>
+    </div>
+
     <button class="btn-logout" onclick="sair()">Sair</button>
   </div>
 </div>
@@ -102,7 +134,7 @@ document.addEventListener('click', function(e) {
     </div>
     <div class="stat">
       <div class="stat-label">Documentos</div>
-      <div class="stat-value">0</div>
+      <div class="stat-value" id="stat-documentos">—</div>
     </div>
     <div class="stat">
       <div class="stat-label">Ações pendentes</div>
@@ -110,17 +142,17 @@ document.addEventListener('click', function(e) {
     </div>
   </div>
 
-  <div id="bloco-assinatura" style="display:none;background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:16px 20px;margin-bottom:32px;align-items:center;justify-content:space-between;gap:16px;">
-    <div>
-      <div id="assin-titulo" style="font-size:14px;font-weight:500;color:#e8eaf0;margin-bottom:4px;">Você está no período Trial</div>
-      <div id="assin-sub" style="font-size:12px;color:#7aabf7;">30 dias grátis com acesso completo.</div>
+  <!-- Bloco assinatura/trial -->
+  <div class="bloco-assinatura" id="bloco-assinatura">
+    <div class="assin-info">
+      <div class="assin-titulo" id="assin-titulo">Você está no período Trial</div>
+      <div class="assin-sub" id="assin-sub">30 dias grátis com acesso completo.</div>
     </div>
-    <a href="assinar.html" id="assin-btn" style="background:#4a7cdc;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;">Assinar plano</a>
+    <a href="assinar.html" class="assin-btn" id="assin-btn">Assinar plano</a>
   </div>
 
   <div class="section-title">Menu principal</div>
-  <div class="menu-grid" style="grid-template-columns:repeat(3,1fr);">
-
+  <div class="menu-grid">
     <a href="empresas.html" class="menu-card">
       <div class="menu-icon icon-blue">🏢</div>
       <div class="menu-title">Empresas <span class="badge badge-new">ativo</span></div>
@@ -138,18 +170,16 @@ document.addEventListener('click', function(e) {
       <div class="menu-title">Relatórios <span class="badge badge-new">ativo</span></div>
       <div class="menu-desc">Gráficos e indicadores SST consolidados — riscos, exames, treinamentos, ações e muito mais.</div>
     </a>
-
   </div>
 
   <div class="section-title">Acesso rápido</div>
-  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px;">
-    <a href="empresas.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">🏢 Empresas</a>
-    <a href="acoes_global.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">⚡ Ações</a>
-    <a href="relatorios.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">📊 Relatórios</a>
-    <a href="usuarios.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">👥 Usuários</a>
-    <a href="assinar.html" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);text-decoration:none;">💳 Assinatura</a>
+  <div class="quick-access">
+    <a href="empresas.html" class="quick-link">🏢 Empresas</a>
+    <a href="acoes_global.html" class="quick-link">⚡ Ações</a>
+    <a href="relatorios.html" class="quick-link">📊 Relatórios</a>
+    <a href="usuarios.html" class="quick-link">👥 Usuários</a>
+    <a href="assinar.html" class="quick-link">💳 Assinatura</a>
   </div>
-
 </div>
 
 <script>
@@ -157,83 +187,142 @@ const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
 const token = localStorage.getItem('sgs_token');
 const userRaw = localStorage.getItem('sgs_user');
-if (!token) { window.location.href = 'login.html'; }
-const user = userRaw ? JSON.parse(userRaw) : {};
-document.getElementById('user-email').textContent = user.email || '';
-const nomeCompleto = user.email?.split('@')[0] || 'usuário';
-const primeiroNome = nomeCompleto.split('.')[0];
-const nomeFmt = primeiroNome.charAt(0).toUpperCase() + primeiroNome.slice(1);
-document.getElementById('user-nome').textContent = nomeFmt;
 
+// Redireciona se não autenticado
+if (!token) { window.location.href = 'login.html'; }
+
+const user = userRaw ? JSON.parse(userRaw) : {};
+
+// Exibe e-mail no header
+document.getElementById('user-email').textContent = user.email || '';
+
+// Exibe primeiro nome formatado (usa campo nome se disponível, fallback para e-mail)
+function formatarNome(u) {
+  if (u.nome) {
+    return u.nome.split(' ')[0];
+  }
+  const slug = u.email?.split('@')[0] || 'usuário';
+  const primeira = slug.split('.')[0];
+  return primeira.charAt(0).toUpperCase() + primeira.slice(1);
+}
+document.getElementById('user-nome').textContent = formatarNome(user);
+
+// ── Dropdown config ──────────────────────────────────
+function toggleConfig() {
+  const d = document.getElementById('dropdown-config');
+  d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+  if (!document.getElementById('menu-config').contains(e.target)) {
+    document.getElementById('dropdown-config').style.display = 'none';
+  }
+});
+
+// ── Stats ────────────────────────────────────────────
 async function carregarStats() {
   try {
+    const headers = { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` };
     const [resEmpresas, resAcoes] = await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/empresas?select=id,total_funcionarios_cadastrados&ativo=eq.true`, {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/acoes?select=id,status&ativo=eq.true`, {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+      fetch(`${SUPA_URL}/rest/v1/empresas?select=id,total_funcionarios_cadastrados&ativo=eq.true`, { headers }),
+      fetch(`${SUPA_URL}/rest/v1/acoes?select=id,status&ativo=eq.true`, { headers })
     ]);
+
     if (resEmpresas.ok) {
       const data = await resEmpresas.json();
       document.getElementById('stat-empresas').textContent = data.length;
       const totalFuncs = data.reduce((acc, e) => acc + (e.total_funcionarios_cadastrados || 0), 0);
       document.getElementById('stat-funcionarios').textContent = totalFuncs;
     }
+
     if (resAcoes.ok) {
       const acoes = await resAcoes.json();
       const pendentes = acoes.filter(a => a.status === 'Pendente' || a.status === 'Em andamento').length;
       document.getElementById('stat-acoes').textContent = pendentes;
     }
-  } catch(e) { console.log('Erro stats:', e); }
+
+    // Documentos: exibe 0 até implementação real
+    document.getElementById('stat-documentos').textContent = '0';
+
+  } catch(e) {
+    console.error('Erro stats:', e);
+    ['stat-empresas','stat-funcionarios','stat-acoes','stat-documentos']
+      .forEach(id => { document.getElementById(id).textContent = '—'; });
+  }
 }
 
+// ── Assinatura / Trial ───────────────────────────────
 async function verificarAssinatura() {
   try {
-    const resPerfil = await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${user.id}&select=perfil`, {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const headers = { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` };
+
+    // Verifica se é SUPERADMIN (não exibe bloco)
+    const resPerfil = await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${user.id}&select=perfil`, { headers });
     const perfil = await resPerfil.json();
     if (perfil[0]?.perfil === 'SUPERADMIN') return;
 
-    const res = await fetch(`${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=status,data_fim_trial&order=criado_em.desc&limit=1`, {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const res = await fetch(
+      `${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=status,data_fim_trial&order=criado_em.desc&limit=1`,
+      { headers }
+    );
     const assinaturas = await res.json();
     const assin = assinaturas[0];
-    const bloco = document.getElementById('bloco-assinatura');
-    const titulo = document.getElementById('assin-titulo');
-    const sub = document.getElementById('assin-sub');
-    const btn = document.getElementById('assin-btn');
 
+    const bloco   = document.getElementById('bloco-assinatura');
+    const titulo  = document.getElementById('assin-titulo');
+    const sub     = document.getElementById('assin-sub');
+    const btn     = document.getElementById('assin-btn');
+
+    // Assinatura ativa: oculta bloco
     if (assin?.status === 'Ativo') {
       bloco.style.display = 'none';
       return;
     }
 
-    const fim = assin ? new Date(assin.data_fim_trial + 'T00:00:00') : null;
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const dias = fim ? Math.ceil((fim - hoje) / (1000*60*60*24)) : 0;
+    // Calcula dias restantes do trial
+    const fim  = assin ? new Date(assin.data_fim_trial + 'T00:00:00') : null;
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    const dias = fim ? Math.ceil((fim - hoje) / (1000 * 60 * 60 * 24)) : 0;
 
     bloco.style.display = 'flex';
+
     if (!assin || dias <= 0) {
-      bloco.style.background = '#2a1515'; bloco.style.borderColor = '#4a2020';
+      // Trial encerrado
+      bloco.style.background = '#2a1515';
+      bloco.style.borderColor = '#4a2020';
       titulo.textContent = '🔴 Período de teste encerrado';
-      sub.style.color = '#e05555'; sub.textContent = 'Assine agora para continuar.';
+      sub.style.color = '#e05555';
+      sub.textContent = 'Assine agora para continuar usando o SGS.';
       btn.style.background = '#e05555';
     } else if (dias <= 7) {
-      bloco.style.background = '#2a2010'; bloco.style.borderColor = '#4a3a10';
+      // Trial vencendo em breve
+      bloco.style.background = '#2a2010';
+      bloco.style.borderColor = '#4a3a10';
       titulo.textContent = `⚠️ Trial vence em ${dias} dia(s)!`;
-      sub.style.color = '#e0a855'; sub.textContent = 'Assine agora para não perder o acesso.';
-      btn.style.background = '#e0a855'; btn.style.color = '#0f1117';
+      sub.style.color = '#e0a855';
+      sub.textContent = 'Assine agora para não perder o acesso.';
+      btn.style.background = '#e0a855';
+      btn.style.color = '#0f1117';
     } else {
+      // Trial ativo com folga
       titulo.textContent = `🎯 Período de teste — ${dias} dias restantes`;
       sub.textContent = '30 dias grátis com acesso completo.';
     }
-  } catch(e) { console.log('Erro assinatura:', e); }
+
+  } catch(e) {
+    console.error('Erro assinatura:', e);
+  }
 }
 
-carregarStats();
-verificarAssinatura();
-
+// ── Logout ───────────────────────────────────────────
 function sair() {
   localStorage.removeItem('sgs_token');
   localStorage.removeItem('sgs_user');
   window.location.href = 'login.html';
 }
+
+// ── Init ─────────────────────────────────────────────
+carregarStats();
+verificarAssinatura();
 </script>
 </body>
 </html>
