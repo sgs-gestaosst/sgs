@@ -162,6 +162,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .page::before{width:5mm;}
 }
 </style>
+<script src="trial_check.js"></script>
 </head>
 <body>
 
@@ -300,7 +301,17 @@ async function carregar(){
     // Carrega SESMT
     const resSESMT=await fetch(`${SUPA_URL}/rest/v1/dimensionamento_sesmt?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const sesmtData=await resSESMT.json();
-    window.sesmtData=sesmtData[0]||null;
+    // Agrega os dados corretamente
+    const sesmtRaw=sesmtData[0]||null;
+    // Busca via RPC para garantir valores corretos
+    const resSesmtCalc=await fetch(`${SUPA_URL}/rest/v1/rpc/calcular_sesmt_empresa`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      body:JSON.stringify({p_empresa_id:parseInt(empresaId)})
+    });
+    const sesmtCalc=await resSesmtCalc.json();
+    window.sesmtData=sesmtRaw;
+    window.sesmtCalc=Array.isArray(sesmtCalc)?sesmtCalc:[];
     // Carrega ações da empresa para o plano de ação
     const resAcoes=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=prioridade.asc,prazo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     window.acoesData=await resAcoes.json();
@@ -594,26 +605,30 @@ function renderSESMT(){
   const grLabels={1:'GR 1 — Baixo',2:'GR 2 — Médio-Baixo',3:'GR 3 — Médio-Alto',4:'GR 4 — Alto'};
 
   // Se não tiver dados calculados, mostra tabela NR-4 calculada na hora
-  const tec=sesmt?.tecnico_sst||0;
-  const eng=sesmt?.engenheiro_sst||0;
-  const med=sesmt?.medico_trabalho||0;
-  const enf=sesmt?.enfermeiro||0;
-  const aux=sesmt?.aux_enfermagem||0;
+  const calc=window.sesmtCalc||[];
+  const tec=calc.find(c=>c.cargo?.includes('Técnico'))?.qtd||sesmt?.tecnico_sst||0;
+  const eng=calc.find(c=>c.cargo?.includes('Engenheiro'))?.qtd||sesmt?.engenheiro_sst||0;
+  const med=calc.find(c=>c.cargo?.includes('Médico'))?.qtd||sesmt?.medico_trabalho||0;
+  const enf=calc.find(c=>c.cargo?.includes('Enfermeiro')&&!c.cargo?.includes('Aux'))?.qtd||sesmt?.enfermeiro||0;
+  const aux=calc.find(c=>c.cargo?.includes('Auxiliar'))?.qtd||sesmt?.aux_enfermagem||0;
   const dispensado=(tec+eng+med+enf+aux)===0;
 
+  const regTec=calc.find(c=>c.cargo?.includes('Técnico'))?.regime||sesmt?.regime_tecnico||'Parcial';
   const profissionais=[
-    {cargo:'Técnico de Segurança do Trabalho',cbo:'3172-05',qtd:tec,regime:sesmt?.regime_tecnico||'—'},
-    {cargo:'Engenheiro de Segurança do Trabalho',cbo:'2149-40',qtd:eng,regime:sesmt?.regime_engenheiro||'—'},
-    {cargo:'Médico do Trabalho',cbo:'2231-38',qtd:med,regime:sesmt?.regime_medico||'—'},
-    {cargo:'Enfermeiro do Trabalho',cbo:'2235-35',qtd:enf,regime:sesmt?.regime_enfermeiro||'—'},
-    {cargo:'Auxiliar de Enfermagem do Trabalho',cbo:'3222-05',qtd:aux,regime:sesmt?.regime_aux_enf||'—'},
+    {cargo:'Técnico de Segurança do Trabalho',cbo:'3172-05',qtd:tec,regime:regTec},
+    {cargo:'Engenheiro de Segurança do Trabalho',cbo:'2149-40',qtd:eng,regime:'Parcial'},
+    {cargo:'Médico do Trabalho',cbo:'2231-38',qtd:med,regime:'Parcial'},
+    {cargo:'Enfermeiro do Trabalho',cbo:'2235-35',qtd:enf,regime:'Parcial'},
+    {cargo:'Auxiliar de Enfermagem do Trabalho',cbo:'3222-05',qtd:aux,regime:'Parcial'},
   ];
 
-  // CIPA / CIPATR
-  const requerCipa=sesmt?.requer_cipa||false;
-  const requerCipatr=sesmt?.requer_cipatr||false;
-  const membrosCipa=sesmt?.numero_membros_cipa||0;
-  const membrosCipatr=sesmt?.numero_membros_cipatr||0;
+  // CIPA / CIPATR / CIPAMIN
+  const requerCipa=calc.some(c=>c.cargo?.includes('CIPA')&&!c.cargo?.includes('CIPATR')&&!c.cargo?.includes('CIPAMIN'))||sesmt?.requer_cipa||false;
+  const requerCipatr=calc.some(c=>c.cargo?.includes('CIPATR'))||sesmt?.requer_cipatr||false;
+  const requerCipamin=calc.some(c=>c.cargo?.includes('CIPAMIN'))||sesmt?.requer_cipamin||false;
+  const membrosCipa=calc.find(c=>c.cargo?.includes('CIPA')&&!c.cargo?.includes('CIPATR')&&!c.cargo?.includes('CIPAMIN'))?.qtd||sesmt?.numero_membros_cipa||0;
+  const membrosCipatr=calc.find(c=>c.cargo?.includes('CIPATR'))?.qtd||sesmt?.numero_membros_cipatr||0;
+  const membrosCipamin=calc.find(c=>c.cargo?.includes('CIPAMIN'))?.qtd||sesmt?.numero_membros_cipamin||0;
 
   pg.innerHTML=`
   <div class="page-header">
