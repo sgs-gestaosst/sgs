@@ -4,17 +4,23 @@
 (async function verificarTrial(){
   const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
   const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
-  const token=localStorage.getItem('sgs_token');
+
+  let token=localStorage.getItem('sgs_token');
   const userRaw=localStorage.getItem('sgs_user');
-  if(!token||!userRaw)return; // login.html cuida disso
+  if(!token||!userRaw)return;
 
   const user=JSON.parse(userRaw);
+
+  // Tenta renovar o token automaticamente se estiver expirado ou prestes a expirar
+  token = await renovarTokenSeNecessario(SUPA_URL, SUPA_KEY, token);
+  if(!token) return;
 
   // SUPERADMIN nunca bloqueia
   try{
     const resPerfil=await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${user.id}&select=perfil`,{
       headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
     });
+    if(resPerfil.status===401){ redirecionarLogin(); return; }
     const perfil=await resPerfil.json();
     if(perfil[0]?.perfil==='SUPERADMIN')return;
   }catch(e){return;}
@@ -24,33 +30,64 @@
     const res=await fetch(`${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=status,data_fim_trial&order=criado_em.desc&limit=1`,{
       headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
     });
+    if(res.status===401){ redirecionarLogin(); return; }
+
     const assinaturas=await res.json();
     const assinatura=assinaturas[0];
 
-    // Sem assinatura → bloqueia
     if(!assinatura){mostrarBloqueio(0);return;}
-
-    // Assinatura ativa paga → libera
     if(assinatura.status==='Ativo')return;
 
-    // Trial → verifica dias
     if(assinatura.status==='Trial'){
       const fim=new Date(assinatura.data_fim_trial+'T00:00:00');
       const hoje=new Date();hoje.setHours(0,0,0,0);
       const dias=Math.ceil((fim-hoje)/(1000*60*60*24));
       if(dias<=0){mostrarBloqueio(0);return;}
       if(dias<=7){mostrarAvisoTrial(dias);return;}
-      return; // Trial ok
+      return;
     }
 
-    // Outros status (Cancelado, Expirado) → bloqueia
     mostrarBloqueio(-1);
-
   }catch(e){console.error('Erro ao verificar trial:',e);}
 })();
 
+// Renovação automática de token
+async function renovarTokenSeNecessario(SUPA_URL, SUPA_KEY, token){
+  try{
+    const payload=JSON.parse(atob(token.split('.')[1]));
+    const expiraEm=payload.exp*1000;
+    const margem=5*60*1000; // renova se faltar menos de 5 minutos
+    if(Date.now() < expiraEm - margem) return token; // ainda válido
+  }catch(e){ /* token malformado, tenta renovar */ }
+
+  const refreshToken=localStorage.getItem('sgs_refresh_token');
+  if(!refreshToken){ redirecionarLogin(); return null; }
+
+  try{
+    const res=await fetch(`${SUPA_URL}/auth/v1/token?grant_type=refresh_token`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+      body:JSON.stringify({refresh_token:refreshToken})
+    });
+    if(!res.ok){ redirecionarLogin(); return null; }
+    const data=await res.json();
+    localStorage.setItem('sgs_token', data.access_token);
+    if(data.refresh_token) localStorage.setItem('sgs_refresh_token', data.refresh_token);
+    return data.access_token;
+  }catch(e){
+    console.error('Erro ao renovar token:', e);
+    return token;
+  }
+}
+
+function redirecionarLogin(){
+  localStorage.removeItem('sgs_token');
+  localStorage.removeItem('sgs_refresh_token');
+  localStorage.removeItem('sgs_user');
+  window.location.href='login.html';
+}
+
 function mostrarBloqueio(dias){
-  // Bloqueia toda a interface com overlay
   const overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;background:rgba(15,17,23,.97);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:IBM Plex Sans,sans-serif;';
   overlay.innerHTML=`
@@ -73,7 +110,6 @@ function mostrarBloqueio(dias){
       </div>
     </div>`;
   document.body.appendChild(overlay);
-  // Bloqueia scroll
   document.body.style.overflow='hidden';
 }
 
@@ -89,6 +125,5 @@ function mostrarAvisoTrial(dias){
     </div>
     <button onclick="this.parentNode.remove()" style="background:none;border:none;color:#545e72;cursor:pointer;font-size:16px;flex-shrink:0;padding:0;line-height:1;">×</button>`;
   document.body.appendChild(aviso);
-  // Auto-remove após 10 segundos
   setTimeout(()=>aviso.remove(),10000);
 }

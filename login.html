@@ -148,6 +148,7 @@ async function fazerLogin() {
 
     // Salva token
     localStorage.setItem('sgs_token', data.access_token);
+    localStorage.setItem('sgs_refresh_token', data.refresh_token||'');
     localStorage.setItem('sgs_user', JSON.stringify({email, id: data.user?.id}));
 
     setStatus('status-login','success','Acesso autorizado! Redirecionando...');
