@@ -124,6 +124,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     <div style="display:flex;gap:8px;">
       <button class="btn btn-edit" onclick="abrirModalCatalogo()">📚 Catálogo</button>
       <button class="btn btn-edit" onclick="abrirModalFuncaoTreinamento()">🔗 Vincular à função</button>
+      <button class="btn btn-secondary" onclick="abrirModalTurma()" style="background:var(--surface2);border:1px solid var(--border);">👥 Registrar turma</button>
       <button class="btn btn-primary" onclick="abrirModalRegistro()">+ Registrar treinamento</button>
     </div>
   </div>
@@ -242,6 +243,108 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <span class="spinner" id="spinner-registro"></span>
         <span id="label-registro">Salvar registro</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TURMA -->
+<div class="modal-overlay" id="modal-turma">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-titulo">
+      <span>👥 Registrar turma de treinamento</span>
+      <button onclick="fecharModalTurma()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <!-- Dados do treinamento -->
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px;">Dados do treinamento</div>
+      <div class="modal-grid">
+        <div class="modal-field full">
+          <label>Treinamento <span style="color:var(--accent);">*</span></label>
+          <select id="turma-treinamento" onchange="preencherDadosTurma()">
+            <option value="">— Selecione —</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Tipo</label>
+          <select id="turma-tipo">
+            <option>Inicial</option>
+            <option>Reciclagem</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Data de realização <span style="color:var(--accent);">*</span></label>
+          <input type="date" id="turma-data" onchange="calcularVencimentoTurma()">
+        </div>
+        <div class="modal-field">
+          <label>Data de vencimento</label>
+          <input type="date" id="turma-vencimento">
+        </div>
+        <div class="modal-field">
+          <label>Carga horária (h)</label>
+          <input type="number" id="turma-carga" placeholder="Ex: 8" min="1">
+        </div>
+        <div class="modal-field">
+          <label>Instrutor</label>
+          <input type="text" id="turma-instrutor" placeholder="Nome do instrutor">
+        </div>
+        <div class="modal-field">
+          <label>Local</label>
+          <input type="text" id="turma-local" placeholder="Local de realização">
+        </div>
+        <div class="modal-field">
+          <label>Nº do certificado / turma</label>
+          <input type="text" id="turma-certificado" placeholder="Código da turma">
+        </div>
+        <div class="modal-field full">
+          <label>Observação</label>
+          <textarea id="turma-observacao" placeholder="Observações adicionais..."></textarea>
+        </div>
+        <div class="modal-field full">
+          <label>Evidência única da turma (lista de presença, certificado...)</label>
+          <div class="upload-area" id="turma-upload-area" onclick="document.getElementById('turma-arquivo').click()" ondragover="dragOver2(event)" ondrop="dropArquivo2(event)">
+            <div style="font-size:24px;margin-bottom:6px;">📎</div>
+            <div style="font-size:13px;color:var(--text2);">Clique ou arraste um arquivo aqui</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:4px;">PDF, JPG, PNG — máx. 10MB · será vinculada a todos os participantes</div>
+          </div>
+          <input type="file" id="turma-arquivo" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="selecionarArquivo2(this)">
+          <div id="turma-upload-preview" style="display:none;" class="upload-preview">
+            <span style="font-size:18px;">📄</span>
+            <div style="flex:1;">
+              <div id="turma-upload-nome" style="font-size:12px;font-weight:500;"></div>
+              <div id="turma-upload-tamanho" style="font-size:10px;color:var(--text3);"></div>
+            </div>
+            <button onclick="removerArquivo2()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Seleção de participantes -->
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;">Participantes <span id="turma-count-badge" style="color:var(--accent);font-size:12px;"></span></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <select id="turma-filtro-setor" onchange="filtrarFuncsTurma()" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:5px 8px;outline:none;">
+            <option value="">Todos os setores</option>
+          </select>
+          <input type="text" id="turma-busca-func" oninput="filtrarFuncsTurma()" placeholder="Buscar funcionário..." style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:5px 10px;outline:none;width:180px;">
+          <button onclick="toggleTodosParticipantes(true)" style="font-size:11px;padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;">✓ Todos</button>
+          <button onclick="toggleTodosParticipantes(false)" style="font-size:11px;padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;">✕ Nenhum</button>
+        </div>
+      </div>
+      <div id="turma-lista-funcs" style="max-height:220px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+        <!-- preenchido via JS -->
+      </div>
+    </div>
+    <div class="status-bar" id="status-turma"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:20px;">
+      <div id="turma-prog" style="font-size:12px;color:var(--text2);display:none;"></div>
+      <div style="display:flex;gap:8px;margin-left:auto;">
+        <button class="btn btn-cancel" onclick="fecharModalTurma()">Cancelar</button>
+        <button class="btn btn-save" id="btn-salvar-turma" onclick="salvarTurma()">
+          <span class="spinner" id="spinner-turma"></span>
+          <span id="label-turma">Registrar para turma</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -921,6 +1024,223 @@ async function atualizarSugestoesComTreinamentos(){
 }
 
 inicializar();
+
+// ── MODAL TURMA ───────────────────────────────────────
+let arquivoTurma = null;
+
+function abrirModalTurma() {
+  // Popula treinamentos
+  const selTrei = document.getElementById('turma-treinamento');
+  selTrei.innerHTML = '<option value="">— Selecione —</option>' + catalogo.map(c =>
+    `<option value="${c.id}">${escHtml(c.nome)}${c.nr_relacionada ? ' (' + c.nr_relacionada + ')' : ''}</option>`
+  ).join('');
+  // Popula filtro de setor
+  const selSetor = document.getElementById('turma-filtro-setor');
+  selSetor.innerHTML = '<option value="">Todos os setores</option>' + setores.map(s =>
+    `<option value="${s.id}">${escHtml(s.nome_setor)}</option>`
+  ).join('');
+  // Limpa campos
+  ['turma-tipo','turma-data','turma-vencimento','turma-carga','turma-instrutor','turma-local','turma-certificado','turma-observacao'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = el.tagName === 'SELECT' ? el.options[0]?.value || '' : '';
+  });
+  document.getElementById('turma-busca-func').value = '';
+  removerArquivo2();
+  renderListaParticipantes(funcionarios);
+  atualizarCountTurma();
+  clearStatus('status-turma');
+  document.getElementById('turma-prog').style.display = 'none';
+  document.getElementById('modal-turma').classList.add('show');
+}
+
+function fecharModalTurma() {
+  document.getElementById('modal-turma').classList.remove('show');
+  arquivoTurma = null;
+}
+
+function preencherDadosTurma() {
+  const tId = parseInt(document.getElementById('turma-treinamento').value);
+  const cat = catalogo.find(c => c.id === tId);
+  if (!cat) return;
+  document.getElementById('turma-carga').value = cat.carga_horaria_inicial || '';
+  calcularVencimentoTurma();
+}
+
+function calcularVencimentoTurma() {
+  const tId = parseInt(document.getElementById('turma-treinamento').value);
+  const data = document.getElementById('turma-data').value;
+  const tipo = document.getElementById('turma-tipo').value;
+  const cat = catalogo.find(c => c.id === tId);
+  if (!data || !cat?.periodicidade_reciclagem) return;
+  const periodos = {'Anual':365,'Bienal':730,'Trienal':1095,'Quinquenal':1825};
+  const dias = periodos[cat.periodicidade_reciclagem];
+  if (!dias) return;
+  const venc = new Date(data + 'T00:00:00');
+  venc.setDate(venc.getDate() + dias);
+  document.getElementById('turma-vencimento').value = venc.toISOString().split('T')[0];
+  if (tipo === 'Reciclagem') document.getElementById('turma-carga').value = cat.carga_horaria_reciclagem || '';
+}
+
+function filtrarFuncsTurma() {
+  const setorId = document.getElementById('turma-filtro-setor').value;
+  const busca = document.getElementById('turma-busca-func').value.toLowerCase().trim();
+  let lista = funcionarios;
+  if (setorId) lista = lista.filter(f => String(f.setor_id) === String(setorId));
+  if (busca) lista = lista.filter(f => f.nome_completo.toLowerCase().includes(busca));
+  renderListaParticipantes(lista);
+}
+
+function renderListaParticipantes(lista) {
+  const container = document.getElementById('turma-lista-funcs');
+  if (!lista.length) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text2);font-size:13px;">Nenhum funcionário encontrado</div>';
+    return;
+  }
+  container.innerHTML = lista.map(f => {
+    const setor = setores.find(s => s.id === f.setor_id);
+    return `<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:12px;transition:border-color .1s;" onmouseover="this.style.borderColor='var(--border-focus)'" onmouseout="this.style.borderColor='var(--border)'">
+      <input type="checkbox" class="turma-check" value="${f.id}" onchange="atualizarCountTurma()" style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(f.nome_completo)}</div>
+        <div style="font-size:10px;color:var(--text3);">${escHtml(setor?.nome_setor || '—')}</div>
+      </div>
+    </label>`;
+  }).join('');
+}
+
+function atualizarCountTurma() {
+  const total = document.querySelectorAll('.turma-check:checked').length;
+  document.getElementById('turma-count-badge').textContent = total > 0 ? `(${total} selecionado${total > 1 ? 's' : ''})` : '';
+}
+
+function toggleTodosParticipantes(marcar) {
+  document.querySelectorAll('.turma-check').forEach(cb => cb.checked = marcar);
+  atualizarCountTurma();
+}
+
+// Upload turma
+function dragOver2(e) { e.preventDefault(); document.getElementById('turma-upload-area').classList.add('dragover'); }
+function dropArquivo2(e) {
+  e.preventDefault();
+  document.getElementById('turma-upload-area').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processarArquivoTurma(file);
+}
+function selecionarArquivo2(input) {
+  if (input.files[0]) processarArquivoTurma(input.files[0]);
+}
+function processarArquivoTurma(file) {
+  if (file.size > 10 * 1024 * 1024) { alert('Arquivo muito grande. Máximo 10MB.'); return; }
+  arquivoTurma = file;
+  document.getElementById('turma-upload-area').style.display = 'none';
+  document.getElementById('turma-upload-preview').style.display = 'flex';
+  document.getElementById('turma-upload-nome').textContent = file.name;
+  document.getElementById('turma-upload-tamanho').textContent = (file.size / 1024).toFixed(0) + ' KB';
+}
+function removerArquivo2() {
+  arquivoTurma = null;
+  document.getElementById('turma-upload-area').style.display = 'flex';
+  document.getElementById('turma-upload-preview').style.display = 'none';
+  const inp = document.getElementById('turma-arquivo'); if (inp) inp.value = '';
+}
+
+async function uploadEvidenciaTurma(file, tId) {
+  const ext = file.name.split('.').pop();
+  const path = `${empresaId}/turma/${tId}_${Date.now()}.${ext}`;
+  const res = await fetch(`${SUPA_URL}/storage/v1/object/${STORAGE_BUCKET}/${path}`, {
+    method: 'POST',
+    headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}`, 'Content-Type': file.type },
+    body: file
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || 'Erro no upload'); }
+  return { url: `${SUPA_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`, nome: file.name };
+}
+
+async function salvarTurma() {
+  const tId = parseInt(document.getElementById('turma-treinamento').value);
+  const data = document.getElementById('turma-data').value;
+  const selecionados = [...document.querySelectorAll('.turma-check:checked')].map(cb => parseInt(cb.value));
+
+  if (!tId) { alert('Selecione o treinamento.'); return; }
+  if (!data) { alert('Informe a data de realização.'); return; }
+  if (!selecionados.length) { alert('Selecione pelo menos um participante.'); return; }
+
+  document.getElementById('btn-salvar-turma').disabled = true;
+  document.getElementById('spinner-turma').className = 'spinner show';
+  document.getElementById('label-turma').textContent = 'Salvando...';
+  const progEl = document.getElementById('turma-prog');
+  progEl.style.display = 'block';
+
+  try {
+    // Upload único da evidência
+    let evidenciaUrl = null, evidenciaNome = null;
+    if (arquivoTurma) {
+      setStatus('status-turma', 'info', 'Enviando evidência...');
+      const up = await uploadEvidenciaTurma(arquivoTurma, tId);
+      evidenciaUrl = up.url; evidenciaNome = up.nome;
+    }
+
+    const vencimento = document.getElementById('turma-vencimento').value || null;
+    const statusVenc = calcularStatusVencimento(vencimento).status;
+    const basePayload = {
+      treinamento_id: tId,
+      empresa_id: parseInt(empresaId),
+      tipo: document.getElementById('turma-tipo').value,
+      data_realizacao: data,
+      data_vencimento: vencimento,
+      carga_horaria: parseInt(document.getElementById('turma-carga').value) || null,
+      instrutor: document.getElementById('turma-instrutor').value.trim() || null,
+      local_realizacao: document.getElementById('turma-local').value.trim() || null,
+      numero_certificado: document.getElementById('turma-certificado').value.trim() || null,
+      observacao: document.getElementById('turma-observacao').value.trim() || null,
+      evidencia_url: evidenciaUrl,
+      evidencia_nome: evidenciaNome,
+      status: statusVenc,
+      ativo: true
+    };
+
+    let ok = 0, erros = 0;
+    for (let i = 0; i < selecionados.length; i++) {
+      const funcId = selecionados[i];
+      progEl.textContent = `Registrando ${i + 1} de ${selecionados.length}...`;
+      const func = funcionarios.find(f => f.id === funcId);
+      try {
+        const payload = { ...basePayload, funcionario_id: funcId, funcao_id: func?.funcao_id || null };
+        const res = await fetch(`${SUPA_URL}/rest/v1/funcionario_treinamentos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}`, 'Prefer': 'return=representation' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const d = await res.json();
+          registros.unshift(d[0]);
+          ok++;
+        } else { erros++; }
+      } catch (e) { erros++; }
+    }
+
+    renderStats(); renderTab();
+    fecharModalTurma();
+    const msg = erros > 0
+      ? `✓ ${ok} registrado(s) · ✕ ${erros} erro(s)`
+      : `✓ Turma registrada! ${ok} funcionário(s) vinculados ao treinamento.`;
+    setStatus('status-registro', erros > 0 ? 'info' : 'success', msg);
+    document.getElementById('modal-registro').classList.remove('show');
+    // Toast de confirmação
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#0e2820;border:1px solid #1a4a38;border-radius:8px;padding:12px 18px;z-index:9999;font-size:13px;color:#2dd4a0;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);';
+    t.innerHTML = `<span>✓</span><span>${ok} funcionário(s) registrado(s) na turma${erros > 0 ? ' · ' + erros + ' erro(s)' : ''}</span><button onclick="this.parentNode.remove()" style="background:none;border:none;color:#545e72;cursor:pointer;font-size:16px;margin-left:8px;">×</button>`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 7000);
+  } catch (e) {
+    setStatus('status-turma', 'error', e.message);
+  } finally {
+    document.getElementById('btn-salvar-turma').disabled = false;
+    document.getElementById('spinner-turma').className = 'spinner';
+    document.getElementById('label-turma').textContent = 'Registrar para turma';
+    progEl.style.display = 'none';
+  }
+}
+
 </script>
 </body>
 </html>
