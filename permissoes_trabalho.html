@@ -15,7 +15,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50;flex-wrap:wrap;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
 .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
 .header-title{font-size:13px;color:var(--text2);flex:1;}
 .container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
@@ -71,37 +71,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 @keyframes spin{to{transform:rotate(360deg);}}
 .empty{text-align:center;padding:40px;color:var(--text3);}
 /* Modal */
-/* Modal via <dialog> nativo */
-dialog#modal-pt{
-  border:none;
-  padding:0;
-  margin:0;
-  background:rgba(10,12,18,.95);
-  width:100vw;
-  height:100vh;
-  max-width:100vw;
-  max-height:100vh;
-  position:fixed;
-  top:0;left:0;
-  overflow-y:auto;
-  display:none;
-  box-sizing:border-box;
-}
-dialog#modal-pt[open]{display:block;}
-dialog#modal-pt::backdrop{display:none;}
-.modal{
-  background:#181c27;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:28px;
-  max-width:760px;
-  width:calc(100% - 40px);
-  margin:20px auto;
-  position:relative;
-  box-sizing:border-box;
-  max-height:calc(100vh - 40px);
-  overflow-y:auto;
-}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:760px;width:100%;margin:auto;max-height:90vh;overflow-y:auto;}
 .modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .modal-field{margin-bottom:0;}
@@ -119,12 +91,6 @@ dialog#modal-pt::backdrop{display:none;}
 .chk-btn.sim.active{background:#0e2820;color:#2dd4a0;border-color:#1a4a38;}
 .chk-btn.nao.active{background:#2a1515;color:#e05555;border-color:#4a2020;}
 .chk-btn.na.active{background:#1e2333;color:var(--text3);border-color:var(--border);}
-/* Abas do modal */
-.modal-tabs{display:none;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);}
-.modal-tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
-.modal-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-.modal-section{display:block;}
-
 @media(max-width:768px){
   .header{padding:12px 16px;}
   .header-title{display:none;}
@@ -137,23 +103,16 @@ dialog#modal-pt::backdrop{display:none;}
   .filtro-busca{min-width:unset;width:100%;}
   .filtros select{width:100%;}
   .pt-card{flex-wrap:wrap;}
-  .pt-tipo-icon{width:36px;height:36px;font-size:16px;}
-  .modal{padding:16px;max-width:100%;border-radius:12px;max-height:85vh;overflow-y:auto;}
-  .modal-overlay{padding:6px;align-items:flex-start;}
-  .modal-titulo{font-size:14px;margin-bottom:12px;}
+  .modal-overlay{padding:8px;}
+  .modal{padding:16px;max-height:90vh;overflow-y:auto;}
   .modal-grid{grid-template-columns:1fr;}
   .modal-field.full{grid-column:1;}
-  /* Abas ativas no mobile */
-  .modal-tabs{display:flex;}
-  .modal-section.hidden-mobile{display:none;}
 }
 @media(max-width:480px){
   .stats-grid{grid-template-columns:1fr 1fr;}
   #riscos-checks,#epis-checks{grid-template-columns:1fr!important;}
   .pt-card .chk-btns{flex-wrap:wrap;}
   .chk-btn{padding:4px 7px;font-size:10px;}
-  .modal-overlay{padding:4px;}
-  .modal{border-radius:8px;}
 }
 </style>
 </head>
@@ -195,36 +154,30 @@ dialog#modal-pt::backdrop{display:none;}
 </div>
 
 <!-- MODAL NOVA/EDITAR PT -->
-<dialog id="modal-pt" class="modal-overlay">
+<div class="modal-overlay" id="modal-pt">
   <div class="modal">
     <div class="modal-titulo">
       <span id="modal-pt-titulo">Nova Permissão de Trabalho</span>
       <button onclick="fecharModalPT()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
     </div>
-    <!-- Abas mobile -->
-    <div class="modal-tabs">
-      <div class="modal-tab active" id="tab-dados" onclick="mudarTabPT('dados')">📝 Dados</div>
-      <div class="modal-tab" id="tab-checklist" onclick="mudarTabPT('checklist')">✅ Checklist</div>
-    </div>
-    <div class="modal-section" id="section-dados">
     <div class="modal-grid">
       <div class="modal-field full">
         <label>Tipo de PT <span style="color:var(--accent);">*</span> <span style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">(marque todos que se aplicam)</span></label>
-        <div id="pt-tipos-wrap" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;transition:all .15s;" id="label-tipo-Trabalho em Altura">
-            <input type="checkbox" class="pt-tipo-chk" value="Trabalho em Altura" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:14px;height:14px;"> 🧗 Trabalho em Altura
+        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
+            <input type="checkbox" class="pt-tipo-chk" value="Trabalho em Altura" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 🧗 Trabalho em Altura
           </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;transition:all .15s;" id="label-tipo-Espaço Confinado">
-            <input type="checkbox" class="pt-tipo-chk" value="Espaço Confinado" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:14px;height:14px;"> 🕳️ Espaço Confinado
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
+            <input type="checkbox" class="pt-tipo-chk" value="Espaço Confinado" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 🕳️ Espaço Confinado
           </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;transition:all .15s;" id="label-tipo-Trabalho a Quente">
-            <input type="checkbox" class="pt-tipo-chk" value="Trabalho a Quente" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:14px;height:14px;"> 🔥 Trabalho a Quente
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
+            <input type="checkbox" class="pt-tipo-chk" value="Trabalho a Quente" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 🔥 Trabalho a Quente
           </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;transition:all .15s;" id="label-tipo-Energias Perigosas">
-            <input type="checkbox" class="pt-tipo-chk" value="Energias Perigosas" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:14px;height:14px;"> ⚡ Energias Perigosas
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
+            <input type="checkbox" class="pt-tipo-chk" value="Energias Perigosas" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> ⚡ Energias Perigosas
           </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;transition:all .15s;" id="label-tipo-Geral">
-            <input type="checkbox" class="pt-tipo-chk" value="Geral" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:14px;height:14px;"> 📋 Geral
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
+            <input type="checkbox" class="pt-tipo-chk" value="Geral" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 📋 Geral
           </label>
         </div>
       </div>
@@ -290,11 +243,11 @@ dialog#modal-pt::backdrop{display:none;}
       </div>
       <div class="modal-field full">
         <label>Riscos potenciais identificados</label>
-        <div id="riscos-checks" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
+        <div id="riscos-checks" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
       </div>
       <div class="modal-field full">
         <label>Equipamentos de proteção necessários (EPIs/EPCs)</label>
-        <div id="epis-checks" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
+        <div id="epis-checks" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
       </div>
       <div class="modal-field full">
         <label>Medidas de controle / Recomendações adicionais</label>
@@ -305,17 +258,13 @@ dialog#modal-pt::backdrop{display:none;}
         <input type="text" id="pt-obs" placeholder="Opcional">
       </div>
     </div>
-    </div><!-- /modal-grid -->
-    </div><!-- /section-dados -->
     <!-- Checklist interno por tipo -->
-    <div class="modal-section" id="section-checklist" style="margin-top:20px;">
-    <div>
+    <div style="margin-top:20px;">
       <div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">
         ✅ Checklist de verificação — <span id="chk-tipo-label">—</span>
       </div>
       <div id="lista-checklist"></div>
     </div>
-    </div><!-- /section-checklist -->
     <div class="status-bar" id="status-pt"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
       <div id="pt-modal-esq"></div>
@@ -328,7 +277,7 @@ dialog#modal-pt::backdrop{display:none;}
       </div>
     </div>
   </div>
-</dialog>
+</div>
 
 <script>
 const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
@@ -502,9 +451,8 @@ function renderLista(){
   if(!filtradas.length){el.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:12px;">📋</div>Nenhuma PT encontrada.</div>`;return;}
   el.innerHTML=filtradas.map(p=>{
     const setor=setores.find(s=>s.id===p.setor_id);
-    const tiposCard=(p.tipo||'').split(', ');
-    const cor=TIPO_CORES[tiposCard[0]]||{bg:'#1e2333',brd:'#2a3044'};
-    const icone=tiposCard.length>1?'📋🔗':TIPO_ICONES[tiposCard[0]]||'📋';
+    const cor=TIPO_CORES[p.tipo]||{bg:'#1e2333',brd:'#2a3044'};
+    const icone=TIPO_ICONES[p.tipo]||'📋';
     const stCls=STATUS_CLS[p.status]||'mb-info';
     return`<div class="pt-card" onclick="abrirDetalhesPT(${p.id})">
       <div class="pt-tipo-icon" style="background:${cor.bg};border:1px solid ${cor.brd};">${icone}</div>
@@ -513,7 +461,7 @@ function renderLista(){
         <div class="pt-servico">${escHtml(p.descricao_servico)}</div>
         <div class="pt-meta">
           <span class="mini-badge ${stCls}">${p.status}</span>
-          ${(p.tipo||'').split(', ').map(t=>{const c=TIPO_CORES[t]||cor;return`<span class="mini-badge" style="background:${c.bg};color:var(--text2);border:1px solid ${c.brd};">${t}</span>`;}).join('')}
+          ${(p.tipo||'')'.split(', ').map(t=>{const c=TIPO_CORES[t]||cor;return`<span class="mini-badge" style="background:${c.bg};color:var(--text2);border:1px solid ${c.brd};">${t}</span>`;}).join('')}
           <span>📅 ${fmtData(p.data_emissao)}</span>
           ${p.hora_inicio?`<span>🕐 ${p.hora_inicio}${p.hora_termino?' → '+p.hora_termino:''}</span>`:''}
           ${setor?`<span>🗂️ ${escHtml(setor.nome_setor)}</span>`:''}
@@ -532,30 +480,18 @@ function renderLista(){
 
 // ── CHECKLIST ─────────────────────────────────────────
 function getTiposSelecionados(){
-  return [...document.querySelectorAll('.pt-tipo-chk:checked')].map(cb=>cb.value);
+  return[...document.querySelectorAll('.pt-tipo-chk:checked')].map(cb=>cb.value);
 }
-
 async function atualizarChecklist(){
   const tipos=getTiposSelecionados();
-  const label=tipos.length?tipos.join(' · '):'—';
-  document.getElementById('chk-tipo-label').textContent=label;
-  // União dos itens de todos os tipos, sem duplicatas (por id único = tipo+id)
-  const itensVistos=new Set();
-  const itens=[];
-  tipos.forEach(tipo=>{
-    (CHECKLISTS_PT[tipo]||[]).forEach(item=>{
-      const chave=`${tipo}-${item.id}`;
-      if(!itensVistos.has(chave)){
-        itensVistos.add(chave);
-        itens.push({...item,_uid:chave,_tipo:tipo});
-      }
-    });
-  });
+  document.getElementById('chk-tipo-label').textContent=tipos.length?tipos.join(' · '):'—';
+  const vistos=new Set();const itens=[];
+  tipos.forEach(tipo=>{(CHECKLISTS_PT[tipo]||[]).forEach(item=>{const uid=`${tipo}-${item.id}`;if(!vistos.has(uid)){vistos.add(uid);itens.push({...item,_uid:uid,_tipo:tipo});}});});
   chkRespostas={};
   document.getElementById('lista-checklist').innerHTML=itens.length?itens.map((item,i)=>{
-    const showHeader=i===0||itens[i-1]._tipo!==item._tipo;
-    const header=showHeader&&tipos.length>1?`<div style="font-size:10px;font-weight:600;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;padding:10px 0 4px;margin-top:${i>0?'8px':'0'}">${item._tipo}</div>`:'';
-    return`${header}<div class="chk-item" id="chk-${item._uid}">
+    const hdr=i===0||itens[i-1]._tipo!==item._tipo;
+    const cabec=hdr&&tipos.length>1?`<div style="font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;padding:10px 0 4px;margin-top:${i>0?'8px':'0'}">${item._tipo}</div>`:'';
+    return`${cabec}<div class="chk-item" id="chk-${item._uid}">
       <div class="chk-texto">${escHtml(item.texto)}</div>
       <div class="chk-btns">
         <button class="chk-btn sim" onclick="responderChk('${item._uid}','Sim')">✓ Sim</button>
@@ -563,8 +499,7 @@ async function atualizarChecklist(){
         <button class="chk-btn na" onclick="responderChk('${item._uid}','N/A')">N/A</button>
       </div>
     </div>`;
-  }).join(''):'<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Selecione pelo menos um tipo de PT acima</div>';
-  // Mostra campos de inventário conforme tipos selecionados
+  }).join(''):'<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Selecione pelo menos um tipo acima</div>';
   const campoEC=document.getElementById('campo-ec');
   const campoANC=document.getElementById('campo-anc');
   if(campoEC)campoEC.style.display=tipos.includes('Espaço Confinado')?'block':'none';
@@ -604,7 +539,6 @@ function abrirModalNovaPT(){
   document.getElementById('pt-modal-esq').innerHTML='';
   const selSet=document.getElementById('pt-setor');
   selSet.innerHTML='<option value="">— Geral —</option>'+setores.map(s=>`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`).join('');
-  // Desmarca todos os tipos e marca Trabalho em Altura como padrão
   document.querySelectorAll('.pt-tipo-chk').forEach(cb=>cb.checked=cb.value==='Trabalho em Altura');
   document.getElementById('pt-numero').value=gerarNumeroPT();
   document.getElementById('pt-servico').value='';
@@ -622,10 +556,7 @@ function abrirModalNovaPT(){
   renderChecks('epis-checks',EPIS_LISTA,'epi');
   atualizarChecklist();
   clearStatus('status-pt');
-  resetTabsPT();
-  const dlg=document.getElementById('modal-pt');
-  document.body.style.overflow='hidden';
-  if(dlg.showModal)dlg.showModal();else dlg.classList.add('show');
+  document.getElementById('modal-pt').classList.add('show');
 }
 
 function editarPT(id){
@@ -640,9 +571,7 @@ function editarPT(id){
     </div>`;
   const selSet=document.getElementById('pt-setor');
   selSet.innerHTML='<option value="">— Geral —</option>'+setores.map(s=>`<option value="${s.id}" ${p.setor_id==s.id?'selected':''}>${escHtml(s.nome_setor)}</option>`).join('');
-  // Marca os tipos salvos (suporte a múltiplos separados por vírgula)
-  const tiposSalvos=(p.tipo||'').split(',').map(t=>t.trim());
-  document.querySelectorAll('.pt-tipo-chk').forEach(cb=>cb.checked=tiposSalvos.includes(cb.value));
+  const tiposSalvos=(p.tipo||'').split(', ').map(t=>t.trim());document.querySelectorAll('.pt-tipo-chk').forEach(cb=>cb.checked=tiposSalvos.includes(cb.value));
   document.getElementById('pt-numero').value=p.numero_pt||'';
   document.getElementById('pt-servico').value=p.descricao_servico||'';
   document.getElementById('pt-local').value=p.local_servico||'';
@@ -666,12 +595,10 @@ function editarPT(id){
     resps.forEach(r=>{responderChk(r.item_id,r.resposta);});
   });
   clearStatus('status-pt');
-  resetTabsPT();
-  const dlg=document.getElementById('modal-pt');
-  if(dlg.showModal)dlg.showModal();else dlg.classList.add('show');
+  document.getElementById('modal-pt').classList.add('show');
 }
 
-function fecharModalPT(){const dlg=document.getElementById('modal-pt');if(dlg.open)dlg.close();else dlg.classList.remove('show');ptEditando=null;chkRespostas={};document.body.style.overflow='';}
+function fecharModalPT(){document.getElementById('modal-pt').classList.remove('show');ptEditando=null;chkRespostas={};}
 
 async function salvarPT(){
   const servico=document.getElementById('pt-servico').value.trim();
@@ -716,10 +643,8 @@ async function salvarPT(){
       pts.unshift(d[0]);ptId=d[0].id;
     }
     // Salva respostas do checklist
-    // Salva checklist de todos os tipos selecionados sem duplicatas
-    const itensVistosSave=new Set();
-    const itensSave=[];
-    tipos.forEach(t=>{(CHECKLISTS_PT[t]||[]).forEach(item=>{const chave=`${t}-${item.id}`;if(!itensVistosSave.has(chave)){itensVistosSave.add(chave);itensSave.push({...item,_uid:chave});}});});
+    const vistosSave=new Set();const itensSave=[];
+    tipos.forEach(t=>{(CHECKLISTS_PT[t]||[]).forEach(item=>{const uid=`${t}-${item.id}`;if(!vistosSave.has(uid)){vistosSave.add(uid);itensSave.push({...item,_uid:uid});}});});
     for(const item of itensSave){
       const resp=chkRespostas[item._uid]||'Pendente';
       await fetch(`${SUPA_URL}/rest/v1/pt_checklist_respostas`,{
@@ -801,7 +726,7 @@ async function imprimirPT(id){
         <div class="topo-sub">${escHtml(nome)} · Emitida em ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</div>
       </div>
       <div style="text-align:right;">
-        <span class="tipo-badge" style="background:#e0f2fe;color:#0369a1;">${icone} ${escHtml((p.tipo||'').split(', ').join(' · '))}</span>
+        <span class="tipo-badge" style="background:#e0f2fe;color:#0369a1;">${icone} ${escHtml(p.tipo)}</span>
         <div style="font-size:9pt;color:#6b7280;margin-top:4pt;">Validade: ${escHtml(p.validade||'1 turno')}</div>
       </div>
     </div>
@@ -848,7 +773,7 @@ async function imprimirPT(id){
     <div class="secao">4. Medidas de controle / Recomendações</div>
     <div style="background:#fffbeb;border:1pt solid #f59e0b;border-radius:3pt;padding:8pt;font-size:9pt;color:#92400e;margin-bottom:8pt;">${escHtml(p.medidas_controle)}</div>`:''}
 
-    <div class="secao">${p.medidas_controle?'5':'4'}. Checklist — ${escHtml((p.tipo||'').split(', ').join(' · '))}</div>
+    <div class="secao">${p.medidas_controle?'5':'4'}. Checklist — ${escHtml(p.tipo)}</div>
     <table class="chk-table">
       <thead><tr><th style="width:70%;">Item de verificação</th><th style="text-align:center;">Resp.</th><th>Observação</th></tr></thead>
       <tbody>
@@ -887,26 +812,6 @@ document.getElementById('modal-pt').addEventListener('click',e=>{
 });
 
 inicializar();
-
-// ── ABAS MOBILE DO MODAL PT ───────────────────────────
-function mudarTabPT(aba) {
-  const isMobile = window.innerWidth <= 768;
-  document.getElementById('tab-dados').classList.toggle('active', aba === 'dados');
-  document.getElementById('tab-checklist').classList.toggle('active', aba === 'checklist');
-  if (isMobile) {
-    document.getElementById('section-dados').classList.toggle('hidden-mobile', aba !== 'dados');
-    document.getElementById('section-checklist').classList.toggle('hidden-mobile', aba !== 'checklist');
-  }
-}
-
-function resetTabsPT() {
-  // Ao abrir o modal, volta para aba Dados e reseta visibilidade
-  document.getElementById('tab-dados').classList.add('active');
-  document.getElementById('tab-checklist').classList.remove('active');
-  document.getElementById('section-dados').classList.remove('hidden-mobile');
-  document.getElementById('section-checklist').classList.add('hidden-mobile');
-}
-
 </script>
 </body>
 </html>
