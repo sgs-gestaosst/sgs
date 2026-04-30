@@ -73,7 +73,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 /* Modal */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
 .modal-overlay.show{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:900px;width:100%;margin:auto;max-height:88vh;overflow-y:auto;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;max-width:900px;width:100%;margin:auto;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
 .modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .modal-field{margin-bottom:0;}
@@ -160,28 +160,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 <!-- MODAL NOVA/EDITAR PT -->
 <div class="modal-overlay" id="modal-pt">
   <div class="modal">
-    <div class="modal-titulo">
-      <span id="modal-pt-titulo">Nova Permissão de Trabalho</span>
-      <button onclick="fecharModalPT()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    <div style="padding:24px 28px 16px;flex-shrink:0;border-bottom:1px solid var(--border);">
+      <div class="modal-titulo" style="margin-bottom:0;">
+        <span id="modal-pt-titulo">Nova Permissão de Trabalho</span>
+        <button onclick="fecharModalPT()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+      </div>
     </div>
+    <div style="padding:20px 28px;overflow-y:auto;flex:1;">
     <div class="modal-grid">
       <div class="modal-field full">
         <label>Tipo de PT <span style="color:var(--accent);">*</span> <span style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">(marque todos que se aplicam)</span></label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Trabalho em Altura" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 🧗 Trabalho em Altura
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;white-space:nowrap;">
+            <input type="checkbox" class="pt-tipo-chk" value="Trabalho em Altura" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:13px;height:13px;"> 🧗 Trabalho em Altura
           </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Espaço Confinado" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 🕳️ Espaço Confinado
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;white-space:nowrap;">
+            <input type="checkbox" class="pt-tipo-chk" value="Espaço Confinado" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:13px;height:13px;"> 🕳️ Espaço Confinado
           </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Trabalho a Quente" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 🔥 Trabalho a Quente
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;white-space:nowrap;">
+            <input type="checkbox" class="pt-tipo-chk" value="Trabalho a Quente" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:13px;height:13px;"> 🔥 Trabalho a Quente
           </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Energias Perigosas" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> ⚡ Energias Perigosas
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;white-space:nowrap;">
+            <input type="checkbox" class="pt-tipo-chk" value="Energias Perigosas" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:13px;height:13px;"> ⚡ Energias Perigosas
           </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Geral" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 📋 Geral
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;white-space:nowrap;">
+            <input type="checkbox" class="pt-tipo-chk" value="Geral" onchange="atualizarChecklist()" style="accent-color:var(--accent);width:13px;height:13px;"> 📋 Geral
           </label>
         </div>
       </div>
@@ -267,7 +270,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       </div>
     </div>
     <div class="status-bar" id="status-pt"></div>
-    <div class="modal-acoes" style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">
+    </div><!-- /scroll area -->
+    </div><!-- /modal-grid wrapper -->
+    <div style="padding:16px 28px;border-top:1px solid var(--border);flex-shrink:0;display:flex;justify-content:space-between;align-items:center;">
       <div id="pt-modal-esq"></div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-cancel" onclick="fecharModalPT()">Cancelar</button>
