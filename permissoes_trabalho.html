@@ -91,6 +91,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .chk-btn.sim.active{background:#0e2820;color:#2dd4a0;border-color:#1a4a38;}
 .chk-btn.nao.active{background:#2a1515;color:#e05555;border-color:#4a2020;}
 .chk-btn.na.active{background:#1e2333;color:var(--text3);border-color:var(--border);}
+/* Abas do modal */
+.modal-tabs{display:none;gap:0;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.modal-tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.modal-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.modal-section{display:block;}
+
 @media(max-width:768px){
   .header{padding:12px 16px;}
   .header-title{display:none;}
@@ -104,15 +110,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .filtros select{width:100%;}
   .pt-card{flex-wrap:wrap;}
   .pt-tipo-icon{width:36px;height:36px;font-size:16px;}
-  .modal{padding:16px;}
+  .modal{padding:16px;max-width:100%;border-radius:12px;}
+  .modal-overlay{padding:8px;}
+  .modal-titulo{font-size:14px;margin-bottom:12px;}
   .modal-grid{grid-template-columns:1fr;}
   .modal-field.full{grid-column:1;}
+  /* Abas ativas no mobile */
+  .modal-tabs{display:flex;}
+  .modal-section.hidden-mobile{display:none;}
 }
 @media(max-width:480px){
   .stats-grid{grid-template-columns:1fr 1fr;}
   #riscos-checks,#epis-checks{grid-template-columns:1fr!important;}
   .pt-card .chk-btns{flex-wrap:wrap;}
-  .modal .modal-titulo{font-size:14px;}
+  .chk-btn{padding:4px 7px;font-size:10px;}
+  .modal-overlay{padding:4px;}
+  .modal{border-radius:8px;}
 }
 </style>
 </head>
@@ -160,6 +173,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <span id="modal-pt-titulo">Nova Permissão de Trabalho</span>
       <button onclick="fecharModalPT()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
     </div>
+    <!-- Abas mobile -->
+    <div class="modal-tabs">
+      <div class="modal-tab active" id="tab-dados" onclick="mudarTabPT('dados')">📝 Dados</div>
+      <div class="modal-tab" id="tab-checklist" onclick="mudarTabPT('checklist')">✅ Checklist</div>
+    </div>
+    <div class="modal-section" id="section-dados">
     <div class="modal-grid">
       <div class="modal-field">
         <label>Tipo de PT <span style="color:var(--accent);">*</span></label>
@@ -248,13 +267,17 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <input type="text" id="pt-obs" placeholder="Opcional">
       </div>
     </div>
+    </div><!-- /modal-grid -->
+    </div><!-- /section-dados -->
     <!-- Checklist interno por tipo -->
-    <div style="margin-top:20px;">
+    <div class="modal-section" id="section-checklist" style="margin-top:20px;">
+    <div>
       <div style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">
         ✅ Checklist de verificação — <span id="chk-tipo-label">—</span>
       </div>
       <div id="lista-checklist"></div>
     </div>
+    </div><!-- /section-checklist -->
     <div class="status-bar" id="status-pt"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;">
       <div id="pt-modal-esq"></div>
@@ -540,6 +563,7 @@ function abrirModalNovaPT(){
   renderChecks('epis-checks',EPIS_LISTA,'epi');
   atualizarChecklist();
   clearStatus('status-pt');
+  resetTabsPT();
   document.getElementById('modal-pt').classList.add('show');
 }
 
@@ -579,6 +603,7 @@ function editarPT(id){
     resps.forEach(r=>{responderChk(r.item_id,r.resposta);});
   });
   clearStatus('status-pt');
+  resetTabsPT();
   document.getElementById('modal-pt').classList.add('show');
 }
 
@@ -793,6 +818,26 @@ document.getElementById('modal-pt').addEventListener('click',e=>{
 });
 
 inicializar();
+
+// ── ABAS MOBILE DO MODAL PT ───────────────────────────
+function mudarTabPT(aba) {
+  const isMobile = window.innerWidth <= 768;
+  document.getElementById('tab-dados').classList.toggle('active', aba === 'dados');
+  document.getElementById('tab-checklist').classList.toggle('active', aba === 'checklist');
+  if (isMobile) {
+    document.getElementById('section-dados').classList.toggle('hidden-mobile', aba !== 'dados');
+    document.getElementById('section-checklist').classList.toggle('hidden-mobile', aba !== 'checklist');
+  }
+}
+
+function resetTabsPT() {
+  // Ao abrir o modal, volta para aba Dados e reseta visibilidade
+  document.getElementById('tab-dados').classList.add('active');
+  document.getElementById('tab-checklist').classList.remove('active');
+  document.getElementById('section-dados').classList.remove('hidden-mobile');
+  document.getElementById('section-checklist').classList.add('hidden-mobile');
+}
+
 </script>
 </body>
 </html>
