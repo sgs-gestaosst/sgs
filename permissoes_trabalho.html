@@ -71,9 +71,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 @keyframes spin{to{transform:rotate(360deg);}}
 .empty{text-align:center;padding:40px;color:var(--text3);}
 /* Modal */
-.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(10,12,18,.95);z-index:99999;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+/* Modal via <dialog> nativo — z-index garantido pelo browser */
+dialog#modal-pt{
+  border:none;padding:0;background:transparent;
+  max-width:100vw;max-height:100vh;width:100%;height:100%;
+  position:fixed;top:0;left:0;
+  display:none;align-items:flex-start;justify-content:center;
+  overflow-y:auto;
+}
+dialog#modal-pt[open]{display:flex;}
+dialog#modal-pt::backdrop{background:rgba(10,12,18,.92);}
+/* Fallback para browsers sem ::backdrop robusto */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100vw;height:100vh;background:rgba(10,12,18,.92);z-index:99998;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
 .modal-overlay.show{display:flex;}
-.modal{background:#181c27;border:1px solid var(--border);border-radius:16px;padding:28px;max-width:760px;width:100%;margin:auto;max-height:90vh;overflow-y:auto;position:relative;z-index:100000;}
+.modal{background:#181c27;border:1px solid var(--border);border-radius:16px;padding:28px;max-width:760px;width:100%;margin:20px auto;max-height:calc(100vh - 40px);overflow-y:auto;position:relative;}
 .modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .modal-field{margin-bottom:0;}
@@ -167,7 +178,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 </div>
 
 <!-- MODAL NOVA/EDITAR PT -->
-<div class="modal-overlay" id="modal-pt">
+<dialog id="modal-pt" class="modal-overlay">
   <div class="modal">
     <div class="modal-titulo">
       <span id="modal-pt-titulo">Nova Permissão de Trabalho</span>
@@ -300,7 +311,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       </div>
     </div>
   </div>
-</div>
+</dialog>
 
 <script>
 const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
@@ -595,7 +606,9 @@ function abrirModalNovaPT(){
   atualizarChecklist();
   clearStatus('status-pt');
   resetTabsPT();
-  document.getElementById('modal-pt').classList.add('show');
+  const dlg=document.getElementById('modal-pt');
+  document.body.style.overflow='hidden';
+  if(dlg.showModal)dlg.showModal();else dlg.classList.add('show');
 }
 
 function editarPT(id){
@@ -637,10 +650,11 @@ function editarPT(id){
   });
   clearStatus('status-pt');
   resetTabsPT();
-  document.getElementById('modal-pt').classList.add('show');
+  const dlg=document.getElementById('modal-pt');
+  if(dlg.showModal)dlg.showModal();else dlg.classList.add('show');
 }
 
-function fecharModalPT(){document.getElementById('modal-pt').classList.remove('show');ptEditando=null;chkRespostas={};}
+function fecharModalPT(){const dlg=document.getElementById('modal-pt');if(dlg.open)dlg.close();else dlg.classList.remove('show');ptEditando=null;chkRespostas={};document.body.style.overflow='';}
 
 async function salvarPT(){
   const servico=document.getElementById('pt-servico').value.trim();
