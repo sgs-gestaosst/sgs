@@ -73,7 +73,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 /* Modal */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
 .modal-overlay.show{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:760px;width:100%;margin:auto;max-height:90vh;overflow-y:auto;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:760px;width:100%;margin:auto;}
 .modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .modal-field{margin-bottom:0;}
@@ -91,29 +91,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .chk-btn.sim.active{background:#0e2820;color:#2dd4a0;border-color:#1a4a38;}
 .chk-btn.nao.active{background:#2a1515;color:#e05555;border-color:#4a2020;}
 .chk-btn.na.active{background:#1e2333;color:var(--text3);border-color:var(--border);}
-@media(max-width:768px){
-  .header{padding:12px 16px;}
-  .header-title{display:none;}
-  .container{padding:16px 12px 60px;}
-  .hero{flex-wrap:wrap;gap:10px;padding:14px 16px;}
-  .hero-info{width:100%;}
-  .hero .btn{width:100%;justify-content:center;}
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .filtros{flex-direction:column;}
-  .filtro-busca{min-width:unset;width:100%;}
-  .filtros select{width:100%;}
-  .pt-card{flex-wrap:wrap;}
-  .modal-overlay{padding:8px;}
-  .modal{padding:16px;max-height:90vh;overflow-y:auto;}
-  .modal-grid{grid-template-columns:1fr;}
-  .modal-field.full{grid-column:1;}
-}
-@media(max-width:480px){
-  .stats-grid{grid-template-columns:1fr 1fr;}
-  #riscos-checks,#epis-checks{grid-template-columns:1fr!important;}
-  .pt-card .chk-btns{flex-wrap:wrap;}
-  .chk-btn{padding:4px 7px;font-size:10px;}
-}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(3,1fr);}.modal-grid{grid-template-columns:1fr;}.header-title{display:none;}}
 </style>
 </head>
 <body>
@@ -161,25 +139,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <button onclick="fecharModalPT()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
     </div>
     <div class="modal-grid">
-      <div class="modal-field full">
-        <label>Tipo de PT <span style="color:var(--accent);">*</span> <span style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;">(marque todos que se aplicam)</span></label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Trabalho em Altura" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 🧗 Trabalho em Altura
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Espaço Confinado" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 🕳️ Espaço Confinado
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Trabalho a Quente" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 🔥 Trabalho a Quente
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Energias Perigosas" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> ⚡ Energias Perigosas
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;font-weight:500;">
-            <input type="checkbox" class="pt-tipo-chk" value="Geral" onchange="atualizarChecklist()" style="accent-color:var(--accent);"> 📋 Geral
-          </label>
-        </div>
+      <div class="modal-field">
+        <label>Tipo de PT <span style="color:var(--accent);">*</span></label>
+        <select id="pt-tipo" onchange="atualizarChecklist()">
+          <option>Trabalho em Altura</option>
+          <option>Espaço Confinado</option>
+          <option>Trabalho a Quente</option>
+          <option>Energias Perigosas</option>
+          <option>Geral</option>
+        </select>
       </div>
       <div class="modal-field">
         <label>Número da PT</label>
@@ -444,7 +412,7 @@ function renderLista(){
   const el=document.getElementById('lista-pts');
   const filtradas=pts.filter(p=>{
     if(busca&&!p.numero_pt.toLowerCase().includes(busca)&&!p.descricao_servico.toLowerCase().includes(busca))return false;
-    if(tipo&&!(p.tipo||'').split(', ').includes(tipo))return false;
+    if(tipo&&p.tipo!==tipo)return false;
     if(status&&p.status!==status)return false;
     return true;
   });
@@ -461,7 +429,7 @@ function renderLista(){
         <div class="pt-servico">${escHtml(p.descricao_servico)}</div>
         <div class="pt-meta">
           <span class="mini-badge ${stCls}">${p.status}</span>
-          ${(p.tipo||'')'.split(', ').map(t=>{const c=TIPO_CORES[t]||cor;return`<span class="mini-badge" style="background:${c.bg};color:var(--text2);border:1px solid ${c.brd};">${t}</span>`;}).join('')}
+          <span class="mini-badge" style="background:${cor.bg};color:var(--text2);border:1px solid ${cor.brd};">${p.tipo}</span>
           <span>📅 ${fmtData(p.data_emissao)}</span>
           ${p.hora_inicio?`<span>🕐 ${p.hora_inicio}${p.hora_termino?' → '+p.hora_termino:''}</span>`:''}
           ${setor?`<span>🗂️ ${escHtml(setor.nome_setor)}</span>`:''}
@@ -479,31 +447,25 @@ function renderLista(){
 }
 
 // ── CHECKLIST ─────────────────────────────────────────
-function getTiposSelecionados(){
-  return[...document.querySelectorAll('.pt-tipo-chk:checked')].map(cb=>cb.value);
-}
 async function atualizarChecklist(){
-  const tipos=getTiposSelecionados();
-  document.getElementById('chk-tipo-label').textContent=tipos.length?tipos.join(' · '):'—';
-  const vistos=new Set();const itens=[];
-  tipos.forEach(tipo=>{(CHECKLISTS_PT[tipo]||[]).forEach(item=>{const uid=`${tipo}-${item.id}`;if(!vistos.has(uid)){vistos.add(uid);itens.push({...item,_uid:uid,_tipo:tipo});}});});
+  const tipo=document.getElementById('pt-tipo').value;
+  document.getElementById('chk-tipo-label').textContent=tipo;
+  const itens=CHECKLISTS_PT[tipo]||[];
   chkRespostas={};
-  document.getElementById('lista-checklist').innerHTML=itens.length?itens.map((item,i)=>{
-    const hdr=i===0||itens[i-1]._tipo!==item._tipo;
-    const cabec=hdr&&tipos.length>1?`<div style="font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;padding:10px 0 4px;margin-top:${i>0?'8px':'0'}">${item._tipo}</div>`:'';
-    return`${cabec}<div class="chk-item" id="chk-${item._uid}">
+  document.getElementById('lista-checklist').innerHTML=itens.map(item=>`
+    <div class="chk-item" id="chk-${item.id}">
       <div class="chk-texto">${escHtml(item.texto)}</div>
       <div class="chk-btns">
-        <button class="chk-btn sim" onclick="responderChk('${item._uid}','Sim')">✓ Sim</button>
-        <button class="chk-btn nao" onclick="responderChk('${item._uid}','Não')">✕ Não</button>
-        <button class="chk-btn na" onclick="responderChk('${item._uid}','N/A')">N/A</button>
+        <button class="chk-btn sim" onclick="responderChk(${item.id},'Sim')">✓ Sim</button>
+        <button class="chk-btn nao" onclick="responderChk(${item.id},'Não')">✕ Não</button>
+        <button class="chk-btn na" onclick="responderChk(${item.id},'N/A')">N/A</button>
       </div>
-    </div>`;
-  }).join(''):'<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Selecione pelo menos um tipo acima</div>';
+    </div>`).join('');
+  // Mostra campos de inventário conforme tipo
   const campoEC=document.getElementById('campo-ec');
   const campoANC=document.getElementById('campo-anc');
-  if(campoEC)campoEC.style.display=tipos.includes('Espaço Confinado')?'block':'none';
-  if(campoANC)campoANC.style.display=tipos.includes('Trabalho em Altura')?'block':'none';
+  if(campoEC)campoEC.style.display=tipo==='Espaço Confinado'?'block':'none';
+  if(campoANC)campoANC.style.display=tipo==='Trabalho em Altura'?'block':'none';
   // Carrega inventários se necessário
   if(tipo==='Espaço Confinado'){
     try{
@@ -539,7 +501,7 @@ function abrirModalNovaPT(){
   document.getElementById('pt-modal-esq').innerHTML='';
   const selSet=document.getElementById('pt-setor');
   selSet.innerHTML='<option value="">— Geral —</option>'+setores.map(s=>`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`).join('');
-  document.querySelectorAll('.pt-tipo-chk').forEach(cb=>cb.checked=cb.value==='Trabalho em Altura');
+  document.getElementById('pt-tipo').value='Trabalho em Altura';
   document.getElementById('pt-numero').value=gerarNumeroPT();
   document.getElementById('pt-servico').value='';
   document.getElementById('pt-local').value='';
@@ -571,7 +533,7 @@ function editarPT(id){
     </div>`;
   const selSet=document.getElementById('pt-setor');
   selSet.innerHTML='<option value="">— Geral —</option>'+setores.map(s=>`<option value="${s.id}" ${p.setor_id==s.id?'selected':''}>${escHtml(s.nome_setor)}</option>`).join('');
-  const tiposSalvos=(p.tipo||'').split(', ').map(t=>t.trim());document.querySelectorAll('.pt-tipo-chk').forEach(cb=>cb.checked=tiposSalvos.includes(cb.value));
+  document.getElementById('pt-tipo').value=p.tipo;
   document.getElementById('pt-numero').value=p.numero_pt||'';
   document.getElementById('pt-servico').value=p.descricao_servico||'';
   document.getElementById('pt-local').value=p.local_servico||'';
@@ -605,9 +567,7 @@ async function salvarPT(){
   if(!servico){alert('Descreva o serviço a ser executado.');return;}
   document.getElementById('btn-salvar-pt').disabled=true;
   document.getElementById('spinner-pt').className='spinner show';
-  const tipos=getTiposSelecionados();
-  if(!tipos.length){alert('Selecione pelo menos um tipo de PT.');return;}
-  const tipo=tipos.join(', ');
+  const tipo=document.getElementById('pt-tipo').value;
   const payload={
     empresa_id:parseInt(empresaId),
     setor_id:parseInt(document.getElementById('pt-setor').value)||null,
@@ -643,10 +603,9 @@ async function salvarPT(){
       pts.unshift(d[0]);ptId=d[0].id;
     }
     // Salva respostas do checklist
-    const vistosSave=new Set();const itensSave=[];
-    tipos.forEach(t=>{(CHECKLISTS_PT[t]||[]).forEach(item=>{const uid=`${t}-${item.id}`;if(!vistosSave.has(uid)){vistosSave.add(uid);itensSave.push({...item,_uid:uid});}});});
-    for(const item of itensSave){
-      const resp=chkRespostas[item._uid]||'Pendente';
+    const itens=CHECKLISTS_PT[tipo]||[];
+    for(const item of itens){
+      const resp=chkRespostas[item.id]||'Pendente';
       await fetch(`${SUPA_URL}/rest/v1/pt_checklist_respostas`,{
         method:'POST',
         headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'resolution=merge-duplicates'},
