@@ -15,7 +15,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;flex-wrap:wrap;}
 .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
 .header-title{font-size:13px;color:var(--text2);flex:1;}
 .container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
@@ -91,7 +91,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .chk-btn.sim.active{background:#0e2820;color:#2dd4a0;border-color:#1a4a38;}
 .chk-btn.nao.active{background:#2a1515;color:#e05555;border-color:#4a2020;}
 .chk-btn.na.active{background:#1e2333;color:var(--text3);border-color:var(--border);}
-@media(max-width:768px){.stats-grid{grid-template-columns:repeat(3,1fr);}.modal-grid{grid-template-columns:1fr;}.header-title{display:none;}}
+@media(max-width:768px){
+  .header{padding:12px 16px;}
+  .header-title{display:none;}
+  .container{padding:16px 12px 60px;}
+  .hero{flex-wrap:wrap;gap:10px;padding:14px 16px;}
+  .hero-info{width:100%;}
+  .hero .btn{width:100%;justify-content:center;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .filtros{flex-direction:column;}
+  .filtro-busca{min-width:unset;width:100%;}
+  .filtros select{width:100%;}
+  .pt-card{flex-wrap:wrap;}
+  .pt-tipo-icon{width:36px;height:36px;font-size:16px;}
+  .modal{padding:16px;}
+  .modal-grid{grid-template-columns:1fr;}
+  .modal-field.full{grid-column:1;}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  #riscos-checks,#epis-checks{grid-template-columns:1fr!important;}
+  .pt-card .chk-btns{flex-wrap:wrap;}
+  .modal .modal-titulo{font-size:14px;}
+}
 </style>
 </head>
 <body>
@@ -211,11 +233,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       </div>
       <div class="modal-field full">
         <label>Riscos potenciais identificados</label>
-        <div id="riscos-checks" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
+        <div id="riscos-checks" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
       </div>
       <div class="modal-field full">
         <label>Equipamentos de proteção necessários (EPIs/EPCs)</label>
-        <div id="epis-checks" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
+        <div id="epis-checks" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;"></div>
       </div>
       <div class="modal-field full">
         <label>Medidas de controle / Recomendações adicionais</label>
