@@ -636,7 +636,64 @@ async function salvarMedida(srId,nivel,valor){
     const lista=contexto==='setor'?riscosSetor:riscosFuncao;
     const sr=lista.find(x=>x.id===srId);
     if(sr){sr[campo]=valor;sr[checkCampo]=checked;}
+    // ── Integração Central de Ações ───────────────────
+    if(valor&&valor.trim()&&checked){
+      await criarAcaoFromMedida(srId,nivel,valor.trim());
+    }
   }catch(e){console.error(e);}
+}
+
+async function criarAcaoFromMedida(srId,nivel,descricao){
+  try{
+    const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+    const sr=lista.find(x=>x.id===srId);
+    const risco=sr?todosRiscos.find(r=>r.id===sr.risco_id):null;
+    const nomeRisco=risco?.nome_risco||'Risco';
+    const nomeNivel={eliminacao:'Eliminação',substituicao:'Substituição',engenharia:'Engenharia',administrativo:'Administrativo',epi:'EPI'}[nivel]||nivel;
+    const setor_id=contexto==='setor'?(setorAtivo?.id||null):null;
+    const funcao_id=contexto==='funcao'?(funcaoAtiva?.id||null):null;
+    const titulo=`[${nomeNivel}] ${descricao.length>80?descricao.slice(0,80)+'…':descricao}`;
+    // Evita duplicata na mesma sessão
+    const chave=`acao_medida_${srId}_${nivel}`;
+    const acaoExistenteId=sessionStorage.getItem(chave);
+    if(acaoExistenteId){
+      await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${acaoExistenteId}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+        body:JSON.stringify({titulo,descricao:`Medida de controle (${nomeNivel}) para o risco: ${nomeRisco}`,atualizado_em:new Date().toISOString()})
+      });
+      return;
+    }
+    const res=await fetch(`${SUPA_URL}/rest/v1/acoes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({
+        empresa_id:parseInt(empresaId),
+        titulo,
+        descricao:`Medida de controle (${nomeNivel}) para o risco: ${nomeRisco}`,
+        origem:'Gestão de Riscos',
+        prioridade:risco?.gut_total>=12?'Alta':risco?.gut_total>=6?'Média':'Baixa',
+        setor_id,
+        funcao_id,
+        status:'Pendente',
+        ativo:true
+      })
+    });
+    if(res.ok){
+      const data=await res.json();
+      const novaAcao=Array.isArray(data)?data[0]:data;
+      if(novaAcao?.id)sessionStorage.setItem(chave,novaAcao.id);
+      mostrarToastAcao();
+    }
+  }catch(e){console.error('Erro ao criar ação:',e);}
+}
+
+function mostrarToastAcao(){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;right:24px;background:#0e2820;border:1px solid #1a4a38;border-radius:8px;padding:12px 18px;z-index:9999;font-size:13px;color:#2dd4a0;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);';
+  t.innerHTML=`<span>✓</span><span>Ação criada na <a href="acoes.html?empresa_id=${empresaId}" style="color:#2dd4a0;font-weight:500;">Central de Ações</a></span><button onclick="this.parentNode.remove()" style="background:none;border:none;color:#545e72;cursor:pointer;font-size:16px;margin-left:8px;">×</button>`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),6000);
 }
 
 // ── EPIs ──────────────────────────────────────────────
