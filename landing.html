@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Sistema de Gestão em Saúde e Segurança do Trabalho</title>
+<meta name="description" content="Gerencie toda a SST da sua empresa em um único sistema. PGR, PCMSO, LTCAT, treinamentos, EPIs e muito mais.">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#00c896;--verde2:#00a87e;--verde3:#e6fdf7;
+  --azul:#0a1628;--azul2:#112240;--azul3:#1a3a6e;
+  --text:#0a1628;--text2:#4a5568;--text3:#718096;
+  --branco:#ffffff;--cinza:#f7f9fc;--borda:#e2e8f0;
+  --radius:12px;--shadow:0 4px 24px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--branco);overflow-x:hidden;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;transition:all .3s;}
+nav.scrolled{background:rgba(255,255,255,.95);backdrop-filter:blur(12px);box-shadow:0 1px 20px rgba(0,0,0,.08);}
+.nav-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--azul);display:flex;align-items:center;gap:10px;}
+.nav-logo-dot{width:10px;height:10px;background:var(--verde);border-radius:50%;display:inline-block;}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{font-size:14px;color:var(--text2);text-decoration:none;font-weight:500;transition:color .2s;}
+.nav-links a:hover{color:var(--verde2);}
+.nav-cta{background:var(--azul);color:#fff;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:500;text-decoration:none;transition:all .2s;}
+.nav-cta:hover{background:var(--azul3);transform:translateY(-1px);}
+
+/* HERO */
+.hero{min-height:100vh;background:linear-gradient(135deg,var(--azul) 0%,var(--azul2) 50%,#0d2d52 100%);display:flex;align-items:center;padding:120px 40px 80px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(0,200,150,.15) 0%,transparent 70%);border-radius:50%;}
+.hero::after{content:'';position:absolute;bottom:-100px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(0,200,150,.08) 0%,transparent 70%);border-radius:50%;}
+.hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,200,150,.15);border:1px solid rgba(0,200,150,.3);color:var(--verde);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;margin-bottom:24px;}
+.hero-badge-dot{width:6px;height:6px;background:var(--verde);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.hero h1{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:20px;}
+.hero h1 span{color:var(--verde);}
+.hero-desc{font-size:18px;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:36px;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+.btn-hero-prim{background:var(--verde);color:var(--azul);padding:14px 28px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+.btn-hero-prim:hover{background:#00e0a8;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,200,150,.4);}
+.btn-hero-sec{background:rgba(255,255,255,.1);color:#fff;padding:14px 28px;border-radius:10px;font-size:15px;font-weight:500;text-decoration:none;border:1px solid rgba(255,255,255,.2);display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+.btn-hero-sec:hover{background:rgba(255,255,255,.15);}
+/* Hero visual */
+.hero-visual{position:relative;}
+.hero-card{background:rgba(255,255,255,.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px;margin-bottom:16px;}
+.hero-card-titulo{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+.hero-stat-row{display:flex;gap:12px;}
+.hero-stat{background:rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;flex:1;text-align:center;}
+.hero-stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--verde);}
+.hero-stat-lab{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;}
+.hero-modules{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
+.hero-mod{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;font-size:12px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:8px;}
+.hero-mod-icon{font-size:16px;}
+
+/* STATS BAR */
+.stats-bar{background:var(--cinza);border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);padding:28px 40px;}
+.stats-bar-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:20px;}
+.stats-item{text-align:center;}
+.stats-val{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--azul);}
+.stats-lab{font-size:13px;color:var(--text3);margin-top:2px;}
+
+/* SECTION */
+section{padding:80px 40px;}
+.section-inner{max-width:1100px;margin:0 auto;}
+.section-tag{font-size:13px;font-weight:600;color:var(--verde2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;}
+.section-titulo{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;color:var(--azul);line-height:1.15;margin-bottom:16px;}
+.section-desc{font-size:17px;color:var(--text2);line-height:1.7;max-width:560px;}
+
+/* MÓDULOS */
+.modulos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;}
+.mod-card{background:var(--branco);border:1px solid var(--borda);border-radius:var(--radius);padding:24px;transition:all .2s;position:relative;overflow:hidden;}
+.mod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--verde),var(--azul3));transform:scaleX(0);transition:transform .3s;}
+.mod-card:hover{box-shadow:var(--shadow);transform:translateY(-4px);}
+.mod-card:hover::before{transform:scaleX(1);}
+.mod-icone{width:48px;height:48px;background:var(--verde3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:14px;}
+.mod-titulo{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--azul);margin-bottom:8px;}
+.mod-desc{font-size:14px;color:var(--text2);line-height:1.6;}
+.mod-tag{display:inline-block;font-size:10px;font-weight:600;color:var(--verde2);background:var(--verde3);padding:2px 8px;border-radius:4px;margin-top:10px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* COMO FUNCIONA */
+.como-bg{background:var(--cinza);}
+.como-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-top:48px;}
+.como-steps{display:flex;flex-direction:column;gap:24px;}
+.step{display:flex;gap:16px;align-items:flex-start;}
+.step-num{width:36px;height:36px;background:var(--azul);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;flex-shrink:0;}
+.step-info{}
+.step-titulo{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--azul);margin-bottom:4px;}
+.step-desc{font-size:14px;color:var(--text2);line-height:1.6;}
+.como-visual{background:var(--azul);border-radius:20px;padding:32px;color:#fff;}
+.como-visual-titulo{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:20px;color:var(--verde);}
+.como-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.08);}
+.como-item:last-child{border-bottom:none;}
+.como-check{width:24px;height:24px;background:rgba(0,200,150,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--verde);font-size:12px;flex-shrink:0;}
+.como-item-txt{font-size:14px;color:rgba(255,255,255,.8);}
+
+/* PLANO */
+.plano-section{background:linear-gradient(135deg,var(--azul),var(--azul2));}
+.plano-section .section-titulo{color:#fff;}
+.plano-section .section-desc{color:rgba(255,255,255,.7);}
+.plano-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px;max-width:800px;margin-left:auto;margin-right:auto;}
+.plano-card{border-radius:20px;padding:36px;position:relative;}
+.plano-card.essencial{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);}
+.plano-card.enterprise{background:var(--verde);border:1px solid var(--verde);}
+.plano-nome{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;}
+.plano-card.essencial .plano-nome{color:rgba(255,255,255,.6);}
+.plano-card.enterprise .plano-nome{color:var(--azul);}
+.plano-preco{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;margin-bottom:4px;}
+.plano-card.essencial .plano-preco{color:#fff;}
+.plano-card.enterprise .plano-preco{color:var(--azul);}
+.plano-periodo{font-size:14px;margin-bottom:24px;}
+.plano-card.essencial .plano-periodo{color:rgba(255,255,255,.5);}
+.plano-card.enterprise .plano-periodo{color:rgba(10,22,40,.6);}
+.plano-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.plano-features li{font-size:14px;display:flex;align-items:center;gap:10px;}
+.plano-card.essencial .plano-features li{color:rgba(255,255,255,.8);}
+.plano-card.enterprise .plano-features li{color:var(--azul);}
+.plano-features li::before{content:'✓';font-weight:700;flex-shrink:0;}
+.plano-card.essencial .plano-features li::before{color:var(--verde);}
+.plano-card.enterprise .plano-features li::before{color:var(--azul);}
+.plano-btn{display:block;text-align:center;padding:14px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;}
+.plano-card.essencial .plano-btn{background:var(--verde);color:var(--azul);}
+.plano-card.essencial .plano-btn:hover{background:#00e0a8;}
+.plano-card.enterprise .plano-btn{background:var(--azul);color:#fff;}
+.plano-card.enterprise .plano-btn:hover{background:#0d2d52;}
+.plano-trial{text-align:center;margin-top:20px;font-size:13px;color:rgba(255,255,255,.5);}
+
+/* DEPOIMENTOS / NRs */
+.nrs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px;}
+.nr-card{background:var(--cinza);border:1px solid var(--borda);border-radius:var(--radius);padding:20px;text-align:center;}
+.nr-badge{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--azul);margin-bottom:6px;}
+.nr-desc{font-size:12px;color:var(--text3);}
+
+/* CTA FINAL */
+.cta-section{background:var(--verde3);border-top:1px solid rgba(0,200,150,.2);}
+.cta-inner{max-width:700px;margin:0 auto;text-align:center;}
+.cta-inner .section-titulo{font-size:36px;}
+.cta-btns{display:flex;gap:14px;justify-content:center;margin-top:32px;flex-wrap:wrap;}
+.btn-cta-prim{background:var(--azul);color:#fff;padding:16px 32px;border-radius:10px;font-size:16px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:all .2s;}
+.btn-cta-prim:hover{background:var(--azul3);transform:translateY(-2px);}
+.btn-cta-wpp{background:#25d366;color:#fff;padding:16px 32px;border-radius:10px;font-size:16px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:all .2s;}
+.btn-cta-wpp:hover{background:#1ea952;transform:translateY(-2px);}
+
+/* FOOTER */
+footer{background:var(--azul);color:rgba(255,255,255,.5);padding:40px;text-align:center;font-size:13px;}
+footer a{color:var(--verde);text-decoration:none;}
+
+/* ANIMATIONS */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .6s,transform .6s;}
+.fade-up.visible{opacity:1;transform:translateY(0);}
+
+/* MOBILE */
+@media(max-width:768px){
+  nav{padding:14px 20px;}
+  .nav-links{display:none;}
+  .hero{padding:100px 20px 60px;}
+  .hero-inner{grid-template-columns:1fr;}
+  .hero h1{font-size:36px;}
+  .hero-visual{display:none;}
+  section{padding:60px 20px;}
+  .section-titulo{font-size:28px;}
+  .modulos-grid{grid-template-columns:1fr;}
+  .como-grid{grid-template-columns:1fr;}
+  .plano-grid{grid-template-columns:1fr;}
+  .nrs-grid{grid-template-columns:1fr 1fr;}
+  .stats-bar{padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">
+    <span class="nav-logo-dot"></span>
+    SGS
+  </div>
+  <div class="nav-links">
+    <a href="#modulos">Módulos</a>
+    <a href="#como">Como funciona</a>
+    <a href="#planos">Planos</a>
+    <a href="#contato">Contato</a>
+  </div>
+  <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="nav-cta">Acessar sistema →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Gestão completa de SST
+      </div>
+      <h1>SST organizada.<br><span>Empresa protegida.</span></h1>
+      <p class="hero-desc">O SGS centraliza toda a gestão de Saúde e Segurança do Trabalho da sua empresa — PGR, PCMSO, LTCAT, treinamentos, EPIs e muito mais em um único sistema na nuvem.</p>
+      <div class="hero-btns">
+        <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="btn-hero-prim">Começar grátis por 30 dias →</a>
+        <a href="https://wa.me/5594981564271?text=Olá!%20Quero%20conhecer%20o%20SGS" class="btn-hero-sec">💬 Falar com consultor</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-titulo">Visão geral — Empresa piloto</div>
+        <div class="hero-stat-row">
+          <div class="hero-stat"><div class="hero-stat-val">87</div><div class="hero-stat-lab">Funcionários</div></div>
+          <div class="hero-stat"><div class="hero-stat-val">GR 3</div><div class="hero-stat-lab">Grau de risco</div></div>
+          <div class="hero-stat"><div class="hero-stat-val">2 TST</div><div class="hero-stat-lab">SESMT</div></div>
+        </div>
+        <div class="hero-modules">
+          <div class="hero-mod"><span class="hero-mod-icon">✅</span>PGR atualizado</div>
+          <div class="hero-mod"><span class="hero-mod-icon">✅</span>PCMSO vigente</div>
+          <div class="hero-mod"><span class="hero-mod-icon">⚠️</span>3 treinamentos</div>
+          <div class="hero-mod"><span class="hero-mod-icon">✅</span>EPIs em dia</div>
+          <div class="hero-mod"><span class="hero-mod-icon">✅</span>LTCAT gerado</div>
+          <div class="hero-mod"><span class="hero-mod-icon">⚡</span>5 ações abertas</div>
+        </div>
+      </div>
+      <div class="hero-card" style="background:rgba(0,200,150,.12);border-color:rgba(0,200,150,.2);">
+        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:6px;">Próximo vencimento</div>
+        <div style="font-size:15px;color:#fff;font-weight:500;">ASO Periódico — João Silva</div>
+        <div style="font-size:12px;color:var(--verde);margin-top:4px;">⏰ Vence em 15 dias</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stats-item"><div class="stats-val">100%</div><div class="stats-lab">Web — acesso de qualquer lugar</div></div>
+    <div class="stats-item"><div class="stats-val">NR-1</div><div class="stats-lab">PGR conforme nova NR-1</div></div>
+    <div class="stats-item"><div class="stats-val">30 dias</div><div class="stats-lab">Teste grátis sem cartão</div></div>
+    <div class="stats-item"><div class="stats-val">R$999</div><div class="stats-lab">Por conta / mês</div></div>
+    <div class="stats-item"><div class="stats-val">1.000</div><div class="stats-lab">Funcionários incluídos</div></div>
+  </div>
+</div>
+
+<!-- MÓDULOS -->
+<section id="modulos">
+  <div class="section-inner">
+    <div class="fade-up">
+      <div class="section-tag">Módulos disponíveis</div>
+      <h2 class="section-titulo">Tudo que você precisa<br>em um só lugar</h2>
+      <p class="section-desc">Do cadastro de funcionários à geração dos documentos legais — o SGS cobre todo o ciclo de gestão de SST.</p>
+    </div>
+    <div class="modulos-grid">
+      <div class="mod-card fade-up">
+        <div class="mod-icone">⚠️</div>
+        <div class="mod-titulo">Riscos e PGR</div>
+        <div class="mod-desc">Identificação e avaliação de riscos por setor e função, com geração automática do PGR conforme nova NR-1.</div>
+        <span class="mod-tag">NR-1</span>
+      </div>
+      <div class="mod-card fade-up">
+        <div class="mod-icone">🩺</div>
+        <div class="mod-titulo">Exames e PCMSO</div>
+        <div class="mod-desc">Catálogo de exames por função, controle de ASOs e vencimentos por funcionário. Documento PCMSO incluído.</div>
+        <span class="mod-tag">NR-7</span>
+      </div>
+      <div class="mod-card fade-up">
+        <div class="mod-icone">🎓</div>
+        <div class="mod-titulo">Treinamentos</div>
+        <div class="mod-desc">Controle completo de treinamentos obrigatórios por NR, com alertas de vencimento automáticos.</div>
+        <span class="mod-tag">Múltiplas NRs</span>
+      </div>
+      <div class="mod-card fade-up">
+        <div class="mod-icone">🥽</div>
+        <div class="mod-titulo">Gestão de EPIs</div>
+        <div class="mod-desc">Catálogo por função com controle de CA, entregas e substituições. Histórico completo por colaborador.</div>
+        <span class="mod-tag">NR-6</span>
+      </div>
+      <div class="mod-card fade-up">
+        <div class="mod-icone">📊</div>
+        <div class="mod-titulo">Medições e LTCAT</div>
+        <div class="mod-desc">Registro de medições ambientais de ruído, calor e agentes químicos. Geração automática do LTCAT.</div>
+        <span class="mod-tag">NR-15</span>
+      </div>
+      <div class="mod-card fade-up">
+        <div class="mod-icone">📁</div>
+        <div class="mod-titulo">Documentos do Colaborador</div>
+        <div class="mod-desc">ASO gerado automaticamente ao admitir. Upload de certificados, habilitações e documentos pessoais na nuvem.</div>
+        <span class="mod-tag">ASO · NRs</span>
+      </div>
+      <div class="mod-card fade-up">
+        <div class="mod-icone">🔍</div>
+        <div class="mod-titulo">Checklists e Inspeções</div>
+        <div class="mod-desc">Checklists prontos para NR-1, 5, 6, 10, 12, 17, 23, 33, 35 e mais. Geração de ações corretivas automáticas.</div>
+        <span class="mod-tag">NR-1 ao NR-35</span>
+      </div>
+      <div class="mod-card fade-up">
+        <div class="mod-icone">📋</div>
+        <div class="mod-titulo">Permissão de Trabalho</div>
+        <div class="mod-desc">PT para espaço confinado, trabalho em altura, eletricidade e inflamáveis. Integrado ao inventário técnico.</div>
+        <span class="mod-tag">NR-33 · NR-35</span>
+      </div>
+      <div class="mod-card fade-up">
+        <div class="mod-icone">⚡</div>
+        <div class="mod-titulo">Central de Ações</div>
+        <div class="mod-desc">Gestão centralizada de todas as ações corretivas e preventivas com prioridade, prazo e responsável.</div>
+        <span class="mod-tag">PDCA</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NRs ATENDIDAS -->
+<div style="background:var(--cinza);padding:60px 40px;border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);">
+  <div class="section-inner">
+    <div style="text-align:center;margin-bottom:36px;" class="fade-up">
+      <div class="section-tag">Conformidade legal</div>
+      <h2 class="section-titulo">NRs atendidas pelo sistema</h2>
+    </div>
+    <div class="nrs-grid fade-up">
+      <div class="nr-card"><div class="nr-badge">NR-1</div><div class="nr-desc">PGR e GRO</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-4</div><div class="nr-desc">SESMT</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-5</div><div class="nr-desc">CIPA</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-6</div><div class="nr-desc">EPIs</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-7</div><div class="nr-desc">PCMSO</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-9</div><div class="nr-desc">LTCAT</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-15</div><div class="nr-desc">Insalubridade</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-17</div><div class="nr-desc">Ergonomia / AET</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-22</div><div class="nr-desc">Mineração</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-31</div><div class="nr-desc">Rural</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-33</div><div class="nr-desc">Esp. Confinados</div></div>
+      <div class="nr-card"><div class="nr-badge">NR-35</div><div class="nr-desc">Trabalho em Altura</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMO FUNCIONA -->
+<section id="como" class="como-bg">
+  <div class="section-inner">
+    <div class="fade-up" style="text-align:center;margin-bottom:0;">
+      <div class="section-tag">Simples de usar</div>
+      <h2 class="section-titulo">Como funciona</h2>
+    </div>
+    <div class="como-grid">
+      <div class="como-steps fade-up">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <div class="step-titulo">Cadastre sua empresa</div>
+            <div class="step-desc">Digite o CNPJ e o sistema busca automaticamente os dados na Receita Federal — razão social, endereço, CNAE e grau de risco.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <div class="step-titulo">Mapeie riscos e funções</div>
+            <div class="step-desc">Cadastre setores, funções e associe os riscos. O sistema já sugere os exames, EPIs e treinamentos obrigatórios.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <div class="step-titulo">Gerencie funcionários</div>
+            <div class="step-desc">Cada colaborador tem ficha completa com ASO automático, documentos, treinamentos e EPIs controlados.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <div class="step-titulo">Gere os documentos</div>
+            <div class="step-desc">PGR, PCMSO e LTCAT gerados com um clique, prontos para assinar e arquivar — conformidade legal garantida.</div>
+          </div>
+        </div>
+      </div>
+      <div class="como-visual fade-up">
+        <div class="como-visual-titulo">✓ Incluído no plano</div>
+        <div class="como-item"><div class="como-check">✓</div><div class="como-item-txt">Empresas ilimitadas</div></div>
+        <div class="como-item"><div class="como-check">✓</div><div class="como-item-txt">Até 1.000 funcionários com ficha individual</div></div>
+        <div class="como-item"><div class="como-check">✓</div><div class="como-item-txt">Até 20 usuários por conta</div></div>
+        <div class="como-item"><div class="como-check">✓</div><div class="como-item-txt">Geração de PGR, PCMSO e LTCAT</div></div>
+        <div class="como-item"><div class="como-check">✓</div><div class="como-item-txt">Upload de documentos na nuvem</div></div>
+        <div class="como-item"><div class="como-check">✓</div><div class="como-item-txt">Alertas de vencimento automáticos</div></div>
+        <div class="como-item"><div class="como-check">✓</div><div class="como-item-txt">Acesso de qualquer dispositivo</div></div>
+        <div class="como-item"><div class="como-check">✓</div><div class="como-item-txt">Suporte via WhatsApp</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANOS -->
+<section id="planos" class="plano-section">
+  <div class="section-inner">
+    <div class="fade-up" style="text-align:center;">
+      <div class="section-tag" style="color:rgba(0,200,150,.8);">Planos e preços</div>
+      <h2 class="section-titulo">Simples e transparente</h2>
+      <p class="section-desc" style="margin:0 auto;">30 dias grátis para testar. Sem cartão de crédito.</p>
+    </div>
+    <div class="plano-grid">
+      <div class="plano-card essencial fade-up">
+        <div class="plano-nome">Essencial</div>
+        <div class="plano-preco">R$ 999</div>
+        <div class="plano-periodo">/mês · por conta</div>
+        <ul class="plano-features">
+          <li>Empresas ilimitadas</li>
+          <li>Até 1.000 funcionários</li>
+          <li>Até 20 usuários</li>
+          <li>Todos os módulos SST</li>
+          <li>PGR, PCMSO, LTCAT</li>
+          <li>Suporte via WhatsApp</li>
+          <li>30 dias grátis</li>
+        </ul>
+        <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="plano-btn">Começar grátis →</a>
+      </div>
+      <div class="plano-card enterprise fade-up">
+        <div class="plano-nome">Enterprise</div>
+        <div class="plano-preco">Sob consulta</div>
+        <div class="plano-periodo">Para grandes operações</div>
+        <ul class="plano-features">
+          <li>Funcionários ilimitados</li>
+          <li>Usuários ilimitados</li>
+          <li>Suporte dedicado</li>
+          <li>Implantação assistida</li>
+          <li>Treinamento da equipe</li>
+          <li>SLA garantido</li>
+        </ul>
+        <a href="https://wa.me/5594981564271?text=Olá!%20Tenho%20interesse%20no%20plano%20Enterprise%20do%20SGS." class="plano-btn">Falar com consultor →</a>
+      </div>
+    </div>
+    <div class="plano-trial fade-up">🔒 Pagamento seguro via Mercado Pago · Cancele quando quiser</div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="contato" class="cta-section">
+  <div class="section-inner">
+    <div class="cta-inner fade-up">
+      <div class="section-tag">Comece agora</div>
+      <h2 class="section-titulo">Sua SST organizada<br>em minutos</h2>
+      <p class="section-desc" style="margin:16px auto 0;text-align:center;">Crie sua conta gratuitamente e tenha 30 dias para testar todos os recursos sem compromisso.</p>
+      <div class="cta-btns">
+        <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="btn-cta-prim">🚀 Criar conta grátis</a>
+        <a href="https://wa.me/5594981564271?text=Olá!%20Quero%20conhecer%20o%20SGS%20—%20Sistema%20de%20Gestão%20em%20SST" class="btn-cta-wpp">💬 WhatsApp</a>
+      </div>
+      <p style="margin-top:20px;font-size:13px;color:var(--text3);">Dúvidas? Fale com a gente: <a href="tel:+5594981564271" style="color:var(--verde2);font-weight:500;">(94) 98156-4271</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>SGS — Sistema de Gestão em Saúde e Segurança do Trabalho</div>
+  <div style="margin-top:8px;">
+    <a href="https://sgs-gestaosst.github.io/sgs/login.html">Acessar sistema</a> · 
+    <a href="https://wa.me/5594981564271">WhatsApp</a> · 
+    <a href="mailto:sgs.gestaosst@gmail.com">sgs.gestaosst@gmail.com</a>
+  </div>
+  <div style="margin-top:12px;font-size:11px;opacity:.5;">© 2026 SGS. Todos os direitos reservados.</div>
+</footer>
+
+<script>
+// Navbar scroll
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>50);
+});
+
+// Fade up on scroll
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:.1});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
