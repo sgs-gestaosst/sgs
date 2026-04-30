@@ -270,15 +270,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       </div>
     </div>
     <div class="status-bar" id="status-pt"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
-      <div id="pt-modal-esq"></div>
-      <div style="display:flex;gap:8px;">
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <div id="pt-modal-esq" style="margin-right:auto;"></div>
         <button class="btn btn-cancel" onclick="fecharModalPT()">Cancelar</button>
         <button class="btn btn-save" id="btn-salvar-pt" onclick="salvarPT()">
           <span class="spinner" id="spinner-pt"></span>
           <span id="label-pt">Emitir PT</span>
         </button>
-      </div>
     </div>
   </div>
 </div>
