@@ -227,7 +227,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   /* Sumário — mantém junto */
   .page:nth-child(2){page-break-after:always!important;break-after:page!important;}
 
-  @page{size:A4;margin:15mm 15mm 15mm 22mm;}
+  @page{size:A4;margin:20mm 20mm 20mm 25mm;}
 }
 @media(max-width:230mm){
   .page{width:100%;padding:15mm 12mm 15mm 18mm;}
@@ -431,9 +431,12 @@ function renderDocumento(){
   wrap.appendChild(renderMatrizEPI());
   wrap.appendChild(renderPlanoAcao());
 
-  // Marca a primeira .doc-section de cada .page para não quebrar antes dela
-  // (a quebra é controlada pela .page anterior)
-  document.querySelectorAll('.page').forEach(pg=>{
+  // Numeração automática de páginas
+  const paginas=document.querySelectorAll('.page');
+  paginas.forEach((pg,i)=>{
+    const numEl=pg.querySelector('.pf-page');
+    if(numEl)numEl.textContent=`Pág. ${i+1}`;
+    // Marca primeira doc-section de cada página para não quebrar antes
     const primSec=pg.querySelector('.doc-section');
     if(primSec)primSec.classList.add('primeira-secao');
   });
@@ -706,25 +709,33 @@ function renderInventarioRiscos(){
       const catNome=getCatNome(risco.categoria_risco_id);
       const perigo=fr.perigo_id?getPerigo(fr.perigo_id):null;
       const nivel=fr.nivel_risco;
+
+      // Busca medidas — inclui setor_risco_medidas via origem
       const mds=medidas_funcao.filter(m=>m.funcao_risco_id===fr.id);
-      const episFr=mds.filter(m=>m.nivel==='EPI');
+      // Busca EPIs — tanto de funcao_risco_medidas quanto propagados do setor
+      const episFr=mds.filter(m=>m.nivel==='EPI'&&m.epi_id);
+
+      // Labels descritivos sem o número
+      const PROB_LABEL={1:'Muito baixa',2:'Baixa',3:'Média',4:'Alta',5:'Muito alta'};
+      const SEV_LABEL={1:'Insignificante',2:'Leve',3:'Moderada',4:'Grave',5:'Catastrófica'};
 
       // Medidas preenchidas
-      const medidasHtml=MEDIDAS_CONFIG.map(mc=>{
-        const marcada=fr[`medida_${mc.key}`];
-        const desc=fr[`medida_${mc.key}_desc`];
-        if(!marcada&&!desc)return'';
+      const medidasItens=MEDIDAS_CONFIG.map(mc=>{
         if(mc.key==='epi'){
+          if(!episFr.length&&!fr.medida_epi)return'';
           if(!episFr.length)return'';
           return`<div class="medida-item">
             <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">5</div>
             <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
             <div class="medida-desc">${episFr.map(e=>{
               const epiDados=epis.find(x=>x.id===e.epi_id);
-              return`${h(epiDados?.nome||'EPI')}${e.ca?' (CA:'+h(e.ca)+')':''}`;
-            }).join(', ')}</div>
+              return`${h(epiDados?.nome||'EPI')}${e.ca?' (CA:'+h(e.ca)+')':''}${e.validade_ca?' Val:'+fmtData(e.validade_ca):''}`;
+            }).join(' · ')}</div>
           </div>`;
         }
+        const marcada=fr[`medida_${mc.key}`];
+        const desc=fr[`medida_${mc.key}_desc`];
+        if(!marcada&&!desc)return'';
         return`<div class="medida-item">
           <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">${{elim:1,subs:2,eng:3,adm:4}[mc.key]}</div>
           <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
@@ -739,20 +750,19 @@ function renderInventarioRiscos(){
           <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
           ${nivel?`<span class="nivel-pill nivel-${nivel}">${nivelLabel(nivel)}</span>`:''}
         </div>
-        <div class="risco-funcao-grid">
-          <div class="rf-field"><div class="lbl">Código</div><div class="val" style="font-family:'IBM Plex Mono',monospace;">${h(risco.codigo_risco||'—')}</div></div>
-          <div class="rf-field"><div class="lbl">Probabilidade</div><div class="val">${fr.probabilidade?`${fr.probabilidade}/5 — ${{1:'Muito baixa',2:'Baixa',3:'Média',4:'Alta',5:'Muito alta'}[fr.probabilidade]||''}`:'—'}</div></div>
-          <div class="rf-field"><div class="lbl">Severidade</div><div class="val">${fr.severidade?`${fr.severidade}/5 — ${{1:'Insignificante',2:'Leve',3:'Moderada',4:'Grave',5:'Catastrófica'}[fr.severidade]||''}`:'—'}</div></div>
+        <div class="risco-funcao-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="rf-field"><div class="lbl">Probabilidade</div><div class="val">${fr.probabilidade?h(PROB_LABEL[fr.probabilidade]||'—'):'—'}</div></div>
+          <div class="rf-field"><div class="lbl">Severidade</div><div class="val">${fr.severidade?h(SEV_LABEL[fr.severidade]||'—'):'—'}</div></div>
           <div class="rf-field"><div class="lbl">Nº de expostos</div><div class="val">${fr.num_expostos||'—'}</div></div>
         </div>
         ${risco.danos_saude?`<div class="danos-box">
           <div class="danos-label">🩺 Danos à saúde potenciais</div>
           <div class="danos-text">${h(risco.danos_saude)}</div>
         </div>`:''}
-        ${medidasHtml?`<div class="medidas-box">
+        ${medidasItens?`<div class="medidas-box">
           <div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>
-          ${medidasHtml}
-        </div>`:'<div class="medidas-box"><div class="medidas-label">Medidas de prevenção e controle</div><div class="medida-item"><div class="medida-vazio">Nenhuma medida de controle registrada para este risco.</div></div></div>'}
+          ${medidasItens}
+        </div>`:''}
       </div>`;
     });
 
@@ -857,23 +867,48 @@ function renderPlanoAcao(){
   const setoresMap={};setores.forEach(s=>{setoresMap[s.id]=s.nome_setor;});
   const funcoesMap={};funcoes.forEach(f=>{funcoesMap[f.id]=f.nome_funcao;});
 
+  // Agrupa ações por título (Opção A — deduplicação na renderização)
+  const acoesAgrupadas=[];
+  const titlosVistos={};
+  acoes.forEach(a=>{
+    const titulo=a.titulo.trim();
+    if(titlosVistos[titulo]!==undefined){
+      // Adiciona vínculo ao grupo existente
+      const grupo=acoesAgrupadas[titlosVistos[titulo]];
+      const setor=a.setor_id?setoresMap[a.setor_id]:null;
+      const funcao=a.funcao_id?funcoesMap[a.funcao_id]:null;
+      if(setor&&!grupo.vinculos.includes('📁 '+setor))grupo.vinculos.push('📁 '+setor);
+      if(funcao&&!grupo.vinculos.includes('👷 '+funcao))grupo.vinculos.push('👷 '+funcao);
+      // Mantém a prioridade mais alta
+      const priorOrdem={Crítica:4,Alta:3,Média:2,Baixa:1};
+      if((priorOrdem[a.prioridade]||0)>(priorOrdem[grupo.prioridade]||0))grupo.prioridade=a.prioridade;
+      // Mantém o prazo mais próximo
+      if(a.prazo&&(!grupo.prazo||a.prazo<grupo.prazo))grupo.prazo=a.prazo;
+    }else{
+      titlosVistos[titulo]=acoesAgrupadas.length;
+      const setor=a.setor_id?setoresMap[a.setor_id]:null;
+      const funcao=a.funcao_id?funcoesMap[a.funcao_id]:null;
+      const vinculos=[];
+      if(setor)vinculos.push('📁 '+setor);
+      if(funcao)vinculos.push('👷 '+funcao);
+      acoesAgrupadas.push({titulo,origem:a.origem,prioridade:a.prioridade,responsavel:a.responsavel,prazo:a.prazo,status:a.status,vinculos});
+    }
+  });
+
   pg.innerHTML=`
   ${phHeader('—')}
   <div class="doc-section"><span class="num-secao">6</span>Plano de Ação</div>
   <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a implementar, com responsáveis, prazos e status, seguindo a hierarquia da NR-1.</p>
-  ${!acoes.length?`<div class="em-breve"><div class="em-breve-icon">📋</div><div class="em-breve-label">Nenhuma ação selecionada.<br>Clique em "Revisar plano de ação" para selecionar.</div></div>`:`
+  ${!acoesAgrupadas.length?`<div class="em-breve"><div class="em-breve-icon">📋</div><div class="em-breve-label">Nenhuma ação selecionada.<br>Clique em "Revisar plano de ação" para selecionar.</div></div>`:`
   <table class="doc-table">
     <thead><tr><th style="width:35%;">Ação</th><th style="width:12%;">Origem</th><th style="width:10%;text-align:center;">Prioridade</th><th style="width:15%;">Responsável</th><th style="width:13%;text-align:center;">Prazo</th><th style="width:15%;text-align:center;">Status</th></tr></thead>
-    <tbody>${acoes.map(a=>{
+    <tbody>${acoesAgrupadas.map(a=>{
       const prior=a.prioridade||'Média';
       const prazo=a.prazo?fmtData(a.prazo):'—';
-      const setor=a.setor_id?setoresMap[a.setor_id]||'—':'—';
-      const funcao=a.funcao_id?funcoesMap[a.funcao_id]||'—':'—';
       return`<tr>
         <td>
           <div style="font-weight:500;font-size:9pt;">${h(a.titulo)}</div>
-          ${setor!=='—'?`<div style="font-size:7pt;color:#9ca3af;margin-top:2pt;">📁 ${h(setor)}</div>`:''}
-          ${funcao!=='—'?`<div style="font-size:7pt;color:#9ca3af;">👷 ${h(funcao)}</div>`:''}
+          ${a.vinculos.length?`<div style="font-size:7pt;color:#9ca3af;margin-top:2pt;">${a.vinculos.map(v=>h(v)).join(' · ')}</div>`:''}
         </td>
         <td style="font-size:8pt;">${h(a.origem||'Manual')}</td>
         <td style="text-align:center;"><span style="background:${PRIOR_BG[prior]||'#f3f4f6'};color:${PRIOR_COR[prior]||'#374151'};padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${h(prior)}</span></td>
@@ -883,10 +918,8 @@ function renderPlanoAcao(){
       </tr>`;
     }).join('')}</tbody>
   </table>`}
-
   <div class="doc-subsection" style="margin-top:16pt;">Monitoramento e Revisão — NR-1</div>
   <p class="doc-text">Este PGR deverá ser revisado: <strong>anualmente</strong> (revisão periódica obrigatória); após <strong>mudanças nos processos</strong> que alterem os riscos; após <strong>acidente grave, fatal</strong> ou diagnóstico de doença ocupacional; quando houver <strong>novos agentes de risco</strong>; quando solicitado por <strong>Auditor Fiscal do Trabalho</strong>.</p>
-
   <div style="margin-top:30pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
     ${['Elaborado por','Revisado por','Aprovado por'].map(l=>`<div style="text-align:center;">
       <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:40pt;">
