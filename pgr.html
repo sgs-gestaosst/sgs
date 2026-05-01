@@ -28,7 +28,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 /* ── FOLHA A4 ── */
 .page{
   background:#fff;width:210mm;min-height:297mm;
-  padding:20mm 20mm 24mm 25mm;
+  padding:20mm 20mm 32mm 25mm;
   box-shadow:0 4px 32px rgba(0,0,0,.5);
   position:relative;color:#1a1a2e;
   font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;
@@ -76,6 +76,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .page-footer{position:absolute;bottom:12mm;left:25mm;right:20mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #e5e7eb;padding-top:6pt;}
 .pf-label{font-size:7.5pt;color:#9ca3af;}
 .pf-page{font-family:'IBM Plex Mono',monospace;font-size:8pt;color:#6b7280;}
+/* Garante espaço para o rodapé absoluto na tela */
+.page{padding-bottom:28mm;}
 
 /* ── TABELAS ── */
 .doc-table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:8.5pt;}
@@ -151,9 +153,36 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .screen-header{display:none!important;}
   .screen-body{padding:0!important;}
   .pages-wrap{gap:0!important;}
-  .page{box-shadow:none!important;margin:0!important;page-break-after:always;width:210mm!important;min-height:297mm!important;}
-  .page:last-child{page-break-after:avoid;}
-  @page{size:A4;margin:0;}
+  .page{
+    box-shadow:none!important;
+    margin:0!important;
+    page-break-after:always;
+    break-after:page;
+    width:210mm!important;
+    min-height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding-bottom:20mm!important;
+  }
+  .page:last-child{
+    page-break-after:avoid;
+    break-after:avoid;
+  }
+  /* Evita corte no meio de elementos importantes */
+  .funcao-bloco{page-break-inside:avoid;break-inside:avoid;}
+  .risco-funcao{page-break-inside:avoid;break-inside:avoid;}
+  .danos-box{page-break-inside:avoid;break-inside:avoid;}
+  .medidas-box{page-break-inside:avoid;break-inside:avoid;}
+  .ficha-grid{page-break-inside:avoid;break-inside:avoid;}
+  .ficha-item{page-break-inside:avoid;break-inside:avoid;}
+  .doc-table{page-break-inside:auto;}
+  .doc-table tr{page-break-inside:avoid;break-inside:avoid;}
+  .doc-table thead{display:table-header-group;}
+  .doc-section{page-break-after:avoid;break-after:avoid;}
+  .doc-subsection{page-break-after:avoid;break-after:avoid;}
+  /* Rodapé fixo não funciona bem em print — deixa no fluxo normal */
+  .page-footer{position:relative!important;bottom:auto!important;left:auto!important;right:auto!important;margin-top:20pt;}
+  @page{size:A4;margin:15mm 15mm 20mm 20mm;}
 }
 @media(max-width:230mm){
   .page{width:100%;padding:15mm 12mm 15mm 18mm;}
@@ -655,14 +684,14 @@ function renderInventarioRiscos(){
       blocoHtml+=`<div class="risco-funcao">
         <div class="risco-funcao-header">
           <span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
-          ${perigo?`<span class="risco-perigo-pill">⚠ ${h(perigo.nome)}</span>`:''}
+          ${perigo?`<span class="risco-perigo-pill">⚠ Perigo: ${h(perigo.nome)}</span>`:''}
           <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
           ${nivel?`<span class="nivel-pill nivel-${nivel}">${nivelLabel(nivel)}</span>`:''}
         </div>
         <div class="risco-funcao-grid">
           <div class="rf-field"><div class="lbl">Código</div><div class="val" style="font-family:'IBM Plex Mono',monospace;">${h(risco.codigo_risco||'—')}</div></div>
-          <div class="rf-field"><div class="lbl">Probabilidade</div><div class="val">${fr.probabilidade?`${fr.probabilidade}/5`:'—'}</div></div>
-          <div class="rf-field"><div class="lbl">Severidade</div><div class="val">${fr.severidade?`${fr.severidade}/5`:'—'}</div></div>
+          <div class="rf-field"><div class="lbl">Probabilidade</div><div class="val">${fr.probabilidade?`${fr.probabilidade}/5 — ${{1:'Muito baixa',2:'Baixa',3:'Média',4:'Alta',5:'Muito alta'}[fr.probabilidade]||''}`:'—'}</div></div>
+          <div class="rf-field"><div class="lbl">Severidade</div><div class="val">${fr.severidade?`${fr.severidade}/5 — ${{1:'Insignificante',2:'Leve',3:'Moderada',4:'Grave',5:'Catastrófica'}[fr.severidade]||''}`:'—'}</div></div>
           <div class="rf-field"><div class="lbl">Nº de expostos</div><div class="val">${fr.num_expostos||'—'}</div></div>
         </div>
         ${risco.danos_saude?`<div class="danos-box">
