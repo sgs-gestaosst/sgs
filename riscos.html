@@ -525,9 +525,7 @@ function renderPainel(){
   document.getElementById('painel-sub').textContent=`${riscosAtivos.length} risco(s) identificado(s)${contexto==='funcao'&&funcaoAtiva?' — incluindo riscos herdados do setor':''}`;
 
   document.getElementById('painel-actions').innerHTML=
-    contexto==='setor'
-      ?`<button class="btn btn-primary btn-sm" onclick="abrirModalAdicionar()">+ Identificar perigo / risco</button>`
-      :`<span style="font-size:11px;color:var(--text3);">Riscos gerenciados pelo setor + específicos desta função</span>`;
+    `<button class="btn btn-primary btn-sm" onclick="abrirModalAdicionar()">+ Identificar perigo / risco</button>`;
 
   const tabs=`<div class="ctx-tabs">
     <div class="ctx-tab ${contexto==='setor'?'active':''}" onclick="mudarContexto('setor')">🗂️ ${h(setorAtivo.nome_setor)}</div>
@@ -698,11 +696,22 @@ function abrirModalAdicionar(){
   document.getElementById('riscos-selecionados-resumo').innerHTML='';
   document.getElementById('btn-confirmar-adicionar').disabled=true;
   clearStatus('status-add');
-  // Mostra info de propagação
+  // Título e info de propagação conforme contexto
+  const ehSetor=contexto==='setor';
+  document.getElementById('modal-add-titulo').textContent=
+    ehSetor?'Identificar Perigo e Risco — Setor':`Identificar Perigo e Risco — ${funcaoAtiva?.nome_funcao||'Função'}`;
+  document.getElementById('modal-add-sub').textContent=
+    ehSetor
+      ?'O risco será adicionado ao setor e propagado automaticamente para todas as funções vinculadas.'
+      :'O risco será adicionado especificamente a esta função, sem afetar outras funções do setor.';
   const infoEl=document.getElementById('propagacao-info');
-  infoEl.style.display='flex';
-  document.getElementById('propagacao-count').textContent=
-    funcoesSetor.length?`${funcoesSetor.length} função(ões)`:'todas as funções';
+  if(ehSetor){
+    infoEl.style.display='flex';
+    document.getElementById('propagacao-count').textContent=
+      funcoesSetor.length?`${funcoesSetor.length} função(ões)`:'todas as funções';
+  }else{
+    infoEl.style.display='none';
+  }
   document.getElementById('modal-adicionar').classList.add('show');
 }
 
@@ -912,8 +921,11 @@ function atualizarResumo(){
 function atualizarBtnConfirmar(){
   const btn=document.getElementById('btn-confirmar-adicionar');
   btn.disabled=riscosSelecionados.size===0;
+  const destino=contexto==='setor'?'ao setor':`à função ${funcaoAtiva?.nome_funcao||''}`;
   document.getElementById('label-add').textContent=
-    riscosSelecionados.size>1?`Adicionar ${riscosSelecionados.size} riscos ao setor`:'Adicionar ao setor';
+    riscosSelecionados.size>1
+      ?`Adicionar ${riscosSelecionados.size} riscos ${destino}`
+      :`Adicionar ${destino}`;
 }
 
 // ── CONFIRMAR ADICIONAR ────────────────────────────────────────
@@ -922,34 +934,45 @@ async function confirmarAdicionarRiscos(){
   const btn=document.getElementById('btn-confirmar-adicionar');
   btn.disabled=true;
   document.getElementById('spinner-add').classList.add('show');
-  setStatus('status-add','info','Adicionando e propagando para as funções...');
+  const ehSetor=contexto==='setor';
+  setStatus('status-add','info',ehSetor?'Adicionando e propagando para as funções...':'Adicionando à função...');
 
   try{
     for(const riscoId of riscosSelecionados){
-      // 1. Insere no setor
-      const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos`,{
-        method:'POST',
-        headers:{...h2(),'Prefer':'return=representation'},
-        body:JSON.stringify({
-          setor_id:setorAtivo.id,
-          risco_id:riscoId,
-          perigo_id:perigoSelecionado?.id||null,
-          ativo:true
-        })
-      });
-      if(!res.ok)throw new Error('Erro ao adicionar risco ao setor');
-      const data=await res.json();
-      const novoSetorRisco={...data[0],epis:[]};
-      riscosSetor.push(novoSetorRisco);
-
-      // 2. Propaga para todas as funções do setor
-      await propagarRiscoParaFuncoes(novoSetorRisco);
+      if(ehSetor){
+        // Insere no setor_riscos
+        const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos`,{
+          method:'POST',headers:{...h2(),'Prefer':'return=representation'},
+          body:JSON.stringify({setor_id:setorAtivo.id,risco_id:riscoId,perigo_id:perigoSelecionado?.id||null,ativo:true})
+        });
+        if(!res.ok)throw new Error('Erro ao adicionar risco ao setor');
+        const data=await res.json();
+        const novoSetorRisco={...data[0],epis:[]};
+        riscosSetor.push(novoSetorRisco);
+        // Propaga para funções
+        await propagarRiscoParaFuncoes(novoSetorRisco);
+      }else{
+        // Insere direto no funcao_riscos sem propagação
+        const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
+          method:'POST',headers:{...h2(),'Prefer':'return=representation'},
+          body:JSON.stringify({
+            funcao_id:funcaoAtiva.id,risco_id:riscoId,
+            perigo_id:perigoSelecionado?.id||null,
+            propagado_do_setor:false,ativo:true
+          })
+        });
+        if(!res.ok)throw new Error('Erro ao adicionar risco à função');
+        const data=await res.json();
+        riscosFuncao.push({...data[0],epis:[]});
+      }
     }
-
     fecharModalAdicionar();
     renderPainel();
     renderNavSetores();
-    toast(`${riscosSelecionados.size} risco(s) adicionado(s) e propagado(s) para ${funcoesSetor.length} função(ões)`);
+    toast(ehSetor
+      ?`${riscosSelecionados.size} risco(s) adicionado(s) e propagado(s) para ${funcoesSetor.length} função(ões)`
+      :`${riscosSelecionados.size} risco(s) adicionado(s) à função ${funcaoAtiva?.nome_funcao||''}`
+    );
   }catch(e){
     setStatus('status-add','error',e.message);
     btn.disabled=false;
@@ -1058,15 +1081,26 @@ async function criarAcaoFromMedida(srId,nivel,descricao){
     const risco=sr?todosRiscos.find(r=>r.id===sr.risco_id):null;
     const nomeRisco=risco?.nome_risco||'Risco';
     const nomeNivel={elim:'Eliminação',subs:'Substituição',eng:'Engenharia',adm:'Administrativo',epi:'EPI'}[nivel]||nivel;
-    const chave=`acao_medida_${srId}_${nivel}`;
-    const acaoExistenteId=sessionStorage.getItem(chave);
-    const titulo=`[${nomeNivel}] ${descricao.length>80?descricao.slice(0,80)+'…':descricao}`;
-    if(acaoExistenteId){
-      await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${acaoExistenteId}`,{method:'PATCH',headers:h2(),
-        body:JSON.stringify({titulo,atualizado_em:new Date().toISOString()})});
+    const titulo=`[${nomeNivel}] ${descricao.length>80?descricao.slice(0,80)+'…':descricao}`.trim();
+
+    // Verifica se já existe ação com mesmo título para esta empresa
+    const resCheck=await fetch(
+      `${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&titulo=eq.${encodeURIComponent(titulo)}&ativo=eq.true&select=id&limit=1`,
+      {headers:h2()}
+    );
+    const existente=await resCheck.json();
+
+    if(existente.length){
+      // Já existe — só atualiza o timestamp
+      await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${existente[0].id}`,{
+        method:'PATCH',headers:h2(),
+        body:JSON.stringify({atualizado_em:new Date().toISOString()})
+      });
       return;
     }
-    const res=await fetch(`${SUPA_URL}/rest/v1/acoes`,{
+
+    // Não existe — cria nova
+    await fetch(`${SUPA_URL}/rest/v1/acoes`,{
       method:'POST',headers:{...h2(),'Prefer':'return=representation'},
       body:JSON.stringify({
         empresa_id:parseInt(empresaId),titulo,
@@ -1078,13 +1112,8 @@ async function criarAcaoFromMedida(srId,nivel,descricao){
         status:'Pendente',ativo:true
       })
     });
-    if(res.ok){
-      const data=await res.json();
-      const novaAcao=Array.isArray(data)?data[0]:data;
-      if(novaAcao?.id)sessionStorage.setItem(chave,novaAcao.id);
-      toast('Ação criada na Central de Ações',`acoes.html?empresa_id=${empresaId}`);
-    }
-  }catch(e){console.error(e);}
+    toast('Ação criada na Central de Ações',`acoes.html?empresa_id=${empresaId}`);
+  }catch(e){console.error('Erro ao criar ação:',e);}
 }
 
 // ── EPIs ───────────────────────────────────────────────────────
