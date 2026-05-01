@@ -734,11 +734,26 @@ function renderInventarioRiscos(){
     const frs=funcao_riscos.filter(fr=>fr.funcao_id===funcao.id);
     const setoresNomes=setoresPorFuncao[funcao.id]||[];
 
+    // Coleta agentes únicos presentes nos setores desta função
+    const setoresDaFuncao=funcaoSetores.filter(fs=>fs.funcao_id===funcao.id).map(fs=>setores.find(s=>s.id===fs.setor_id)).filter(Boolean);
+    const agentesMap=[
+      {key:'tem_agente_fisico',label:'Físico',cls:'agente-fisico'},
+      {key:'tem_agente_quimico',label:'Químico',cls:'agente-quimico'},
+      {key:'tem_agente_biologico',label:'Biológico',cls:'agente-biologico'},
+      {key:'tem_agente_ergonomico',label:'Ergonômico',cls:'agente-ergonomico'},
+      {key:'tem_agente_acidente',label:'Acidente',cls:'agente-acidente'},
+      {key:'tem_agente_psicossocial',label:'Psicossocial',cls:'agente-psicossocial'},
+    ];
+    const badgesAgentes=agentesMap
+      .filter(a=>setoresDaFuncao.some(s=>s[a.key]))
+      .map(a=>`<span class="agente-badge ${a.cls}">${a.label}</span>`).join('');
+
     let blocoHtml=`<div class="funcao-bloco">
       <div class="funcao-bloco-header">
         <div>
           <div class="funcao-bloco-nome">👷 ${h(funcao.nome_funcao)}</div>
           ${funcao.cbo?`<div class="funcao-bloco-cbo">CBO: ${h(funcao.cbo)}</div>`:''}
+          ${badgesAgentes?`<div style="margin-top:4pt;">${badgesAgentes}</div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4pt;">
           ${setoresNomes.length?`<span class="funcao-bloco-setores">📁 Setor(es): ${h(setoresNomes.join(' · '))}</span>`:''}
