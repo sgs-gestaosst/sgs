@@ -152,37 +152,82 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   body{background:#fff!important;}
   .screen-header{display:none!important;}
   .screen-body{padding:0!important;}
-  .pages-wrap{gap:0!important;}
+  .pages-wrap{gap:0!important;display:block!important;}
+
+  /* Na impressão, .page deixa de ser uma folha rígida e vira um bloco contínuo */
   .page{
     box-shadow:none!important;
     margin:0!important;
-    page-break-after:always;
-    break-after:page;
-    width:210mm!important;
+    width:100%!important;
     min-height:auto!important;
     max-height:none!important;
     overflow:visible!important;
-    padding-bottom:20mm!important;
+    padding:10mm 15mm 10mm 20mm!important;
+    /* Sem page-break automático em cada .page */
+    page-break-after:auto;
+    break-after:auto;
   }
-  .page:last-child{
-    page-break-after:avoid;
-    break-after:avoid;
+
+  /* Só a CAPA força quebra depois */
+  .page:first-child{
+    page-break-after:always!important;
+    break-after:page!important;
+    min-height:277mm!important;
+    padding:20mm 20mm 20mm 25mm!important;
   }
-  /* Evita corte no meio de elementos importantes */
-  .funcao-bloco{page-break-inside:avoid;break-inside:avoid;}
+
+  /* Listra azul fixa em todas as páginas */
+  .page::before{
+    content:''!important;
+    display:block!important;
+    position:fixed!important;
+    left:0!important;top:0!important;bottom:0!important;
+    width:6mm!important;
+    background:linear-gradient(180deg,#1a3a6e 0%,#0d2040 100%)!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+
+  /* Seções principais quebram para nova página */
+  .doc-section{
+    page-break-before:always;
+    break-before:page;
+    padding-top:0!important;
+    margin-top:0!important;
+  }
+  /* Exceto a primeira seção de cada página (que já começou numa nova página) */
+  .page:first-child .doc-section,
+  .page .doc-section:first-of-type,
+  .doc-section.primeira-secao{
+    page-break-before:avoid;
+    break-before:avoid;
+  }
+
+  /* Evita corte no meio de elementos */
+  .funcao-bloco{page-break-inside:avoid;break-inside:avoid;margin-bottom:8pt;}
   .risco-funcao{page-break-inside:avoid;break-inside:avoid;}
   .danos-box{page-break-inside:avoid;break-inside:avoid;}
   .medidas-box{page-break-inside:avoid;break-inside:avoid;}
   .ficha-grid{page-break-inside:avoid;break-inside:avoid;}
   .ficha-item{page-break-inside:avoid;break-inside:avoid;}
-  .doc-table{page-break-inside:auto;}
+  .doc-table{page-break-inside:auto;width:100%;}
   .doc-table tr{page-break-inside:avoid;break-inside:avoid;}
   .doc-table thead{display:table-header-group;}
-  .doc-section{page-break-after:avoid;break-after:avoid;}
   .doc-subsection{page-break-after:avoid;break-after:avoid;}
-  /* Rodapé fixo não funciona bem em print — deixa no fluxo normal */
-  .page-footer{position:relative!important;bottom:auto!important;left:auto!important;right:auto!important;margin-top:20pt;}
-  @page{size:A4;margin:15mm 15mm 20mm 20mm;}
+
+  /* Rodapé no fluxo normal */
+  .page-footer{
+    position:relative!important;
+    bottom:auto!important;left:auto!important;right:auto!important;
+    margin-top:16pt;
+    page-break-inside:avoid;
+    break-inside:avoid;
+  }
+
+  /* Sumário — mantém junto */
+  .page:nth-child(2){page-break-after:always!important;break-after:page!important;}
+
+  @page{size:A4;margin:15mm 15mm 15mm 22mm;}
 }
 @media(max-width:230mm){
   .page{width:100%;padding:15mm 12mm 15mm 18mm;}
@@ -382,10 +427,16 @@ function renderDocumento(){
   wrap.appendChild(renderIdentificacao());
   wrap.appendChild(renderCaracterizacao());
   wrap.appendChild(renderSESMT());
-  // Inventário pode gerar múltiplas páginas
   renderInventarioRiscos().forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(renderMatrizEPI());
   wrap.appendChild(renderPlanoAcao());
+
+  // Marca a primeira .doc-section de cada .page para não quebrar antes dela
+  // (a quebra é controlada pela .page anterior)
+  document.querySelectorAll('.page').forEach(pg=>{
+    const primSec=pg.querySelector('.doc-section');
+    if(primSec)primSec.classList.add('primeira-secao');
+  });
 }
 
 // ── CAPA ──────────────────────────────────────────────────────
