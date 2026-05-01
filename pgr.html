@@ -605,7 +605,7 @@ function renderCaracterizacao(){
       <div class="setor-detalhe-header">
         <div>
           <div class="setor-detalhe-nome">${h(s.nome_setor)}</div>
-          ${fns.length?`<div style="font-size:8pt;color:#6b7280;margin-top:2pt;">👷 ${h(fns.join(' · '))}</div>`:''}
+          ${fns.length?`<div style="font-size:8pt;color:#6b7280;margin-top:2pt;">Funções: ${h(fns.join(' · '))}</div>`:''}
         </div>
         <div style="text-align:right;">
           <div style="font-size:8pt;color:#6b7280;margin-bottom:4pt;">${s.num_funcionarios_previsto||0} trabalhador(es)</div>
@@ -638,12 +638,12 @@ function renderCaracterizacao(){
           <div class="setor-detalhe-nome">${h(f.nome_funcao)}</div>
           <div style="display:flex;gap:8pt;margin-top:3pt;flex-wrap:wrap;">
             ${f.cbo?`<span style="font-size:7pt;font-family:'IBM Plex Mono',monospace;background:#eff6ff;color:#1d4ed8;padding:1pt 6pt;border-radius:3pt;border:1pt solid #bfdbfe;">CBO ${h(f.cbo)}</span>`:''}
-            ${f.turno?`<span style="font-size:7pt;background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;border:1pt solid #e5e7eb;">${h(f.turno)}</span>`:''}
-            ${f.escolaridade_minima?`<span style="font-size:7pt;background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;border:1pt solid #e5e7eb;">Esc: ${h(f.escolaridade_minima)}</span>`:''}
+            ${f.turno?`<span style="font-size:7pt;background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;border:1pt solid #e5e7eb;">Turno: ${h(f.turno)}</span>`:''}
+            ${f.escolaridade_minima?`<span style="font-size:7pt;background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;border:1pt solid #e5e7eb;">Escolaridade mínima: ${h(f.escolaridade_minima)}</span>`:''}
           </div>
         </div>
         <div style="text-align:right;flex-shrink:0;">
-          ${setoresNomes.length?`<div style="font-size:8pt;color:#4a7cdc;margin-bottom:3pt;">📁 ${h(setoresNomes.join(' · '))}</div>`:''}
+          ${setoresNomes.length?`<div style="font-size:8pt;color:#4a7cdc;margin-bottom:3pt;">Setor(es): ${h(setoresNomes.join(' · '))}</div>`:''}
           <div style="font-size:8pt;color:#6b7280;">${numTrab} trabalhador(es)</div>
         </div>
       </div>
