@@ -624,8 +624,36 @@ function renderCaracterizacao(){
     <div class="ficha-item"><div class="ficha-label">Setores de trabalho</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${setores.length}</div></div>
     <div class="ficha-item"><div class="ficha-label">Funções mapeadas</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${funcoes.length}</div></div>
   </div>
+
   <div class="doc-subsection" style="margin-top:14pt;">Detalhamento dos setores</div>
   ${setoresDetalhes}
+
+  <div class="doc-subsection" style="margin-top:14pt;">Quadro de funções</div>
+  ${funcoes.length?funcoes.map(f=>{
+    const setoresNomes=funcaoSetores.filter(fs=>fs.funcao_id===f.id).map(fs=>setores.find(s=>s.id===fs.setor_id)?.nome_setor).filter(Boolean);
+    const numTrab=funcaoSetores.filter(fs=>fs.funcao_id===f.id).reduce((acc,fs)=>acc+(fs.num_funcionarios_previsto||0),0)||f.num_funcionarios_previsto||0;
+    return`<div class="setor-detalhe" style="margin-bottom:8pt;">
+      <div class="setor-detalhe-header">
+        <div>
+          <div class="setor-detalhe-nome">${h(f.nome_funcao)}</div>
+          <div style="display:flex;gap:8pt;margin-top:3pt;flex-wrap:wrap;">
+            ${f.cbo?`<span style="font-size:7pt;font-family:'IBM Plex Mono',monospace;background:#eff6ff;color:#1d4ed8;padding:1pt 6pt;border-radius:3pt;border:1pt solid #bfdbfe;">CBO ${h(f.cbo)}</span>`:''}
+            ${f.turno?`<span style="font-size:7pt;background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;border:1pt solid #e5e7eb;">${h(f.turno)}</span>`:''}
+            ${f.escolaridade_minima?`<span style="font-size:7pt;background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;border:1pt solid #e5e7eb;">Esc: ${h(f.escolaridade_minima)}</span>`:''}
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          ${setoresNomes.length?`<div style="font-size:8pt;color:#4a7cdc;margin-bottom:3pt;">📁 ${h(setoresNomes.join(' · '))}</div>`:''}
+          <div style="font-size:8pt;color:#6b7280;">${numTrab} trabalhador(es)</div>
+        </div>
+      </div>
+      ${f.descricao?`<div style="padding:8pt 10pt;border-top:1pt solid #e5e7eb;">
+        <div style="font-size:6.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:3pt;">Descrição da função</div>
+        <div style="font-size:8.5pt;color:#374151;line-height:1.5;">${h(f.descricao)}</div>
+      </div>`:''}
+    </div>`;
+  }).join(''):`<div class="em-breve"><div class="em-breve-icon">👷</div><div class="em-breve-label">Nenhuma função cadastrada.</div></div>`}
+
   ${pfFooter(4)}`;
   return pg;
 }
