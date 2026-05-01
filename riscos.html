@@ -15,95 +15,172 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+
+  /* ── HEADER ── */
   .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
-  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
   .header-title{font-size:13px;color:var(--text2);flex:1;}
   .header-title span{color:var(--text);font-weight:500;}
-  .container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+
+  /* ── LAYOUT ── */
+  .container{max-width:1200px;margin:0 auto;padding:28px 24px 80px;}
   .voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
   .voltar:hover{color:var(--text);}
-  /* Hero */
+
+  /* ── HERO ── */
   .hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+  .hero-icon{width:44px;height:44px;border-radius:10px;background:#2a2010;border:1px solid #4a3a10;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
   .hero-info{flex:1;}
   .hero-nome{font-size:16px;font-weight:500;}
   .hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
-  .hero-actions{display:flex;gap:8px;}
-  /* Botões */
+
+  /* ── BOTÕES ── */
   .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
-  .btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
-  .btn-edit:hover{border-color:var(--border-focus);}
-  .btn-save{background:var(--accent2);color:#0f1117;}
-  .btn-save:hover{background:#3de8b4;}
-  .btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
-  .btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
-  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:6px 12px;}
-  .btn-danger:hover{background:#2a1515;}
-  .btn-sm{padding:5px 12px;font-size:12px;}
   .btn-primary{background:var(--accent);color:#fff;}
   .btn-primary:hover{background:#5a8ce8;}
+  .btn-success{background:var(--accent2);color:#0f1117;}
+  .btn-success:hover{background:#3de8b4;}
+  .btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--border-focus);}
+  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);font-size:12px;padding:5px 10px;}
+  .btn-danger:hover{background:#2a1515;}
   .btn-pgr{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
   .btn-pgr:hover{background:#2a3550;}
-  /* Layout 2 colunas */
-  .layout{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start;}
-  /* Painel esquerdo — setores */
+  .btn-sm{padding:5px 12px;font-size:12px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  /* ── LAYOUT 2 COLUNAS ── */
+  .layout{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;}
+
+  /* ── PAINEL SETORES ── */
   .painel-setores{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:sticky;top:80px;}
-  .painel-titulo{padding:14px 16px;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-  .setor-item{padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;display:flex;align-items:center;gap:10px;}
+  .painel-titulo{padding:12px 16px;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .setor-item{padding:11px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;display:flex;align-items:center;gap:10px;}
   .setor-item:last-child{border-bottom:none;}
   .setor-item:hover{background:var(--surface2);}
-  .setor-item.active{background:var(--surface2);border-left:3px solid var(--accent);}
+  .setor-item.active{background:var(--surface2);border-left:3px solid var(--accent);padding-left:13px;}
   .setor-item-nome{font-size:13px;font-weight:500;flex:1;}
   .setor-item-count{font-size:10px;font-family:var(--mono);padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
   .setor-item.active .setor-item-count{background:#1a2540;color:#7aabf7;border-color:#2a4070;}
-  /* Painel direito — riscos */
+
+  /* ── PAINEL RISCOS ── */
   .painel-riscos{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-  .painel-riscos-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-  .painel-riscos-titulo{font-size:15px;font-weight:500;}
-  .painel-riscos-sub{font-size:12px;color:var(--text2);margin-top:2px;}
-  .painel-riscos-body{padding:20px;}
-  /* Tabs de contexto */
+  .painel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .painel-titulo-text{font-size:15px;font-weight:500;}
+  .painel-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+  .painel-body{padding:20px;}
+
+  /* ── TABS CONTEXTO ── */
   .ctx-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
   .ctx-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);transition:all .15s;}
   .ctx-tab:hover{border-color:var(--border-focus);color:var(--text);}
   .ctx-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-  /* Busca de riscos */
-  .busca-wrap{position:relative;margin-bottom:12px;}
-  .busca-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:10px 14px;outline:none;transition:border-color .15s;}
-  .busca-input:focus{border-color:var(--border-focus);}
-  .busca-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border-focus);border-radius:var(--radius);z-index:500;max-height:280px;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.6);}
-  .busca-dropdown.show{display:block;}
-  .busca-option{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
-  .busca-option:last-child{border-bottom:none;}
-  .busca-option:hover,.busca-option.selected{background:var(--surface2);}
-  .busca-option-nome{font-size:13px;font-weight:500;}
-  .busca-option-meta{font-size:11px;color:var(--text3);margin-top:2px;display:flex;gap:8px;}
-  /* Cards de risco */
+
+  /* ── MODAL ADICIONAR RISCO (novo fluxo perigo→risco) ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:680px;width:100%;margin:auto;}
+  .modal-titulo{font-size:16px;font-weight:500;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+  .modal-sub{font-size:12px;color:var(--text2);margin-bottom:20px;}
+  .modal-close{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;}
+  .modal-close:hover{color:var(--text);}
+
+  /* Steps */
+  .steps{display:flex;gap:0;margin-bottom:24px;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+  .step{flex:1;padding:10px 14px;font-size:12px;font-weight:500;color:var(--text3);background:var(--bg);border-right:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:all .2s;}
+  .step:last-child{border-right:none;}
+  .step.active{background:var(--surface2);color:var(--text);}
+  .step.done{background:#0e2820;color:var(--success);}
+  .step-num{width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--text3);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .step.active .step-num{background:var(--accent);color:#fff;}
+  .step.done .step-num{background:var(--success);color:#0f1117;}
+
+  /* Step panels */
+  .step-panel{display:none;}
+  .step-panel.active{display:block;}
+
+  /* Categorias grid */
+  .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+  .cat-card{padding:14px;border-radius:8px;border:2px solid transparent;cursor:pointer;transition:all .15s;text-align:center;}
+  .cat-card:hover{border-color:currentColor;opacity:.9;}
+  .cat-card.selected{border-color:currentColor;box-shadow:0 0 0 3px rgba(255,255,255,.08);}
+  .cat-card-icon{font-size:22px;margin-bottom:6px;}
+  .cat-card-nome{font-size:12px;font-weight:600;}
+
+  /* Busca de perigo */
+  .field-label{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block;}
+  .search-wrap{position:relative;}
+  .search-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:10px 14px;outline:none;transition:border-color .15s;}
+  .search-input:focus{border-color:var(--border-focus);}
+  .search-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border-focus);border-radius:var(--radius);z-index:500;max-height:260px;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.6);margin-top:2px;}
+  .search-dropdown.show{display:block;}
+  .search-option{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
+  .search-option:last-child{border-bottom:none;}
+  .search-option:hover,.search-option.sel{background:var(--surface2);}
+  .search-option-nome{font-size:13px;font-weight:500;}
+  .search-option-desc{font-size:11px;color:var(--text3);margin-top:2px;}
+
+  /* Perigo selecionado */
+  .perigo-selecionado{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .perigo-sel-nome{font-size:13px;font-weight:500;flex:1;}
+  .perigo-sel-desc{font-size:11px;color:var(--text2);margin-top:2px;}
+  .perigo-sel-ex{font-size:11px;color:var(--text3);margin-top:2px;font-style:italic;}
+
+  /* Lista de riscos sugeridos */
+  .riscos-sugeridos{margin-top:8px;}
+  .risco-sugerido{padding:10px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;}
+  .risco-sugerido:hover{border-color:var(--border-focus);background:var(--surface2);}
+  .risco-sugerido.selected{border-color:var(--accent2);background:#0e2820;}
+  .risco-sug-check{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;}
+  .risco-sugerido.selected .risco-sug-check{background:var(--accent2);border-color:var(--accent2);color:#0f1117;}
+  .risco-sug-info{flex:1;}
+  .risco-sug-nome{font-size:13px;font-weight:500;}
+  .risco-sug-meta{font-size:11px;color:var(--text3);margin-top:2px;display:flex;gap:8px;}
+  .risco-sug-danos{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.4;}
+
+  /* Busca risco livre */
+  .divider-ou{text-align:center;font-size:11px;color:var(--text3);margin:16px 0;display:flex;align-items:center;gap:10px;}
+  .divider-ou::before,.divider-ou::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  /* Info propagação */
+  .propagacao-info{background:#1a2540;border:1px solid #2a4070;border-radius:8px;padding:12px 14px;margin-top:16px;font-size:12px;color:#7aabf7;display:flex;align-items:flex-start;gap:8px;}
+  .propagacao-info strong{display:block;margin-bottom:2px;color:#a8c8ff;}
+
+  /* ── CARDS DE RISCO ── */
   .risco-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;transition:border-color .15s;}
   .risco-card:hover{border-color:var(--border-focus);}
   .risco-card-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
-  .risco-cat-badge{font-size:10px;padding:3px 8px;border-radius:4px;font-weight:500;font-family:var(--mono);white-space:nowrap;flex-shrink:0;}
+  .risco-cat-badge{font-size:10px;padding:3px 8px;border-radius:4px;font-weight:600;font-family:var(--mono);white-space:nowrap;flex-shrink:0;}
+  .risco-perigo-badge{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);white-space:nowrap;flex-shrink:0;}
   .risco-info{flex:1;}
   .risco-nome{font-size:13px;font-weight:500;}
   .risco-codigo{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px;}
-  .risco-actions{display:flex;gap:6px;flex-shrink:0;}
-  /* Avaliação de risco */
-  .avaliacao-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
-  .aval-field label{display:block;font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
-  .aval-field select,.aval-field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
-  .aval-field select:focus,.aval-field input:focus{border-color:var(--border-focus);}
-  /* Nível de risco badge */
-  .nivel-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--mono);}
+  .risco-danos{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.4;}
+  .risco-actions{display:flex;gap:6px;flex-shrink:0;align-items:flex-start;}
+
+  /* Propagação badge */
+  .prop-badge{font-size:10px;padding:2px 7px;border-radius:4px;background:#1a2540;color:#7aabf7;border:1px solid #2a4070;white-space:nowrap;}
+
+  /* Nível */
+  .nivel-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;font-family:var(--mono);}
   .nivel-MUITO-ALTO{background:#3a0f0f;color:#ff6b6b;border:1px solid #6a1f1f;}
   .nivel-ALTO{background:#3a2010;color:#ff9f43;border:1px solid #6a4020;}
   .nivel-MEDIO{background:#2a2a10;color:#ffd32a;border:1px solid #5a5020;}
   .nivel-BAIXO{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
-  /* Hierarquia de controle */
+
+  /* Avaliação */
+  .avaliacao-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;}
+  .aval-field label{display:block;font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;}
+  .aval-field select,.aval-field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+  .aval-field select:focus,.aval-field input:focus{border-color:var(--border-focus);}
+
+  /* Hierarquia */
   .hierarquia{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;}
   .hier-titulo{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
   .hier-nivel{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);}
   .hier-nivel:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
   .hier-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;}
-  .hier-label{font-size:11px;font-weight:500;color:var(--text2);width:100px;flex-shrink:0;padding-top:2px;}
+  .hier-label{font-size:11px;font-weight:500;width:90px;flex-shrink:0;padding-top:2px;}
   .hier-conteudo{flex:1;}
   .hier-check{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
   .hier-check input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;}
@@ -112,52 +189,49 @@
   .hier-detalhe.show{display:block;}
   .hier-detalhe textarea,.hier-detalhe input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;resize:vertical;min-height:52px;}
   .hier-detalhe textarea:focus,.hier-detalhe input:focus{border-color:var(--border-focus);}
-  .hier-detalhe-grid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;}
-  /* EPIs adicionados */
-  .epis-lista{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+
+  /* EPIs */
+  .epis-lista{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
   .epi-tag{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:11px;display:flex;align-items:center;gap:6px;}
   .epi-tag-nome{color:#a78bfa;}
   .epi-tag-ca{color:var(--text3);}
-  /* Exposto */
-  .expostos-field{display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
-  .expostos-field label{font-size:12px;color:var(--text2);flex:1;}
-  .expostos-field input{width:80px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:5px 10px;outline:none;text-align:center;}
-  /* Status e spinners */
+
+  /* Status */
   .status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
   .status-bar.show{display:flex;}
   .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
   .status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
-  .spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#0f1117;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+
+  /* Spinner */
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
   .spinner.show{display:inline-block;}
-  .spinner-w{border-top-color:#fff!important;border-color:rgba(255,255,255,.2)!important;}
   @keyframes spin{to{transform:rotate(360deg);}}
-  /* Modal */
-  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
-  .modal-overlay.show{display:flex;}
-  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:500px;width:100%;margin:auto;}
-  .modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
-  .modal-field{margin-bottom:14px;}
-  .modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
-  .modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
-  .modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+
   /* Empty */
   .empty{text-align:center;padding:40px 20px;color:var(--text2);}
   .empty-icon{font-size:32px;margin-bottom:12px;}
   .empty-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px;}
-  /* Mini badge */
-  .mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;display:inline-block;}
-  .mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+
+  /* Toast */
+  .toast{position:fixed;bottom:24px;right:24px;background:#0e2820;border:1px solid #1a4a38;border-radius:8px;padding:12px 18px;z-index:9999;font-size:13px;color:#2dd4a0;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:slideIn .3s ease;}
+  @keyframes slideIn{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+  /* Modal excluir */
+  .modal-sm{max-width:440px;}
+
   @media(max-width:768px){
     .layout{grid-template-columns:1fr;}
     .painel-setores{position:static;}
     .avaliacao-grid{grid-template-columns:1fr 1fr;}
+    .cat-grid{grid-template-columns:repeat(2,1fr);}
     .header-title{display:none;}
   }
 </style>
 </head>
 <body>
 <div class="header">
-  <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
+  <a href="index.html" class="header-logo">SGS</a>
   <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Riscos</span></div>
 </div>
 
@@ -165,18 +239,17 @@
   <a id="link-voltar" href="empresa_detalhe.html" class="voltar">← Voltar para empresa</a>
 
   <div class="hero">
-    <div style="width:44px;height:44px;border-radius:10px;background:#2a2010;border:1px solid #4a3a10;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⚠️</div>
+    <div class="hero-icon">⚠️</div>
     <div class="hero-info">
       <div class="hero-nome" id="hero-nome">Gestão de Riscos</div>
-      <div class="hero-sub" id="hero-sub">Carregando empresa...</div>
+      <div class="hero-sub" id="hero-sub">Carregando...</div>
     </div>
-    <div class="hero-actions">
+    <div style="display:flex;gap:8px;">
       <a id="btn-pgr" href="#" class="btn btn-pgr" target="_blank">📄 Gerar PGR</a>
     </div>
   </div>
 
   <div class="layout">
-    <!-- PAINEL ESQUERDO — SETORES -->
     <div class="painel-setores">
       <div class="painel-titulo">
         <span>Setores</span>
@@ -185,16 +258,15 @@
       <div id="lista-setores-nav"></div>
     </div>
 
-    <!-- PAINEL DIREITO — RISCOS -->
     <div class="painel-riscos">
-      <div class="painel-riscos-header">
+      <div class="painel-header">
         <div>
-          <div class="painel-riscos-titulo" id="painel-titulo">Selecione um setor</div>
-          <div class="painel-riscos-sub" id="painel-sub">Clique em um setor para gerenciar os riscos</div>
+          <div class="painel-titulo-text" id="painel-titulo">Selecione um setor</div>
+          <div class="painel-sub" id="painel-sub">Clique em um setor para gerenciar os riscos</div>
         </div>
-        <div style="display:flex;gap:8px;" id="painel-actions" style="display:none;"></div>
+        <div id="painel-actions"></div>
       </div>
-      <div class="painel-riscos-body" id="painel-body">
+      <div class="painel-body" id="painel-body">
         <div class="empty">
           <div class="empty-icon">⚠️</div>
           <div class="empty-title">Selecione um setor</div>
@@ -205,18 +277,94 @@
   </div>
 </div>
 
-<!-- MODAL CONFIRMAR EXCLUSÃO -->
-<div class="modal-overlay" id="modal-excluir">
+<!-- ── MODAL ADICIONAR RISCO (fluxo perigo → risco) ── -->
+<div class="modal-overlay" id="modal-adicionar">
   <div class="modal">
     <div class="modal-titulo">
+      <span id="modal-add-titulo">Identificar Perigo e Risco</span>
+      <button class="modal-close" onclick="fecharModalAdicionar()">×</button>
+    </div>
+    <div class="modal-sub" id="modal-add-sub">Siga os passos para identificar corretamente o perigo e o risco associado</div>
+
+    <div class="steps">
+      <div class="step active" id="step-ind-0"><div class="step-num">1</div>Categoria</div>
+      <div class="step" id="step-ind-1"><div class="step-num">2</div>Perigo</div>
+      <div class="step" id="step-ind-2"><div class="step-num">3</div>Risco</div>
+    </div>
+
+    <!-- STEP 1: Categoria -->
+    <div class="step-panel active" id="step-0">
+      <label class="field-label">Selecione a categoria do perigo</label>
+      <div class="cat-grid" id="cat-grid"></div>
+    </div>
+
+    <!-- STEP 2: Perigo -->
+    <div class="step-panel" id="step-1">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-ghost btn-sm" onclick="irStep(0)">← Voltar</button>
+        <span id="cat-selecionada-label" style="font-size:12px;color:var(--text2);"></span>
+      </div>
+      <label class="field-label">Buscar perigo</label>
+      <div class="search-wrap">
+        <input type="text" class="search-input" id="busca-perigo-input" placeholder="Digite para buscar o perigo..." oninput="filtrarPerigo()" autocomplete="off">
+        <div class="search-dropdown" id="busca-perigo-dropdown"></div>
+      </div>
+      <div id="perigo-selecionado-wrap" style="display:none;margin-top:12px;"></div>
+      <div id="btn-proximo-perigo-wrap" style="display:none;margin-top:16px;text-align:right;">
+        <button class="btn btn-primary" onclick="irStep(2)">Próximo: Selecionar Risco →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Risco -->
+    <div class="step-panel" id="step-2">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-ghost btn-sm" onclick="irStep(1)">← Voltar</button>
+        <span style="font-size:12px;color:var(--text2);">Selecione um ou mais riscos associados ao perigo</span>
+      </div>
+
+      <div id="riscos-sugeridos-wrap"></div>
+
+      <div class="divider-ou">ou busque outro risco</div>
+
+      <div class="search-wrap">
+        <input type="text" class="search-input" id="busca-risco-livre-input" placeholder="Buscar qualquer risco do catálogo..." oninput="filtrarRiscoLivre()" autocomplete="off">
+        <div class="search-dropdown" id="busca-risco-livre-dropdown"></div>
+      </div>
+
+      <div class="propagacao-info" id="propagacao-info" style="display:none;">
+        <span>🔗</span>
+        <div>
+          <strong>Propagação automática ativada</strong>
+          Este risco será vinculado ao setor e propagado automaticamente para <span id="propagacao-count">todas as funções</span> deste setor.
+        </div>
+      </div>
+
+      <div id="riscos-selecionados-resumo" style="margin-top:12px;"></div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="fecharModalAdicionar()">Cancelar</button>
+        <button class="btn btn-success" id="btn-confirmar-adicionar" onclick="confirmarAdicionarRiscos()" disabled>
+          <span class="spinner" id="spinner-add"></span>
+          <span id="label-add">Adicionar ao setor</span>
+        </button>
+      </div>
+      <div class="status-bar" id="status-add"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL CONFIRMAR EXCLUSÃO ── -->
+<div class="modal-overlay" id="modal-excluir">
+  <div class="modal modal-sm">
+    <div class="modal-titulo">
       <span id="modal-excluir-titulo">Remover risco?</span>
-      <button onclick="fecharModalExcluir()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+      <button class="modal-close" onclick="fecharModalExcluir()">×</button>
     </div>
     <div style="font-size:13px;color:var(--text2);margin-bottom:20px;" id="modal-excluir-desc">Esta ação não pode ser desfeita.</div>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
-      <button class="btn btn-cancel" onclick="fecharModalExcluir()">Cancelar</button>
+      <button class="btn btn-ghost" onclick="fecharModalExcluir()">Cancelar</button>
       <button class="btn" style="background:var(--danger);color:#fff;" id="btn-confirmar-excluir">
-        <span class="spinner spinner-w" id="spinner-excluir"></span>
+        <span class="spinner" id="spinner-excluir"></span>
         <span id="label-excluir">Remover</span>
       </button>
     </div>
@@ -233,102 +381,107 @@ const params=new URLSearchParams(window.location.search);
 const empresaId=params.get('empresa_id');
 if(!empresaId)window.location.href='empresas.html';
 
-let empresa=null,setores=[],funcoes=[],todosRiscos=[],todosEpis=[],categoriasRisco=[];
-let setorAtivo=null,contexto='setor'; // setor ou funcao
+// ── STATE ──────────────────────────────────────────────────────
+let empresa=null,setores=[],funcoes=[],todosRiscos=[],todosEpis=[],categoriasRisco=[],todosPerigos=[];
+let setorAtivo=null,contexto='setor',funcaoAtiva=null;
 let riscosSetor=[],riscosFuncao=[],funcoesSetor=[];
-let funcaoAtiva=null;
+// Modal state
+let catSelecionada=null,perigoSelecionado=null,riscosSelecionados=new Set(),stepAtual=0;
 
-// ── UTILITÁRIOS ──────────────────────────────────────
-function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className='status-bar show '+tipo;el.innerHTML=`<span>${{info:'↻',success:'✓',error:'✕'}[tipo]}</span><span>${msg}</span>`;}
-function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+// ── UTILS ──────────────────────────────────────────────────────
+function esc(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function h(s){return esc(s);}
 
-// ── CORES POR CATEGORIA ──────────────────────────────
 const CAT_ESTILOS={
-  'Físico':      {bg:'#2a2010',color:'#e0a855',border:'#4a3a10'},
-  'Químico':     {bg:'#2a1010',color:'#e05555',border:'#4a2020'},
-  'Biológico':   {bg:'#1e1a40',color:'#a78bfa',border:'#3a2a80'},
-  'Ergonômico':  {bg:'#1a2540',color:'#7aabf7',border:'#2a4070'},
-  'Acidente':    {bg:'#2a1515',color:'#ff9f43',border:'#5a3010'},
-  'Psicossocial':{bg:'#2a1530',color:'#f472b6',border:'#5a2550'},
+  'Físico':      {bg:'#2a2010',color:'#e0a855',border:'#4a3a10',icon:'🔊'},
+  'Químico':     {bg:'#2a1010',color:'#e05555',border:'#4a2020',icon:'⚗️'},
+  'Biológico':   {bg:'#1e1a40',color:'#a78bfa',border:'#3a2a80',icon:'🦠'},
+  'Ergonômico':  {bg:'#1a2540',color:'#7aabf7',border:'#2a4070',icon:'🏋️'},
+  'Acidente':    {bg:'#2a1515',color:'#ff9f43',border:'#5a3010',icon:'⚡'},
+  'Psicossocial':{bg:'#2a1530',color:'#f472b6',border:'#5a2550',icon:'🧠'},
 };
 function getCatEstilo(catId){
   const c=categoriasRisco.find(x=>x.id===catId);
-  return CAT_ESTILOS[c?.nome]||{bg:'#1e2333',color:'#888',border:'#2a3044'};
+  return CAT_ESTILOS[c?.nome]||{bg:'#1e2333',color:'#888',border:'#2a3044',icon:'⚠️'};
 }
 function getCatNome(catId){return categoriasRisco.find(x=>x.id===catId)?.nome||'—';}
-
-// ── NÍVEL DE RISCO ────────────────────────────────────
 function calcularNivel(prob,sev){
   if(!prob||!sev)return null;
-  const score=prob*sev;
-  if(score>=15)return'MUITO-ALTO';
-  if(score>=8)return'ALTO';
-  if(score>=4)return'MEDIO';
-  return'BAIXO';
+  const s=prob*sev;
+  if(s>=15)return'MUITO-ALTO';if(s>=8)return'ALTO';if(s>=4)return'MEDIO';return'BAIXO';
 }
-function nivelLabel(n){return{MUITO_ALTO:'Muito alto',ALTO:'Alto',MEDIO:'Médio',BAIXO:'Baixo'}[n]||n||'—';}
+function nivelLabel(n){return{'MUITO-ALTO':'Muito alto','ALTO':'Alto','MEDIO':'Médio','BAIXO':'Baixo'}[n]||n||'—';}
 
-// ── INICIALIZAÇÃO ─────────────────────────────────────
+function toast(msg,href){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span>✓</span><span>${msg}${href?` — <a href="${href}" style="color:#2dd4a0;font-weight:500;">Ver ações</a>`:''}</span><button onclick="this.parentNode.remove()" style="background:none;border:none;color:#545e72;cursor:pointer;font-size:16px;margin-left:8px;">×</button>`;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),6000);
+}
+
+function setStatus(id,tipo,msg){
+  const el=document.getElementById(id);if(!el)return;
+  el.className='status-bar show '+tipo;
+  el.innerHTML=`<span>${{info:'↻',success:'✓',error:'✕'}[tipo]||'·'}</span><span>${msg}</span>`;
+}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+
+// ── INICIALIZAÇÃO ──────────────────────────────────────────────
 async function inicializar(){
   document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
   document.getElementById('btn-pgr').href=`pgr.html?empresa_id=${empresaId}`;
   try{
-    const [resEmp,resSets,resFuncs,resRiscos,resEpis,resCats]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,codigo_risco,categoria_risco_id,gravidade,urgencia,tendencia,gut_total,danos_saude,epi_indicado,epc_indicado,nr_relacionada&order=nome_risco.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/catalogo_epis?ativo=eq.true&select=id,nome,categoria&order=categoria.asc,nome.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome,cor_identificacao`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    const [resEmp,resSets,resFuncs,resRiscos,resEpis,resCats,resPerigos]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,codigo_risco,categoria_risco_id,danos_saude,epi_indicado,epc_indicado,nr_relacionada&order=nome_risco.asc`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/catalogo_epis?ativo=eq.true&select=id,nome,categoria&order=categoria.asc,nome.asc`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome,cor_identificacao`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/perigos?ativo=eq.true&select=id,nome,descricao,exemplos,categoria_risco_id&order=nome.asc`,{headers:h2()}),
     ]);
-    const [empData,setsData,funcsData,riscosData,episData,catsData]=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resRiscos.json(),resEpis.json(),resCats.json()]);
-    empresa=empData[0];
-    setores=setsData;
-    funcoes=funcsData;
-    todosRiscos=riscosData;
-    todosEpis=episData;
-    categoriasRisco=catsData;
+    const dados=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resRiscos.json(),resEpis.json(),resCats.json(),resPerigos.json()]);
+    [empresa,setores,funcoes,todosRiscos,todosEpis,categoriasRisco,todosPerigos]=dados.map((d,i)=>i===0?d[0]:d);
     const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
     document.getElementById('hero-nome').textContent=`Gestão de Riscos — ${nome}`;
-    document.getElementById('hero-sub').textContent=`${setores.length} setores · ${funcoes.length} funções · ${todosRiscos.length} riscos no catálogo`;
     document.getElementById('header-nome').textContent=nome;
+    document.getElementById('hero-sub').textContent=`${setores.length} setor(es) · ${funcoes.length} função(ões) · ${todosRiscos.length} riscos no catálogo`;
     renderNavSetores();
   }catch(e){console.error(e);}
 }
 
-// ── NAV SETORES ───────────────────────────────────────
+function h2(){return{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'};}
+
+// ── NAV SETORES ────────────────────────────────────────────────
 async function renderNavSetores(){
   const nav=document.getElementById('lista-setores-nav');
-  document.getElementById('total-setores').textContent=`${setores.length} setores`;
+  document.getElementById('total-setores').textContent=`${setores.length}`;
   if(!setores.length){nav.innerHTML=`<div style="padding:16px;font-size:12px;color:var(--text3);text-align:center;">Nenhum setor cadastrado</div>`;return;}
-  // Conta riscos por setor
   const counts={};
   if(setores.length){
     const ids=setores.map(s=>s.id).join(',');
     try{
-      const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=in.(${ids})&ativo=eq.true&select=setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=in.(${ids})&ativo=eq.true&select=setor_id`,{headers:h2()});
       const data=await res.json();
       data.forEach(x=>{counts[x.setor_id]=(counts[x.setor_id]||0)+1;});
     }catch(e){}
   }
   nav.innerHTML=setores.map(s=>`
     <div class="setor-item ${setorAtivo?.id===s.id?'active':''}" onclick="selecionarSetor(${s.id})">
-      <div class="setor-item-nome">${escHtml(s.nome_setor)}</div>
+      <div class="setor-item-nome">${h(s.nome_setor)}</div>
       <span class="setor-item-count">${counts[s.id]||0}</span>
     </div>`).join('');
 }
 
-// ── SELECIONAR SETOR ──────────────────────────────────
+// ── SELECIONAR SETOR ───────────────────────────────────────────
 async function selecionarSetor(setorId){
   setorAtivo=setores.find(s=>s.id===setorId);
-  funcaoAtiva=null;
-  contexto='setor';
-  document.querySelectorAll('.setor-item').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.setor-item').forEach(el=>{if(el.onclick.toString().includes(`(${setorId})`))el.classList.add('active');});
-  // Busca funções do setor
+  funcaoAtiva=null;contexto='setor';
+  document.querySelectorAll('.setor-item').forEach(el=>{
+    el.classList.toggle('active',el.onclick?.toString().includes(`(${setorId})`));
+  });
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&ativo=eq.true&select=funcao_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&ativo=eq.true&select=funcao_id`,{headers:h2()});
     const data=await res.json();
     funcoesSetor=data.map(x=>funcoes.find(f=>f.id===x.funcao_id)).filter(Boolean);
   }catch(e){funcoesSetor=[];}
@@ -338,54 +491,59 @@ async function selecionarSetor(setorId){
 
 async function carregarRiscosSetor(setorId){
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${setorId}&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${setorId}&ativo=eq.true&select=*`,{headers:h2()});
     riscosSetor=await res.json();
+    // Carrega EPIs para cada risco do setor
+    if(riscosSetor.length){
+      const ids=riscosSetor.map(r=>r.id).join(',');
+      const resM=await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=in.(${ids})&ativo=eq.true&select=*`,{headers:h2()});
+      const medidas=await resM.json();
+      riscosSetor.forEach(sr=>{sr.epis=medidas.filter(m=>m.setor_risco_id===sr.id&&m.nivel==='EPI');});
+    }
   }catch(e){riscosSetor=[];}
 }
 
 async function carregarRiscosFuncao(funcaoId){
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&ativo=eq.true&select=*`,{headers:h2()});
     riscosFuncao=await res.json();
+    if(riscosFuncao.length){
+      const ids=riscosFuncao.map(r=>r.id).join(',');
+      const resM=await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=in.(${ids})&ativo=eq.true&select=*`,{headers:h2()});
+      const medidas=await resM.json();
+      riscosFuncao.forEach(fr=>{fr.epis=medidas.filter(m=>m.funcao_risco_id===fr.id&&m.nivel==='EPI');});
+    }
   }catch(e){riscosFuncao=[];}
 }
 
-// ── RENDER PAINEL ─────────────────────────────────────
+// ── RENDER PAINEL ──────────────────────────────────────────────
 function renderPainel(){
   if(!setorAtivo)return;
   const riscosAtivos=contexto==='setor'?riscosSetor:riscosFuncao;
   const contextLabel=contexto==='setor'?setorAtivo.nome_setor:funcaoAtiva?.nome_funcao||'';
-
   document.getElementById('painel-titulo').textContent=contextLabel;
-  document.getElementById('painel-sub').textContent=`${riscosAtivos.length} risco(s) identificado(s)`;
+  document.getElementById('painel-sub').textContent=`${riscosAtivos.length} risco(s) identificado(s)${contexto==='funcao'&&funcaoAtiva?' — incluindo riscos herdados do setor':''}`;
 
-  // Actions
-  document.getElementById('painel-actions').innerHTML=`
-    <button class="btn btn-edit btn-sm" onclick="abrirBuscaRisco()">+ Adicionar risco</button>`;
+  document.getElementById('painel-actions').innerHTML=
+    contexto==='setor'
+      ?`<button class="btn btn-primary btn-sm" onclick="abrirModalAdicionar()">+ Identificar perigo / risco</button>`
+      :`<span style="font-size:11px;color:var(--text3);">Riscos gerenciados pelo setor + específicos desta função</span>`;
 
-  // Tabs de contexto
-  let tabsHtml=`<div class="ctx-tabs">
-    <div class="ctx-tab ${contexto==='setor'?'active':''}" onclick="mudarContexto('setor')">🗂️ ${escHtml(setorAtivo.nome_setor)}</div>
-    ${funcoesSetor.map(f=>`<div class="ctx-tab ${contexto==='funcao'&&funcaoAtiva?.id===f.id?'active':''}" onclick="mudarContextoFuncao(${f.id})"}>👷 ${escHtml(f.nome_funcao)}</div>`).join('')}
+  const tabs=`<div class="ctx-tabs">
+    <div class="ctx-tab ${contexto==='setor'?'active':''}" onclick="mudarContexto('setor')">🗂️ ${h(setorAtivo.nome_setor)}</div>
+    ${funcoesSetor.map(f=>`<div class="ctx-tab ${contexto==='funcao'&&funcaoAtiva?.id===f.id?'active':''}" onclick="mudarContextoFuncao(${f.id})">👷 ${h(f.nome_funcao)}</div>`).join('')}
   </div>`;
 
-  // Busca
-  let buscaHtml=`
-    <div class="busca-wrap" id="busca-risco-wrap">
-      <input type="text" class="busca-input" id="busca-risco-input" placeholder="Buscar risco para adicionar..." oninput="filtrarRisco()" onkeydown="navBusca(event)" autocomplete="off" style="display:none;">
-      <div class="busca-dropdown" id="busca-risco-dropdown"></div>
-    </div>
-    <div class="status-bar" id="status-riscos"></div>`;
+  const statusHtml=`<div class="status-bar" id="status-riscos"></div>`;
 
-  // Lista de riscos vinculados
   let riscosHtml='';
   if(!riscosAtivos.length){
-    riscosHtml=`<div class="empty"><div class="empty-icon">🛡️</div><div class="empty-title">Nenhum risco identificado</div><div>Clique em "+ Adicionar risco" para começar.</div></div>`;
+    riscosHtml=`<div class="empty"><div class="empty-icon">🛡️</div><div class="empty-title">Nenhum risco identificado</div><div>${contexto==='setor'?'Clique em "+ Identificar perigo / risco" para começar.':'Nenhum risco associado a esta função ainda.'}</div></div>`;
   }else{
     riscosHtml=riscosAtivos.map(sr=>renderRiscoCard(sr)).join('');
   }
 
-  document.getElementById('painel-body').innerHTML=tabsHtml+buscaHtml+riscosHtml;
+  document.getElementById('painel-body').innerHTML=tabs+statusHtml+riscosHtml;
 }
 
 function renderRiscoCard(sr){
@@ -394,24 +552,34 @@ function renderRiscoCard(sr){
   const estilo=getCatEstilo(risco.categoria_risco_id);
   const catNome=getCatNome(risco.categoria_risco_id);
   const nivel=sr.nivel_risco||calcularNivel(sr.probabilidade,sr.severidade);
-  const nivelHtml=nivel?`<span class="nivel-badge nivel-${nivel}">${nivelLabel(nivel.replace('-',' '))}</span>`:'';
-  const ctx=contexto;
-  const ctxId=ctx==='setor'?setorAtivo.id:funcaoAtiva?.id;
+  const nivelHtml=nivel?`<span class="nivel-badge nivel-${nivel}">${nivelLabel(nivel)}</span>`:'';
+  const propagBadge=sr.propagado_do_setor&&contexto==='funcao'?`<span class="prop-badge">🔗 Do setor</span>`:'';
+
+  // Nome do perigo (se tiver)
+  let perigoBadge='';
+  if(sr.perigo_id){
+    const p=todosPerigos.find(x=>x.id===sr.perigo_id);
+    if(p)perigoBadge=`<span class="risco-perigo-badge">⚠ ${h(p.nome)}</span>`;
+  }
+
+  const danosTrunc=risco.danos_saude?risco.danos_saude.slice(0,120)+(risco.danos_saude.length>120?'…':''):'';
 
   return`<div class="risco-card" id="risco-card-${sr.id}">
     <div class="risco-card-header">
       <span class="risco-cat-badge" style="background:${estilo.bg};color:${estilo.color};border:1px solid ${estilo.border};">${catNome}</span>
       <div class="risco-info">
-        <div class="risco-nome">${escHtml(risco.nome_risco)}</div>
+        ${perigoBadge}
+        <div class="risco-nome">${h(risco.nome_risco)}</div>
         <div class="risco-codigo">${risco.codigo_risco||''} ${risco.nr_relacionada?'· '+risco.nr_relacionada:''}</div>
+        ${danosTrunc?`<div class="risco-danos">🩺 ${h(danosTrunc)}</div>`:''}
       </div>
       <div class="risco-actions">
+        ${propagBadge}
         ${nivelHtml}
-        <button class="btn btn-danger btn-sm" onclick="confirmarRemoverRisco(${sr.id},'${escHtml(risco.nome_risco)}')">✕</button>
+        ${contexto==='setor'||!sr.propagado_do_setor?`<button class="btn btn-danger btn-sm" onclick="confirmarRemoverRisco(${sr.id},'${h(risco.nome_risco)}')">✕</button>`:''}
       </div>
     </div>
 
-    <!-- Avaliação -->
     <div class="avaliacao-grid">
       <div class="aval-field">
         <label>Probabilidade</label>
@@ -433,7 +601,6 @@ function renderRiscoCard(sr){
       </div>
     </div>
 
-    <!-- Hierarquia de controle -->
     <div class="hierarquia">
       <div class="hier-titulo">Hierarquia de controle — NR-1</div>
       ${renderHierarquia(sr)}
@@ -443,11 +610,11 @@ function renderRiscoCard(sr){
 
 function renderHierarquia(sr){
   const niveis=[
-    {key:'elim', label:'1. Eliminação', cor:'#e05555', hint:'Eliminar completamente a fonte do risco'},
-    {key:'subs', label:'2. Substituição', cor:'#e0a855', hint:'Substituir por algo menos perigoso'},
-    {key:'eng',  label:'3. Engenharia', cor:'#4a7cdc', hint:'Enclausuramento, exaustão, barreiras físicas'},
-    {key:'adm',  label:'4. Administrativo', cor:'#2dd4a0', hint:'Procedimentos, sinalização, treinamento'},
-    {key:'epi',  label:'5. EPI', cor:'#a78bfa', hint:'Equipamento de Proteção Individual'},
+    {key:'elim',label:'1. Eliminação',cor:'#e05555',hint:'Eliminar a fonte do risco'},
+    {key:'subs',label:'2. Substituição',cor:'#e0a855',hint:'Substituir por algo menos perigoso'},
+    {key:'eng', label:'3. Engenharia',cor:'#4a7cdc',hint:'Enclausuramento, exaustão, barreiras'},
+    {key:'adm', label:'4. Administrativo',cor:'#2dd4a0',hint:'Procedimentos, sinalização, treinamento'},
+    {key:'epi', label:'5. EPI',cor:'#a78bfa',hint:'Equipamento de Proteção Individual'},
   ];
   return niveis.map(n=>{
     const checked=sr[`medida_${n.key}`]?'checked':'';
@@ -455,19 +622,19 @@ function renderHierarquia(sr){
     if(n.key==='epi'){
       return`<div class="hier-nivel">
         <div class="hier-num" style="background:${n.cor}20;color:${n.cor};border:1px solid ${n.cor}40;">${n.label.split('.')[0]}</div>
-        <div class="hier-label" style="color:${n.cor};">${n.label.split('. ')[1]}</div>
+        <div class="hier-label" style="color:${n.cor};font-size:11px;font-weight:500;">${n.label.split('. ')[1]}</div>
         <div class="hier-conteudo">
           <div class="hier-check">
             <input type="checkbox" id="check-${sr.id}-${n.key}" ${checked} onchange="toggleHier(${sr.id},'${n.key}',this.checked)">
             <label for="check-${sr.id}-${n.key}">${n.hint}</label>
           </div>
           <div class="hier-detalhe ${show}" id="det-${sr.id}-${n.key}">
-            <div style="display:grid;grid-template-columns:1fr 100px 120px;gap:8px;align-items:end;margin-bottom:8px;">
+            <div style="display:grid;grid-template-columns:1fr 90px 110px;gap:8px;align-items:end;margin-bottom:8px;">
               <div>
                 <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">EPI</div>
                 <select id="epi-sel-${sr.id}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;">
-                  <option value="">— Selecionar do catálogo —</option>
-                  ${todosEpis.map(e=>`<option value="${e.id}">${escHtml(e.nome)} (${escHtml(e.categoria||'')})</option>`).join('')}
+                  <option value="">— Selecionar —</option>
+                  ${todosEpis.map(e=>`<option value="${e.id}">${h(e.nome)} (${h(e.categoria||'')})</option>`).join('')}
                 </select>
               </div>
               <div>
@@ -479,14 +646,16 @@ function renderHierarquia(sr){
                 <input type="date" id="epi-validade-${sr.id}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:7px 10px;outline:none;">
               </div>
             </div>
-            <button onclick="adicionarEPI(${sr.id})" style="padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;cursor:pointer;width:100%;">+ Adicionar EPI</button>
+            <button onclick="adicionarEPI(${sr.id})" style="padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;cursor:pointer;width:100%;">+ Adicionar EPI (propaga para todas as funções do setor)</button>
             <div class="epis-lista" id="epis-${sr.id}">
-              ${(sr.epis||[]).map(e=>`<div class="epi-tag" id="epitag-${sr.id}-${e.epi_id}">
-                <span class="epi-tag-nome">🛡 ${escHtml(e.nome||'')}</span>
-                ${e.ca?`<span class="epi-tag-ca">CA:${escHtml(e.ca)}</span>`:''}
-                ${e.validade_ca?`<span class="epi-tag-ca">Val:${new Date(e.validade_ca).toLocaleDateString('pt-BR')}</span>`:''}
-                <button onclick="removerEPI(${sr.id},${e.epi_id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;">✕</button>
-              </div>`).join('')}
+              ${(sr.epis||[]).map(e=>{
+                const epiDados=todosEpis.find(x=>x.id===e.epi_id);
+                return`<div class="epi-tag" id="epitag-${sr.id}-${e.epi_id}">
+                  <span class="epi-tag-nome">🛡 ${h(epiDados?.nome||'EPI')}</span>
+                  ${e.ca?`<span class="epi-tag-ca">CA:${h(e.ca)}</span>`:''}
+                  ${e.validade_ca?`<span class="epi-tag-ca">Val:${new Date(e.validade_ca+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}
+                </div>`;
+              }).join('')}
             </div>
           </div>
         </div>
@@ -494,133 +663,328 @@ function renderHierarquia(sr){
     }
     return`<div class="hier-nivel">
       <div class="hier-num" style="background:${n.cor}20;color:${n.cor};border:1px solid ${n.cor}40;">${n.label.split('.')[0]}</div>
-      <div class="hier-label" style="color:${n.cor};">${n.label.split('. ')[1]}</div>
+      <div class="hier-label" style="color:${n.cor};font-size:11px;font-weight:500;">${n.label.split('. ')[1]}</div>
       <div class="hier-conteudo">
         <div class="hier-check">
           <input type="checkbox" id="check-${sr.id}-${n.key}" ${checked} onchange="toggleHier(${sr.id},'${n.key}',this.checked)">
           <label for="check-${sr.id}-${n.key}">${n.hint}</label>
         </div>
         <div class="hier-detalhe ${show}" id="det-${sr.id}-${n.key}">
-          <textarea placeholder="Descreva a medida de controle..." onblur="salvarMedida(${sr.id},'${n.key}',this.value)">${escHtml(sr[`medida_${n.key}_desc`]||'')}</textarea>
+          <textarea placeholder="Descreva a medida de controle..." onblur="salvarMedida(${sr.id},'${n.key}',this.value)">${h(sr[`medida_${n.key}_desc`]||'')}</textarea>
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── CONTEXTO (setor / função) ─────────────────────────
-async function mudarContexto(ctx){
-  contexto=ctx;
-  funcaoAtiva=null;
-  renderPainel();
-}
-
+// ── CONTEXTO ───────────────────────────────────────────────────
+async function mudarContexto(ctx){contexto=ctx;funcaoAtiva=null;renderPainel();}
 async function mudarContextoFuncao(funcaoId){
-  contexto='funcao';
-  funcaoAtiva=funcoes.find(f=>f.id===funcaoId);
-  await carregarRiscosFuncao(funcaoId);
-  renderPainel();
+  contexto='funcao';funcaoAtiva=funcoes.find(f=>f.id===funcaoId);
+  await carregarRiscosFuncao(funcaoId);renderPainel();
 }
 
-// ── BUSCA DE RISCOS ───────────────────────────────────
-let buscaIdx=-1;
-function abrirBuscaRisco(){
-  const inp=document.getElementById('busca-risco-input');
-  if(inp){inp.style.display='block';inp.focus();}
+// ── MODAL ADICIONAR — FLUXO PERIGO → RISCO ────────────────────
+function abrirModalAdicionar(){
+  catSelecionada=null;perigoSelecionado=null;riscosSelecionados=new Set();stepAtual=0;
+  renderCatGrid();
+  irStep(0);
+  document.getElementById('busca-perigo-input').value='';
+  document.getElementById('busca-risco-livre-input').value='';
+  document.getElementById('busca-perigo-dropdown').classList.remove('show');
+  document.getElementById('busca-risco-livre-dropdown').classList.remove('show');
+  document.getElementById('perigo-selecionado-wrap').style.display='none';
+  document.getElementById('btn-proximo-perigo-wrap').style.display='none';
+  document.getElementById('riscos-selecionados-resumo').innerHTML='';
+  document.getElementById('btn-confirmar-adicionar').disabled=true;
+  clearStatus('status-add');
+  // Mostra info de propagação
+  const infoEl=document.getElementById('propagacao-info');
+  infoEl.style.display='flex';
+  document.getElementById('propagacao-count').textContent=
+    funcoesSetor.length?`${funcoesSetor.length} função(ões)`:'todas as funções';
+  document.getElementById('modal-adicionar').classList.add('show');
 }
 
-function filtrarRisco(){
-  const inp=document.getElementById('busca-risco-input');
-  const dd=document.getElementById('busca-risco-dropdown');
-  const termo=inp.value.trim().toLowerCase();
-  buscaIdx=-1;
-  if(!termo||termo.length<2){dd.classList.remove('show');return;}
-  const jaAdicionados=(contexto==='setor'?riscosSetor:riscosFuncao).map(r=>r.risco_id);
-  const filtrados=todosRiscos.filter(r=>!jaAdicionados.includes(r.id)&&(r.nome_risco.toLowerCase().includes(termo)||(r.codigo_risco||'').toLowerCase().includes(termo))).slice(0,20);
-  if(!filtrados.length){dd.innerHTML=`<div class="busca-option" style="color:var(--text3);cursor:default;">Nenhum risco encontrado</div>`;dd.classList.add('show');return;}
-  dd.innerHTML=filtrados.map(r=>{
-    const est=getCatEstilo(r.categoria_risco_id);
-    const cat=getCatNome(r.categoria_risco_id);
-    return`<div class="busca-option" onclick="adicionarRisco(${r.id})">
-      <div class="busca-option-nome">${escHtml(r.nome_risco)}</div>
-      <div class="busca-option-meta">
-        <span style="color:${est.color};">● ${cat}</span>
-        <span>${r.codigo_risco||''}</span>
-        ${r.nr_relacionada?`<span>${r.nr_relacionada}</span>`:''}
-      </div>
+function fecharModalAdicionar(){document.getElementById('modal-adicionar').classList.remove('show');}
+
+function renderCatGrid(){
+  const grid=document.getElementById('cat-grid');
+  grid.innerHTML=categoriasRisco.map(c=>{
+    const est=CAT_ESTILOS[c.nome]||{bg:'#1e2333',color:'#888',icon:'⚠️'};
+    return`<div class="cat-card" style="background:${est.bg};color:${est.color};" onclick="selecionarCategoria(${c.id},'${h(c.nome)}')" id="catcard-${c.id}">
+      <div class="cat-card-icon">${est.icon}</div>
+      <div class="cat-card-nome">${h(c.nome)}</div>
     </div>`;
   }).join('');
+}
+
+function selecionarCategoria(catId,catNome){
+  catSelecionada={id:catId,nome:catNome};
+  document.getElementById('cat-selecionada-label').innerHTML=
+    `Categoria: <strong style="color:var(--text);">${h(catNome)}</strong>`;
+  // Limpa busca de perigo
+  document.getElementById('busca-perigo-input').value='';
+  document.getElementById('perigo-selecionado-wrap').style.display='none';
+  document.getElementById('btn-proximo-perigo-wrap').style.display='none';
+  perigoSelecionado=null;
+  irStep(1);
+}
+
+function irStep(n){
+  stepAtual=n;
+  [0,1,2].forEach(i=>{
+    document.getElementById(`step-${i}`).classList.toggle('active',i===n);
+    const ind=document.getElementById(`step-ind-${i}`);
+    ind.classList.remove('active','done');
+    if(i<n)ind.classList.add('done');
+    else if(i===n)ind.classList.add('active');
+  });
+  if(n===2)renderRiscosSugeridos();
+}
+
+// ── BUSCA DE PERIGO ────────────────────────────────────────────
+function filtrarPerigo(){
+  const inp=document.getElementById('busca-perigo-input');
+  const dd=document.getElementById('busca-perigo-dropdown');
+  const termo=inp.value.trim().toLowerCase();
+  if(!termo||termo.length<2){dd.classList.remove('show');return;}
+  const filtrados=todosPerigos.filter(p=>
+    p.categoria_risco_id===catSelecionada?.id&&
+    (p.nome.toLowerCase().includes(termo)||p.descricao?.toLowerCase().includes(termo))
+  ).slice(0,15);
+  if(!filtrados.length){
+    dd.innerHTML=`<div class="search-option" style="color:var(--text3);cursor:default;">Nenhum perigo encontrado</div>`;
+  }else{
+    dd.innerHTML=filtrados.map(p=>`
+      <div class="search-option" onclick="selecionarPerigo(${p.id})">
+        <div class="search-option-nome">${h(p.nome)}</div>
+        <div class="search-option-desc">${h(p.exemplos||'')}</div>
+      </div>`).join('');
+  }
   dd.classList.add('show');
 }
 
-function navBusca(e){
-  const dd=document.getElementById('busca-risco-dropdown');
-  const opcoes=dd.querySelectorAll('.busca-option[onclick]');
-  if(!dd.classList.contains('show')||!opcoes.length)return;
-  if(e.key==='ArrowDown'){e.preventDefault();buscaIdx=Math.min(buscaIdx+1,opcoes.length-1);}
-  else if(e.key==='ArrowUp'){e.preventDefault();buscaIdx=Math.max(buscaIdx-1,0);}
-  else if(e.key==='Enter'&&buscaIdx>=0){e.preventDefault();opcoes[buscaIdx].click();return;}
-  else if(e.key==='Escape'){dd.classList.remove('show');return;}
-  opcoes.forEach((o,i)=>o.style.background=i===buscaIdx?'var(--surface2)':'');
-  if(buscaIdx>=0)opcoes[buscaIdx].scrollIntoView({block:'nearest'});
+function selecionarPerigo(perigoId){
+  perigoSelecionado=todosPerigos.find(p=>p.id===perigoId);
+  document.getElementById('busca-perigo-input').value=perigoSelecionado.nome;
+  document.getElementById('busca-perigo-dropdown').classList.remove('show');
+  const wrap=document.getElementById('perigo-selecionado-wrap');
+  wrap.style.display='block';
+  wrap.innerHTML=`<div class="perigo-selecionado">
+    <span style="font-size:18px;">⚠️</span>
+    <div>
+      <div class="perigo-sel-nome">${h(perigoSelecionado.nome)}</div>
+      ${perigoSelecionado.descricao?`<div class="perigo-sel-desc">${h(perigoSelecionado.descricao)}</div>`:''}
+      ${perigoSelecionado.exemplos?`<div class="perigo-sel-ex">Ex: ${h(perigoSelecionado.exemplos)}</div>`:''}
+    </div>
+  </div>`;
+  document.getElementById('btn-proximo-perigo-wrap').style.display='block';
 }
 
-async function adicionarRisco(riscoId){
-  const inp=document.getElementById('busca-risco-input');
-  const dd=document.getElementById('busca-risco-dropdown');
-  if(inp)inp.value='';
-  if(dd)dd.classList.remove('show');
-  const tabela=contexto==='setor'?'setor_riscos':'funcao_riscos';
-  const campo=contexto==='setor'?'setor_id':'funcao_id';
-  const ctxId=contexto==='setor'?setorAtivo.id:funcaoAtiva?.id;
-  if(!ctxId)return;
+// ── RISCOS SUGERIDOS ───────────────────────────────────────────
+async function renderRiscosSugeridos(){
+  const wrap=document.getElementById('riscos-sugeridos-wrap');
+  wrap.innerHTML=`<div style="color:var(--text3);font-size:12px;">Carregando riscos associados...</div>`;
+  riscosSelecionados=new Set();
+  atualizarBtnConfirmar();
+
+  let riscosVinculo=[];
+  if(perigoSelecionado){
+    try{
+      const res=await fetch(`${SUPA_URL}/rest/v1/perigo_riscos?perigo_id=eq.${perigoSelecionado.id}&select=risco_id`,{headers:h2()});
+      const data=await res.json();
+      riscosVinculo=data.map(x=>x.risco_id);
+    }catch(e){}
+  }
+
+  const jaAdicionados=(contexto==='setor'?riscosSetor:riscosFuncao).map(r=>r.risco_id);
+  const sugeridos=todosRiscos.filter(r=>riscosVinculo.includes(r.id)&&!jaAdicionados.includes(r.id));
+
+  if(!sugeridos.length){
+    wrap.innerHTML=perigoSelecionado
+      ?`<div style="color:var(--text3);font-size:12px;padding:8px 0;">Nenhum risco sugerido para este perigo ou todos já foram adicionados. Use a busca abaixo.</div>`
+      :`<div style="color:var(--text3);font-size:12px;padding:8px 0;">Busque diretamente um risco abaixo.</div>`;
+    return;
+  }
+
+  wrap.innerHTML=`
+    <label class="field-label">Riscos associados ao perigo "${h(perigoSelecionado?.nome||'')}"</label>
+    <div class="riscos-sugeridos">
+      ${sugeridos.map(r=>`
+        <div class="risco-sugerido" id="sug-${r.id}" onclick="toggleRiscoSugerido(${r.id})">
+          <div class="risco-sug-check" id="sug-check-${r.id}"></div>
+          <div class="risco-sug-info">
+            <div class="risco-sug-nome">${h(r.nome_risco)}</div>
+            <div class="risco-sug-meta">
+              <span>${r.codigo_risco||''}</span>
+              ${r.nr_relacionada?`<span>${h(r.nr_relacionada)}</span>`:''}
+            </div>
+            ${r.danos_saude?`<div class="risco-sug-danos">🩺 ${h(r.danos_saude.slice(0,100))}${r.danos_saude.length>100?'…':''}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function toggleRiscoSugerido(riscoId){
+  const el=document.getElementById(`sug-${riscoId}`);
+  const chk=document.getElementById(`sug-check-${riscoId}`);
+  if(riscosSelecionados.has(riscoId)){
+    riscosSelecionados.delete(riscoId);
+    el.classList.remove('selected');
+    chk.textContent='';
+  }else{
+    riscosSelecionados.add(riscoId);
+    el.classList.add('selected');
+    chk.textContent='✓';
+  }
+  atualizarBtnConfirmar();
+  atualizarResumo();
+}
+
+// ── BUSCA RISCO LIVRE ──────────────────────────────────────────
+function filtrarRiscoLivre(){
+  const inp=document.getElementById('busca-risco-livre-input');
+  const dd=document.getElementById('busca-risco-livre-dropdown');
+  const termo=inp.value.trim().toLowerCase();
+  if(!termo||termo.length<2){dd.classList.remove('show');return;}
+  const jaAdicionados=(contexto==='setor'?riscosSetor:riscosFuncao).map(r=>r.risco_id);
+  const filtrados=todosRiscos.filter(r=>
+    !jaAdicionados.includes(r.id)&&
+    (r.nome_risco.toLowerCase().includes(termo)||(r.codigo_risco||'').toLowerCase().includes(termo))
+  ).slice(0,15);
+  dd.innerHTML=filtrados.map(r=>{
+    const est=getCatEstilo(r.categoria_risco_id);
+    return`<div class="search-option" onclick="adicionarRiscoLivre(${r.id})">
+      <div class="search-option-nome">${h(r.nome_risco)}</div>
+      <div class="search-option-desc" style="color:${est.color};">● ${getCatNome(r.categoria_risco_id)} · ${r.codigo_risco||''}</div>
+    </div>`;
+  }).join('')||`<div class="search-option" style="color:var(--text3);cursor:default;">Nenhum resultado</div>`;
+  dd.classList.add('show');
+}
+
+function adicionarRiscoLivre(riscoId){
+  riscosSelecionados.add(riscoId);
+  document.getElementById('busca-risco-livre-input').value='';
+  document.getElementById('busca-risco-livre-dropdown').classList.remove('show');
+  atualizarBtnConfirmar();
+  atualizarResumo();
+}
+
+function atualizarResumo(){
+  const wrap=document.getElementById('riscos-selecionados-resumo');
+  if(!riscosSelecionados.size){wrap.innerHTML='';return;}
+  const lista=Array.from(riscosSelecionados).map(id=>{
+    const r=todosRiscos.find(x=>x.id===id);
+    return`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--surface2);border-radius:6px;margin-bottom:4px;font-size:12px;">
+      <span>✓</span><span style="flex:1;">${h(r?.nome_risco||'')}</span>
+      <button onclick="riscosSelecionados.delete(${id});atualizarBtnConfirmar();atualizarResumo();" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;">×</button>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=`<div style="font-size:11px;color:var(--text2);margin-bottom:6px;">${riscosSelecionados.size} risco(s) selecionado(s):</div>${lista}`;
+}
+
+function atualizarBtnConfirmar(){
+  const btn=document.getElementById('btn-confirmar-adicionar');
+  btn.disabled=riscosSelecionados.size===0;
+  document.getElementById('label-add').textContent=
+    riscosSelecionados.size>1?`Adicionar ${riscosSelecionados.size} riscos ao setor`:'Adicionar ao setor';
+}
+
+// ── CONFIRMAR ADICIONAR ────────────────────────────────────────
+async function confirmarAdicionarRiscos(){
+  if(!riscosSelecionados.size||!setorAtivo)return;
+  const btn=document.getElementById('btn-confirmar-adicionar');
+  btn.disabled=true;
+  document.getElementById('spinner-add').classList.add('show');
+  setStatus('status-add','info','Adicionando e propagando para as funções...');
+
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
-      body:JSON.stringify({[campo]:ctxId,risco_id:riscoId,ativo:true})
-    });
-    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
-    const data=await res.json();
-    const novoRisco={...data[0],epis:[]};
-    if(contexto==='setor')riscosSetor.push(novoRisco);
-    else riscosFuncao.push(novoRisco);
+    for(const riscoId of riscosSelecionados){
+      // 1. Insere no setor
+      const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos`,{
+        method:'POST',
+        headers:{...h2(),'Prefer':'return=representation'},
+        body:JSON.stringify({
+          setor_id:setorAtivo.id,
+          risco_id:riscoId,
+          perigo_id:perigoSelecionado?.id||null,
+          ativo:true
+        })
+      });
+      if(!res.ok)throw new Error('Erro ao adicionar risco ao setor');
+      const data=await res.json();
+      const novoSetorRisco={...data[0],epis:[]};
+      riscosSetor.push(novoSetorRisco);
+
+      // 2. Propaga para todas as funções do setor
+      await propagarRiscoParaFuncoes(novoSetorRisco);
+    }
+
+    fecharModalAdicionar();
     renderPainel();
     renderNavSetores();
-    setStatus('status-riscos','success','Risco adicionado!');
-    setTimeout(()=>clearStatus('status-riscos'),2000);
-  }catch(e){setStatus('status-riscos','error',e.message);}
+    toast(`${riscosSelecionados.size} risco(s) adicionado(s) e propagado(s) para ${funcoesSetor.length} função(ões)`);
+  }catch(e){
+    setStatus('status-add','error',e.message);
+    btn.disabled=false;
+  }finally{
+    document.getElementById('spinner-add').classList.remove('show');
+  }
 }
 
-// ── AVALIAÇÃO ─────────────────────────────────────────
+async function propagarRiscoParaFuncoes(setorRisco){
+  if(!funcoesSetor.length)return;
+  for(const funcao of funcoesSetor){
+    // Verifica se já existe
+    const resCheck=await fetch(
+      `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcao.id}&risco_id=eq.${setorRisco.risco_id}&ativo=eq.true&select=id`,
+      {headers:h2()}
+    );
+    const existente=await resCheck.json();
+    if(existente.length)continue; // já existe, pula
+
+    await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
+      method:'POST',
+      headers:{...h2(),'Prefer':'return=representation'},
+      body:JSON.stringify({
+        funcao_id:funcao.id,
+        risco_id:setorRisco.risco_id,
+        perigo_id:setorRisco.perigo_id||null,
+        origem_setor_risco_id:setorRisco.id,
+        propagado_do_setor:true,
+        ativo:true
+      })
+    });
+  }
+}
+
+// ── AVALIAÇÃO ──────────────────────────────────────────────────
 async function atualizarAvaliacao(srId,el,campo){
   const tabela=contexto==='setor'?'setor_riscos':'funcao_riscos';
   const val=el.value?parseInt(el.value):null;
-  // Calcula nível de risco
   const prob=campo==='probabilidade'?val:(parseInt(document.getElementById(`prob-${srId}`)?.value)||null);
   const sev=campo==='severidade'?val:(parseInt(document.getElementById(`sev-${srId}`)?.value)||null);
   const nivel=calcularNivel(prob,sev);
   const updates={[campo]:val,atualizado_em:new Date().toISOString()};
   if(campo==='probabilidade'||campo==='severidade')updates.nivel_risco=nivel;
   try{
-    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify(updates)});
-    // Atualiza localmente
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:h2(),body:JSON.stringify(updates)});
     const lista=contexto==='setor'?riscosSetor:riscosFuncao;
     const sr=lista.find(x=>x.id===srId);
     if(sr){sr[campo]=val;if(nivel!==undefined)sr.nivel_risco=nivel;}
-    // Atualiza badge de nível sem re-render completo
     if(nivel!==undefined){
       const card=document.getElementById(`risco-card-${srId}`);
       const badgeEl=card?.querySelector('.nivel-badge');
       if(badgeEl){
         badgeEl.className=`nivel-badge nivel-${nivel||'BAIXO'}`;
-        badgeEl.textContent=nivelLabel((nivel||'').replace('-',' '));
+        badgeEl.textContent=nivelLabel(nivel||'');
       }
     }
   }catch(e){console.error(e);}
 }
 
-// ── HIERARQUIA ────────────────────────────────────────
+// ── HIERARQUIA ─────────────────────────────────────────────────
 function toggleHier(srId,nivel,checked){
   const det=document.getElementById(`det-${srId}-${nivel}`);
   if(det)det.classList.toggle('show',checked);
@@ -632,14 +996,12 @@ async function salvarMedida(srId,nivel,valor){
   const checkCampo=`medida_${nivel}`;
   const checked=document.getElementById(`check-${srId}-${nivel}`)?.checked||false;
   try{
-    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({[campo]:valor||null,[checkCampo]:checked,atualizado_em:new Date().toISOString()})});
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:h2(),
+      body:JSON.stringify({[campo]:valor||null,[checkCampo]:checked,atualizado_em:new Date().toISOString()})});
     const lista=contexto==='setor'?riscosSetor:riscosFuncao;
     const sr=lista.find(x=>x.id===srId);
     if(sr){sr[campo]=valor;sr[checkCampo]=checked;}
-    // ── Integração Central de Ações ───────────────────
-    if(valor&&valor.trim()&&checked){
-      await criarAcaoFromMedida(srId,nivel,valor.trim());
-    }
+    if(valor&&valor.trim()&&checked)await criarAcaoFromMedida(srId,nivel,valor.trim());
   }catch(e){console.error(e);}
 }
 
@@ -649,120 +1011,148 @@ async function criarAcaoFromMedida(srId,nivel,descricao){
     const sr=lista.find(x=>x.id===srId);
     const risco=sr?todosRiscos.find(r=>r.id===sr.risco_id):null;
     const nomeRisco=risco?.nome_risco||'Risco';
-    const nomeNivel={eliminacao:'Eliminação',substituicao:'Substituição',engenharia:'Engenharia',administrativo:'Administrativo',epi:'EPI'}[nivel]||nivel;
-    const setor_id=contexto==='setor'?(setorAtivo?.id||null):null;
-    const funcao_id=contexto==='funcao'?(funcaoAtiva?.id||null):null;
-    const titulo=`[${nomeNivel}] ${descricao.length>80?descricao.slice(0,80)+'…':descricao}`;
-    // Evita duplicata na mesma sessão
+    const nomeNivel={elim:'Eliminação',subs:'Substituição',eng:'Engenharia',adm:'Administrativo',epi:'EPI'}[nivel]||nivel;
     const chave=`acao_medida_${srId}_${nivel}`;
     const acaoExistenteId=sessionStorage.getItem(chave);
+    const titulo=`[${nomeNivel}] ${descricao.length>80?descricao.slice(0,80)+'…':descricao}`;
     if(acaoExistenteId){
-      await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${acaoExistenteId}`,{
-        method:'PATCH',
-        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
-        body:JSON.stringify({titulo,descricao:`Medida de controle (${nomeNivel}) para o risco: ${nomeRisco}`,atualizado_em:new Date().toISOString()})
-      });
+      await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${acaoExistenteId}`,{method:'PATCH',headers:h2(),
+        body:JSON.stringify({titulo,atualizado_em:new Date().toISOString()})});
       return;
     }
     const res=await fetch(`${SUPA_URL}/rest/v1/acoes`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      method:'POST',headers:{...h2(),'Prefer':'return=representation'},
       body:JSON.stringify({
-        empresa_id:parseInt(empresaId),
-        titulo,
+        empresa_id:parseInt(empresaId),titulo,
         descricao:`Medida de controle (${nomeNivel}) para o risco: ${nomeRisco}`,
         origem:'Gestão de Riscos',
         prioridade:risco?.gut_total>=12?'Alta':risco?.gut_total>=6?'Média':'Baixa',
-        setor_id,
-        funcao_id,
-        status:'Pendente',
-        ativo:true
+        setor_id:contexto==='setor'?setorAtivo?.id:null,
+        funcao_id:contexto==='funcao'?funcaoAtiva?.id:null,
+        status:'Pendente',ativo:true
       })
     });
     if(res.ok){
       const data=await res.json();
       const novaAcao=Array.isArray(data)?data[0]:data;
       if(novaAcao?.id)sessionStorage.setItem(chave,novaAcao.id);
-      mostrarToastAcao();
+      toast('Ação criada na Central de Ações',`acoes.html?empresa_id=${empresaId}`);
     }
-  }catch(e){console.error('Erro ao criar ação:',e);}
+  }catch(e){console.error(e);}
 }
 
-function mostrarToastAcao(){
-  const t=document.createElement('div');
-  t.style.cssText='position:fixed;bottom:24px;right:24px;background:#0e2820;border:1px solid #1a4a38;border-radius:8px;padding:12px 18px;z-index:9999;font-size:13px;color:#2dd4a0;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);';
-  t.innerHTML=`<span>✓</span><span>Ação criada na <a href="acoes.html?empresa_id=${empresaId}" style="color:#2dd4a0;font-weight:500;">Central de Ações</a></span><button onclick="this.parentNode.remove()" style="background:none;border:none;color:#545e72;cursor:pointer;font-size:16px;margin-left:8px;">×</button>`;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),6000);
-}
-
-// ── EPIs ──────────────────────────────────────────────
-function adicionarEPI(srId){
+// ── EPIs ───────────────────────────────────────────────────────
+async function adicionarEPI(srId){
   const sel=document.getElementById(`epi-sel-${srId}`);
   const caInp=document.getElementById(`epi-ca-${srId}`);
   const validadeInp=document.getElementById(`epi-validade-${srId}`);
   if(!sel?.value)return;
   const epi=todosEpis.find(e=>e.id==sel.value);
   if(!epi)return;
-  const lista=document.getElementById(`epis-${srId}`);
-  const tagId=`epitag-${srId}-${epi.id}`;
-  if(document.getElementById(tagId))return;
   const ca=caInp?.value||'';
   const validade=validadeInp?.value||'';
-  const tag=document.createElement('div');
-  tag.id=tagId;
-  tag.className='epi-tag';
-  tag.dataset.epiId=epi.id;
-  tag.dataset.ca=ca;
-  tag.dataset.validade=validade;
-  tag.innerHTML=`<span class="epi-tag-nome">🛡 ${escHtml(epi.nome)}</span>
-    ${ca?`<span class="epi-tag-ca">CA:${escHtml(ca)}</span>`:''}
-    ${validade?`<span class="epi-tag-ca">Val:${new Date(validade+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}
-    <button onclick="removerEPI(${srId},${epi.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;">✕</button>`;
-  lista.appendChild(tag);
-  salvarEPI(srId,epi.id,ca,validade);
+
+  // Adiciona tag visual
+  const lista=document.getElementById(`epis-${srId}`);
+  const tagId=`epitag-${srId}-${epi.id}`;
+  if(!document.getElementById(tagId)){
+    const tag=document.createElement('div');
+    tag.id=tagId;tag.className='epi-tag';
+    tag.innerHTML=`<span class="epi-tag-nome">🛡 ${h(epi.nome)}</span>
+      ${ca?`<span class="epi-tag-ca">CA:${h(ca)}</span>`:''}
+      ${validade?`<span class="epi-tag-ca">Val:${new Date(validade+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}`;
+    lista.appendChild(tag);
+  }
+
+  // Salva no banco e propaga
+  await salvarEPIComPropagacao(srId,epi.id,ca,validade);
   if(caInp)caInp.value='';
   if(validadeInp)validadeInp.value='';
   sel.value='';
 }
 
-async function salvarEPI(srId,epiId,ca,validade){
-  const tabela=contexto==='setor'?'setor_risco_medidas':'funcao_risco_medidas';
-  const campo=contexto==='setor'?'setor_risco_id':'funcao_risco_id';
-  try{
-    await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({[campo]:srId,nivel:'EPI',epi_id:epiId,ca:ca||null,validade_ca:validade||null,ativo:true})});
-    const tabVinculo=contexto==='setor'?'setor_riscos':'funcao_riscos';
-    await fetch(`${SUPA_URL}/rest/v1/${tabVinculo}?id=eq.${srId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({medida_epi:true})});
-  }catch(e){console.error(e);}
+async function salvarEPIComPropagacao(srId,epiId,ca,validade){
+  // 1. Salva no setor_risco_medidas
+  await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas`,{
+    method:'POST',headers:h2(),
+    body:JSON.stringify({setor_risco_id:srId,nivel:'EPI',epi_id:epiId,ca:ca||null,validade_ca:validade||null,ativo:true})
+  });
+  // 2. Atualiza flag medida_epi no setor_riscos
+  await fetch(`${SUPA_URL}/rest/v1/setor_riscos?id=eq.${srId}`,{
+    method:'PATCH',headers:h2(),body:JSON.stringify({medida_epi:true})
+  });
+  // 3. Propaga para funcao_risco_medidas de todas as funções do setor
+  const srDados=riscosSetor.find(x=>x.id===srId);
+  if(!srDados||!funcoesSetor.length)return;
+  for(const funcao of funcoesSetor){
+    try{
+      // Acha o funcao_risco correspondente
+      const resFR=await fetch(
+        `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcao.id}&risco_id=eq.${srDados.risco_id}&ativo=eq.true&select=id`,
+        {headers:h2()}
+      );
+      const frData=await resFR.json();
+      if(!frData.length)continue;
+      const frId=frData[0].id;
+      // Verifica se EPI já foi propagado
+      const resCheck=await fetch(
+        `${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=eq.${frId}&epi_id=eq.${epiId}&ativo=eq.true&select=id`,
+        {headers:h2()}
+      );
+      const jaExiste=await resCheck.json();
+      if(jaExiste.length)continue;
+      // Insere com flag de propagado
+      await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas`,{
+        method:'POST',headers:h2(),
+        body:JSON.stringify({
+          funcao_risco_id:frId,nivel:'EPI',epi_id:epiId,
+          ca:ca||null,validade_ca:validade||null,
+          origem_setor_medida_id:srId,
+          propagado_do_setor:true,ativo:true
+        })
+      });
+      // Atualiza flag medida_epi no funcao_riscos
+      await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${frId}`,{
+        method:'PATCH',headers:h2(),body:JSON.stringify({medida_epi:true})
+      });
+    }catch(e){console.error('Erro ao propagar EPI para função:',e);}
+  }
+  if(funcoesSetor.length)toast(`EPI propagado para ${funcoesSetor.length} função(ões) do setor`);
 }
 
-function removerEPI(srId,epiId){
-  document.getElementById(`epitag-${srId}-${epiId}`)?.remove();
-}
-
-// ── REMOVER RISCO ─────────────────────────────────────
+// ── REMOVER RISCO ──────────────────────────────────────────────
 let _removerCb=null;
 function confirmarRemoverRisco(srId,nome){
   document.getElementById('modal-excluir-titulo').textContent=`Remover "${nome}"?`;
-  document.getElementById('modal-excluir-desc').textContent='O risco será removido deste contexto. Esta ação não pode ser desfeita.';
+  document.getElementById('modal-excluir-desc').textContent=
+    contexto==='setor'
+      ?'O risco será removido do setor. Os vínculos com funções propagados automaticamente também serão desativados.'
+      :'O risco será removido desta função. Esta ação não pode ser desfeita.';
   _removerCb=async()=>{
     const tabela=contexto==='setor'?'setor_riscos':'funcao_riscos';
-    const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});
+    const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{
+      method:'PATCH',headers:h2(),body:JSON.stringify({ativo:false})
+    });
     if(!res.ok)throw new Error('Erro ao remover risco');
-    if(contexto==='setor')riscosSetor=riscosSetor.filter(x=>x.id!==srId);
-    else riscosFuncao=riscosFuncao.filter(x=>x.id!==srId);
-    fecharModalExcluir();
-    renderPainel();
-    renderNavSetores();
+    // Se for do setor, desativa também nos funcao_riscos propagados
+    if(contexto==='setor'){
+      await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?origem_setor_risco_id=eq.${srId}`,{
+        method:'PATCH',headers:h2(),body:JSON.stringify({ativo:false})
+      });
+      riscosSetor=riscosSetor.filter(x=>x.id!==srId);
+    }else{
+      riscosFuncao=riscosFuncao.filter(x=>x.id!==srId);
+    }
+    fecharModalExcluir();renderPainel();renderNavSetores();
   };
   document.getElementById('btn-confirmar-excluir').onclick=async()=>{
-    document.getElementById('spinner-excluir').className='spinner spinner-w show';
+    document.getElementById('spinner-excluir').classList.add('show');
     document.getElementById('label-excluir').textContent='Removendo...';
     document.getElementById('btn-confirmar-excluir').disabled=true;
     try{await _removerCb();}
     catch(e){alert(e.message);}
     finally{
-      document.getElementById('spinner-excluir').className='spinner spinner-w';
+      document.getElementById('spinner-excluir').classList.remove('show');
       document.getElementById('label-excluir').textContent='Remover';
       document.getElementById('btn-confirmar-excluir').disabled=false;
     }
@@ -771,11 +1161,12 @@ function confirmarRemoverRisco(srId,nome){
 }
 function fecharModalExcluir(){document.getElementById('modal-excluir').classList.remove('show');}
 
-// Fechar dropdown ao clicar fora
+// Fechar dropdowns ao clicar fora
 document.addEventListener('click',e=>{
-  if(!e.target.closest('.busca-wrap')){
-    document.getElementById('busca-risco-dropdown')?.classList.remove('show');
-  }
+  if(!e.target.closest('#busca-perigo-input')&&!e.target.closest('#busca-perigo-dropdown'))
+    document.getElementById('busca-perigo-dropdown')?.classList.remove('show');
+  if(!e.target.closest('#busca-risco-livre-input')&&!e.target.closest('#busca-risco-livre-dropdown'))
+    document.getElementById('busca-risco-livre-dropdown')?.classList.remove('show');
 });
 
 inicializar();
