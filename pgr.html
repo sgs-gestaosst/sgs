@@ -233,6 +233,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .page{width:100%;padding:15mm 12mm 15mm 18mm;}
   .page::before{width:5mm;}
 }
+/* ── BADGES AGENTES SETOR ── */
+.agente-badge{display:inline-block;padding:2pt 7pt;border-radius:10pt;font-size:7pt;font-weight:600;margin:1pt 2pt 1pt 0;border:1pt solid;}
+.agente-fisico{background:#fef9c3;color:#854d0e;border-color:#fde68a;}
+.agente-quimico{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
+.agente-biologico{background:#f3e8ff;color:#6b21a8;border-color:#d8b4fe;}
+.agente-ergonomico{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;}
+.agente-acidente{background:#ffedd5;color:#9a3412;border-color:#fdba74;}
+.agente-psicossocial{background:#fce7f3;color:#9d174d;border-color:#f9a8d4;}
+/* ── SETOR DETALHE ── */
+.setor-detalhe{border:1pt solid #e5e7eb;border-radius:4pt;margin:8pt 0;overflow:hidden;page-break-inside:avoid;}
+.setor-detalhe-header{background:#f0f4ff;padding:8pt 10pt;border-bottom:1pt solid #e5e7eb;display:flex;justify-content:space-between;align-items:flex-start;gap:8pt;}
+.setor-detalhe-nome{font-size:10pt;font-weight:700;color:#0d2040;}
+.setor-detalhe-body{padding:8pt 10pt;display:grid;grid-template-columns:1fr 1fr;gap:6pt;}
 </style>
 </head>
 <body>
@@ -389,12 +402,13 @@ async function carregar(){
     }else{setor_riscos=[];medidas_setor=[];}
 
     if(funcaoIds.length){
-      const [resFR,resMedF]=await Promise.all([
-        fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=in.(${funcaoIds.join(',')})&ativo=eq.true&select=*`,{headers:headers()}),
-        fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?ativo=eq.true&select=*`,{headers:headers()}),
-      ]);
+      const resFR=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=in.(${funcaoIds.join(',')})&ativo=eq.true&select=*`,{headers:headers()});
       funcao_riscos=await resFR.json();
-      medidas_funcao=await resMedF.json();
+      if(funcao_riscos.length){
+        const frIds=funcao_riscos.map(fr=>fr.id).join(',');
+        const resMedF=await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=in.(${frIds})&ativo=eq.true&select=*`,{headers:headers()});
+        medidas_funcao=await resMedF.json();
+      }else{medidas_funcao=[];}
     }else{funcao_riscos=[];medidas_funcao=[];}
 
     // SESMT
@@ -562,6 +576,46 @@ function renderCaracterizacao(){
     const f=funcoes.find(x=>x.id===fs.funcao_id);
     if(f)funcoesPorSetor[fs.setor_id].push(f.nome_funcao);
   });
+
+  // Monta badge de agentes para cada setor
+  function agentesSetor(s){
+    const mapa=[
+      {key:'tem_agente_fisico',label:'Físico',cls:'agente-fisico'},
+      {key:'tem_agente_quimico',label:'Químico',cls:'agente-quimico'},
+      {key:'tem_agente_biologico',label:'Biológico',cls:'agente-biologico'},
+      {key:'tem_agente_ergonomico',label:'Ergonômico',cls:'agente-ergonomico'},
+      {key:'tem_agente_acidente',label:'Acidente',cls:'agente-acidente'},
+      {key:'tem_agente_psicossocial',label:'Psicossocial',cls:'agente-psicossocial'},
+    ];
+    return mapa.filter(a=>s[a.key]).map(a=>`<span class="agente-badge ${a.cls}">${a.label}</span>`).join('');
+  }
+
+  // Monta bloco de detalhes por setor
+  const setoresDetalhes=setores.map(s=>{
+    const fns=funcoesPorSetor[s.id]||[];
+    const badges=agentesSetor(s);
+    // Campos opcionais — só mostra se preenchido
+    const detalhes=[];
+    if(s.descricao)detalhes.push(`<div class="rf-field"><div class="lbl">Descrição</div><div class="val" style="font-size:8.5pt;">${h(s.descricao)}</div></div>`);
+    if(s.responsavel_setor)detalhes.push(`<div class="rf-field"><div class="lbl">Responsável</div><div class="val">${h(s.responsavel_setor)}</div></div>`);
+    if(s.andar)detalhes.push(`<div class="rf-field"><div class="lbl">Localização</div><div class="val">${h(s.andar)}</div></div>`);
+    if(s.area_m2)detalhes.push(`<div class="rf-field"><div class="lbl">Área</div><div class="val">${h(String(s.area_m2))} m²</div></div>`);
+
+    return`<div class="setor-detalhe">
+      <div class="setor-detalhe-header">
+        <div>
+          <div class="setor-detalhe-nome">${h(s.nome_setor)}</div>
+          ${fns.length?`<div style="font-size:8pt;color:#6b7280;margin-top:2pt;">👷 ${h(fns.join(' · '))}</div>`:''}
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:8pt;color:#6b7280;margin-bottom:4pt;">${s.num_funcionarios_previsto||0} trabalhador(es)</div>
+          ${badges?`<div>${badges}</div>`:''}
+        </div>
+      </div>
+      ${detalhes.length?`<div class="setor-detalhe-body">${detalhes.join('')}</div>`:''}
+    </div>`;
+  }).join('');
+
   pg.innerHTML=`
   ${phHeader(4)}
   <div class="doc-section"><span class="num-secao">2</span>Caracterização do Estabelecimento</div>
@@ -570,18 +624,8 @@ function renderCaracterizacao(){
     <div class="ficha-item"><div class="ficha-label">Setores de trabalho</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${setores.length}</div></div>
     <div class="ficha-item"><div class="ficha-label">Funções mapeadas</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${funcoes.length}</div></div>
   </div>
-  <div class="doc-subsection" style="margin-top:14pt;">Setores e funções</div>
-  <table class="doc-table">
-    <thead><tr><th style="width:30%;">Setor</th><th style="width:15%;text-align:center;">Func. previstos</th><th>Funções vinculadas</th></tr></thead>
-    <tbody>${setores.map(s=>{
-      const fns=funcoesPorSetor[s.id]||[];
-      return`<tr>
-        <td style="font-weight:500;">${h(s.nome_setor)}</td>
-        <td style="text-align:center;font-weight:600;color:#0d2040;">${s.num_funcionarios_previsto||0}</td>
-        <td style="font-size:8.5pt;">${fns.length?h(fns.join(', ')):'<span style="color:#9ca3af;font-style:italic;">Nenhuma função vinculada</span>'}</td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table>
+  <div class="doc-subsection" style="margin-top:14pt;">Detalhamento dos setores</div>
+  ${setoresDetalhes}
   ${pfFooter(4)}`;
   return pg;
 }
