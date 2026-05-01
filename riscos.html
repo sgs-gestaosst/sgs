@@ -1047,9 +1047,29 @@ async function propagarAvaliacaoParaFuncoes(srId,updates){
 }
 
 // ── HIERARQUIA ─────────────────────────────────────────────────
-function toggleHier(srId,nivel,checked){
+async function toggleHier(srId,nivel,checked){
   const det=document.getElementById(`det-${srId}-${nivel}`);
   if(det)det.classList.toggle('show',checked);
+  // Salva imediatamente o estado do checkbox no banco
+  // (sem esperar o onblur do textarea)
+  const tabela=contexto==='setor'?'setor_riscos':'funcao_riscos';
+  const checkCampo=`medida_${nivel}`;
+  const descCampo=`medida_${nivel}_desc`;
+  const descAtual=document.getElementById(`det-${srId}-${nivel}`)?.querySelector('textarea')?.value||null;
+  const updates={[checkCampo]:checked,[descCampo]:checked?descAtual:null,atualizado_em:new Date().toISOString()};
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:h2(),body:JSON.stringify(updates)});
+    const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+    const sr=lista.find(x=>x.id===srId);
+    if(sr){sr[checkCampo]=checked;if(!checked)sr[descCampo]=null;}
+    // Propaga para funcao_riscos se contexto for setor
+    if(contexto==='setor'){
+      await fetch(
+        `${SUPA_URL}/rest/v1/funcao_riscos?origem_setor_risco_id=eq.${srId}&ativo=eq.true`,
+        {method:'PATCH',headers:h2(),body:JSON.stringify(updates)}
+      );
+    }
+  }catch(e){console.error(e);}
 }
 
 async function salvarMedida(srId,nivel,valor){
