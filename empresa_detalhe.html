@@ -66,13 +66,8 @@
   .modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
   .modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;transition:border-color .15s;}
   .modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
-  .modal-field textarea{resize:vertical;min-height:70px;}
+  .modal-field textarea{resize:vertical;min-height:80px;}
   .modal-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .modal-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-  .section-mini{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px;display:flex;align-items:center;gap:8px;}
-  .section-mini::after{content:'';flex:1;height:1px;background:var(--border);}
-  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);}
-  .toggle-row-label{font-size:13px;color:var(--text);}
   .toggle{width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
   .toggle.on{background:var(--accent2);}
   .toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;}
@@ -110,20 +105,24 @@
   .lista-item-sub{font-size:11px;color:var(--text2);margin-top:3px;}
   .lista-item-actions{display:flex;gap:6px;flex-shrink:0;}
   .mini-badge{font-size:10px;padding:2px 7px;border-radius:4px;font-family:var(--mono);white-space:nowrap;display:inline-block;margin:2px 2px 0 0;}
-  .mb-risk{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
   .mb-info{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
   .mb-blue{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
-  .mb-purple{background:#1e1a40;color:#a78bfa;border:1px solid #3a2a80;}
-  .mb-pink{background:#2a1530;color:#f472b6;border:1px solid #5a2550;}
+  /* CBO */
   .cbo-wrap{position:relative;}
-  .cbo-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border-focus);border-radius:var(--radius);z-index:2000;max-height:220px;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+  .cbo-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border-focus);border-radius:var(--radius);z-index:2000;max-height:280px;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.6);margin-top:2px;}
   .cbo-dropdown.show{display:block;}
-  .cbo-option{padding:9px 12px;cursor:pointer;font-size:13px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--border);}
+  .cbo-option{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s;}
   .cbo-option:last-child{border-bottom:none;}
   .cbo-option:hover,.cbo-option.active{background:var(--surface2);}
-  .cbo-code{font-family:var(--mono);font-size:11px;color:var(--accent2);white-space:nowrap;min-width:58px;}
-  .cbo-nome{color:var(--text);flex:1;}
-  .cbo-empty{padding:12px;font-size:13px;color:var(--text3);text-align:center;}
+  .cbo-code{font-family:var(--mono);font-size:10px;color:var(--accent2);margin-bottom:2px;}
+  .cbo-nome{font-size:13px;color:var(--text);font-weight:500;}
+  .cbo-atividades{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.4;}
+  .cbo-msg{padding:14px;font-size:13px;color:var(--text3);text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .cbo-dica{font-size:11px;color:var(--accent2);margin-top:5px;display:none;}
+  .cbo-dica.show{display:block;}
+  /* Setores check */
+  .setores-check-lista{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;max-height:180px;overflow-y:auto;}
+  /* Status/spinner */
   .status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
   .status-bar.show{display:flex;}
   .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
@@ -142,7 +141,7 @@
     .header{padding:12px 16px;}
     .container{padding:16px 12px 60px;}
     .hero-actions{flex-direction:column;}
-    .modal-grid-2,.modal-grid-3{grid-template-columns:1fr;}
+    .modal-grid-2{grid-template-columns:1fr;}
     .lista-item-actions{flex-direction:column;}
   }
 </style>
@@ -152,6 +151,7 @@
   <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
   <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Empresa</span></div>
 </div>
+
 <div class="container">
   <a href="empresas.html" class="voltar">← Voltar para empresas</a>
   <div class="hero" id="hero">
@@ -165,18 +165,19 @@
       <div class="hero-actions" id="hero-actions">
         <div style="position:relative;" id="menu-modulos">
           <button onclick="toggleModulos()" class="btn btn-edit" id="btn-modulos" style="display:none;">🧭 Módulos ▾</button>
-          <div id="dropdown-modulos" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:200px;z-index:999;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.6);">
-            <a id="btn-riscos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">⚠️ Riscos</a>
-            <a id="btn-exames" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🩺 Exames</a>
-            <a id="btn-treinamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🎓 Treinamentos</a>
-            <a id="btn-epis" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🥽 EPIs</a>
-            <a id="btn-medicoes" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">📊 Medições</a>
-            <a id="btn-equipamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🧯 Equipamentos</a>
-            <a id="btn-pt" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">📋 Permissões de Trabalho</a>
-            <a id="btn-inventarios" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🗂️ Inventários Técnicos</a>
-            <a id="btn-aet" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🪑 AET — Ergonomia</a>
-            <a id="btn-checklists" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">🔍 Checklists</a>
-            <a id="btn-acoes" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;transition:background .1s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">⚡ Ações</a>
+          <div id="dropdown-modulos" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:220px;z-index:999;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.6);">
+            <a id="btn-riscos"       href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">⚠️ Riscos</a>
+            <a id="btn-psicossocial" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🧠 Avaliação Psicossocial</a>
+            <a id="btn-exames"       href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🩺 Exames</a>
+            <a id="btn-treinamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🎓 Treinamentos</a>
+            <a id="btn-epis"         href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🥽 EPIs</a>
+            <a id="btn-medicoes"     href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">📊 Medições</a>
+            <a id="btn-equipamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🧯 Equipamentos</a>
+            <a id="btn-pt"           href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">📋 Permissões de Trabalho</a>
+            <a id="btn-inventarios"  href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🗂️ Inventários Técnicos</a>
+            <a id="btn-aet"          href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🪑 AET — Ergonomia</a>
+            <a id="btn-checklists"   href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🔍 Checklists</a>
+            <a id="btn-acoes"        href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">⚡ Ações</a>
           </div>
         </div>
         <button class="btn btn-danger" onclick="abrirModal()">Excluir</button>
@@ -185,6 +186,7 @@
     </div>
     <div class="status-bar" id="status-edit"></div>
   </div>
+
   <div class="tabs-wrap">
     <div class="tabs">
       <div class="tab active" data-aba="dados" onclick="mudarAba('dados')">Dados gerais</div>
@@ -193,39 +195,24 @@
       <div class="tab" data-aba="funcoes" onclick="mudarAba('funcoes')">Funções</div>
       <div class="tab" data-aba="funcionarios" onclick="mudarAba('funcionarios')">Funcionários</div>
     </div>
-    <div class="tab-content active" id="aba-dados">
-      <div class="section-label">Informações da empresa</div>
-      <div id="campos-dados"></div>
-    </div>
+    <div class="tab-content active" id="aba-dados"><div class="section-label">Informações da empresa</div><div id="campos-dados"></div></div>
     <div class="tab-content" id="aba-cnaes">
       <div class="tab-header"><div class="tab-header-title">CNAEs cadastrados</div></div>
       <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:flex-end;">
           <div>
             <label style="display:block;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Código CNAE</label>
-            <input type="text" id="cnae-codigo" placeholder="Ex: 0210-1/01" maxlength="10"
-              style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:9px 12px;outline:none;"
-              oninput="buscarCNAE()" onkeydown="if(event.key==='Enter')adicionarCNAE()">
+            <input type="text" id="cnae-codigo" placeholder="Ex: 4744-0/01" maxlength="10" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:9px 12px;outline:none;" oninput="buscarCNAE()" onkeydown="if(event.key==='Enter')adicionarCNAE()">
           </div>
           <div>
             <label style="display:block;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Tipo</label>
-            <select id="cnae-tipo" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-              <option value="Secundário">Secundário</option>
-              <option value="Principal">Principal</option>
-            </select>
+            <select id="cnae-tipo" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;"><option value="Secundário">Secundário</option><option value="Principal">Principal</option></select>
           </div>
           <div>
             <label style="display:block;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Grau de Risco</label>
-            <select id="cnae-gr" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-              <option value="">— GR —</option>
-              <option value="1">GR 1</option><option value="2">GR 2</option>
-              <option value="3">GR 3</option><option value="4">GR 4</option>
-            </select>
+            <select id="cnae-gr" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;"><option value="">— GR —</option><option value="1">GR 1</option><option value="2">GR 2</option><option value="3">GR 3</option><option value="4">GR 4</option></select>
           </div>
-          <button class="btn btn-primary" onclick="adicionarCNAE()" style="white-space:nowrap;">
-            <span class="spinner spinner-w" id="spinner-cnae"></span>
-            <span id="label-cnae">+ Adicionar</span>
-          </button>
+          <button class="btn btn-primary" onclick="adicionarCNAE()"><span class="spinner spinner-w" id="spinner-cnae"></span><span id="label-cnae">+ Adicionar</span></button>
         </div>
         <div id="cnae-descricao-preview" style="margin-top:8px;font-size:12px;color:var(--accent2);min-height:18px;"></div>
         <div class="status-bar" id="status-cnae" style="margin-top:8px;"></div>
@@ -233,18 +220,12 @@
       <div class="cnae-list" id="lista-cnaes"></div>
     </div>
     <div class="tab-content" id="aba-setores">
-      <div class="tab-header">
-        <div class="tab-header-title">Setores cadastrados</div>
-        <button class="btn btn-edit" onclick="abrirModalSetor()">+ Novo setor</button>
-      </div>
+      <div class="tab-header"><div class="tab-header-title">Setores cadastrados</div><button class="btn btn-edit" onclick="abrirModalSetor()">+ Novo setor</button></div>
       <div class="status-bar" id="status-setor"></div>
       <div id="lista-setores"></div>
     </div>
     <div class="tab-content" id="aba-funcoes">
-      <div class="tab-header">
-        <div class="tab-header-title">Funções cadastradas</div>
-        <button class="btn btn-edit" onclick="abrirModalFuncao()">+ Nova função</button>
-      </div>
+      <div class="tab-header"><div class="tab-header-title">Funções cadastradas</div><button class="btn btn-edit" onclick="abrirModalFuncao()">+ Nova função</button></div>
       <div class="status-bar" id="status-funcao"></div>
       <div id="lista-funcoes"></div>
     </div>
@@ -252,11 +233,8 @@
       <div class="tab-header">
         <div class="tab-header-title">Funcionários cadastrados</div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;">
-            <div class="toggle" id="toggle-desligados" onclick="toggleDesligados()"></div>
-            <span id="label-desligados">Ver desligados</span>
-          </label>
-          <a id="btn-novo-funcionario" class="btn btn-edit" href="funcionario_detalhe.html?empresa_id=X&novo=1">+ Novo funcionário</a>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;"><div class="toggle" id="toggle-desligados" onclick="toggleDesligados()"></div><span id="label-desligados">Ver desligados</span></label>
+          <a id="btn-novo-funcionario" class="btn btn-edit" href="#">+ Novo funcionário</a>
         </div>
       </div>
       <div class="status-bar" id="status-funcionario"></div>
@@ -276,10 +254,7 @@
     <input class="modal-input" type="text" id="motivo-exclusao" placeholder="Ex: Encerramento de contrato...">
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
-      <button class="btn" style="background:var(--danger);color:#fff;" onclick="confirmarExclusao()">
-        <span class="spinner spinner-w" id="spinner-excluir"></span>
-        <span id="label-excluir">Confirmar exclusão</span>
-      </button>
+      <button class="btn" style="background:var(--danger);color:#fff;" onclick="confirmarExclusao()"><span class="spinner spinner-w" id="spinner-excluir"></span><span id="label-excluir">Confirmar exclusão</span></button>
     </div>
     <div class="status-bar" id="status-excluir" style="margin-top:12px;"></div>
   </div>
@@ -290,25 +265,19 @@
   <div class="modal modal-lg">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
       <div style="font-size:16px;font-weight:500;" id="modal-setor-titulo">Novo setor</div>
-      <button onclick="fecharModalSetor()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;">×</button>
+      <button onclick="fecharModalSetor()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
     </div>
     <div class="modal-grid-2">
-      <div class="modal-field" style="grid-column:1/-1;">
-        <label>Nome do setor <span style="color:var(--accent);">*</span></label>
-        <input type="text" id="s-nome" placeholder="Ex: Produção, Administrativo, Manutenção...">
-      </div>
+      <div class="modal-field" style="grid-column:1/-1;"><label>Nome do setor *</label><input type="text" id="s-nome" placeholder="Ex: Produção, Administrativo..."></div>
       <div class="modal-field"><label>Responsável</label><input type="text" id="s-responsavel" placeholder="Nome do responsável"></div>
       <div class="modal-field"><label>Andar / Localização</label><input type="text" id="s-andar" placeholder="Ex: Térreo, 1º Andar, Galpão A"></div>
       <div class="modal-field"><label>Área (m²)</label><input type="number" id="s-area" placeholder="0" min="0" step="0.01"></div>
-      <div class="modal-field"><label>Nº de funcionários no setor</label><input type="number" id="s-num-funcionarios" placeholder="0" min="0"></div>
+      <div class="modal-field"><label>Nº de funcionários</label><input type="number" id="s-num-funcionarios" placeholder="0" min="0"></div>
       <div class="modal-field" style="grid-column:1/-1;"><label>Descrição</label><textarea id="s-descricao" placeholder="Descrição das atividades do setor..."></textarea></div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-cancel" onclick="fecharModalSetor()">Cancelar</button>
-      <button class="btn btn-save" id="btn-salvar-setor" onclick="salvarSetor()">
-        <span class="spinner" id="spinner-setor"></span>
-        <span id="label-salvar-setor">Salvar setor</span>
-      </button>
+      <button class="btn btn-save" id="btn-salvar-setor" onclick="salvarSetor()"><span class="spinner" id="spinner-setor"></span><span id="label-salvar-setor">Salvar setor</span></button>
     </div>
   </div>
 </div>
@@ -318,49 +287,41 @@
   <div class="modal modal-lg">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
       <div style="font-size:16px;font-weight:500;" id="modal-funcao-titulo">Nova função</div>
-      <button onclick="fecharModalFuncao()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;">×</button>
+      <button onclick="fecharModalFuncao()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
     </div>
     <div class="modal-grid-2">
-      <div class="modal-field"><label>Nome da função <span style="color:var(--accent);">*</span></label><input type="text" id="f-nome" placeholder="Ex: Operador de Máquina, Técnico de SST..."></div>
+      <div class="modal-field"><label>Nome da função *</label><input type="text" id="f-nome" placeholder="Ex: Operador de Máquina..."></div>
       <div class="modal-field">
         <label>Turno</label>
-        <select id="f-turno">
-          <option value="">— Selecione —</option>
-          <option>Diurno</option><option>Noturno</option><option>Misto</option>
-          <option>12x36</option><option>6x1</option><option>5x2</option>
-        </select>
+        <select id="f-turno"><option value="">— Selecione —</option><option>Diurno</option><option>Noturno</option><option>Misto</option><option>12x36</option><option>6x1</option><option>5x2</option></select>
       </div>
       <div class="modal-field" style="grid-column:1/-1;">
-        <label>Código CBO</label>
+        <label>Código CBO — busca na Classificação Brasileira de Ocupações (MTE)</label>
         <div class="cbo-wrap">
-          <input type="text" id="f-cbo" placeholder="Digite o código ou nome da ocupação..." autocomplete="off" oninput="filtrarCBO()" onkeydown="navCBO(event)">
+          <input type="text" id="f-cbo" placeholder="Digite o código (ex: 521105) ou nome da ocupação..." autocomplete="off" oninput="filtrarCBO()" onkeydown="navCBO(event)">
           <div class="cbo-dropdown" id="cbo-dropdown"></div>
         </div>
+        <div class="cbo-dica" id="cbo-dica">✓ Descrição preenchida automaticamente com base na CBO oficial. Você pode editar livremente para adequar à realidade da empresa.</div>
       </div>
       <div class="modal-field" style="grid-column:1/-1;">
-        <label>Setores vinculados <span style="color:var(--accent);">*</span></label>
-        <div id="f-setores-lista" style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;"></div>
+        <label>Setores vinculados *</label>
+        <div class="setores-check-lista" id="f-setores-lista"></div>
         <div id="f-setores-erro" style="font-size:11px;color:var(--danger);margin-top:4px;display:none;">Selecione ao menos um setor.</div>
       </div>
       <div class="modal-field">
         <label>Escolaridade mínima</label>
-        <select id="f-escolaridade">
-          <option value="">— Selecione —</option>
-          <option>Fundamental incompleto</option><option>Fundamental completo</option>
-          <option>Médio incompleto</option><option>Médio completo</option>
-          <option>Técnico</option><option>Superior incompleto</option>
-          <option>Superior completo</option><option>Pós-graduação</option>
-        </select>
+        <select id="f-escolaridade"><option value="">— Selecione —</option><option>Fundamental incompleto</option><option>Fundamental completo</option><option>Médio incompleto</option><option>Médio completo</option><option>Técnico</option><option>Superior incompleto</option><option>Superior completo</option><option>Pós-graduação</option></select>
       </div>
-      <div class="modal-field" style="grid-column:1/-1;"><label>Descrição</label><textarea id="f-descricao" placeholder="Descrição das atividades da função..."></textarea></div>
+      <div class="modal-field" style="grid-column:1/-1;">
+        <label>Descrição da função</label>
+        <textarea id="f-descricao" placeholder="Ao selecionar um CBO, este campo será preenchido automaticamente com a descrição oficial. Edite conforme necessário." style="min-height:100px;"></textarea>
+      </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-cancel" onclick="fecharModalFuncao()">Cancelar</button>
-      <button class="btn btn-save" id="btn-salvar-funcao" onclick="salvarFuncao()">
-        <span class="spinner" id="spinner-funcao"></span>
-        <span id="label-salvar-funcao">Salvar função</span>
-      </button>
+      <button class="btn btn-save" id="btn-salvar-funcao" onclick="salvarFuncao()"><span class="spinner" id="spinner-funcao"></span><span id="label-salvar-funcao">Salvar função</span></button>
     </div>
+    <div class="status-bar" id="status-funcao-modal"></div>
   </div>
 </div>
 
@@ -372,36 +333,124 @@
     <div class="modal-desc" id="desc-confirmar">Esta ação não pode ser desfeita.</div>
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="fecharModalConfirmar()">Cancelar</button>
-      <button class="btn" style="background:var(--danger);color:#fff;" id="btn-confirmar-exclusao">
-        <span class="spinner spinner-w" id="spinner-confirmar"></span>
-        <span id="label-confirmar">Excluir</span>
-      </button>
+      <button class="btn" style="background:var(--danger);color:#fff;" id="btn-confirmar-exclusao"><span class="spinner spinner-w" id="spinner-confirmar"></span><span id="label-confirmar">Excluir</span></button>
     </div>
     <div class="status-bar" id="status-confirmar" style="margin-top:12px;"></div>
   </div>
 </div>
 
 <script>
-const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
-const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
-const token = localStorage.getItem('sgs_token');
-if (!token) window.location.href = 'login.html';
-const params = new URLSearchParams(window.location.search);
-const empresaId = params.get('id');
-if (!empresaId) window.location.href = 'empresas.html';
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const CBO_API='https://servicodados.ibge.gov.br/api/v2/cbo';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('id');
+if(!empresaId)window.location.href='empresas.html';
 
-let empresa=null, cnaes=[], setores=[], funcoes=[], modoEdicao=false;
-let setorEditandoId=null, funcaoEditandoId=null;
+let empresa=null,cnaes=[],setores=[],funcoes=[],modoEdicao=false;
+let setorEditandoId=null,funcaoEditandoId=null;
+let cboTimer=null,cboIdx=-1,cboAutoPreenchido=false;
 
 function iniciais(n){if(!n)return'?';const p=n.trim().split(' ').filter(w=>w.length>2);return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():n.slice(0,2).toUpperCase();}
 const grInfo={1:{cls:'gr1',label:'GR 1'},2:{cls:'gr2',label:'GR 2'},3:{cls:'gr3',label:'GR 3'},4:{cls:'gr4',label:'GR 4'}};
-function toggleModal(id){document.getElementById(id).classList.toggle('on');}
-function getToggle(id){return document.getElementById(id).classList.contains('on');}
-function setToggle(id,v){const el=document.getElementById(id);if(el){v?el.classList.add('on'):el.classList.remove('on');}}
-function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;const icons={info:'↻',success:'✓',error:'✕'};el.className='status-bar show '+tipo;el.innerHTML=`<span>${icons[tipo]}</span><span>${msg}</span>`;}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className='status-bar show '+tipo;el.innerHTML=`<span>${{info:'↻',success:'✓',error:'✕'}[tipo]}</span><span>${msg}</span>`;}
 function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+// ── CBO — BUSCA EM TEMPO REAL NA API DO MTE ───────────────────
+function filtrarCBO(){
+  const termo=document.getElementById('f-cbo').value.trim();
+  const dd=document.getElementById('cbo-dropdown');
+  cboIdx=-1;
+  cboAutoPreenchido=false;
+  document.getElementById('cbo-dica').classList.remove('show');
+  if(!termo||termo.length<2){dd.classList.remove('show');return;}
+  clearTimeout(cboTimer);
+  dd.innerHTML=`<div class="cbo-msg"><div style="width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;"></div>Buscando na CBO...</div>`;
+  dd.classList.add('show');
+  cboTimer=setTimeout(()=>buscarCBO(termo),450);
+}
+
+async function buscarCBO(termo){
+  const dd=document.getElementById('cbo-dropdown');
+  try{
+    const ehCodigo=/^\d+$/.test(termo.replace(/\D/g,''))&&termo.replace(/\D/g,'').length>=4;
+    let resultados=[];
+
+    if(ehCodigo){
+      // Busca por código
+      const codigo=termo.replace(/\D/g,'');
+      const res=await fetch(`${CBO_API}/ocupacoes/${codigo}`);
+      if(res.ok){const d=await res.json();if(d&&d.id)resultados=[d];}
+      if(!resultados.length){
+        const res2=await fetch(`${CBO_API}/subclasses/${codigo}`);
+        if(res2.ok){const d=await res2.json();if(Array.isArray(d))resultados=d.slice(0,10);else if(d&&d.id)resultados=[d];}
+      }
+    }
+
+    if(!resultados.length){
+      // Busca por nome
+      const endpoints=[
+        `${CBO_API}/ocupacoes?busca=${encodeURIComponent(termo)}`,
+        `${CBO_API}/subclasses?busca=${encodeURIComponent(termo)}`,
+      ];
+      for(const url of endpoints){
+        try{const r=await fetch(url);if(r.ok){const d=await r.json();if(Array.isArray(d)&&d.length){resultados=d.slice(0,15);break;}}}catch(e){}
+      }
+    }
+
+    if(!resultados.length){
+      dd.innerHTML=`<div class="cbo-msg">Nenhuma ocupação encontrada para "${escHtml(termo)}"</div>`;
+      return;
+    }
+
+    dd.innerHTML=resultados.map((r,i)=>{
+      const codigo=r.codigo||r.id||'';
+      const nome=r.titulo||r.descricao||r.nome||'';
+      const atividades=r.descricao_sumaria||r.descricao_atividades||'';
+      // Escapa aspas simples para uso em onclick
+      const nomeEsc=nome.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const ativEsc=atividades.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return`<div class="cbo-option" id="cbo-opt-${i}" onclick="selecionarCBO('${codigo}','${nomeEsc}','${ativEsc}')">
+        <div class="cbo-code">${escHtml(String(codigo))}</div>
+        <div class="cbo-nome">${escHtml(nome)}</div>
+        ${atividades?`<div class="cbo-atividades">${escHtml(atividades.slice(0,120))}${atividades.length>120?'…':''}</div>`:''}
+      </div>`;
+    }).join('');
+    dd.classList.add('show');
+  }catch(e){
+    dd.innerHTML=`<div class="cbo-msg">Erro na busca. Verifique sua conexão.</div>`;
+  }
+}
+
+function selecionarCBO(codigo,nome,atividades){
+  document.getElementById('f-cbo').value=`${codigo} — ${nome}`;
+  document.getElementById('cbo-dropdown').classList.remove('show');
+  cboIdx=-1;
+  // Preenche descrição automaticamente se estiver vazia ou foi preenchida antes pelo CBO
+  const desc=document.getElementById('f-descricao');
+  if(atividades&&(!desc.value.trim()||cboAutoPreenchido)){
+    desc.value=atividades;
+    cboAutoPreenchido=true;
+    document.getElementById('cbo-dica').classList.add('show');
+  }
+}
+
+function navCBO(e){
+  const dd=document.getElementById('cbo-dropdown');
+  const opcoes=dd.querySelectorAll('.cbo-option');
+  if(!dd.classList.contains('show')||!opcoes.length)return;
+  if(e.key==='ArrowDown'){e.preventDefault();cboIdx=Math.min(cboIdx+1,opcoes.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();cboIdx=Math.max(cboIdx-1,0);}
+  else if(e.key==='Enter'&&cboIdx>=0){e.preventDefault();opcoes[cboIdx].click();return;}
+  else if(e.key==='Escape'){dd.classList.remove('show');return;}
+  opcoes.forEach((o,i)=>o.classList.toggle('active',i===cboIdx));
+  if(cboIdx>=0)opcoes[cboIdx].scrollIntoView({block:'nearest'});
+}
+
+// ── DADOS GERAIS ──────────────────────────────────────────────
 function renderHero(){
   const nome=empresa.nome_fantasia||empresa.razao_social;
   document.getElementById('hero-avatar').textContent=iniciais(nome);
@@ -429,16 +478,15 @@ function renderCampos(){
   ];
   const c=document.getElementById('campos-dados');
   c.innerHTML=campos.map(f=>{
-    const val=empresa[f.key];
-    const disp=val!==null&&val!==undefined&&val!==''?val:'—';
+    const val=empresa[f.key];const disp=val!==null&&val!==undefined&&val!==''?val:'—';
     if(!modoEdicao){
       let d=disp;
       if(f.type==='toggle')d=val?'Sim':'Não';
       if(f.key==='grau_risco'&&val)d=grInfo[val]?.label||val;
-      if(f.type==='readonly'){const cor=val>0?'var(--accent2)':'var(--text2)';return`<div class="field-row"><span class="field-label">${f.label}</span><span class="field-val" style="color:${cor};font-weight:600;">${disp}</span></div>`;}
+      if(f.type==='readonly'){return`<div class="field-row"><span class="field-label">${f.label}</span><span class="field-val" style="color:${val>0?'var(--accent2)':'var(--text2)'};font-weight:600;">${disp}</span></div>`;}
       return`<div class="field-row"><span class="field-label">${f.label}</span><span class="field-val">${d}</span></div>`;
     }
-    if(f.type==='readonly')return`<div class="field-row"><span class="field-label">${f.label}</span><span class="field-val" style="color:var(--accent2);font-weight:600;">${disp} <span style="font-size:10px;color:var(--text3);">(calculado automaticamente)</span></span></div>`;
+    if(f.type==='readonly')return`<div class="field-row"><span class="field-label">${f.label}</span><span class="field-val" style="color:var(--accent2);font-weight:600;">${disp} <span style="font-size:10px;color:var(--text3);">(calculado)</span></span></div>`;
     if(f.type==='toggle')return`<div class="field-row"><span class="field-label">${f.label}</span><div class="toggle-wrap"><div class="toggle ${val?'on':''}" id="toggle-${f.key}" onclick="toggleField('${f.key}')"></div><span style="font-size:12px;color:var(--text2)" id="toggle-label-${f.key}">${val?'Sim':'Não'}</span></div></div>`;
     if(f.type==='select'){const opts=f.options.map(o=>{const v=typeof o==='object'?o.v:o;const l=typeof o==='object'?o.l:o;return`<option value="${v}" ${val==v?'selected':''}>${l}</option>`;}).join('');return`<div class="field-row"><span class="field-label">${f.label}</span><select class="field-select" id="field-${f.key}"><option value="">—</option>${opts}</select></div>`;}
     return`<div class="field-row"><span class="field-label">${f.label}</span><input class="field-input" type="${f.type}" id="field-${f.key}" value="${val||''}"></div>`;
@@ -450,7 +498,7 @@ function renderCNAEs(){
   if(!cnaes.length){lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">📋</div><div class="empty-tab-title">Nenhum CNAE cadastrado</div></div>`;return;}
   lista.innerHTML=cnaes.map(c=>{
     const gr=c.grau_risco?`<span class="badge ${grInfo[c.grau_risco]?.cls||'gr2'}">${grInfo[c.grau_risco]?.label||''}</span>`:'';
-    return`<div class="cnae-item"><span class="cnae-tipo ${c.tipo==='Principal'?'tipo-p':'tipo-s'}">${c.tipo}</span><span class="cnae-code">${c.cnae}</span><span class="cnae-desc">${c.descricao||''}</span>${gr}<button onclick="removerCNAE(${c.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:2px 6px;flex-shrink:0;">×</button></div>`;
+    return`<div class="cnae-item"><span class="cnae-tipo ${c.tipo==='Principal'?'tipo-p':'tipo-s'}">${c.tipo}</span><span class="cnae-code">${c.cnae}</span><span class="cnae-desc">${c.descricao||''}</span>${gr}<button onclick="removerCNAE(${c.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:2px 6px;">×</button></div>`;
   }).join('');
 }
 
@@ -475,38 +523,29 @@ async function adicionarCNAE(){
   const gr=document.getElementById('cnae-gr').value||null;
   const preview=document.getElementById('cnae-descricao-preview');
   const descricao=preview.dataset.descricao||codigoRaw;
-  if(cnaes.find(c=>c.cnae.replace(/\D/g,'')=== codigo)){setStatus('status-cnae','error','Este CNAE já está cadastrado.');setTimeout(()=>clearStatus('status-cnae'),3000);return;}
+  if(cnaes.find(c=>c.cnae.replace(/\D/g,'')===codigo)){setStatus('status-cnae','error','Este CNAE já está cadastrado.');setTimeout(()=>clearStatus('status-cnae'),3000);return;}
   document.getElementById('spinner-cnae').className='spinner spinner-w show';
   document.getElementById('label-cnae').textContent='Salvando...';
   try{
     const res=await fetch(`${SUPA_URL}/rest/v1/empresa_cnaes`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify({empresa_id:parseInt(empresaId),cnae:codigoRaw,descricao,tipo,grau_risco:gr?parseInt(gr):null})});
-    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar');}
-    const data=await res.json();
-    cnaes.push(data[0]);
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
+    const data=await res.json();cnaes.push(data[0]);
     if(tipo==='Principal'&&gr){await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({grau_risco:parseInt(gr)})});empresa.grau_risco=parseInt(gr);renderHero();}
     renderCNAEs();
-    document.getElementById('cnae-codigo').value='';
-    document.getElementById('cnae-descricao-preview').textContent='';
-    document.getElementById('cnae-descricao-preview').dataset.descricao='';
-    document.getElementById('cnae-gr').value='';
-    setStatus('status-cnae','success','CNAE adicionado com sucesso!');
-    setTimeout(()=>clearStatus('status-cnae'),3000);
+    document.getElementById('cnae-codigo').value='';document.getElementById('cnae-descricao-preview').textContent='';document.getElementById('cnae-descricao-preview').dataset.descricao='';document.getElementById('cnae-gr').value='';
+    setStatus('status-cnae','success','CNAE adicionado!');setTimeout(()=>clearStatus('status-cnae'),3000);
   }catch(e){setStatus('status-cnae','error',`Erro: ${e.message}`);}
   finally{document.getElementById('spinner-cnae').className='spinner spinner-w';document.getElementById('label-cnae').textContent='+ Adicionar';}
 }
 
 async function removerCNAE(id){
   if(!confirm('Remover este CNAE?'))return;
-  try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?id=eq.${id}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-    if(!res.ok)throw new Error('Erro ao remover');
-    cnaes=cnaes.filter(c=>c.id!==id);renderCNAEs();
-    setStatus('status-cnae','success','CNAE removido!');setTimeout(()=>clearStatus('status-cnae'),3000);
-  }catch(e){setStatus('status-cnae','error',`Erro: ${e.message}`);}
+  try{await fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?id=eq.${id}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});cnaes=cnaes.filter(c=>c.id!==id);renderCNAEs();}
+  catch(e){alert('Erro ao remover.');}
 }
 
 function mudarAba(aba){
-  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.toggle('active', t.dataset.aba===aba));
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.toggle('active',t.dataset.aba===aba));
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.getElementById(`aba-${aba}`).classList.add('active');
   if(aba==='setores')carregarSetores();
@@ -514,69 +553,35 @@ function mudarAba(aba){
   if(aba==='funcionarios')carregarFuncionarios();
 }
 
-function modoEditar(){
-  modoEdicao=true;renderCampos();
-  document.getElementById('hero-actions').innerHTML=`<button class="btn btn-cancel" onclick="cancelarEdicao()">Cancelar</button><button class="btn btn-save" id="btn-salvar" onclick="salvarEdicao()"><span class="spinner" id="spinner-save"></span><span id="label-save">Salvar</span></button>`;
-}
-
-function cancelarEdicao(){
-  modoEdicao=false;renderCampos();
-  document.getElementById('hero-actions').innerHTML=`<button class="btn btn-danger" onclick="abrirModal()">Excluir</button><button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
-  clearStatus('status-edit');
-}
-
-function toggleField(key){
-  const t=document.getElementById(`toggle-${key}`);
-  const l=document.getElementById(`toggle-label-${key}`);
-  const on=t.classList.toggle('on');
-  l.textContent=on?'Sim':'Não';
-}
-
+function modoEditar(){modoEdicao=true;renderCampos();document.getElementById('hero-actions').innerHTML=`<button class="btn btn-cancel" onclick="cancelarEdicao()">Cancelar</button><button class="btn btn-save" id="btn-salvar" onclick="salvarEdicao()"><span class="spinner" id="spinner-save"></span><span id="label-save">Salvar</span></button>`;}
+function cancelarEdicao(){modoEdicao=false;renderCampos();document.getElementById('hero-actions').innerHTML=`<button class="btn btn-danger" onclick="abrirModal()">Excluir</button><button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;clearStatus('status-edit');}
+function toggleField(key){const t=document.getElementById(`toggle-${key}`);const l=document.getElementById(`toggle-label-${key}`);const on=t.classList.toggle('on');l.textContent=on?'Sim':'Não';}
 function getFieldVal(key,type){
   if(type==='toggle')return document.getElementById(`toggle-${key}`)?.classList.contains('on');
-  const el=document.getElementById(`field-${key}`);
-  if(!el)return empresa[key];
+  const el=document.getElementById(`field-${key}`);if(!el)return empresa[key];
   if(type==='number')return el.value?parseInt(el.value):null;
   return el.value||null;
 }
 
 async function salvarEdicao(){
-  document.getElementById('btn-salvar').disabled=true;
-  document.getElementById('spinner-save').className='spinner show';
-  document.getElementById('label-save').textContent='Salvando...';
-  const campos=[
-    {key:'telefone',type:'text'},{key:'email',type:'email'},{key:'endereco',type:'text'},
-    {key:'cidade',type:'text'},{key:'estado',type:'select'},{key:'cep',type:'text'},
-    {key:'grau_risco',type:'select'},{key:'total_funcionarios_previsto',type:'number'},
-    {key:'tipo_atividade',type:'select'},{key:'ativo',type:'toggle'}
-  ];
-  const updates={};
-  campos.forEach(c=>{updates[c.key]=getFieldVal(c.key,c.type);});
+  document.getElementById('btn-salvar').disabled=true;document.getElementById('spinner-save').className='spinner show';document.getElementById('label-save').textContent='Salvando...';
+  const campos=[{key:'telefone',type:'text'},{key:'email',type:'email'},{key:'endereco',type:'text'},{key:'cidade',type:'text'},{key:'estado',type:'select'},{key:'cep',type:'text'},{key:'grau_risco',type:'select'},{key:'total_funcionarios_previsto',type:'number'},{key:'tipo_atividade',type:'select'},{key:'ativo',type:'toggle'}];
+  const updates={};campos.forEach(c=>{updates[c.key]=getFieldVal(c.key,c.type);});
   updates.atividade_rural=updates.tipo_atividade==='Rural';
   if(updates.total_funcionarios_previsto!==null)updates.total_funcionarios_previsto_base=updates.total_funcionarios_previsto;
   updates.atualizado_em=new Date().toISOString();
   try{
     const res=await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(updates)});
-    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar');}
-    const data=await res.json();
-    empresa={...empresa,...data[0]};
-    if(updates.grau_risco!==undefined||updates.total_funcionarios_previsto!==undefined){
-      try{await fetch(`${SUPA_URL}/rest/v1/rpc/calcular_sesmt_empresa`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({p_empresa_id:parseInt(empresaId)})});}catch(e){console.warn('SESMT não recalculado:',e);}
-    }
+    if(!res.ok){const e=await res.json();throw new Error(e.message);}
+    empresa={...empresa,...(await res.json())[0]};
+    try{await fetch(`${SUPA_URL}/rest/v1/rpc/calcular_sesmt_empresa`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({p_empresa_id:parseInt(empresaId)})});}catch(e){}
     modoEdicao=false;renderHero();renderCampos();
     document.getElementById('hero-actions').innerHTML=`<button class="btn btn-danger" onclick="abrirModal()">Excluir</button><button class="btn btn-edit" onclick="modoEditar()">Editar</button>`;
-    const s=document.getElementById('status-edit');s.className='status-bar show success';s.innerHTML='✓ Dados salvos com sucesso!';
-    setTimeout(()=>{s.className='status-bar';},3000);
-  }catch(e){
-    setStatus('status-edit','error',e.message);
-    document.getElementById('btn-salvar').disabled=false;
-    document.getElementById('spinner-save').className='spinner';
-    document.getElementById('label-save').textContent='Salvar';
-  }
+    const s=document.getElementById('status-edit');s.className='status-bar show success';s.innerHTML='✓ Dados salvos!';setTimeout(()=>{s.className='status-bar';},3000);
+  }catch(e){setStatus('status-edit','error',e.message);document.getElementById('btn-salvar').disabled=false;document.getElementById('spinner-save').className='spinner';document.getElementById('label-save').textContent='Salvar';}
 }
 
 function toggleModulos(){const d=document.getElementById('dropdown-modulos');d.style.display=d.style.display==='none'?'block':'none';}
-document.addEventListener('click',function(e){if(!document.getElementById('menu-modulos')?.contains(e.target))document.getElementById('dropdown-modulos').style.display='none';});
 
 async function carregarEmpresa(){
   try{
@@ -584,57 +589,40 @@ async function carregarEmpresa(){
       fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
       fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?empresa_id=eq.${empresaId}&select=*&order=tipo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
     ]);
-    const empData=await resEmp.json();
-    const cnaesData=await resCnaes.json();
-    if(!empData.length){window.location.href='empresas.html';return;}
-    empresa=empData[0];cnaes=cnaesData;
+    empresa=(await resEmp.json())[0];cnaes=await resCnaes.json();
+    if(!empresa){window.location.href='empresas.html';return;}
     renderHero();renderCampos();renderCNAEs();
     const modulos=[
-      {id:'btn-riscos',href:`riscos.html?empresa_id=${empresaId}`},
-      {id:'btn-exames',href:`exames.html?empresa_id=${empresaId}`},
-      {id:'btn-treinamentos',href:`treinamentos.html?empresa_id=${empresaId}`},
-      {id:'btn-epis',href:`epis.html?empresa_id=${empresaId}`},
-      {id:'btn-medicoes',href:`medicoes.html?empresa_id=${empresaId}`},
-      {id:'btn-equipamentos',href:`equipamentos_seg.html?empresa_id=${empresaId}`},
-      {id:'btn-pt',href:`permissoes_trabalho.html?empresa_id=${empresaId}`},
-      {id:'btn-inventarios',href:`inventarios.html?empresa_id=${empresaId}`},
-      {id:'btn-aet',href:`aet.html?empresa_id=${empresaId}`},
-      {id:'btn-checklists',href:`checklists.html?empresa_id=${empresaId}`},
-      {id:'btn-acoes',href:`acoes.html?empresa_id=${empresaId}`},
+      {id:'btn-riscos',       href:`riscos.html?empresa_id=${empresaId}`},
+      {id:'btn-psicossocial', href:`psicossocial_campanhas.html?empresa_id=${empresaId}`},
+      {id:'btn-exames',       href:`exames.html?empresa_id=${empresaId}`},
+      {id:'btn-treinamentos', href:`treinamentos.html?empresa_id=${empresaId}`},
+      {id:'btn-epis',         href:`epis.html?empresa_id=${empresaId}`},
+      {id:'btn-medicoes',     href:`medicoes.html?empresa_id=${empresaId}`},
+      {id:'btn-equipamentos', href:`equipamentos_seg.html?empresa_id=${empresaId}`},
+      {id:'btn-pt',           href:`permissoes_trabalho.html?empresa_id=${empresaId}`},
+      {id:'btn-inventarios',  href:`inventarios.html?empresa_id=${empresaId}`},
+      {id:'btn-aet',          href:`aet.html?empresa_id=${empresaId}`},
+      {id:'btn-checklists',   href:`checklists.html?empresa_id=${empresaId}`},
+      {id:'btn-acoes',        href:`acoes.html?empresa_id=${empresaId}`},
     ];
     modulos.forEach(m=>{const el=document.getElementById(m.id);if(el){el.href=m.href;el.style.display='flex';}});
-    const btnModulos=document.getElementById('btn-modulos');
-    if(btnModulos)btnModulos.style.display='inline-flex';
+    document.getElementById('btn-modulos').style.display='inline-flex';
+    document.getElementById('btn-novo-funcionario').href=`funcionario_detalhe.html?empresa_id=${empresaId}&novo=1`;
   }catch(e){console.error(e);}
 }
 
 function abrirModal(){document.getElementById('modal-excluir').classList.add('show');document.getElementById('motivo-exclusao').value='';clearStatus('status-excluir');}
 function fecharModal(){document.getElementById('modal-excluir').classList.remove('show');}
 async function confirmarExclusao(){
-  const motivo=document.getElementById('motivo-exclusao').value.trim();
-  document.getElementById('spinner-excluir').className='spinner spinner-w show';
-  document.getElementById('label-excluir').textContent='Inativando...';
-  document.querySelector('#modal-excluir .btn[onclick="confirmarExclusao()"]').disabled=true;
-  try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false,data_inativacao:new Date().toISOString(),motivo_inativacao:motivo||'Não informado'})});
-    if(!res.ok)throw new Error('Erro ao inativar empresa');
-    fecharModal();setTimeout(()=>{window.location.href='empresas.html';},800);
-  }catch(e){
-    setStatus('status-excluir','error',e.message);
-    document.getElementById('spinner-excluir').className='spinner spinner-w';
-    document.getElementById('label-excluir').textContent='Confirmar exclusão';
-    document.querySelector('#modal-excluir .btn[onclick="confirmarExclusao()"]').disabled=false;
-  }
+  document.getElementById('spinner-excluir').className='spinner spinner-w show';document.getElementById('label-excluir').textContent='Inativando...';
+  try{await fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false,data_inativacao:new Date().toISOString(),motivo_inativacao:document.getElementById('motivo-exclusao').value||'Não informado'})});fecharModal();setTimeout(()=>{window.location.href='empresas.html';},800);}
+  catch(e){setStatus('status-excluir','error',e.message);document.getElementById('spinner-excluir').className='spinner spinner-w';document.getElementById('label-excluir').textContent='Confirmar exclusão';}
 }
 
-// ── SETORES ──────────────────────────────────────────
+// ── SETORES ───────────────────────────────────────────────────
 async function carregarSetores(){
-  try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-    setores=await res.json();
-    renderSetores();
-    popularCheckboxSetores([]);
-  }catch(e){console.error(e);}
+  try{const res=await fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});setores=await res.json();renderSetores();}catch(e){console.error(e);}
 }
 
 function renderSetores(){
@@ -642,128 +630,63 @@ function renderSetores(){
   if(!setores.length){lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">🗂️</div><div class="empty-tab-title">Nenhum setor cadastrado</div></div>`;return;}
   lista.innerHTML=setores.map(s=>{
     const sub=[s.andar,s.responsavel_setor].filter(Boolean).join(' · ')||s.descricao?.slice(0,60)||'—';
-    const previsto=s.num_funcionarios_previsto||0;
-    const cadastrado=s.num_funcionarios_cadastrados||0;
+    const previsto=s.num_funcionarios_previsto||0,cadastrado=s.num_funcionarios_cadastrados||0;
     const funcBadge=previsto>0?`<span class="mini-badge mb-info">${cadastrado}/${previsto} func</span>`:cadastrado>0?`<span class="mini-badge mb-info">${cadastrado} func</span>`:'';
-    return`<div class="lista-item">
-      <div class="lista-item-icon icon-setor">🗂️</div>
-      <div class="lista-item-info">
-        <div class="lista-item-nome">${escHtml(s.nome_setor)}</div>
-        <div class="lista-item-sub">${escHtml(sub)}</div>
-        <div style="margin-top:6px;">${funcBadge}</div>
-      </div>
-      <div class="lista-item-actions">
-        <button class="btn btn-edit btn-sm" onclick="editarSetor(${s.id})">Editar</button>
-        <button class="btn btn-danger btn-sm" onclick="excluirSetorConfirmar(${s.id},'${escHtml(s.nome_setor)}')">Excluir</button>
-      </div>
-    </div>`;
+    return`<div class="lista-item"><div class="lista-item-icon icon-setor">🗂️</div><div class="lista-item-info"><div class="lista-item-nome">${escHtml(s.nome_setor)}</div><div class="lista-item-sub">${escHtml(sub)}</div><div style="margin-top:6px;">${funcBadge}</div></div><div class="lista-item-actions"><button class="btn btn-edit btn-sm" onclick="editarSetor(${s.id})">Editar</button><button class="btn btn-danger btn-sm" onclick="excluirSetorConfirmar(${s.id},'${escHtml(s.nome_setor)}')">Excluir</button></div></div>`;
   }).join('');
 }
 
 function popularCheckboxSetores(selecionados=[]){
-  const lista=document.getElementById('f-setores-lista');
-  if(!lista)return;
-  if(!setores.length){lista.innerHTML=`<div style="font-size:12px;color:var(--text3);padding:4px 0;">Nenhum setor cadastrado.</div>`;return;}
+  const lista=document.getElementById('f-setores-lista');if(!lista)return;
+  if(!setores.length){lista.innerHTML=`<div style="font-size:12px;color:var(--text3);padding:8px 0;">Nenhum setor cadastrado.</div>`;return;}
   lista.innerHTML=setores.map(s=>{
     const vinculo=selecionados.find(x=>(typeof x==='object'?x.setor_id:x)===s.id);
-    const checked=!!vinculo;
-    const qtd=typeof vinculo==='object'?vinculo.num_funcionarios_previsto||'':'';
-    return`<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:0;">
-        <input type="checkbox" value="${s.id}" ${checked?'checked':''}
-          style="width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;"
-          onchange="toggleSetorQtd(${s.id},this.checked)">
+    const checked=!!vinculo;const qtd=typeof vinculo==='object'?vinculo.num_funcionarios_previsto||'':'';
+    return`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;">
+        <input type="checkbox" value="${s.id}" ${checked?'checked':''} style="width:15px;height:15px;accent-color:var(--accent);" onchange="toggleSetorQtd(${s.id},this.checked)">
         <span style="font-size:13px;">${escHtml(s.nome_setor)}</span>
       </label>
-      <div id="qtd-setor-${s.id}" style="display:${checked?'flex':'none'};align-items:center;gap:6px;flex-shrink:0;">
+      <div id="qtd-setor-${s.id}" style="display:${checked?'flex':'none'};align-items:center;gap:6px;">
         <span style="font-size:11px;color:var(--text3);">Func. previsto:</span>
-        <input type="number" id="num-setor-${s.id}" value="${qtd}" min="0" placeholder="0"
-          style="width:64px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:4px 8px;outline:none;text-align:center;">
+        <input type="number" id="num-setor-${s.id}" value="${qtd}" min="0" placeholder="0" style="width:64px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:4px 8px;outline:none;text-align:center;">
       </div>
     </div>`;
   }).join('');
 }
 
-function toggleSetorQtd(setorId,checked){
-  const wrap=document.getElementById(`qtd-setor-${setorId}`);
-  if(wrap)wrap.style.display=checked?'flex':'none';
-  if(!checked){const inp=document.getElementById(`num-setor-${setorId}`);if(inp)inp.value='';}
-}
+function toggleSetorQtd(id,checked){const w=document.getElementById(`qtd-setor-${id}`);if(w)w.style.display=checked?'flex':'none';if(!checked){const i=document.getElementById(`num-setor-${id}`);if(i)i.value='';}}
+function getSetoresSelecionados(){const lista=document.getElementById('f-setores-lista');if(!lista)return[];return[...lista.querySelectorAll('input[type=checkbox]:checked')].map(el=>{const id=parseInt(el.value);const qtdEl=document.getElementById(`num-setor-${id}`);return{setor_id:id,num_funcionarios_previsto:qtdEl&&qtdEl.value?parseInt(qtdEl.value):0};});}
 
-function getSetoresSelecionados(){
-  const lista=document.getElementById('f-setores-lista');
-  if(!lista)return[];
-  return[...lista.querySelectorAll('input[type=checkbox]:checked')].map(el=>{
-    const id=parseInt(el.value);
-    const qtdEl=document.getElementById(`num-setor-${id}`);
-    return{setor_id:id,num_funcionarios_previsto:qtdEl&&qtdEl.value?parseInt(qtdEl.value):0};
-  });
-}
-
-function popularSelectSetores(){}
-
-function limparFormSetor(){
-  ['s-nome','s-responsavel','s-andar','s-descricao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['s-area','s-num-funcionarios'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-}
-
-function abrirModalSetor(){
-  setorEditandoId=null;limparFormSetor();
-  document.getElementById('modal-setor-titulo').textContent='Novo setor';
-  document.getElementById('label-salvar-setor').textContent='Salvar setor';
-  document.getElementById('modal-setor').classList.add('show');
-}
-
+function limparFormSetor(){['s-nome','s-responsavel','s-andar','s-descricao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});['s-area','s-num-funcionarios'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
+function abrirModalSetor(){setorEditandoId=null;limparFormSetor();document.getElementById('modal-setor-titulo').textContent='Novo setor';document.getElementById('label-salvar-setor').textContent='Salvar setor';document.getElementById('modal-setor').classList.add('show');}
 function fecharModalSetor(){document.getElementById('modal-setor').classList.remove('show');setorEditandoId=null;}
-
 function editarSetor(id){
-  const s=setores.find(x=>x.id===id);if(!s)return;
-  setorEditandoId=id;limparFormSetor();
-  document.getElementById('s-nome').value=s.nome_setor||'';
-  document.getElementById('s-responsavel').value=s.responsavel_setor||'';
-  document.getElementById('s-andar').value=s.andar||'';
-  document.getElementById('s-area').value=s.area_m2||'';
-  document.getElementById('s-num-funcionarios').value=s.num_funcionarios_previsto||'';
-  document.getElementById('s-descricao').value=s.descricao||'';
-  document.getElementById('modal-setor-titulo').textContent='Editar setor';
-  document.getElementById('label-salvar-setor').textContent='Salvar alterações';
-  document.getElementById('modal-setor').classList.add('show');
+  const s=setores.find(x=>x.id===id);if(!s)return;setorEditandoId=id;limparFormSetor();
+  document.getElementById('s-nome').value=s.nome_setor||'';document.getElementById('s-responsavel').value=s.responsavel_setor||'';document.getElementById('s-andar').value=s.andar||'';document.getElementById('s-area').value=s.area_m2||'';document.getElementById('s-num-funcionarios').value=s.num_funcionarios_previsto||'';document.getElementById('s-descricao').value=s.descricao||'';
+  document.getElementById('modal-setor-titulo').textContent='Editar setor';document.getElementById('label-salvar-setor').textContent='Salvar alterações';document.getElementById('modal-setor').classList.add('show');
 }
-
 async function salvarSetor(){
-  const nome=document.getElementById('s-nome').value.trim();
-  if(!nome){alert('Informe o nome do setor.');return;}
-  document.getElementById('btn-salvar-setor').disabled=true;
-  document.getElementById('spinner-setor').className='spinner show';
-  document.getElementById('label-salvar-setor').textContent='Salvando...';
+  const nome=document.getElementById('s-nome').value.trim();if(!nome){alert('Informe o nome do setor.');return;}
+  document.getElementById('btn-salvar-setor').disabled=true;document.getElementById('spinner-setor').className='spinner show';document.getElementById('label-salvar-setor').textContent='Salvando...';
   const payload={empresa_id:parseInt(empresaId),nome_setor:nome,responsavel_setor:document.getElementById('s-responsavel').value||null,andar:document.getElementById('s-andar').value||null,area_m2:document.getElementById('s-area').value?parseFloat(document.getElementById('s-area').value):null,num_funcionarios_previsto:document.getElementById('s-num-funcionarios').value?parseInt(document.getElementById('s-num-funcionarios').value):null,num_funcionarios_previsto_base:document.getElementById('s-num-funcionarios').value?parseInt(document.getElementById('s-num-funcionarios').value):null,descricao:document.getElementById('s-descricao').value||null,ativo:true,atualizado_em:new Date().toISOString()};
   try{
     let res;
     if(setorEditandoId)res=await fetch(`${SUPA_URL}/rest/v1/setores?id=eq.${setorEditandoId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
     else res=await fetch(`${SUPA_URL}/rest/v1/setores`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
-    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar setor');}
+    if(!res.ok){const e=await res.json();throw new Error(e.message);}
     fecharModalSetor();await carregarSetores();
-    setStatus('status-setor','success',setorEditandoId?'Setor atualizado!':'Setor cadastrado!');
-    setTimeout(()=>clearStatus('status-setor'),3000);
+    setStatus('status-setor','success',setorEditandoId?'Setor atualizado!':'Setor cadastrado!');setTimeout(()=>clearStatus('status-setor'),3000);
   }catch(e){setStatus('status-setor','error',`Erro: ${e.message}`);}
-  finally{
-    document.getElementById('btn-salvar-setor').disabled=false;
-    document.getElementById('spinner-setor').className='spinner';
-    document.getElementById('label-salvar-setor').textContent=setorEditandoId?'Salvar alterações':'Salvar setor';
-  }
+  finally{document.getElementById('btn-salvar-setor').disabled=false;document.getElementById('spinner-setor').className='spinner';document.getElementById('label-salvar-setor').textContent=setorEditandoId?'Salvar alterações':'Salvar setor';}
 }
 
-// ── FUNÇÕES ───────────────────────────────────────────
+// ── FUNÇÕES ───────────────────────────────────────────────────
 async function carregarFuncoes(){
   try{
     const res=await fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     funcoes=await res.json();
-    if(funcoes.length){
-      const ids=funcoes.map(f=>f.id).join(',');
-      const resFs=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=in.(${ids})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-      const fsData=await resFs.json();
-      funcoes=funcoes.map(f=>({...f,setor_ids:fsData.filter(x=>x.funcao_id===f.id).map(x=>x.setor_id)}));
-    }
+    if(funcoes.length){const ids=funcoes.map(f=>f.id).join(',');const resFs=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=in.(${ids})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});const fsData=await resFs.json();funcoes=funcoes.map(f=>({...f,setor_ids:fsData.filter(x=>x.funcao_id===f.id).map(x=>x.setor_id)}));}
     renderFuncoes();
   }catch(e){console.error(e);}
 }
@@ -772,69 +695,38 @@ function renderFuncoes(){
   const lista=document.getElementById('lista-funcoes');
   if(!funcoes.length){lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">👷</div><div class="empty-tab-title">Nenhuma função cadastrada</div></div>`;return;}
   lista.innerHTML=funcoes.map(f=>{
-    const setoresVinculados=(f.setor_ids||[]).map(sid=>{const s=setores.find(x=>x.id===sid);return s?escHtml(s.nome_setor):null;}).filter(Boolean);
+    const setoresVinculados=(f.setor_ids||[]).map(sid=>setores.find(x=>x.id===sid)?.nome_setor).filter(Boolean);
     const setorLabel=setoresVinculados.length?`📁 ${setoresVinculados.join(', ')}`:'';
     const cboBadge=f.cbo?`<span class="mini-badge mb-info">CBO ${f.cbo}</span>`:'';
     const turnoBadge=f.turno?`<span class="mini-badge mb-blue">${f.turno}</span>`:'';
-    return`<div class="lista-item">
-      <div class="lista-item-icon icon-funcao">👷</div>
-      <div class="lista-item-info">
-        <div class="lista-item-nome">${escHtml(f.nome_funcao)}</div>
-        <div class="lista-item-sub">${setorLabel||'Sem setor vinculado'}</div>
-        <div style="margin-top:6px;">${cboBadge}${turnoBadge}</div>
-      </div>
-      <div class="lista-item-actions">
-        <button class="btn btn-edit btn-sm" onclick="editarFuncao(${f.id})">Editar</button>
-        <button class="btn btn-danger btn-sm" onclick="excluirFuncaoConfirmar(${f.id},'${escHtml(f.nome_funcao)}')">Excluir</button>
-      </div>
-    </div>`;
+    return`<div class="lista-item"><div class="lista-item-icon icon-funcao">👷</div><div class="lista-item-info"><div class="lista-item-nome">${escHtml(f.nome_funcao)}</div><div class="lista-item-sub">${setorLabel||'Sem setor vinculado'}</div><div style="margin-top:6px;">${cboBadge}${turnoBadge}</div></div><div class="lista-item-actions"><button class="btn btn-edit btn-sm" onclick="editarFuncao(${f.id})">Editar</button><button class="btn btn-danger btn-sm" onclick="excluirFuncaoConfirmar(${f.id},'${escHtml(f.nome_funcao)}')">Excluir</button></div></div>`;
   }).join('');
 }
 
 function limparFormFuncao(){
-  ['f-nome','f-cbo','f-descricao','f-turno','f-escolaridade'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  const dd=document.getElementById('cbo-dropdown');if(dd)dd.classList.remove('show');
-  const erro=document.getElementById('f-setores-erro');if(erro)erro.style.display='none';
+  ['f-nome','f-cbo','f-descricao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-turno').value='';document.getElementById('f-escolaridade').value='';
+  document.getElementById('cbo-dropdown').classList.remove('show');document.getElementById('f-setores-erro').style.display='none';
+  document.getElementById('cbo-dica').classList.remove('show');cboAutoPreenchido=false;
   popularCheckboxSetores([]);
 }
 
-function abrirModalFuncao(){
-  funcaoEditandoId=null;limparFormFuncao();
-  if(!setores.length)carregarSetores().then(()=>popularCheckboxSetores([]));
-  else popularCheckboxSetores([]);
-  document.getElementById('modal-funcao-titulo').textContent='Nova função';
-  document.getElementById('label-salvar-funcao').textContent='Salvar função';
-  document.getElementById('modal-funcao').classList.add('show');
-}
-
+function abrirModalFuncao(){funcaoEditandoId=null;limparFormFuncao();if(!setores.length)carregarSetores().then(()=>popularCheckboxSetores([]));document.getElementById('modal-funcao-titulo').textContent='Nova função';document.getElementById('label-salvar-funcao').textContent='Salvar função';clearStatus('status-funcao-modal');document.getElementById('modal-funcao').classList.add('show');}
 function fecharModalFuncao(){document.getElementById('modal-funcao').classList.remove('show');funcaoEditandoId=null;}
 
 async function editarFuncao(id){
-  const f=funcoes.find(x=>x.id===id);if(!f)return;
-  funcaoEditandoId=id;limparFormFuncao();
-  document.getElementById('f-nome').value=f.nome_funcao||'';
-  document.getElementById('f-turno').value=f.turno||'';
-  document.getElementById('f-escolaridade').value=f.escolaridade_minima||'';
-  document.getElementById('f-descricao').value=f.descricao||'';
-  if(f.cbo){const entry=CBO_LIST.find(([cod])=>cod===f.cbo);document.getElementById('f-cbo').value=entry?`${entry[0]} — ${entry[1]}`:f.cbo;}
-  try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${id}&ativo=eq.true&select=setor_id,num_funcionarios_previsto`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-    const data=await res.json();popularCheckboxSetores(data);
-  }catch(e){popularCheckboxSetores([]);}
-  document.getElementById('modal-funcao-titulo').textContent='Editar função';
-  document.getElementById('label-salvar-funcao').textContent='Salvar alterações';
-  document.getElementById('modal-funcao').classList.add('show');
+  const f=funcoes.find(x=>x.id===id);if(!f)return;funcaoEditandoId=id;limparFormFuncao();
+  document.getElementById('f-nome').value=f.nome_funcao||'';document.getElementById('f-turno').value=f.turno||'';document.getElementById('f-escolaridade').value=f.escolaridade_minima||'';document.getElementById('f-descricao').value=f.descricao||'';
+  if(f.cbo)document.getElementById('f-cbo').value=f.cbo;
+  try{const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${id}&ativo=eq.true&select=setor_id,num_funcionarios_previsto`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});popularCheckboxSetores(await res.json());}catch(e){popularCheckboxSetores([]);}
+  document.getElementById('modal-funcao-titulo').textContent='Editar função';document.getElementById('label-salvar-funcao').textContent='Salvar alterações';clearStatus('status-funcao-modal');document.getElementById('modal-funcao').classList.add('show');
 }
 
 async function salvarFuncao(){
-  const nome=document.getElementById('f-nome').value.trim();
-  if(!nome){alert('Informe o nome da função.');return;}
-  const setoresSelecionados=getSetoresSelecionados();
-  if(!setoresSelecionados.length){document.getElementById('f-setores-erro').style.display='block';return;}
+  const nome=document.getElementById('f-nome').value.trim();if(!nome){alert('Informe o nome da função.');return;}
+  const setoresSelecionados=getSetoresSelecionados();if(!setoresSelecionados.length){document.getElementById('f-setores-erro').style.display='block';return;}
   document.getElementById('f-setores-erro').style.display='none';
-  document.getElementById('btn-salvar-funcao').disabled=true;
-  document.getElementById('spinner-funcao').className='spinner show';
-  document.getElementById('label-salvar-funcao').textContent='Salvando...';
+  document.getElementById('btn-salvar-funcao').disabled=true;document.getElementById('spinner-funcao').className='spinner show';document.getElementById('label-salvar-funcao').textContent='Salvando...';
   const cboRaw=document.getElementById('f-cbo').value.trim();
   const cboVal=cboRaw?cboRaw.split('—')[0].trim().replace(/\D/g,'').slice(0,6)||null:null;
   const payload={empresa_id:parseInt(empresaId),nome_funcao:nome,cbo:cboVal,turno:document.getElementById('f-turno').value||null,escolaridade_minima:document.getElementById('f-escolaridade').value||null,descricao:document.getElementById('f-descricao').value||null,ativo:true,atualizado_em:new Date().toISOString()};
@@ -842,243 +734,82 @@ async function salvarFuncao(){
     let funcaoId;
     if(funcaoEditandoId){
       const res=await fetch(`${SUPA_URL}/rest/v1/funcoes?id=eq.${funcaoEditandoId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
-      if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar função');}
+      if(!res.ok){const e=await res.json();throw new Error(e.message);}
       funcaoId=funcaoEditandoId;
       await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${funcaoId}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     }else{
       const res=await fetch(`${SUPA_URL}/rest/v1/funcoes`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
-      if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar função');}
-      const data=await res.json();funcaoId=data[0].id;
+      if(!res.ok){const e=await res.json();throw new Error(e.message);}
+      funcaoId=(await res.json())[0].id;
     }
-
-    // ── SALVA VÍNCULOS E PROPAGA RISCOS/EPIs ──────────────────
-    setStatus('status-funcao','info','Salvando vínculos e sincronizando riscos...');
+    setStatus('status-funcao-modal','info','Salvando vínculos e sincronizando riscos...');
     for(const vs of setoresSelecionados){
-      await fetch(`${SUPA_URL}/rest/v1/funcao_setores`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
-        body:JSON.stringify({funcao_id:funcaoId,setor_id:vs.setor_id,num_funcionarios_previsto:vs.num_funcionarios_previsto,ativo:true})
-      });
-      // Propaga riscos e EPIs existentes no setor para esta função
-      await sincronizarRiscosEPIsParaFuncao(funcaoId, vs.setor_id);
+      await fetch(`${SUPA_URL}/rest/v1/funcao_setores`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({funcao_id:funcaoId,setor_id:vs.setor_id,num_funcionarios_previsto:vs.num_funcionarios_previsto,ativo:true})});
+      await sincronizarRiscosEPIsParaFuncao(funcaoId,vs.setor_id);
     }
-
     fecharModalFuncao();await carregarFuncoes();
-    setStatus('status-funcao','success',funcaoEditandoId?'Função atualizada e riscos sincronizados!':'Função cadastrada e riscos sincronizados!');
+    setStatus('status-funcao','success',funcaoEditandoId?'Função atualizada!':'Função cadastrada e riscos sincronizados!');
     setTimeout(()=>clearStatus('status-funcao'),4000);
-  }catch(e){setStatus('status-funcao','error',`Erro: ${e.message}`);}
-  finally{
-    document.getElementById('btn-salvar-funcao').disabled=false;
-    document.getElementById('spinner-funcao').className='spinner';
-    document.getElementById('label-salvar-funcao').textContent=funcaoEditandoId?'Salvar alterações':'Salvar função';
-  }
+  }catch(e){setStatus('status-funcao-modal','error',`Erro: ${e.message}`);}
+  finally{document.getElementById('btn-salvar-funcao').disabled=false;document.getElementById('spinner-funcao').className='spinner';document.getElementById('label-salvar-funcao').textContent=funcaoEditandoId?'Salvar alterações':'Salvar função';}
 }
 
-// ── SINCRONIZAÇÃO DE RISCOS E EPIs AO VINCULAR FUNÇÃO AO SETOR ─
-async function sincronizarRiscosEPIsParaFuncao(funcaoId, setorId){
+// ── SINCRONIZAÇÃO DE RISCOS E EPIs ────────────────────────────
+async function sincronizarRiscosEPIsParaFuncao(funcaoId,setorId){
   try{
-    // Busca todos os riscos ativos do setor
-    const resSR=await fetch(
-      `${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${setorId}&ativo=eq.true&select=*`,
-      {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}
-    );
-    const setorRiscos=await resSR.json();
-    if(!setorRiscos.length)return;
-
+    const resSR=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${setorId}&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const setorRiscos=await resSR.json();if(!setorRiscos.length)return;
     for(const sr of setorRiscos){
-      // Verifica se funcao_risco já existe para este risco
-      const resCheck=await fetch(
-        `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&risco_id=eq.${sr.risco_id}&ativo=eq.true&select=id`,
-        {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}
-      );
-      const existente=await resCheck.json();
-      let frId;
-
-      if(existente.length){
-        // Já existe — só atualiza dados de avaliação se estiver vazio
-        frId=existente[0].id;
-        await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${frId}`,{
-          method:'PATCH',
-          headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
-          body:JSON.stringify({
-            probabilidade:sr.probabilidade||null,
-            severidade:sr.severidade||null,
-            nivel_risco:sr.nivel_risco||null,
-            num_expostos:sr.num_expostos||0,
-            medida_elim:sr.medida_elim||false,
-            medida_elim_desc:sr.medida_elim_desc||null,
-            medida_subs:sr.medida_subs||false,
-            medida_subs_desc:sr.medida_subs_desc||null,
-            medida_eng:sr.medida_eng||false,
-            medida_eng_desc:sr.medida_eng_desc||null,
-            medida_adm:sr.medida_adm||false,
-            medida_adm_desc:sr.medida_adm_desc||null,
-            medida_epi:sr.medida_epi||false,
-            origem_setor_risco_id:sr.id,
-            propagado_do_setor:true,
-            atualizado_em:new Date().toISOString()
-          })
-        });
-      }else{
-        // Não existe — cria propagado do setor
-        const resInsert=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
-          method:'POST',
-          headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
-          body:JSON.stringify({
-            funcao_id:funcaoId,
-            risco_id:sr.risco_id,
-            perigo_id:sr.perigo_id||null,
-            probabilidade:sr.probabilidade||null,
-            severidade:sr.severidade||null,
-            nivel_risco:sr.nivel_risco||null,
-            num_expostos:sr.num_expostos||0,
-            medida_elim:sr.medida_elim||false,
-            medida_elim_desc:sr.medida_elim_desc||null,
-            medida_subs:sr.medida_subs||false,
-            medida_subs_desc:sr.medida_subs_desc||null,
-            medida_eng:sr.medida_eng||false,
-            medida_eng_desc:sr.medida_eng_desc||null,
-            medida_adm:sr.medida_adm||false,
-            medida_adm_desc:sr.medida_adm_desc||null,
-            medida_epi:sr.medida_epi||false,
-            origem_setor_risco_id:sr.id,
-            propagado_do_setor:true,
-            ativo:true
-          })
-        });
-        if(!resInsert.ok)continue;
-        const frData=await resInsert.json();
-        frId=frData[0].id;
-      }
-
-      // Propaga EPIs do setor para este funcao_risco
-      const resMedidas=await fetch(
-        `${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=eq.${sr.id}&nivel=eq.EPI&ativo=eq.true&select=*`,
-        {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}
-      );
-      const medidas=await resMedidas.json();
-
-      for(const m of medidas){
+      const resCheck=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&risco_id=eq.${sr.risco_id}&ativo=eq.true&select=id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const existente=await resCheck.json();let frId;
+      const dados={probabilidade:sr.probabilidade||null,severidade:sr.severidade||null,nivel_risco:sr.nivel_risco||null,num_expostos:sr.num_expostos||0,medida_elim:sr.medida_elim||false,medida_elim_desc:sr.medida_elim_desc||null,medida_subs:sr.medida_subs||false,medida_subs_desc:sr.medida_subs_desc||null,medida_eng:sr.medida_eng||false,medida_eng_desc:sr.medida_eng_desc||null,medida_adm:sr.medida_adm||false,medida_adm_desc:sr.medida_adm_desc||null,medida_epi:sr.medida_epi||false,origem_setor_risco_id:sr.id,propagado_do_setor:true};
+      if(existente.length){frId=existente[0].id;await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${frId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({...dados,atualizado_em:new Date().toISOString()})});}
+      else{const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify({funcao_id:funcaoId,risco_id:sr.risco_id,perigo_id:sr.perigo_id||null,...dados,ativo:true})});if(!res.ok)continue;frId=(await res.json())[0].id;}
+      const resMedidas=await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=eq.${sr.id}&nivel=eq.EPI&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      for(const m of await resMedidas.json()){
         if(!m.epi_id)continue;
-        const resEpiCheck=await fetch(
-          `${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=eq.${frId}&epi_id=eq.${m.epi_id}&ativo=eq.true&select=id`,
-          {headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}
-        );
-        const epiExistente=await resEpiCheck.json();
-        if(epiExistente.length)continue;
-        await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas`,{
-          method:'POST',
-          headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
-          body:JSON.stringify({funcao_risco_id:frId,nivel:'EPI',epi_id:m.epi_id,ca:m.ca||null,validade_ca:m.validade_ca||null,origem_setor_medida_id:m.id,propagado_do_setor:true,ativo:true})
-        });
+        const resEpiCheck=await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=eq.${frId}&epi_id=eq.${m.epi_id}&ativo=eq.true&select=id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+        if((await resEpiCheck.json()).length)continue;
+        await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({funcao_risco_id:frId,nivel:'EPI',epi_id:m.epi_id,ca:m.ca||null,validade_ca:m.validade_ca||null,origem_setor_medida_id:m.id,propagado_do_setor:true,ativo:true})});
       }
     }
-  }catch(e){
-    console.error('Erro ao sincronizar riscos/EPIs para função:',e);
-  }
+  }catch(e){console.error('Erro ao sincronizar:',e);}
 }
 
-// ── EXCLUSÃO GENÉRICA ────────────────────────────────
+// ── EXCLUSÃO GENÉRICA ─────────────────────────────────────────
 let _excluirCb=null;
 function abrirModalConfirmar(icon,titulo,desc,cb){
-  document.getElementById('icon-confirmar').textContent=icon;
-  document.getElementById('titulo-confirmar').textContent=titulo;
-  document.getElementById('desc-confirmar').textContent=desc;
-  clearStatus('status-confirmar');_excluirCb=cb;
+  document.getElementById('icon-confirmar').textContent=icon;document.getElementById('titulo-confirmar').textContent=titulo;document.getElementById('desc-confirmar').textContent=desc;clearStatus('status-confirmar');_excluirCb=cb;
   document.getElementById('btn-confirmar-exclusao').onclick=async()=>{
-    document.getElementById('spinner-confirmar').className='spinner spinner-w show';
-    document.getElementById('label-confirmar').textContent='Excluindo...';
-    document.getElementById('btn-confirmar-exclusao').disabled=true;
+    document.getElementById('spinner-confirmar').className='spinner spinner-w show';document.getElementById('label-confirmar').textContent='Excluindo...';document.getElementById('btn-confirmar-exclusao').disabled=true;
     try{await _excluirCb();fecharModalConfirmar();}
-    catch(e){
-      setStatus('status-confirmar','error',e.message);
-      document.getElementById('spinner-confirmar').className='spinner spinner-w';
-      document.getElementById('label-confirmar').textContent='Excluir';
-      document.getElementById('btn-confirmar-exclusao').disabled=false;
-    }
+    catch(e){setStatus('status-confirmar','error',e.message);document.getElementById('spinner-confirmar').className='spinner spinner-w';document.getElementById('label-confirmar').textContent='Excluir';document.getElementById('btn-confirmar-exclusao').disabled=false;}
   };
   document.getElementById('modal-confirmar-exclusao').classList.add('show');
 }
-function fecharModalConfirmar(){document.getElementById('modal-confirmar-exclusao').classList.remove('show');_excluirCb=null;}
+function fecharModalConfirmar(){document.getElementById('modal-confirmar-exclusao').classList.remove('show');}
+function excluirSetorConfirmar(id,nome){abrirModalConfirmar('🗂️',`Excluir setor "${nome}"?`,'Esta ação não pode ser desfeita.',async()=>{await fetch(`${SUPA_URL}/rest/v1/setores?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})});await carregarSetores();setStatus('status-setor','success','Setor removido!');setTimeout(()=>clearStatus('status-setor'),3000);});}
+function excluirFuncaoConfirmar(id,nome){abrirModalConfirmar('👷',`Excluir função "${nome}"?`,'Esta ação não pode ser desfeita.',async()=>{await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});await fetch(`${SUPA_URL}/rest/v1/funcoes?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})});await carregarFuncoes();setStatus('status-funcao','success','Função removida!');setTimeout(()=>clearStatus('status-funcao'),3000);});}
 
-function excluirSetorConfirmar(id,nome){
-  abrirModalConfirmar('🗂️',`Excluir setor "${nome}"?`,'Esta ação não pode ser desfeita.',async()=>{
-    const res=await fetch(`${SUPA_URL}/rest/v1/setores?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})});
-    if(!res.ok)throw new Error('Erro ao excluir setor');
-    await carregarSetores();
-    setStatus('status-setor','success','Setor removido com sucesso!');
-    setTimeout(()=>clearStatus('status-setor'),3000);
-  });
-}
-
-function excluirFuncaoConfirmar(id,nome){
-  abrirModalConfirmar('👷',`Excluir função "${nome}"?`,'Esta ação não pode ser desfeita.',async()=>{
-    await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false})});
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcoes?id=eq.${id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})});
-    if(!res.ok)throw new Error('Erro ao excluir função');
-    await carregarFuncoes();
-    setStatus('status-funcao','success','Função removida com sucesso!');
-    setTimeout(()=>clearStatus('status-funcao'),3000);
-  });
-}
-
-// ── FUNCIONÁRIOS ─────────────────────────────────────
+// ── FUNCIONÁRIOS ──────────────────────────────────────────────
 let mostrarDesligados=false;
-function toggleDesligados(){
-  mostrarDesligados=!mostrarDesligados;
-  document.getElementById('toggle-desligados').classList.toggle('on',mostrarDesligados);
-  document.getElementById('label-desligados').textContent=mostrarDesligados?'Ocultar desligados':'Ver desligados';
-  carregarFuncionarios();
-}
-
+function toggleDesligados(){mostrarDesligados=!mostrarDesligados;document.getElementById('toggle-desligados').classList.toggle('on',mostrarDesligados);document.getElementById('label-desligados').textContent=mostrarDesligados?'Ocultar desligados':'Ver desligados';carregarFuncionarios();}
 async function carregarFuncionarios(){
-  const btn=document.getElementById('btn-novo-funcionario');
-  if(btn)btn.href=`funcionario_detalhe.html?empresa_id=${empresaId}&novo=1`;
-  const lista=document.getElementById('lista-funcionarios');
-  lista.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);font-size:13px;">Carregando...</div>`;
-  try{
-    const filtro=mostrarDesligados?'':`&ativo=eq.true`;
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}${filtro}&select=id,nome_completo,matricula,data_admissao,data_demissao,tipo_contrato,funcao_id,setor_id,ativo&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-    const data=await res.json();
-    renderFuncionarios(data);
-  }catch(e){
-    lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">⚠️</div><div class="empty-tab-title">Erro ao carregar funcionários</div></div>`;
-  }
+  const lista=document.getElementById('lista-funcionarios');lista.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);">Carregando...</div>`;
+  try{const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}${mostrarDesligados?'':`&ativo=eq.true`}&select=id,nome_completo,matricula,data_admissao,data_demissao,tipo_contrato,funcao_id,setor_id,ativo&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});renderFuncionarios(await res.json());}
+  catch(e){lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">⚠️</div><div class="empty-tab-title">Erro ao carregar</div></div>`;}
 }
-
 function renderFuncionarios(funcionarios){
   const lista=document.getElementById('lista-funcionarios');
-  if(!funcionarios.length){
-    lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">👷</div><div class="empty-tab-title">${mostrarDesligados?'Nenhum funcionário encontrado.':'Nenhum funcionário ativo.'}</div></div>`;
-    return;
-  }
-  const ativos=funcionarios.filter(f=>f.ativo);
-  const desligados=funcionarios.filter(f=>!f.ativo);
+  if(!funcionarios.length){lista.innerHTML=`<div class="empty-tab"><div class="empty-tab-icon">👷</div><div class="empty-tab-title">${mostrarDesligados?'Nenhum funcionário.':'Nenhum funcionário ativo.'}</div></div>`;return;}
+  const ativos=funcionarios.filter(f=>f.ativo),desligados=funcionarios.filter(f=>!f.ativo);
   function renderItem(f){
-    const funcao=funcoes.find(x=>x.id===f.funcao_id);
-    const setor=setores.find(x=>x.id===f.setor_id);
+    const funcao=funcoes.find(x=>x.id===f.funcao_id),setor=setores.find(x=>x.id===f.setor_id);
     const admissao=f.data_admissao?new Date(f.data_admissao).toLocaleDateString('pt-BR'):'—';
     const demissao=f.data_demissao?new Date(f.data_demissao).toLocaleDateString('pt-BR'):null;
-    const iniciais=(f.nome_completo||'?').trim().split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase();
-    const opacidade=f.ativo?'1':'0.5';
-    const avatarBg=f.ativo?'#1a2540':'#2a1515';
-    const avatarCor=f.ativo?'#7aabf7':'#e05555';
-    return`<a href="funcionario_detalhe.html?id=${f.id}&empresa_id=${empresaId}" style="text-decoration:none;">
-      <div class="lista-item" style="cursor:pointer;opacity:${opacidade};">
-        <div style="width:36px;height:36px;border-radius:50%;background:${avatarBg};color:${avatarCor};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;">${iniciais}</div>
-        <div class="lista-item-info">
-          <div class="lista-item-nome">${escHtml(f.nome_completo)}</div>
-          <div class="lista-item-sub">${funcao?escHtml(funcao.nome_funcao):'—'}${setor?' · '+escHtml(setor.nome_setor):''}</div>
-          <div style="margin-top:4px;">
-            ${f.ativo
-              ?`${f.matricula?`<span class="mini-badge mb-info">Mat. ${escHtml(f.matricula)}</span>`:''}${f.tipo_contrato?`<span class="mini-badge mb-blue">${escHtml(f.tipo_contrato)}</span>`:''}<span class="mini-badge mb-info">Adm. ${admissao}</span>`
-              :`<span class="mini-badge" style="background:#2a1515;color:#e05555;border:1px solid #4a2020;">Desligado</span>${demissao?`<span class="mini-badge mb-info">Dem. ${demissao}</span>`:''}`
-            }
-          </div>
-        </div>
-        <div style="color:var(--text3);font-size:18px;">›</div>
-      </div>
-    </a>`;
+    const inic=(f.nome_completo||'?').trim().split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+    const bg=f.ativo?'#1a2540':'#2a1515',cor=f.ativo?'#7aabf7':'#e05555';
+    return`<a href="funcionario_detalhe.html?id=${f.id}&empresa_id=${empresaId}" style="text-decoration:none;"><div class="lista-item" style="cursor:pointer;opacity:${f.ativo?'1':'0.5'};"><div style="width:36px;height:36px;border-radius:50%;background:${bg};color:${cor};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;">${inic}</div><div class="lista-item-info"><div class="lista-item-nome">${escHtml(f.nome_completo)}</div><div class="lista-item-sub">${funcao?escHtml(funcao.nome_funcao):'—'}${setor?' · '+escHtml(setor.nome_setor):''}</div><div style="margin-top:4px;">${f.ativo?`${f.matricula?`<span class="mini-badge mb-info">Mat. ${escHtml(f.matricula)}</span>`:''}<span class="mini-badge mb-info">Adm. ${admissao}</span>`:`<span class="mini-badge" style="background:#2a1515;color:#e05555;border:1px solid #4a2020;">Desligado</span>${demissao?`<span class="mini-badge mb-info">Dem. ${demissao}</span>`:''}`}</div></div><div style="color:var(--text3);font-size:18px;">›</div></div></a>`;
   }
   let html='';
   if(ativos.length){html+=`<div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Ativos (${ativos.length})</div>`;html+=ativos.map(renderItem).join('');}
@@ -1086,38 +817,11 @@ function renderFuncionarios(funcionarios){
   lista.innerHTML=html;
 }
 
-// ── CBO AUTOCOMPLETE ─────────────────────────────────
-let cboIdx=-1;
-function filtrarCBO(){
-  const input=document.getElementById('f-cbo');
-  const termo=input.value.trim().toLowerCase();
-  const dropdown=document.getElementById('cbo-dropdown');
-  cboIdx=-1;
-  if(!termo||termo.length<2){dropdown.classList.remove('show');return;}
-  const filtrados=CBO_LIST.filter(([cod,nome])=>cod.includes(termo)||nome.toLowerCase().includes(termo)).slice(0,40);
-  if(!filtrados.length){dropdown.innerHTML=`<div class="cbo-empty">Nenhuma ocupação encontrada</div>`;dropdown.classList.add('show');return;}
-  dropdown.innerHTML=filtrados.map(([cod,nome])=>`<div class="cbo-option" onclick="selecionarCBO('${cod}','${nome.replace(/'/g,"\\'")}')"><span class="cbo-code">${cod}</span><span class="cbo-nome">${escHtml(nome)}</span></div>`).join('');
-  dropdown.classList.add('show');
-}
-function selecionarCBO(cod,nome){document.getElementById('f-cbo').value=`${cod} — ${nome}`;document.getElementById('cbo-dropdown').classList.remove('show');cboIdx=-1;}
-function navCBO(e){
-  const dropdown=document.getElementById('cbo-dropdown');
-  const opcoes=dropdown.querySelectorAll('.cbo-option');
-  if(!dropdown.classList.contains('show')||!opcoes.length)return;
-  if(e.key==='ArrowDown'){e.preventDefault();cboIdx=Math.min(cboIdx+1,opcoes.length-1);}
-  else if(e.key==='ArrowUp'){e.preventDefault();cboIdx=Math.max(cboIdx-1,0);}
-  else if(e.key==='Enter'&&cboIdx>=0){e.preventDefault();opcoes[cboIdx].click();return;}
-  else if(e.key==='Escape'){dropdown.classList.remove('show');return;}
-  opcoes.forEach((o,i)=>o.classList.toggle('active',i===cboIdx));
-  if(cboIdx>=0)opcoes[cboIdx].scrollIntoView({block:'nearest'});
-}
-
-document.addEventListener('click',e=>{if(!e.target.closest('.cbo-wrap'))document.getElementById('cbo-dropdown')?.classList.remove('show');});
+document.addEventListener('click',e=>{
+  if(!document.getElementById('menu-modulos')?.contains(e.target))document.getElementById('dropdown-modulos').style.display='none';
+  if(!e.target.closest('.cbo-wrap'))document.getElementById('cbo-dropdown')?.classList.remove('show');
+});
 ['modal-setor','modal-funcao'].forEach(id=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this){if(id==='modal-setor')fecharModalSetor();else fecharModalFuncao();}});});
-
-function sair(){localStorage.removeItem('sgs_token');localStorage.removeItem('sgs_user');window.location.href='login.html';}
-
-const CBO_LIST=[["010105","Oficial general do exército"],["010110","Oficial superior do exército"],["010115","Oficial intermediário do exército"],["010120","Oficial subalterno do exército"],["010205","Oficial general da marinha"],["010210","Oficial superior da marinha"],["010215","Oficial intermediário da marinha"],["010220","Oficial subalterno da marinha"],["010305","Oficial general da aeronáutica"],["010310","Oficial superior da aeronáutica"],["010315","Oficial intermediário da aeronáutica"],["010320","Oficial subalterno da aeronáutica"],["011105","Praça das forças armadas"],["020105","Coronel da polícia militar"],["020110","Tenente-coronel da polícia militar"],["020115","Major da polícia militar"],["020120","Capitão da polícia militar"],["020125","Tenente da polícia militar"],["020130","Subtenente da polícia militar"],["020135","Sargento da polícia militar"],["020140","Cabo da polícia militar"],["020145","Soldado da polícia militar"],["030105","Coronel do corpo de bombeiros militar"],["030110","Tenente-coronel do corpo de bombeiros militar"],["030115","Major do corpo de bombeiros militar"],["030120","Capitão do corpo de bombeiros militar"],["030125","Tenente do corpo de bombeiros militar"],["030130","Subtenente do corpo de bombeiros militar"],["030135","Sargento do corpo de bombeiros militar"],["030140","Cabo do corpo de bombeiros militar"],["030145","Soldado do corpo de bombeiros militar"],["111105","Senador"],["111110","Deputado federal"],["111115","Deputado estadual e distrital"],["111120","Vereador"],["111205","Governador"],["111210","Prefeito"],["111305","Ministro de estado"],["111310","Secretário estadual"],["111315","Secretário municipal"],["111405","Dirigente de partido político"],["111410","Dirigente de entidade de trabalhadores"],["111415","Dirigente de entidade patronal"],["111420","Dirigente de entidade cultural, recreativa e esportiva"],["111425","Dirigente de entidade religiosa"],["111430","Dirigente de entidade filantrópica"],["112005","Diretor geral de empresa e organizações exceto de interesse público"],["121005","Diretor de planejamento estratégico"],["121010","Diretor administrativo"],["121015","Diretor financeiro"],["121020","Diretor de operações"],["121025","Diretor comercial e de marketing"],["121030","Diretor de recursos humanos"],["121035","Diretor de suprimentos"],["121040","Diretor de tecnologia da informação"],["121045","Diretor de produção e operações"],["121105","Diretor de operações de obras"],["121110","Diretor de operações de serviços"],["122105","Gerente de produção e operações"],["122110","Gerente de operações de serviços"],["122115","Gerente de projeto"],["122120","Gerente industrial"],["122125","Gerente de logística"],["122130","Gerente de qualidade"],["122205","Gerente de área de saúde"],["122305","Gerente de área de educação"],["122405","Gerente de área social, cultural e desportiva"],["123105","Gerente administrativo"],["123110","Gerente financeiro"],["123115","Gerente de recursos humanos"],["123120","Gerente de compras"],["123125","Gerente de marketing"],["123130","Gerente de vendas"],["123135","Gerente de comunicação"],["123140","Gerente jurídico"],["123205","Gerente de tecnologia da informação"],["123210","Gerente de sistemas de informação"],["123305","Gerente de segurança"],["123310","Gerente de meio ambiente"],["123315","Gerente de saúde e segurança do trabalho"],["131105","Gerente de área de saúde"],["131205","Gerente de área de educação"],["131305","Gerente de área de serviços culturais e desportos"],["131405","Gerente de área de serviços de assistência social"],["141205","Gerente de loja e supermercado"],["141210","Gerente de hotel"],["141215","Gerente de restaurante"],["141305","Gerente de agência bancária"],["141310","Gerente de agência de correios"],["141405","Gerente de empresa de telecomunicações"],["141505","Gerente de seguros e previdência"],["141605","Gerente de transporte"],["142105","Gerente de pesquisa e desenvolvimento"],["142110","Gerente de inovação"],["201105","Físico"],["201110","Astrônomo"],["201205","Químico"],["201210","Geoquímico"],["201305","Matemático"],["201310","Estatístico"],["201315","Matemático aplicado"],["201405","Actuário"],["201410","Analista de pesquisa operacional"],["202105","Geólogo"],["202110","Geofísico"],["202115","Geomorfólogo"],["202120","Hidrogeólogo"],["202125","Oceanógrafo geólogo"],["202205","Meteorologista"],["202210","Climatologista"],["202215","Hidrólogo"],["202305","Biólogo"],["202310","Ecólogo"],["202315","Microbiologista"],["202320","Geneticista"],["202325","Bioquímico"],["202330","Biofísico"],["202335","Biotecnologista"],["211105","Analista de sistemas"],["211110","Analista de redes e comunicação de dados"],["211115","Analista de suporte computacional"],["211120","Analista de banco de dados"],["211125","Administrador de banco de dados"],["211130","Administrador de redes"],["211135","Administrador de sistemas"],["211140","Administrador em segurança da informação"],["211205","Engenheiro de software"],["211210","Desenvolvedor de sistemas"],["211215","Desenvolvedor web"],["211220","Desenvolvedor de aplicativos móveis"],["212205","Engenheiro civil"],["212210","Engenheiro estrutural"],["212215","Engenheiro hidráulico"],["212220","Engenheiro sanitarista"],["212225","Engenheiro de transportes"],["212230","Engenheiro de trânsito"],["212235","Engenheiro de minas"],["212240","Engenheiro de petróleo"],["212245","Engenheiro de segurança do trabalho"],["212250","Engenheiro ambiental"],["212305","Engenheiro eletricista"],["212310","Engenheiro eletrônico"],["212315","Engenheiro de telecomunicações"],["212320","Engenheiro de controle e automação"],["212405","Engenheiro mecânico"],["212410","Engenheiro aeronáutico"],["212415","Engenheiro naval"],["212420","Engenheiro de produção"],["212505","Engenheiro metalurgista"],["212605","Engenheiro químico"],["212610","Engenheiro de alimentos"],["212705","Engenheiro de qualidade"],["212805","Arquiteto"],["212810","Urbanista"],["214205","Engenheiro agrônomo"],["214210","Engenheiro florestal"],["214215","Engenheiro de pesca"],["221105","Médico clínico geral"],["221110","Médico do trabalho"],["221115","Médico cardiologista"],["221120","Médico cirurgião"],["221125","Médico dermatologista"],["221130","Médico ginecologista e obstetra"],["221135","Médico infectologista"],["221140","Médico neurologista"],["221145","Médico oftalmologista"],["221150","Médico ortopedista"],["221155","Médico otorrinolaringologista"],["221160","Médico pediatra"],["221165","Médico pneumologista"],["221170","Médico psiquiatra"],["221175","Médico radiologista"],["221180","Médico urologista"],["221205","Médico veterinário"],["222105","Enfermeiro"],["222110","Enfermeiro do trabalho"],["222115","Enfermeiro de saúde pública"],["222120","Enfermeiro obstétrico"],["222125","Enfermeiro de UTI"],["222205","Fisioterapeuta"],["222210","Terapeuta ocupacional"],["222215","Fonoaudiólogo"],["222220","Nutricionista"],["222225","Psicólogo"],["222230","Psicólogo do trabalho"],["222305","Odontólogo clínico"],["222310","Odontólogo cirurgião"],["222405","Farmacêutico"],["222410","Farmacêutico bioquímico"],["223105","Assistente social"],["223205","Sociólogo"],["223210","Antropólogo"],["223225","Economista"],["223230","Geógrafo"],["223235","Historiador"],["224105","Administrador"],["224205","Contador"],["224210","Auditor contábil"],["224305","Economista"],["224405","Advogado"],["224410","Advogado trabalhista"],["225105","Biólogo"],["225110","Biomédico"],["228105","Profissional de educação física"],["228110","Treinador desportivo"],["231105","Professor de ensino superior"],["232105","Professor de ensino médio"],["233105","Professor de ensino fundamental — séries iniciais"],["234105","Professor de educação especial"],["234205","Professor de educação infantil"],["235105","Coordenador pedagógico"],["235110","Diretor escolar"],["235205","Instrutor de formação profissional"],["241005","Advogado"],["251105","Psicólogo clínico"],["251110","Psicólogo do trabalho"],["251305","Assistente social"],["252105","Economista"],["261105","Jornalista"],["261205","Publicitário"],["261305","Escritor"],["261405","Intérprete"],["261410","Tradutor"],["261505","Bibliotecário"],["262105","Artista plástico"],["262205","Músico compositor"],["262305","Bailarino"],["262405","Atleta profissional"],["271105","Chef de cozinha"],["311105","Técnico químico"],["311110","Técnico de laboratório de análises físico-químicas"],["311115","Técnico de controle de qualidade"],["311305","Técnico agrícola"],["311310","Técnico agropecuário"],["311505","Técnico em meio ambiente"],["312105","Técnico em construção civil"],["312110","Técnico em edificações"],["312115","Técnico em estradas"],["312205","Técnico de segurança do trabalho"],["312210","Técnico em meio ambiente"],["312215","Técnico em higiene ocupacional"],["313105","Técnico eletricista"],["313110","Técnico eletrônico"],["313115","Técnico em instrumentação"],["313120","Técnico em automação"],["313125","Técnico em telecomunicações"],["314105","Técnico mecânico"],["314110","Técnico em manutenção mecânica"],["314115","Técnico em refrigeração e climatização"],["314125","Técnico em soldagem"],["314130","Técnico em caldeiraria"],["314135","Técnico em usinagem"],["314205","Técnico em metalurgia"],["314405","Técnico em alimentos"],["315105","Técnico em informática"],["315110","Técnico em suporte de TI"],["315115","Técnico em redes de computadores"],["316105","Desenhista técnico"],["316205","Designer de produto"],["316215","Designer gráfico"],["317205","Técnico em planejamento e controle da produção"],["317210","Técnico em logística"],["317305","Técnico em contabilidade"],["317405","Técnico em gestão de recursos humanos"],["318005","Técnico de planejamento e programação de manutenção"],["321105","Técnico de enfermagem"],["321110","Técnico de enfermagem do trabalho"],["321205","Técnico em radiologia"],["321305","Técnico em análises clínicas"],["321405","Técnico em prótese dentária"],["321505","Técnico em farmácia"],["321605","Técnico em nutrição"],["321705","Técnico em saúde bucal"],["322105","Técnico em fisioterapia"],["322205","Técnico em veterinária"],["324105","Agente comunitário de saúde"],["324205","Auxiliar de enfermagem"],["325105","Técnico em segurança do trabalho"],["331105","Professor de ensino fundamental — nível médio"],["332105","Instrutor de treinamento"],["334105","Técnico em secretariado"],["334110","Secretário executivo"],["334115","Recepcionista bilíngue"],["341105","Piloto comercial de avião"],["341110","Piloto de helicóptero"],["341205","Controlador de tráfego aéreo"],["341305","Comissário de bordo"],["341405","Agente de viagem"],["341410","Guia de turismo"],["342105","Prático de porto"],["342205","Maquinista de trem"],["351105","Agente fiscal de tributos"],["351205","Fiscal de tributos estadual e municipal"],["351305","Agente de inspeção de saúde"],["354105","Avaliador de imóveis"],["354110","Corretor de imóveis"],["354205","Corretor de valores"],["371105","Técnico em segurança do trabalho"],["372105","Radiotécnico"],["372205","Técnico em som"],["374105","Técnico em desportos"],["374110","Preparador físico"],["374115","Personal trainer"],["391105","Técnico de apoio em pesquisa e desenvolvimento"],["391205","Técnico em controle de produção"],["410105","Supervisor administrativo"],["411005","Auxiliar de escritório"],["411010","Auxiliar administrativo"],["411015","Assistente administrativo"],["411020","Assistente de departamento pessoal"],["411025","Auxiliar de departamento pessoal"],["411030","Arquivista"],["411035","Almoxarife"],["411040","Controlador de estoque"],["411045","Conferente de carga e descarga"],["411050","Expedidor de mercadorias"],["411105","Contínuo"],["411115","Mensageiro"],["412105","Digitador"],["412110","Operador de computador"],["413105","Caixa bancário"],["413110","Cobrador externo"],["413115","Carteiro"],["413120","Operador de caixa"],["413125","Cobrador de transporte coletivo"],["413205","Escriturário de banco"],["414105","Assistente de recursos humanos"],["414110","Auxiliar de recursos humanos"],["414115","Analista de recursos humanos"],["414120","Recrutador"],["414205","Assistente de pessoal"],["414210","Analista de folha de pagamento"],["415105","Almoxarife"],["415110","Auxiliar de almoxarife"],["415115","Controlador de estoque"],["415205","Comprador"],["415210","Auxiliar de compras"],["415215","Analista de compras"],["416105","Recepcionista"],["416110","Telefonista"],["416115","Operador de telemarketing ativo"],["416120","Operador de telemarketing receptivo"],["416125","Operador de central de atendimento (call center)"],["510105","Supervisor de serviços de proteção e segurança"],["511105","Comissário de bordo"],["511205","Guia de turismo"],["511305","Agente funerário"],["512105","Cozinheiro geral"],["512110","Cozinheiro industrial"],["512115","Auxiliar de cozinha"],["512120","Copeiro"],["512125","Garçom"],["512130","Barman"],["512135","Maitre"],["512140","Churrasqueiro"],["512145","Pizzaiolo"],["513105","Camareiro de hotel"],["513110","Governanta de hotel"],["513115","Zelador de edifício"],["513120","Faxineiro"],["514105","Cuidador de idosos"],["514110","Auxiliar de enfermagem domiciliar"],["514115","Babá"],["515105","Porteiro"],["515110","Vigilante"],["515115","Segurança"],["515120","Vigia"],["515125","Guarda noturno"],["515130","Controlador de acesso"],["515135","Agente de segurança"],["515205","Bombeiro civil"],["515210","Brigadista de emergência"],["515305","Agente penitenciário"],["516105","Cabeleireiro"],["516110","Barbeiro"],["516115","Manicure"],["516120","Pedicure"],["516205","Esteticista"],["516210","Maquiador"],["517105","Agente de trânsito"],["519105","Gari"],["519110","Varredor de rua"],["519115","Operador de coleta de lixo"],["519120","Catador de material reciclável"],["519125","Jardineiro"],["519130","Limpador de piscinas"],["519135","Dedetizador"],["521105","Vendedor de comércio varejista"],["521110","Atendente de loja"],["521115","Operador de caixa"],["521120","Repositor de mercadorias"],["521125","Promotor de vendas"],["521205","Vendedor em domicílio"],["522105","Feirante"],["522110","Camelô"],["523105","Representante comercial"],["523110","Vendedor externo"],["523115","Consultor de vendas"],["524105","Corretor de imóveis"],["610005","Supervisor de produção agropecuária"],["611005","Trabalhador agropecuário em geral"],["611010","Agricultor"],["611105","Trabalhador na cultura de arroz"],["611205","Trabalhador na horticultura"],["611305","Trabalhador em reflorestamento"],["612005","Trabalhador na criação de bovinos"],["612010","Vaqueiro"],["612025","Trabalhador na criação de suínos"],["612030","Trabalhador na criação de aves"],["612050","Trabalhador na apicultura"],["612055","Trabalhador na piscicultura"],["613005","Pescador artesanal"],["613010","Pescador industrial"],["614005","Operador de máquinas agrícolas"],["614010","Tratorista agrícola"],["614015","Operador de colheitadeira"],["711105","Mineiro"],["711405","Pedreiro"],["711410","Servente de obras"],["711415","Armador de ferragem"],["711420","Carpinteiro de formas"],["711425","Operador de betoneira"],["711430","Concreteiro"],["711435","Mestre de obras"],["711505","Encanador"],["711510","Bombeiro hidráulico"],["711605","Eletricista de instalações prediais"],["711610","Eletricista de instalações industriais"],["711705","Vidraceiro"],["711805","Pintor de obras"],["711905","Azulejista"],["712005","Gesseiro"],["712105","Impermeabilizador"],["712205","Montador de estruturas de concreto pré-moldado"],["712210","Montador de andaime"],["712215","Montador de estrutura metálica"],["712305","Operador de máquinas de terraplenagem"],["712310","Operador de escavadeira hidráulica"],["712315","Operador de pá carregadeira"],["712320","Operador de motoniveladora"],["712325","Operador de rolo compactador"],["712330","Operador de trator de esteira"],["712405","Mergulhador profissional"],["712505","Montador de instalações de ar condicionado"],["713105","Trabalhador de conservação de vias"],["713110","Asfaltador"],["713205","Trabalhador de tratamento de água"],["721105","Operador de máquina de usinagem CNC"],["721110","Torneiro mecânico"],["721115","Fresador"],["721120","Retificador"],["721205","Ferramenteiro"],["721210","Estampador"],["721305","Polidor de metais"],["722105","Soldador"],["722110","Operador de corte a laser"],["722205","Caldeireiro"],["722210","Chapeiro"],["722215","Funileiro industrial"],["722220","Serralheiro industrial"],["722225","Montador de estruturas metálicas"],["722305","Trefilador de metais"],["722405","Galvanizador"],["722505","Fundidor"],["723105","Eletricista de manutenção industrial"],["723110","Eletricista de manutenção de máquinas"],["723115","Bobinador de motores"],["723205","Eletrônico de manutenção"],["724105","Mecânico de manutenção industrial"],["724110","Mecânico de máquinas industriais"],["724115","Mecânico de bombas industriais"],["724120","Mecânico de compressores"],["724205","Mecânico de veículos automotores"],["724210","Mecânico de automóveis"],["724215","Mecânico de caminhões"],["724220","Mecânico de ônibus"],["724225","Mecânico de motocicletas"],["724230","Mecânico de tratores"],["724305","Mecânico de refrigeração"],["724405","Mecânico de aeronaves"],["724505","Mecânico de embarcações"],["724605","Montador de veículos"],["725105","Instalador de tubulações industriais"],["725110","Montador de tubulações"],["725205","Instalador de tubulações de gás"],["726105","Operador de máquinas de madeira"],["726110","Marceneiro"],["726115","Carpinteiro"],["726120","Operador de serra circular"],["726205","Moveleiro"],["726210","Montador de móveis"],["727105","Impressor gráfico"],["731105","Operador de fiação têxtil"],["731205","Operador de tecelagem"],["731210","Tecelão"],["731305","Operador de malharia"],["731405","Operador de beneficiamento têxtil"],["732105","Costureiro industrial"],["732110","Costureiro de manutenção"],["732115","Operador de máquina de costura"],["732120","Cortador de tecidos"],["732125","Modelista"],["733105","Curtidor"],["733205","Sapateiro"],["733210","Montador de calçados"],["734105","Joalheiro"],["734110","Ourives"],["735105","Soprador de vidro"],["735205","Oleiro"],["735210","Ceramista"],["741105","Operador de instalações de energia elétrica"],["741110","Operador de subestação elétrica"],["741115","Operador de usina hidrelétrica"],["742105","Operador de instalações de água e esgoto"],["743105","Operador de instalações de petróleo e gás"],["743110","Operador de refinaria"],["744105","Operador de instalações de gás encanado"],["751105","Padeiro"],["751110","Confeiteiro"],["751115","Boeiro"],["752105","Açougueiro"],["752110","Desossador"],["752115","Magarefe"],["752205","Processador de carnes"],["753105","Trabalhador de beneficiamento de frutas"],["753205","Trabalhador de produção de laticínios"],["754105","Trabalhador de produção de bebidas"],["761105","Pintor industrial"],["761110","Jateador industrial"],["761205","Operador de caldeira"],["763105","Operador de instalações químicas"],["764105","Operador de instalações de produção de papel"],["766105","Operador de instalações de plástico"],["766110","Operador de injeção de plástico"],["771105","Motorista de caminhão"],["771110","Motorista de carreta"],["771140","Operador de máquinas de terraplanagem"],["771145","Operador de escavadeira"],["771150","Operador de retroescavadeira"],["771155","Operador de pá carregadeira"],["771165","Operador de rolo compactador"],["771170","Operador de trator de esteira"],["772105","Motorista de ônibus urbano"],["772110","Motorista de ônibus rodoviário"],["772115","Motorista de microônibus"],["773105","Motorista de automóvel"],["773110","Motorista particular"],["773115","Motorista de táxi"],["773120","Motorista de aplicativo"],["773205","Operador de empilhadeira"],["773210","Operador de ponte rolante"],["773215","Operador de guincho"],["773220","Operador de guindaste"],["774105","Marinheiro de convés"],["774205","Trabalhador portuário"],["774210","Estivador"],["782105","Carregador"],["782110","Estivador"],["782115","Ajudante de carga e descarga"],["782205","Trabalhador de expedição e logística"],["782210","Separador de pedidos"],["782215","Auxiliar de logística"],["782305","Embalador a mão"],["811105","Operador de produção polivalente"],["811110","Auxiliar de produção"],["811115","Operador de linha de produção"],["821105","Operador de alto-forno"],["848105","Trabalhador de acabamento de produção"],["848110","Trabalhador de embalagem"],["848205","Trabalhador de depósito"],["848210","Auxiliar de logística"],["848305","Ajudante geral"],["848310","Auxiliar de serviços gerais"],["861105","Operador de central de utilidades"],["861110","Operador de caldeira industrial"],["870105","Operador de produção de carvão vegetal"],["870110","Carvoeiro"],["911105","Mecânico de manutenção polivalente"],["911205","Eletricista de manutenção predial"],["912105","Técnico de manutenção de equipamentos de informática"],["912205","Reparador de eletrodomésticos"],["991105","Ajudante de obras"],["991110","Auxiliar de serviços gerais"],["991115","Faxineiro"],["992105","Servente de limpeza"],["992110","Zelador"],["992115","Copeiro"],["993105","Coletador de lixo"],["994105","Trabalhador braçal"],["994110","Carregador"],["994115","Ajudante geral"]];
 
 carregarEmpresa();
 </script>
