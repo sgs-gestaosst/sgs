@@ -306,7 +306,7 @@
       </div>
       <label class="field-label">Buscar perigo</label>
       <div class="search-wrap">
-        <input type="text" class="search-input" id="busca-perigo-input" placeholder="Digite para buscar o perigo..." oninput="filtrarPerigo()" autocomplete="off">
+        <input type="text" class="search-input" id="busca-perigo-input" placeholder="Clique para ver todos os perigos ou digite para filtrar..." oninput="filtrarPerigo()" onfocus="mostrarTodosPerigos()" autocomplete="off">
         <div class="search-dropdown" id="busca-perigo-dropdown"></div>
       </div>
       <div id="perigo-selecionado-wrap" style="display:none;margin-top:12px;"></div>
@@ -327,7 +327,7 @@
       <div class="divider-ou">ou busque outro risco</div>
 
       <div class="search-wrap">
-        <input type="text" class="search-input" id="busca-risco-livre-input" placeholder="Buscar qualquer risco do catálogo..." oninput="filtrarRiscoLivre()" autocomplete="off">
+        <input type="text" class="search-input" id="busca-risco-livre-input" placeholder="Clique para ver todos os riscos ou digite para filtrar..." oninput="filtrarRiscoLivre()" onfocus="mostrarTodosRiscos()" autocomplete="off">
         <div class="search-dropdown" id="busca-risco-livre-dropdown"></div>
       </div>
 
@@ -744,6 +744,17 @@ function irStep(n){
 }
 
 // ── BUSCA DE PERIGO ────────────────────────────────────────────
+function mostrarTodosPerigos(){
+  const dd=document.getElementById('busca-perigo-dropdown');
+  const filtrados=todosPerigos.filter(p=>p.categoria_risco_id===catSelecionada?.id).slice(0,40);
+  if(!filtrados.length)return;
+  dd.innerHTML=filtrados.map(p=>`
+    <div class="search-option" onclick="selecionarPerigo(${p.id})">
+      <div class="search-option-nome">${h(p.nome)}</div>
+      <div class="search-option-desc">${h(p.exemplos||'')}</div>
+    </div>`).join('');
+  dd.classList.add('show');
+}
 function filtrarPerigo(){
   const inp=document.getElementById('busca-perigo-input');
   const dd=document.getElementById('busca-perigo-dropdown');
@@ -843,6 +854,20 @@ function toggleRiscoSugerido(riscoId){
 }
 
 // ── BUSCA RISCO LIVRE ──────────────────────────────────────────
+function mostrarTodosRiscos(){
+  const dd=document.getElementById('busca-risco-livre-dropdown');
+  const jaAdicionados=(contexto==='setor'?riscosSetor:riscosFuncao).map(r=>r.risco_id);
+  const disponiveis=todosRiscos.filter(r=>!jaAdicionados.includes(r.id)).slice(0,40);
+  if(!disponiveis.length)return;
+  dd.innerHTML=disponiveis.map(r=>{
+    const est=getCatEstilo(r.categoria_risco_id);
+    return`<div class="search-option" onclick="adicionarRiscoLivre(${r.id})">
+      <div class="search-option-nome">${h(r.nome_risco)}</div>
+      <div class="search-option-desc" style="color:${est.color};">● ${getCatNome(r.categoria_risco_id)} · ${r.codigo_risco||''}</div>
+    </div>`;
+  }).join('');
+  dd.classList.add('show');
+}
 function filtrarRiscoLivre(){
   const inp=document.getElementById('busca-risco-livre-input');
   const dd=document.getElementById('busca-risco-livre-dropdown');
@@ -973,6 +998,7 @@ async function atualizarAvaliacao(srId,el,campo){
     const lista=contexto==='setor'?riscosSetor:riscosFuncao;
     const sr=lista.find(x=>x.id===srId);
     if(sr){sr[campo]=val;if(nivel!==undefined)sr.nivel_risco=nivel;}
+    // Atualiza badge visual
     if(nivel!==undefined){
       const card=document.getElementById(`risco-card-${srId}`);
       const badgeEl=card?.querySelector('.nivel-badge');
@@ -981,7 +1007,20 @@ async function atualizarAvaliacao(srId,el,campo){
         badgeEl.textContent=nivelLabel(nivel||'');
       }
     }
+    // Propaga para funcao_riscos se estiver no contexto setor
+    if(contexto==='setor'){
+      await propagarAvaliacaoParaFuncoes(srId,updates);
+    }
   }catch(e){console.error(e);}
+}
+
+async function propagarAvaliacaoParaFuncoes(srId,updates){
+  try{
+    await fetch(
+      `${SUPA_URL}/rest/v1/funcao_riscos?origem_setor_risco_id=eq.${srId}&ativo=eq.true`,
+      {method:'PATCH',headers:h2(),body:JSON.stringify(updates)}
+    );
+  }catch(e){console.error('Erro ao propagar avaliação:',e);}
 }
 
 // ── HIERARQUIA ─────────────────────────────────────────────────
@@ -995,12 +1034,19 @@ async function salvarMedida(srId,nivel,valor){
   const campo=`medida_${nivel}_desc`;
   const checkCampo=`medida_${nivel}`;
   const checked=document.getElementById(`check-${srId}-${nivel}`)?.checked||false;
+  const updates={[campo]:valor||null,[checkCampo]:checked,atualizado_em:new Date().toISOString()};
   try{
-    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:h2(),
-      body:JSON.stringify({[campo]:valor||null,[checkCampo]:checked,atualizado_em:new Date().toISOString()})});
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:h2(),body:JSON.stringify(updates)});
     const lista=contexto==='setor'?riscosSetor:riscosFuncao;
     const sr=lista.find(x=>x.id===srId);
     if(sr){sr[campo]=valor;sr[checkCampo]=checked;}
+    // Propaga medida para funcao_riscos se contexto for setor
+    if(contexto==='setor'){
+      await fetch(
+        `${SUPA_URL}/rest/v1/funcao_riscos?origem_setor_risco_id=eq.${srId}&ativo=eq.true`,
+        {method:'PATCH',headers:h2(),body:JSON.stringify(updates)}
+      );
+    }
     if(valor&&valor.trim()&&checked)await criarAcaoFromMedida(srId,nivel,valor.trim());
   }catch(e){console.error(e);}
 }

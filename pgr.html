@@ -614,7 +614,7 @@ function renderInventarioRiscos(){
           ${funcao.cbo?`<div class="funcao-bloco-cbo">CBO: ${h(funcao.cbo)}</div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4pt;">
-          ${setoresNomes.length?`<span class="funcao-bloco-setores">📁 ${h(setoresNomes.join(' · '))}</span>`:''}
+          ${setoresNomes.length?`<span class="funcao-bloco-setores">📁 Setor(es): ${h(setoresNomes.join(' · '))}</span>`:''}
           <span style="font-size:7.5pt;color:#9ca3af;">${frs.length} risco(s)</span>
         </div>
       </div>`;
