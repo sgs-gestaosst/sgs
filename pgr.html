@@ -6,7 +6,6 @@
 <title>PGR — Programa de Gerenciamento de Riscos</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── TELA ─────────────────────────────── */
 :root{
   --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
   --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
@@ -16,7 +15,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
 .screen-header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
-.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
 .screen-actions{margin-left:auto;display:flex;gap:10px;align-items:center;}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
 .btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
@@ -26,45 +25,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .screen-body{padding:40px 24px;display:flex;justify-content:center;}
 .pages-wrap{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%;}
 
-/* ── FOLHA A4 ─────────────────────────── */
+/* ── FOLHA A4 ── */
 .page{
-  background:#fff;
-  width:210mm;
-  min-height:297mm;
-  padding:20mm 20mm 20mm 25mm;
+  background:#fff;width:210mm;min-height:297mm;
+  padding:20mm 20mm 24mm 25mm;
   box-shadow:0 4px 32px rgba(0,0,0,.5);
-  position:relative;
-  color:#1a1a2e;
-  font-family:'IBM Plex Sans',sans-serif;
-  font-size:10pt;
-  line-height:1.5;
+  position:relative;color:#1a1a2e;
+  font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;
 }
-/* Faixa lateral decorativa */
 .page::before{
-  content:'';
-  position:absolute;
-  left:0;top:0;bottom:0;
-  width:8mm;
+  content:'';position:absolute;left:0;top:0;bottom:0;width:8mm;
   background:linear-gradient(180deg,#1a3a6e 0%,#0d2040 100%);
 }
 
-/* ── TIPOGRAFIA DO DOCUMENTO ──────────── */
+/* ── TIPOGRAFIA ── */
 .doc-title{font-size:22pt;font-weight:700;color:#0d2040;line-height:1.2;margin-bottom:4pt;}
-.doc-subtitle{font-size:13pt;color:#2a5298;font-weight:500;margin-bottom:6pt;}
-.doc-label{font-size:7pt;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;}
-.doc-value{font-size:10pt;color:#1a1a2e;font-weight:500;}
-.doc-section{font-size:12pt;font-weight:700;color:#0d2040;text-transform:uppercase;letter-spacing:.06em;border-bottom:2pt solid #1a3a6e;padding-bottom:4pt;margin:16pt 0 10pt;}
+.doc-section{font-size:11pt;font-weight:700;color:#0d2040;text-transform:uppercase;letter-spacing:.06em;border-bottom:2pt solid #1a3a6e;padding-bottom:4pt;margin:16pt 0 10pt;}
 .doc-subsection{font-size:10pt;font-weight:600;color:#2a5298;margin:10pt 0 6pt;}
 .doc-text{font-size:9.5pt;color:#374151;line-height:1.6;text-align:justify;}
-.doc-em{font-size:9pt;color:#6b7280;font-style:italic;}
+.num-secao{color:#4a7cdc;font-family:'IBM Plex Mono',monospace;font-size:9pt;margin-right:6pt;}
 
-/* ── CAPA ─────────────────────────────── */
+/* ── CAPA ── */
 .capa{display:flex;flex-direction:column;height:100%;min-height:257mm;}
 .capa-logo-wrap{display:flex;align-items:center;gap:12pt;margin-bottom:40pt;}
 .capa-logo-box{width:50pt;height:50pt;background:#0d2040;display:flex;align-items:center;justify-content:center;border-radius:6pt;}
-.capa-logo-text{font-family:'IBM Plex Mono',monospace;font-size:16pt;font-weight:700;color:#fff;letter-spacing:.05em;}
-.capa-sistema{font-size:9pt;color:#6b7280;}
-.capa-sistema strong{color:#2a5298;}
+.capa-logo-text{font-family:'IBM Plex Mono',monospace;font-size:16pt;font-weight:700;color:#fff;}
 .capa-divider{height:3pt;background:linear-gradient(90deg,#1a3a6e,#2a5298,#4a7cdc);margin:20pt 0;border-radius:2pt;}
 .capa-titulo-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;}
 .capa-pre{font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#2a5298;margin-bottom:8pt;}
@@ -84,22 +69,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .capa-footer-label{font-size:8pt;color:#9ca3af;}
 .capa-footer-value{font-size:9pt;color:#374151;font-weight:500;}
 
-/* ── HEADER PÁGINAS INTERNAS ──────────── */
+/* ── HEADER/FOOTER PÁGINAS ── */
 .page-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1pt solid #e5e7eb;padding-bottom:8pt;margin-bottom:14pt;}
 .ph-empresa{font-size:8pt;font-weight:600;color:#374151;}
 .ph-doc{font-size:8pt;color:#9ca3af;font-family:'IBM Plex Mono',monospace;}
-.page-footer{position:absolute;bottom:15mm;left:25mm;right:20mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #e5e7eb;padding-top:6pt;}
+.page-footer{position:absolute;bottom:12mm;left:25mm;right:20mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #e5e7eb;padding-top:6pt;}
 .pf-label{font-size:7.5pt;color:#9ca3af;}
 .pf-page{font-family:'IBM Plex Mono',monospace;font-size:8pt;color:#6b7280;}
 
-/* ── TABELAS ──────────────────────────── */
-.doc-table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9pt;}
-.doc-table th{background:#0d2040;color:#fff;padding:6pt 8pt;text-align:left;font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
-.doc-table td{padding:6pt 8pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;}
+/* ── TABELAS ── */
+.doc-table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:8.5pt;}
+.doc-table th{background:#0d2040;color:#fff;padding:5pt 7pt;text-align:left;font-size:7.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.doc-table td{padding:5pt 7pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;}
 .doc-table tr:nth-child(even) td{background:#f9fafb;}
 .doc-table tr:last-child td{border-bottom:none;}
 
-/* ── FICHAS ───────────────────────────── */
+/* ── FICHAS ── */
 .ficha-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1pt solid #e5e7eb;border-radius:4pt;overflow:hidden;margin:8pt 0;}
 .ficha-grid-3{grid-template-columns:1fr 1fr 1fr;}
 .ficha-item{padding:8pt 10pt;border-right:1pt solid #e5e7eb;border-bottom:1pt solid #e5e7eb;}
@@ -110,50 +95,63 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .ficha-value{font-size:9.5pt;color:#1a1a2e;font-weight:500;}
 .ficha-full{grid-column:1/-1;border-right:none!important;}
 
-/* ── RISCO CARD NO DOC ────────────────── */
-.risco-doc{border:1pt solid #e5e7eb;border-radius:4pt;margin:8pt 0;overflow:hidden;}
-.risco-doc-header{background:#f9fafb;padding:7pt 10pt;display:flex;align-items:center;gap:8pt;border-bottom:1pt solid #e5e7eb;}
-.risco-doc-cat{font-size:7pt;padding:2pt 7pt;border-radius:3pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
-.risco-doc-nome{font-size:10pt;font-weight:600;color:#0d2040;flex:1;}
-.risco-doc-nivel{font-size:8pt;padding:2pt 8pt;border-radius:3pt;font-weight:700;}
+/* ── INVENTÁRIO DE RISCOS ── */
+.funcao-bloco{border:1pt solid #e5e7eb;border-radius:4pt;margin:10pt 0;overflow:hidden;page-break-inside:avoid;}
+.funcao-bloco-header{background:#f0f4ff;padding:7pt 10pt;border-bottom:1pt solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:8pt;}
+.funcao-bloco-nome{font-size:10pt;font-weight:700;color:#0d2040;}
+.funcao-bloco-cbo{font-size:8pt;color:#6b7280;font-family:'IBM Plex Mono',monospace;}
+.funcao-bloco-setores{font-size:8pt;color:#4a7cdc;background:#e8f0fe;padding:2pt 8pt;border-radius:10pt;border:1pt solid #c7d7f9;}
+
+/* Risco dentro da função */
+.risco-funcao{border-bottom:1pt solid #f3f4f6;padding:8pt 10pt;}
+.risco-funcao:last-child{border-bottom:none;}
+.risco-funcao-header{display:flex;align-items:flex-start;gap:8pt;margin-bottom:5pt;}
+.risco-cat-pill{font-size:7pt;padding:2pt 7pt;border-radius:3pt;font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;flex-shrink:0;}
+.risco-perigo-pill{font-size:7pt;padding:2pt 7pt;border-radius:3pt;background:#f3f4f6;color:#6b7280;border:1pt solid #e5e7eb;white-space:nowrap;flex-shrink:0;}
+.risco-funcao-nome{font-size:9.5pt;font-weight:600;color:#0d2040;flex:1;}
+.nivel-pill{font-size:7.5pt;padding:2pt 8pt;border-radius:3pt;font-weight:700;white-space:nowrap;flex-shrink:0;}
 .nivel-MUITO-ALTO{background:#fee2e2;color:#991b1b;}
 .nivel-ALTO{background:#ffedd5;color:#9a3412;}
 .nivel-MEDIO{background:#fef9c3;color:#854d0e;}
 .nivel-BAIXO{background:#dcfce7;color:#166534;}
-.risco-doc-body{padding:8pt 10pt;}
-.risco-doc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6pt;margin-bottom:8pt;}
-.risco-doc-field .label{font-size:7pt;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2pt;}
-.risco-doc-field .value{font-size:9pt;color:#374151;font-weight:500;}
-.medidas-hierarquia{margin-top:6pt;}
-.mh-titulo{font-size:7.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#6b7280;margin-bottom:5pt;}
-.mh-item{display:flex;gap:6pt;align-items:flex-start;margin-bottom:4pt;}
-.mh-num{width:14pt;height:14pt;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7pt;font-weight:700;flex-shrink:0;}
-.mh-label{font-size:8pt;font-weight:600;width:70pt;flex-shrink:0;padding-top:1pt;}
-.mh-desc{font-size:8.5pt;color:#374151;flex:1;}
-.mh-vazio{font-size:8pt;color:#9ca3af;font-style:italic;}
 
-/* ── SEÇÃO EM BREVE ───────────────────── */
+.risco-funcao-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6pt;margin-bottom:6pt;}
+.rf-field .lbl{font-size:6.5pt;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2pt;}
+.rf-field .val{font-size:8.5pt;color:#374151;font-weight:500;}
+
+.danos-box{background:#fff7ed;border-left:3pt solid #fb923c;padding:5pt 8pt;margin-bottom:5pt;border-radius:0 3pt 3pt 0;}
+.danos-label{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:2pt;}
+.danos-text{font-size:8pt;color:#374151;line-height:1.5;}
+
+.medidas-box{margin-top:5pt;}
+.medidas-label{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:4pt;}
+.medida-item{display:flex;gap:6pt;align-items:flex-start;margin-bottom:3pt;}
+.medida-num{width:14pt;height:14pt;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7pt;font-weight:700;flex-shrink:0;}
+.medida-label{font-size:7.5pt;font-weight:600;width:65pt;flex-shrink:0;padding-top:1pt;}
+.medida-desc{font-size:8pt;color:#374151;flex:1;line-height:1.4;}
+.medida-vazio{font-size:7.5pt;color:#9ca3af;font-style:italic;}
+
+/* ── MATRIZ EPI ── */
+.epi-matrix-table{width:100%;border-collapse:collapse;font-size:8pt;margin:8pt 0;}
+.epi-matrix-table th{background:#0d2040;color:#fff;padding:5pt 7pt;font-size:7.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.03em;text-align:left;}
+.epi-matrix-table td{padding:5pt 7pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;}
+.epi-matrix-table tr:nth-child(even) td{background:#f9fafb;}
+.epi-pill{display:inline-block;background:#ede9fe;color:#5b21b6;border:1pt solid #c4b5fd;border-radius:3pt;padding:1pt 6pt;font-size:7pt;font-weight:600;margin:1pt 2pt 1pt 0;}
+.ca-pill{display:inline-block;background:#f3f4f6;color:#374151;border:1pt solid #e5e7eb;border-radius:3pt;padding:1pt 5pt;font-size:6.5pt;font-family:'IBM Plex Mono',monospace;}
+
+/* ── SEÇÕES EM BREVE ── */
 .em-breve{background:#f9fafb;border:1pt dashed #d1d5db;border-radius:4pt;padding:16pt;text-align:center;margin:10pt 0;}
 .em-breve-icon{font-size:20pt;margin-bottom:6pt;}
 .em-breve-label{font-size:9pt;color:#9ca3af;font-style:italic;}
 
-/* ── NUMERAÇÃO ────────────────────────── */
-.num-secao{color:#4a7cdc;font-family:'IBM Plex Mono',monospace;font-size:9pt;margin-right:6pt;}
-
-/* ── PRINT ────────────────────────────── */
+/* ── PRINT ── */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   body{background:#fff!important;}
   .screen-header{display:none!important;}
   .screen-body{padding:0!important;}
   .pages-wrap{gap:0!important;}
-  .page{
-    box-shadow:none!important;
-    margin:0!important;
-    page-break-after:always;
-    width:210mm!important;
-    min-height:297mm!important;
-  }
+  .page{box-shadow:none!important;margin:0!important;page-break-after:always;width:210mm!important;min-height:297mm!important;}
   .page:last-child{page-break-after:avoid;}
   @page{size:A4;margin:0;}
 }
@@ -162,27 +160,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .page::before{width:5mm;}
 }
 </style>
-<script src="trial_check.js"></script>
 </head>
 <body>
 
-<!-- BARRA DE CONTROLE (só tela) -->
 <div class="screen-header">
-  <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
+  <a href="index.html" class="header-logo">SGS</a>
   <span style="font-size:13px;color:var(--text2);">Visualização do documento</span>
   <div class="screen-actions">
     <button class="btn btn-edit" onclick="toggleElaboradora()" id="btn-elab">✏️ Empresa elaboradora</button>
-    <button class="btn btn-edit" onclick="abrirModalPlanoAcao()" id="btn-plano">📋 Revisar plano de ação</button>
-    <a id="btn-voltar" href="#" class="btn btn-edit" style="text-decoration:none;">← Voltar</a>
+    <button class="btn btn-edit" onclick="abrirModalPlanoAcao()">📋 Revisar plano de ação</button>
+    <a id="btn-voltar" href="#" class="btn btn-edit">← Voltar</a>
     <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
   </div>
 </div>
 
-<!-- Painel empresa elaboradora -->
+<!-- Painel elaboradora -->
 <div id="painel-elaboradora" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 32px;">
   <div style="max-width:900px;margin:0 auto;">
     <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:16px;align-items:end;">
-      <!-- Upload de logo -->
       <div>
         <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Logo</label>
         <div id="logo-preview" onclick="document.getElementById('elab-logo-input').click()"
@@ -190,16 +185,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
           📷<br>Logo
         </div>
         <input type="file" id="elab-logo-input" accept="image/*" style="display:none;" onchange="carregarLogo(this)">
-        <button onclick="removerLogo()" id="btn-remover-logo" style="display:none;margin-top:4px;font-size:10px;background:none;border:none;color:var(--danger);cursor:pointer;padding:0;">✕ Remover</button>
+        <button onclick="removerLogo()" id="btn-remover-logo" style="display:none;margin-top:4px;font-size:10px;background:none;border:none;color:var(--danger);cursor:pointer;">✕ Remover</button>
       </div>
-      <!-- Campos -->
       <div>
         <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Nome da empresa elaboradora</label>
         <input type="text" id="elab-nome" placeholder="Ex: SST Consultoria Ltda" oninput="atualizarElaboradora()"
           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
       </div>
       <div>
-        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">CNPJ da elaboradora</label>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">CNPJ</label>
         <input type="text" id="elab-cnpj" placeholder="00.000.000/0000-00" oninput="atualizarElaboradora()"
           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
       </div>
@@ -209,13 +203,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
       </div>
     </div>
-    <div style="margin-top:8px;font-size:11px;color:var(--text3);">
-      ℹ️ Estes dados aparecem na capa e rodapé. Não são salvos no banco — preencha antes de imprimir.
-    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--text3);">ℹ️ Estes dados aparecem na capa e rodapé. Preencha antes de imprimir.</div>
   </div>
 </div>
 
-<!-- MODAL REVISAR PLANO DE AÇÃO -->
+<!-- Modal plano de ação -->
 <div id="modal-plano" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:700px;width:100%;margin:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -249,14 +241,13 @@ const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
 const token=localStorage.getItem('sgs_token');
 if(!token)window.location.href='login.html';
-
 const params=new URLSearchParams(window.location.search);
 const empresaId=params.get('empresa_id');
 if(!empresaId)window.location.href='empresas.html';
-
 document.getElementById('btn-voltar').href=`riscos.html?empresa_id=${empresaId}`;
 
-let empresa,cnaes,setores,funcoes,setor_riscos,funcao_riscos,medidas_setor,medidas_funcao,categorias,epis;
+let empresa,cnaes,setores,funcoes,funcaoSetores,setor_riscos,funcao_riscos,
+    medidas_setor,medidas_funcao,categorias,epis,perigos,riscos;
 
 function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtData(d){if(!d)return'—';return new Date(d+'T00:00:00').toLocaleDateString('pt-BR');}
@@ -272,52 +263,85 @@ const CAT_CORES={
   'Acidente':    {bg:'#ffedd5',color:'#9a3412'},
   'Psicossocial':{bg:'#fce7f3',color:'#9d174d'},
 };
+const MEDIDAS_CONFIG=[
+  {key:'elim',label:'Eliminação',cor:'#dc2626',bg:'#fee2e2'},
+  {key:'subs',label:'Substituição',cor:'#d97706',bg:'#fef3c7'},
+  {key:'eng', label:'Engenharia',cor:'#2563eb',bg:'#dbeafe'},
+  {key:'adm', label:'Administrativo',cor:'#059669',bg:'#d1fae5'},
+  {key:'epi', label:'EPI',cor:'#7c3aed',bg:'#ede9fe'},
+];
+
 function getCatCor(catId){const c=categorias?.find(x=>x.id===catId);return CAT_CORES[c?.nome]||{bg:'#f3f4f6',color:'#374151'};}
 function getCatNome(catId){return categorias?.find(x=>x.id===catId)?.nome||'—';}
+function getRiscoNome(riscoId){return riscos?.find(r=>r.id===riscoId)?.nome_risco||`Risco #${riscoId}`;}
+function getRisco(riscoId){return riscos?.find(r=>r.id===riscoId);}
+function getPerigo(perigoId){return perigos?.find(p=>p.id===perigoId);}
 function nivelLabel(n){return{'MUITO-ALTO':'Muito alto','ALTO':'Alto','MEDIO':'Médio','BAIXO':'Baixo'}[n]||n||'—';}
+function h(s){return escHtml(s);}
+
+function headers(){return{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`};}
 
 async function carregar(){
   try{
-    const [resEmp,resCnaes,resSets,resFuncs,resSR,resFR,resMedS,resMedF,resCats,resEpis]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?empresa_id=eq.${empresaId}&select=*&order=tipo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao,cbo,turno&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/setor_riscos?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/funcao_riscos?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/catalogo_epis?ativo=eq.true&select=id,nome`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+    const [resEmp,resCnaes,resSets,resFuncs,resFuncSets,resRiscos,resCats,resEpis,resPerigos]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?empresa_id=eq.${empresaId}&select=*&order=tipo.asc`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_funcao.asc`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/funcao_setores?ativo=eq.true&select=funcao_id,setor_id,num_funcionarios_previsto`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=*`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=*`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/catalogo_epis?ativo=eq.true&select=id,nome,categoria`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/perigos?ativo=eq.true&select=id,nome,descricao,categoria_risco_id`,{headers:headers()}),
     ]);
-    [empresa,cnaes,setores,funcoes,setor_riscos,funcao_riscos,medidas_setor,medidas_funcao,categorias,epis]=await Promise.all([resEmp.json(),resCnaes.json(),resSets.json(),resFuncs.json(),resSR.json(),resFR.json(),resMedS.json(),resMedF.json(),resCats.json(),resEpis.json()]);
-    empresa=empresa[0];
-    // Carrega funcao_setores para montar tabela de setores x funções
-    if(setores.length){
-      const sIds=setores.map(s=>s.id).join(',');
-      const resFuncSet=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=in.(${sIds})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-      window.funcaoSetoresData=await resFuncSet.json();
-    }else{window.funcaoSetoresData=[];}
-    // Carrega SESMT
-    const resSESMT=await fetch(`${SUPA_URL}/rest/v1/dimensionamento_sesmt?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-    const sesmtData=await resSESMT.json();
-    // Agrega os dados corretamente
-    const sesmtRaw=sesmtData[0]||null;
-    // Busca via RPC para garantir valores corretos
+
+    [empresa,cnaes,setores,funcoes,funcaoSetores,riscos,categorias,epis,perigos]=await Promise.all([
+      resEmp.json().then(d=>d[0]),
+      resCnaes.json(),resSets.json(),resFuncs.json(),resFuncSets.json(),
+      resRiscos.json(),resCats.json(),resEpis.json(),resPerigos.json(),
+    ]);
+
+    // Busca setor_riscos e funcao_riscos filtrados pela empresa (via setores)
+    const setorIds=setores.map(s=>s.id);
+    const funcaoIds=funcoes.map(f=>f.id);
+
+    if(setorIds.length){
+      const [resSR,resMedS]=await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=in.(${setorIds.join(',')})&ativo=eq.true&select=*`,{headers:headers()}),
+        fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?ativo=eq.true&select=*`,{headers:headers()}),
+      ]);
+      setor_riscos=await resSR.json();
+      medidas_setor=await resMedS.json();
+    }else{setor_riscos=[];medidas_setor=[];}
+
+    if(funcaoIds.length){
+      const [resFR,resMedF]=await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=in.(${funcaoIds.join(',')})&ativo=eq.true&select=*`,{headers:headers()}),
+        fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?ativo=eq.true&select=*`,{headers:headers()}),
+      ]);
+      funcao_riscos=await resFR.json();
+      medidas_funcao=await resMedF.json();
+    }else{funcao_riscos=[];medidas_funcao=[];}
+
+    // SESMT
     const resSesmtCalc=await fetch(`${SUPA_URL}/rest/v1/rpc/calcular_sesmt_empresa`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+      method:'POST',headers:{'Content-Type':'application/json',...headers()},
       body:JSON.stringify({p_empresa_id:parseInt(empresaId)})
     });
-    const sesmtCalc=await resSesmtCalc.json();
-    window.sesmtData=sesmtRaw;
-    window.sesmtCalc=Array.isArray(sesmtCalc)?sesmtCalc:[];
-    // Carrega ações da empresa para o plano de ação
-    const resAcoes=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=prioridade.asc,prazo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    window.sesmtCalc=await resSesmtCalc.json();
+
+    const resSesmt=await fetch(`${SUPA_URL}/rest/v1/dimensionamento_sesmt?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:headers()});
+    const sesmtArr=await resSesmt.json();
+    window.sesmtData=sesmtArr[0]||null;
+
+    // Ações
+    const resAcoes=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=prioridade.asc,prazo.asc`,{headers:headers()});
     window.acoesData=await resAcoes.json();
+
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro ao carregar: ${e.message}</div>`;
+    console.error(e);
   }
 }
 
@@ -329,91 +353,74 @@ function renderDocumento(){
   wrap.appendChild(renderIdentificacao());
   wrap.appendChild(renderCaracterizacao());
   wrap.appendChild(renderSESMT());
-  wrap.appendChild(renderInventarioRiscos());
+  // Inventário pode gerar múltiplas páginas
+  renderInventarioRiscos().forEach(pg=>wrap.appendChild(pg));
+  wrap.appendChild(renderMatrizEPI());
   wrap.appendChild(renderPlanoAcao());
 }
 
-// ── CAPA ──────────────────────────────────────────────
+// ── CAPA ──────────────────────────────────────────────────────
 function renderCapa(){
-  const pg=document.createElement('div');
-  pg.className='page';
+  const pg=criarPagina();
   const gr=empresa.grau_risco;
-  const cnpjFormatado=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'Não informado';
+  const cnpj=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'Não informado';
+  const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
   pg.innerHTML=`
   <div class="capa">
     <div class="capa-logo-wrap">
       <div id="doc-elab-logo" class="capa-logo-box"><span class="capa-logo-text">SST</span></div>
       <div>
         <div id="doc-elab-nome" style="font-size:10pt;font-weight:700;color:#0d2040;">Empresa Elaboradora</div>
-        <div class="capa-sistema">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
+        <div style="font-size:9pt;color:#6b7280;">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
       </div>
     </div>
-
     <div class="capa-divider"></div>
-
     <div class="capa-titulo-wrap">
       <div class="capa-pre">Programa de Gerenciamento de Riscos</div>
       <div class="capa-titulo">PGR</div>
       <div class="capa-titulo-sub">Conforme NR-1 — Portaria MTE nº 672/2021</div>
-
       <div class="capa-empresa-box">
-        <div class="capa-empresa-nome">${escHtml(empresa.razao_social||empresa.nome_fantasia||'—')}</div>
-        ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#4b5563;margin-bottom:4pt;">${escHtml(empresa.nome_fantasia)}</div>`:''}
-        <div class="capa-empresa-cnpj">CNPJ: ${escHtml(cnpjFormatado)}</div>
+        <div class="capa-empresa-nome">${h(empresa.razao_social||empresa.nome_fantasia||'—')}</div>
+        ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#4b5563;margin-bottom:4pt;">${h(empresa.nome_fantasia)}</div>`:''}
+        <div class="capa-empresa-cnpj">CNPJ: ${h(cnpj)}</div>
       </div>
-
       <div class="capa-badges">
         ${gr?`<span class="capa-badge ${grInfo[gr]?.cls||'badge-info'}">${grInfo[gr]?.label||''}</span>`:''}
-        ${empresa.atividade_rural?`<span class="capa-badge badge-info">Atividade Rural</span>`:''}
-        ${cnaes.find(c=>c.tipo==='Principal')?`<span class="capa-badge badge-info">CNAE: ${escHtml(cnaes.find(c=>c.tipo==='Principal').cnae)}</span>`:''}
+        ${cnpePrincipal?`<span class="capa-badge badge-info">CNAE: ${h(cnpePrincipal.cnae)}</span>`:''}
         <span class="capa-badge badge-info">${setores.length} setor(es)</span>
-        <span class="capa-badge badge-info">${empresa.total_funcionarios_previsto||0} funcionários cobertos</span>
+        <span class="capa-badge badge-info">${funcoes.length} função(ões)</span>
+        <span class="capa-badge badge-info">${empresa.total_funcionarios_previsto||0} trabalhadores cobertos</span>
       </div>
     </div>
-
     <div class="capa-footer">
-      <div>
-        <div class="capa-footer-label">Versão do documento</div>
-        <div class="capa-footer-value">1.0 — ${fmtAno()}</div>
-      </div>
-      <div style="text-align:center;">
-        <div class="capa-footer-label">Elaboração</div>
-        <div class="capa-footer-value" id="doc-elab-footer" class="elab-responsavel">—</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="capa-footer-label">Periodicidade de revisão</div>
-        <div class="capa-footer-value">Anual ou quando necessário*</div>
-      </div>
+      <div><div class="capa-footer-label">Versão</div><div class="capa-footer-value">1.0 — ${fmtAno()}</div></div>
+      <div style="text-align:center;"><div class="capa-footer-label">Elaboração</div><div class="capa-footer-value" id="doc-elab-footer">—</div></div>
+      <div style="text-align:right;"><div class="capa-footer-label">Revisão periódica</div><div class="capa-footer-value">Anual</div></div>
     </div>
   </div>`;
   return pg;
 }
 
-// ── SUMÁRIO ───────────────────────────────────────────
+// ── SUMÁRIO ───────────────────────────────────────────────────
 function renderSumario(){
-  const pg=document.createElement('div');
-  pg.className='page';
+  const pg=criarPagina();
   pg.innerHTML=`
-  <div class="page-header">
-    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="ph-doc">PGR — ${fmtAno()}</span>
-  </div>
-
+  ${phHeader(2)}
   <div class="doc-section">Sumário</div>
-
   <table class="doc-table" style="margin-top:16pt;">
     <tbody>
       ${[
         ['1','Identificação da Empresa','3'],
         ['2','Caracterização do Estabelecimento','4'],
         ['3','Dimensionamento do SESMT — NR-4','5'],
-        ['4','Inventário de Riscos Ocupacionais','6'],
-        ['4.1','Riscos por Setor','6'],
-        ['4.2','Riscos por Função','—'],
-        ['5','Avaliação e Classificação dos Riscos','—'],
-        ['6','Medidas de Prevenção e Controle','—'],
-        ['7','Plano de Ação','—'],
-        ['8','Monitoramento e Revisão','—'],
+        ['4','Inventário de Riscos Ocupacionais por Função','6'],
+        ['4.1','Identificação de Perigos e Riscos','6'],
+        ['4.2','Avaliação e Nível de Risco','6'],
+        ['4.3','Danos à Saúde Potenciais','6'],
+        ['4.4','Medidas de Prevenção e Controle','6'],
+        ['5','Matriz de EPI por Função','—'],
+        ['6','Plano de Ação','—'],
+        ['7','Monitoramento e Revisão','—'],
       ].map(([n,t,p])=>`<tr>
         <td style="width:30pt;"><span class="num-secao">${n}</span></td>
         <td style="color:#1a1a2e;">${t}</td>
@@ -421,190 +428,87 @@ function renderSumario(){
       </tr>`).join('')}
     </tbody>
   </table>
-
-  <div class="em-breve" style="margin-top:30pt;">
-    <div class="em-breve-icon">📋</div>
-    <div class="em-breve-label">Seções marcadas com "—" serão preenchidas automaticamente<br>conforme os módulos de riscos e exames forem cadastrados no sistema.</div>
-  </div>
-
-  <div class="page-footer">
-    <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="pf-page">Página 2</span>
-  </div>`;
+  ${pfFooter(2)}`;
   return pg;
 }
 
-// ── IDENTIFICAÇÃO ─────────────────────────────────────
+// ── IDENTIFICAÇÃO ─────────────────────────────────────────────
 function renderIdentificacao(){
-  const pg=document.createElement('div');
-  pg.className='page';
-  const cnpjF=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'—';
+  const pg=criarPagina();
+  const cnpj=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'—';
   const gr=empresa.grau_risco;
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
   pg.innerHTML=`
-  <div class="page-header">
-    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="ph-doc">PGR — ${fmtAno()}</span>
-  </div>
-
+  ${phHeader(3)}
   <div class="doc-section"><span class="num-secao">1</span>Identificação da Empresa</div>
-
   <div class="ficha-grid">
-    <div class="ficha-item ficha-full">
-      <div class="ficha-label">Razão Social</div>
-      <div class="ficha-value" style="font-size:11pt;">${escHtml(empresa.razao_social||'—')}</div>
-    </div>
-    <div class="ficha-item ficha-full">
-      <div class="ficha-label">Nome Fantasia</div>
-      <div class="ficha-value">${escHtml(empresa.nome_fantasia||'—')}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">CNPJ</div>
-      <div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${escHtml(cnpjF)}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Grau de Risco</div>
-      <div class="ficha-value">${gr?grInfo[gr]?.label:'—'}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">CNAE Principal</div>
-      <div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${cnpePrincipal?escHtml(cnpePrincipal.cnae):'—'}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Descrição CNAE</div>
-      <div class="ficha-value">${cnpePrincipal?escHtml(cnpePrincipal.descricao||'—'):'—'}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Endereço</div>
-      <div class="ficha-value">${escHtml(empresa.endereco||'—')}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Município / Estado</div>
-      <div class="ficha-value">${escHtml([empresa.cidade,empresa.estado].filter(Boolean).join(' / ')||'—')}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">CEP</div>
-      <div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${escHtml(empresa.cep||'—')}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Telefone</div>
-      <div class="ficha-value">${escHtml(empresa.telefone||'—')}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">E-mail</div>
-      <div class="ficha-value">${escHtml(empresa.email||'—')}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Atividade Rural</div>
-      <div class="ficha-value">${empresa.atividade_rural?'Sim':'Não'}</div>
-    </div>
+    <div class="ficha-item ficha-full"><div class="ficha-label">Razão Social</div><div class="ficha-value" style="font-size:11pt;">${h(empresa.razao_social||'—')}</div></div>
+    <div class="ficha-item ficha-full"><div class="ficha-label">Nome Fantasia</div><div class="ficha-value">${h(empresa.nome_fantasia||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">CNPJ</div><div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${h(cnpj)}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Grau de Risco</div><div class="ficha-value">${gr?grInfo[gr]?.label:'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">CNAE Principal</div><div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${cnpePrincipal?h(cnpePrincipal.cnae):'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Descrição CNAE</div><div class="ficha-value">${cnpePrincipal?h(cnpePrincipal.descricao||'—'):'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Endereço</div><div class="ficha-value">${h(empresa.endereco||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Município / Estado</div><div class="ficha-value">${h([empresa.cidade,empresa.estado].filter(Boolean).join(' / ')||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">CEP</div><div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${h(empresa.cep||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Telefone</div><div class="ficha-value">${h(empresa.telefone||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">E-mail</div><div class="ficha-value">${h(empresa.email||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Atividade Rural</div><div class="ficha-value">${empresa.atividade_rural?'Sim':'Não'}</div></div>
   </div>
-
   ${cnaes.length?`
   <div class="doc-subsection" style="margin-top:14pt;">CNAEs cadastrados</div>
   <table class="doc-table">
     <thead><tr><th>Tipo</th><th>Código</th><th>Descrição</th><th>GR</th></tr></thead>
-    <tbody>
-      ${cnaes.map(c=>`<tr>
-        <td>${c.tipo}</td>
-        <td style="font-family:'IBM Plex Mono',monospace;">${escHtml(c.cnae)}</td>
-        <td>${escHtml(c.descricao||'—')}</td>
-        <td>${c.grau_risco?grInfo[c.grau_risco]?.label:'—'}</td>
-      </tr>`).join('')}
-    </tbody>
+    <tbody>${cnaes.map(c=>`<tr>
+      <td>${h(c.tipo)}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;">${h(c.cnae)}</td>
+      <td>${h(c.descricao||'—')}</td>
+      <td>${c.grau_risco?grInfo[c.grau_risco]?.label:'—'}</td>
+    </tr>`).join('')}</tbody>
   </table>`:''}
-
-  <div class="page-footer">
-    <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="pf-page">Página 3</span>
-  </div>`;
+  ${pfFooter(3)}`;
   return pg;
 }
 
-// ── CARACTERIZAÇÃO ────────────────────────────────────
+// ── CARACTERIZAÇÃO ────────────────────────────────────────────
 function renderCaracterizacao(){
-  const pg=document.createElement('div');
-  pg.className='page';
-  const totalFunc=empresa.total_funcionarios_previsto||0;
-
-  // Monta mapa de funções por setor usando funcao_setores (já carregado)
+  const pg=criarPagina();
   const funcoesPorSetor={};
-  if(window.funcaoSetoresData){
-    window.funcaoSetoresData.forEach(fs=>{
-      if(!funcoesPorSetor[fs.setor_id])funcoesPorSetor[fs.setor_id]=[];
-      const f=funcoes.find(x=>x.id===fs.funcao_id);
-      if(f)funcoesPorSetor[fs.setor_id].push(f.nome_funcao);
-    });
-  }
-
+  funcaoSetores.forEach(fs=>{
+    if(!funcoesPorSetor[fs.setor_id])funcoesPorSetor[fs.setor_id]=[];
+    const f=funcoes.find(x=>x.id===fs.funcao_id);
+    if(f)funcoesPorSetor[fs.setor_id].push(f.nome_funcao);
+  });
   pg.innerHTML=`
-  <div class="page-header">
-    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="ph-doc">PGR — ${fmtAno()}</span>
-  </div>
-
+  ${phHeader(4)}
   <div class="doc-section"><span class="num-secao">2</span>Caracterização do Estabelecimento</div>
-
-  <div class="doc-subsection">Quadro de funcionários</div>
   <div class="ficha-grid ficha-grid-3">
-    <div class="ficha-item">
-      <div class="ficha-label">Funcionários cobertos pelo programa</div>
-      <div class="ficha-value" style="font-size:16pt;color:#0d2040;font-weight:700;">${totalFunc}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Setores de trabalho</div>
-      <div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${setores.length}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Funções mapeadas</div>
-      <div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${funcoes.length}</div>
-    </div>
+    <div class="ficha-item"><div class="ficha-label">Trabalhadores cobertos</div><div class="ficha-value" style="font-size:16pt;color:#0d2040;font-weight:700;">${empresa.total_funcionarios_previsto||0}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Setores de trabalho</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${setores.length}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Funções mapeadas</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${funcoes.length}</div></div>
   </div>
-
   <div class="doc-subsection" style="margin-top:14pt;">Setores e funções</div>
   <table class="doc-table">
-    <thead>
-      <tr>
-        <th style="width:30%;">Setor</th>
-        <th style="width:15%;text-align:center;">Func. previstos</th>
-        <th>Funções vinculadas</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${setores.map(s=>{
-        const funcsDoSetor=(funcoesPorSetor[s.id]||[]);
-        const funcsLabel=funcsDoSetor.length?funcsDoSetor.join(', '):'<span style="color:#9ca3af;font-style:italic;">Nenhuma função vinculada</span>';
-        return`<tr>
-          <td style="font-weight:500;">${escHtml(s.nome_setor)}</td>
-          <td style="text-align:center;font-weight:600;color:#0d2040;">${s.num_funcionarios_previsto||0}</td>
-          <td style="font-size:8.5pt;color:#374151;">${funcsLabel}</td>
-        </tr>`;
-      }).join('')}
-    </tbody>
+    <thead><tr><th style="width:30%;">Setor</th><th style="width:15%;text-align:center;">Func. previstos</th><th>Funções vinculadas</th></tr></thead>
+    <tbody>${setores.map(s=>{
+      const fns=funcoesPorSetor[s.id]||[];
+      return`<tr>
+        <td style="font-weight:500;">${h(s.nome_setor)}</td>
+        <td style="text-align:center;font-weight:600;color:#0d2040;">${s.num_funcionarios_previsto||0}</td>
+        <td style="font-size:8.5pt;">${fns.length?h(fns.join(', ')):'<span style="color:#9ca3af;font-style:italic;">Nenhuma função vinculada</span>'}</td>
+      </tr>`;
+    }).join('')}</tbody>
   </table>
-
-  <div class="doc-subsection" style="margin-top:14pt;">Processos e atividades</div>
-  <div class="em-breve">
-    <div class="em-breve-icon">🏭</div>
-    <div class="em-breve-label">A descrição detalhada dos processos produtivos e atividades<br>será complementada conforme o inventário de riscos for desenvolvido.</div>
-  </div>
-
-  <div class="page-footer">
-    <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="pf-page">Página 4</span>
-  </div>`;
+  ${pfFooter(4)}`;
   return pg;
 }
 
-// ── SESMT — NR-4 ─────────────────────────────────────
+// ── SESMT ─────────────────────────────────────────────────────
 function renderSESMT(){
-  const pg=document.createElement('div');pg.className='page';
+  const pg=criarPagina();
   const sesmt=window.sesmtData;
   const gr=empresa.grau_risco||1;
   const numFunc=empresa.total_funcionarios_previsto||0;
-  const grLabels={1:'GR 1 — Baixo',2:'GR 2 — Médio-Baixo',3:'GR 3 — Médio-Alto',4:'GR 4 — Alto'};
-
-  // Se não tiver dados calculados, mostra tabela NR-4 calculada na hora
   const calc=window.sesmtCalc||[];
   const tec=calc.find(c=>c.cargo?.includes('Técnico'))?.qtd||sesmt?.tecnico_sst||0;
   const eng=calc.find(c=>c.cargo?.includes('Engenheiro'))?.qtd||sesmt?.engenheiro_sst||0;
@@ -612,227 +516,379 @@ function renderSESMT(){
   const enf=calc.find(c=>c.cargo?.includes('Enfermeiro')&&!c.cargo?.includes('Aux'))?.qtd||sesmt?.enfermeiro||0;
   const aux=calc.find(c=>c.cargo?.includes('Auxiliar'))?.qtd||sesmt?.aux_enfermagem||0;
   const dispensado=(tec+eng+med+enf+aux)===0;
-
-  const regTec=calc.find(c=>c.cargo?.includes('Técnico'))?.regime||sesmt?.regime_tecnico||'Parcial';
+  const requerCipa=calc.some(c=>c.cargo?.includes('CIPA')&&!c.cargo?.includes('CIPATR'))||sesmt?.requer_cipa||false;
+  const requerCipatr=calc.some(c=>c.cargo?.includes('CIPATR'))||sesmt?.requer_cipatr||false;
+  const membrosCipa=calc.find(c=>c.cargo?.includes('CIPA')&&!c.cargo?.includes('CIPATR'))?.qtd||sesmt?.numero_membros_cipa||0;
+  const membrosCipatr=calc.find(c=>c.cargo?.includes('CIPATR'))?.qtd||sesmt?.numero_membros_cipatr||0;
+  const grLabels={1:'GR 1 — Baixo',2:'GR 2 — Médio-Baixo',3:'GR 3 — Médio-Alto',4:'GR 4 — Alto'};
   const profissionais=[
-    {cargo:'Técnico de Segurança do Trabalho',cbo:'3172-05',qtd:tec,regime:regTec},
+    {cargo:'Técnico de Segurança do Trabalho',cbo:'3172-05',qtd:tec,regime:'Parcial'},
     {cargo:'Engenheiro de Segurança do Trabalho',cbo:'2149-40',qtd:eng,regime:'Parcial'},
     {cargo:'Médico do Trabalho',cbo:'2231-38',qtd:med,regime:'Parcial'},
     {cargo:'Enfermeiro do Trabalho',cbo:'2235-35',qtd:enf,regime:'Parcial'},
     {cargo:'Auxiliar de Enfermagem do Trabalho',cbo:'3222-05',qtd:aux,regime:'Parcial'},
   ];
-
-  // CIPA / CIPATR / CIPAMIN
-  const requerCipa=calc.some(c=>c.cargo?.includes('CIPA')&&!c.cargo?.includes('CIPATR')&&!c.cargo?.includes('CIPAMIN'))||sesmt?.requer_cipa||false;
-  const requerCipatr=calc.some(c=>c.cargo?.includes('CIPATR'))||sesmt?.requer_cipatr||false;
-  const requerCipamin=calc.some(c=>c.cargo?.includes('CIPAMIN'))||sesmt?.requer_cipamin||false;
-  const membrosCipa=calc.find(c=>c.cargo?.includes('CIPA')&&!c.cargo?.includes('CIPATR')&&!c.cargo?.includes('CIPAMIN'))?.qtd||sesmt?.numero_membros_cipa||0;
-  const membrosCipatr=calc.find(c=>c.cargo?.includes('CIPATR'))?.qtd||sesmt?.numero_membros_cipatr||0;
-  const membrosCipamin=calc.find(c=>c.cargo?.includes('CIPAMIN'))?.qtd||sesmt?.numero_membros_cipamin||0;
-
   pg.innerHTML=`
-  <div class="page-header">
-    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="ph-doc">PGR — ${fmtAno()}</span>
-  </div>
-
+  ${phHeader(5)}
   <div class="doc-section"><span class="num-secao">3</span>Dimensionamento do SESMT — NR-4</div>
-
-  <p class="doc-text" style="margin-bottom:12pt;">O dimensionamento do Serviço Especializado em Engenharia de Segurança e em Medicina do Trabalho (SESMT) foi realizado conforme o Quadro I da NR-4, considerando o Grau de Risco da atividade principal e o número de empregados do estabelecimento.</p>
-
+  <p class="doc-text" style="margin-bottom:12pt;">O dimensionamento do SESMT foi realizado conforme o Quadro I da NR-4, considerando o Grau de Risco da atividade principal e o número de empregados do estabelecimento.</p>
   <div class="ficha-grid ficha-grid-3" style="margin-bottom:14pt;">
-    <div class="ficha-item">
-      <div class="ficha-label">Grau de risco (NR-4)</div>
-      <div class="ficha-value" style="font-size:12pt;color:#0d2040;font-weight:700;">${grLabels[gr]||'—'}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Nº de empregados (base)</div>
-      <div class="ficha-value" style="font-size:12pt;color:#2a5298;font-weight:700;">${numFunc}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">SESMT centralizado</div>
-      <div class="ficha-value">${sesmt?.sesmt_centralizado?'Sim':'Não'}</div>
-    </div>
+    <div class="ficha-item"><div class="ficha-label">Grau de risco (NR-4)</div><div class="ficha-value" style="font-size:12pt;color:#0d2040;font-weight:700;">${grLabels[gr]||'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Nº de empregados</div><div class="ficha-value" style="font-size:12pt;color:#2a5298;font-weight:700;">${numFunc}</div></div>
+    <div class="ficha-item"><div class="ficha-label">SESMT centralizado</div><div class="ficha-value">${sesmt?.sesmt_centralizado?'Sim':'Não'}</div></div>
   </div>
-
-  ${dispensado?`
-  <div style="background:#f0fdf4;border:2pt solid #86efac;border-radius:6pt;padding:14pt 16pt;margin-bottom:14pt;">
+  ${dispensado?`<div style="background:#f0fdf4;border:2pt solid #86efac;border-radius:6pt;padding:14pt 16pt;margin-bottom:14pt;">
     <div style="font-size:11pt;font-weight:700;color:#166534;margin-bottom:4pt;">✓ SESMT Dispensado</div>
-    <div style="font-size:9pt;color:#166534;">Conforme NR-4, o estabelecimento está dispensado da constituição de SESMT com base no Grau de Risco ${gr} e no número de ${numFunc} empregados.</div>
+    <div style="font-size:9pt;color:#166534;">Conforme NR-4, o estabelecimento está dispensado da constituição de SESMT com base no GR ${gr} e ${numFunc} empregados.</div>
   </div>`:`
   <div class="doc-subsection">Profissionais exigidos — Quadro I NR-4</div>
   <table class="doc-table">
-    <thead>
-      <tr>
-        <th>Profissional</th>
-        <th>CBO</th>
-        <th style="text-align:center;">Quantidade</th>
-        <th style="text-align:center;">Regime</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${profissionais.filter(p=>p.qtd>0).map(p=>`
-      <tr>
-        <td style="font-weight:500;">${p.cargo}</td>
-        <td style="font-family:'IBM Plex Mono',monospace;font-size:8.5pt;">${p.cbo}</td>
-        <td style="text-align:center;font-weight:700;color:#0d2040;">${p.qtd}</td>
-        <td style="text-align:center;">${p.regime}</td>
-      </tr>`).join('')}
-      ${profissionais.filter(p=>p.qtd>0).length===0?`
-      <tr><td colspan="4" style="text-align:center;color:#9ca3af;font-style:italic;">Nenhum profissional dimensionado</td></tr>`:''}
-    </tbody>
+    <thead><tr><th>Profissional</th><th>CBO</th><th style="text-align:center;">Qtd.</th><th style="text-align:center;">Regime</th></tr></thead>
+    <tbody>${profissionais.filter(p=>p.qtd>0).map(p=>`<tr>
+      <td style="font-weight:500;">${h(p.cargo)}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;font-size:8.5pt;">${h(p.cbo)}</td>
+      <td style="text-align:center;font-weight:700;color:#0d2040;">${p.qtd}</td>
+      <td style="text-align:center;">${h(p.regime)}</td>
+    </tr>`).join('')}</tbody>
   </table>`}
-
   <div class="doc-subsection" style="margin-top:14pt;">CIPA / CIPATR — NR-5 / NR-31</div>
   <div class="ficha-grid">
-    <div class="ficha-item">
-      <div class="ficha-label">Requer CIPA (NR-5)</div>
-      <div class="ficha-value" style="${requerCipa?'color:#166534;font-weight:600;':'color:#6b7280;'}">${requerCipa?'Sim':'Não'}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Nº de membros CIPA</div>
-      <div class="ficha-value">${requerCipa?(membrosCipa||'—'):'—'}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Requer CIPATR (NR-31)</div>
-      <div class="ficha-value" style="${requerCipatr?'color:#166534;font-weight:600;':'color:#6b7280;'}">${requerCipatr?'Sim':'Não'}</div>
-    </div>
-    <div class="ficha-item">
-      <div class="ficha-label">Nº de membros CIPATR</div>
-      <div class="ficha-value">${requerCipatr?(membrosCipatr||'—'):'—'}</div>
-    </div>
+    <div class="ficha-item"><div class="ficha-label">Requer CIPA (NR-5)</div><div class="ficha-value" style="${requerCipa?'color:#166534;font-weight:600;':'color:#6b7280;'}">${requerCipa?'Sim':'Não'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Nº de membros CIPA</div><div class="ficha-value">${requerCipa?(membrosCipa||'—'):'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Requer CIPATR (NR-31)</div><div class="ficha-value" style="${requerCipatr?'color:#166534;font-weight:600;':'color:#6b7280;'}">${requerCipatr?'Sim':'Não'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Nº de membros CIPATR</div><div class="ficha-value">${requerCipatr?(membrosCipatr||'—'):'—'}</div></div>
   </div>
-
-  <div class="doc-subsection" style="margin-top:14pt;">Base legal</div>
-  <p class="doc-text">O dimensionamento foi realizado conforme o <strong>Quadro I da NR-4</strong> (Portaria MTE nº 3.214/1978, atualizada), considerando o número total de empregados do estabelecimento e o Grau de Risco da atividade econômica principal conforme classificação CNAE. O não cumprimento do dimensionamento do SESMT sujeita o empregador às penalidades previstas no art. 201 da CLT.</p>
-
-  <div class="page-footer">
-    <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="pf-page">Página 5</span>
-  </div>`;
+  ${pfFooter(5)}`;
   return pg;
 }
 
-// ── INVENTÁRIO DE RISCOS ──────────────────────────────
+// ── INVENTÁRIO DE RISCOS POR FUNÇÃO ───────────────────────────
 function renderInventarioRiscos(){
-  const pg=document.createElement('div');
-  pg.className='page';
-  // Busca riscos do Supabase para cada setor
-  const setoresComRiscos=setores.map(s=>{
-    const riscos=setor_riscos.filter(sr=>sr.setor_id===s.id);
-    return{...s,riscos};
-  });
-  const totalRiscos=setor_riscos.length;
+  const paginas=[];
+  const pg=criarPagina();
 
-  if(!totalRiscos){
+  // Mapa setor por função
+  const setoresPorFuncao={};
+  funcaoSetores.forEach(fs=>{
+    if(!setoresPorFuncao[fs.funcao_id])setoresPorFuncao[fs.funcao_id]=[];
+    const s=setores.find(x=>x.id===fs.setor_id);
+    if(s)setoresPorFuncao[fs.funcao_id].push(s.nome_setor);
+  });
+
+  // Funções com riscos
+  const funcoesComRiscos=funcoes.filter(f=>{
+    const frs=funcao_riscos.filter(fr=>fr.funcao_id===f.id);
+    return frs.length>0;
+  });
+
+  if(!funcoesComRiscos.length){
     pg.innerHTML=`
-    <div class="page-header">
-      <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-      <span class="ph-doc">PGR — ${fmtAno()}</span>
-    </div>
-    <div class="doc-section"><span class="num-secao">3</span>Inventário de Riscos Ocupacionais</div>
+    ${phHeader(6)}
+    <div class="doc-section"><span class="num-secao">4</span>Inventário de Riscos Ocupacionais</div>
     <div class="em-breve">
       <div class="em-breve-icon">⚠️</div>
-      <div class="em-breve-label">Nenhum risco identificado ainda.<br>Acesse o módulo de Riscos para vincular riscos aos setores e funções.</div>
+      <div class="em-breve-label">Nenhum risco identificado ainda.<br>Acesse o módulo de Riscos para vincular perigos e riscos às funções.</div>
     </div>
-    <div class="page-footer">
-      <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-      <span class="pf-page">Página 5</span>
-    </div>`;
-    return pg;
+    ${pfFooter(6)}`;
+    paginas.push(pg);
+    return paginas;
   }
 
-  // Monta tabela consolidada de riscos
-  let tabelaRiscos='';
-  setoresComRiscos.forEach(s=>{
-    if(!s.riscos.length)return;
-    s.riscos.forEach(sr=>{
-      // Busca dados do risco na tabela de riscos (não temos aqui, mas mostramos o que temos)
-      const nivel=sr.nivel_risco||'—';
-      const nivelCls=nivel!=='—'?`nivel-${nivel}`:'';
-      tabelaRiscos+=`<tr>
-        <td style="font-weight:500;">${escHtml(s.nome_setor)}</td>
-        <td style="font-size:8.5pt;color:#6b7280;">Risco ID: ${sr.risco_id}</td>
-        <td style="text-align:center;">${sr.num_expostos||'—'}</td>
-        <td style="text-align:center;">${sr.probabilidade||'—'}</td>
-        <td style="text-align:center;">${sr.severidade||'—'}</td>
-        <td style="text-align:center;">${nivel!=='—'?`<span class="risco-doc-nivel ${nivelCls}">${nivelLabel(nivel)}</span>`:'—'}</td>
-      </tr>`;
+  let paginaAtual=pg;
+  let conteudoPagina='';
+  let numPagina=6;
+
+  conteudoPagina+=`
+  ${phHeader(numPagina)}
+  <div class="doc-section"><span class="num-secao">4</span>Inventário de Riscos Ocupacionais por Função</div>
+  <p class="doc-text" style="margin-bottom:12pt;">O inventário a seguir apresenta os perigos identificados e os riscos associados, organizados por função, conforme levantamento realizado nos setores de trabalho. Para cada risco são indicados o nível de risco (Probabilidade × Severidade), os danos à saúde potenciais e as medidas de controle previstas na hierarquia da NR-1.</p>`;
+
+  funcoesComRiscos.forEach((funcao,fi)=>{
+    const frs=funcao_riscos.filter(fr=>fr.funcao_id===funcao.id);
+    const setoresNomes=setoresPorFuncao[funcao.id]||[];
+
+    let blocoHtml=`<div class="funcao-bloco">
+      <div class="funcao-bloco-header">
+        <div>
+          <div class="funcao-bloco-nome">👷 ${h(funcao.nome_funcao)}</div>
+          ${funcao.cbo?`<div class="funcao-bloco-cbo">CBO: ${h(funcao.cbo)}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4pt;">
+          ${setoresNomes.length?`<span class="funcao-bloco-setores">📁 ${h(setoresNomes.join(' · '))}</span>`:''}
+          <span style="font-size:7.5pt;color:#9ca3af;">${frs.length} risco(s)</span>
+        </div>
+      </div>`;
+
+    frs.forEach(fr=>{
+      const risco=getRisco(fr.risco_id);
+      if(!risco)return;
+      const catCor=getCatCor(risco.categoria_risco_id);
+      const catNome=getCatNome(risco.categoria_risco_id);
+      const perigo=fr.perigo_id?getPerigo(fr.perigo_id):null;
+      const nivel=fr.nivel_risco;
+      const mds=medidas_funcao.filter(m=>m.funcao_risco_id===fr.id);
+      const episFr=mds.filter(m=>m.nivel==='EPI');
+
+      // Medidas preenchidas
+      const medidasHtml=MEDIDAS_CONFIG.map(mc=>{
+        const marcada=fr[`medida_${mc.key}`];
+        const desc=fr[`medida_${mc.key}_desc`];
+        if(!marcada&&!desc)return'';
+        if(mc.key==='epi'){
+          if(!episFr.length)return'';
+          return`<div class="medida-item">
+            <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">5</div>
+            <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
+            <div class="medida-desc">${episFr.map(e=>{
+              const epiDados=epis.find(x=>x.id===e.epi_id);
+              return`${h(epiDados?.nome||'EPI')}${e.ca?' (CA:'+h(e.ca)+')':''}`;
+            }).join(', ')}</div>
+          </div>`;
+        }
+        return`<div class="medida-item">
+          <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">${{elim:1,subs:2,eng:3,adm:4}[mc.key]}</div>
+          <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
+          <div class="medida-desc">${desc?h(desc):'<span style="color:#9ca3af;font-style:italic;">Medida indicada — descrição não preenchida</span>'}</div>
+        </div>`;
+      }).filter(Boolean).join('');
+
+      blocoHtml+=`<div class="risco-funcao">
+        <div class="risco-funcao-header">
+          <span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
+          ${perigo?`<span class="risco-perigo-pill">⚠ ${h(perigo.nome)}</span>`:''}
+          <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
+          ${nivel?`<span class="nivel-pill nivel-${nivel}">${nivelLabel(nivel)}</span>`:''}
+        </div>
+        <div class="risco-funcao-grid">
+          <div class="rf-field"><div class="lbl">Código</div><div class="val" style="font-family:'IBM Plex Mono',monospace;">${h(risco.codigo_risco||'—')}</div></div>
+          <div class="rf-field"><div class="lbl">Probabilidade</div><div class="val">${fr.probabilidade?`${fr.probabilidade}/5`:'—'}</div></div>
+          <div class="rf-field"><div class="lbl">Severidade</div><div class="val">${fr.severidade?`${fr.severidade}/5`:'—'}</div></div>
+          <div class="rf-field"><div class="lbl">Nº de expostos</div><div class="val">${fr.num_expostos||'—'}</div></div>
+        </div>
+        ${risco.danos_saude?`<div class="danos-box">
+          <div class="danos-label">🩺 Danos à saúde potenciais</div>
+          <div class="danos-text">${h(risco.danos_saude)}</div>
+        </div>`:''}
+        ${medidasHtml?`<div class="medidas-box">
+          <div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>
+          ${medidasHtml}
+        </div>`:'<div class="medidas-box"><div class="medidas-label">Medidas de prevenção e controle</div><div class="medida-item"><div class="medida-vazio">Nenhuma medida de controle registrada para este risco.</div></div></div>'}
+      </div>`;
+    });
+
+    blocoHtml+='</div>';
+
+    // Verifica se precisa nova página (heurística: a cada 2 funções com muitos riscos)
+    if(fi>0&&fi%2===0){
+      conteudoPagina+=blocoHtml;
+      conteudoPagina+=pfFooter(numPagina);
+      paginaAtual.innerHTML=conteudoPagina;
+      paginas.push(paginaAtual);
+      paginaAtual=criarPagina();
+      numPagina++;
+      conteudoPagina=phHeader(numPagina);
+    }else{
+      conteudoPagina+=blocoHtml;
+    }
+  });
+
+  conteudoPagina+=pfFooter(numPagina);
+  paginaAtual.innerHTML=conteudoPagina;
+  paginas.push(paginaAtual);
+  return paginas;
+}
+
+// ── MATRIZ EPI POR FUNÇÃO ─────────────────────────────────────
+function renderMatrizEPI(){
+  const pg=criarPagina();
+
+  // Monta mapa: funcao_id → lista de EPIs únicos com CA
+  const episPorFuncao={};
+  funcao_riscos.forEach(fr=>{
+    const mds=medidas_funcao.filter(m=>m.funcao_risco_id===fr.id&&m.nivel==='EPI');
+    if(!mds.length)return;
+    if(!episPorFuncao[fr.funcao_id])episPorFuncao[fr.funcao_id]=[];
+    mds.forEach(m=>{
+      const jaExiste=episPorFuncao[fr.funcao_id].find(x=>x.epi_id===m.epi_id);
+      if(!jaExiste)episPorFuncao[fr.funcao_id].push({epi_id:m.epi_id,ca:m.ca,validade_ca:m.validade_ca});
     });
   });
 
+  const funcoesComEpi=funcoes.filter(f=>episPorFuncao[f.id]?.length>0);
+
+  if(!funcoesComEpi.length){
+    pg.innerHTML=`
+    ${phHeader('—')}
+    <div class="doc-section"><span class="num-secao">5</span>Matriz de EPI por Função</div>
+    <div class="em-breve">
+      <div class="em-breve-icon">🛡️</div>
+      <div class="em-breve-label">Nenhum EPI vinculado às funções ainda.<br>Adicione EPIs nos riscos do módulo de Gestão de Riscos para gerar esta matriz.</div>
+    </div>
+    ${pfFooter('—')}`;
+    return pg;
+  }
+
+  const linhas=funcoesComEpi.map(f=>{
+    const episFuncao=episPorFuncao[f.id]||[];
+    const episHtml=episFuncao.map(e=>{
+      const epiDados=epis.find(x=>x.id===e.epi_id);
+      return`<span class="epi-pill">🛡 ${h(epiDados?.nome||'EPI')}</span>${e.ca?`<span class="ca-pill">CA:${h(e.ca)}</span>`:''}${e.validade_ca?`<span class="ca-pill">Val:${fmtData(e.validade_ca)}</span>`:''}`;
+    }).join(' ');
+
+    // Setores desta função
+    const setoresNomes=(funcaoSetores.filter(fs=>fs.funcao_id===f.id).map(fs=>setores.find(s=>s.id===fs.setor_id)?.nome_setor).filter(Boolean));
+
+    return`<tr>
+      <td style="font-weight:500;">${h(f.nome_funcao)}<br><span style="font-size:7pt;color:#9ca3af;">${h(setoresNomes.join(', '))}</span></td>
+      <td style="text-align:center;font-weight:600;color:#0d2040;">${episFuncao.length}</td>
+      <td>${episHtml}</td>
+    </tr>`;
+  }).join('');
+
   pg.innerHTML=`
-  <div class="page-header">
-    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="ph-doc">PGR — ${fmtAno()}</span>
-  </div>
-
-  <div class="doc-section"><span class="num-secao">3</span>Inventário de Riscos Ocupacionais</div>
-
-  <p class="doc-text">O inventário de riscos foi elaborado com base na identificação dos perigos presentes nos setores de trabalho, considerando as fontes geradoras, trajetórias e os danos potenciais à saúde e segurança dos trabalhadores, em conformidade com a NR-1.</p>
-
-  <div class="doc-subsection" style="margin-top:12pt;">3.1 — Riscos por setor</div>
-  <table class="doc-table">
+  ${phHeader('—')}
+  <div class="doc-section"><span class="num-secao">5</span>Matriz de EPI por Função</div>
+  <p class="doc-text" style="margin-bottom:12pt;">A matriz a seguir consolida os Equipamentos de Proteção Individual obrigatórios para cada função, gerados automaticamente a partir das medidas de controle registradas no inventário de riscos. O fornecimento, higienização, manutenção e substituição dos EPIs listados é obrigação do empregador, conforme NR-6.</p>
+  <table class="epi-matrix-table">
     <thead>
       <tr>
-        <th>Setor</th>
-        <th>Risco identificado</th>
-        <th style="text-align:center;">Expostos</th>
-        <th style="text-align:center;">Prob.</th>
-        <th style="text-align:center;">Sev.</th>
-        <th style="text-align:center;">Nível</th>
+        <th style="width:30%;">Função / Setor(es)</th>
+        <th style="width:10%;text-align:center;">Qtd. EPIs</th>
+        <th>EPIs obrigatórios (com Nº CA e Validade)</th>
       </tr>
     </thead>
-    <tbody>${tabelaRiscos||'<tr><td colspan="6" style="text-align:center;color:#9ca3af;font-style:italic;">Nenhum risco cadastrado</td></tr>'}</tbody>
+    <tbody>${linhas}</tbody>
   </table>
-
-  <div class="doc-subsection" style="margin-top:14pt;">3.2 — Riscos por função</div>
-  <div class="em-breve">
-    <div class="em-breve-icon">👷</div>
-    <div class="em-breve-label">Vincule riscos às funções no módulo de Riscos para gerar esta seção automaticamente.</div>
-  </div>
-
-  <div class="page-footer">
-    <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="pf-page">Página 5</span>
-  </div>`;
+  <p class="doc-text" style="margin-top:12pt;font-size:8.5pt;">* O Certificado de Aprovação (CA) é emitido pelo MTE e deve estar válido. EPIs com CA vencido devem ser imediatamente substituídos. O trabalhador deve ser treinado para o uso correto de cada EPI.</p>
+  ${pfFooter('—')}`;
   return pg;
 }
 
-// ── PLANO DE AÇÃO ─────────────────────────────────────
-let acoesSelecionadasIds=null; // null = todas
+// ── PLANO DE AÇÃO ─────────────────────────────────────────────
+let acoesSelecionadasIds=null;
 
+function renderPlanoAcao(){
+  const pg=criarPagina();
+  const todasAcoes=window.acoesData||[];
+  const idsAtivos=acoesSelecionadasIds||todasAcoes.map(a=>a.id);
+  const acoes=todasAcoes.filter(a=>idsAtivos.includes(a.id)&&a.status!=='Arquivada'&&a.status!=='Cancelada');
+  const PRIOR_COR={'Crítica':'#991b1b','Alta':'#9a3412','Média':'#854d0e','Baixa':'#166534'};
+  const PRIOR_BG={'Crítica':'#fee2e2','Alta':'#ffedd5','Média':'#fef9c3','Baixa':'#dcfce7'};
+  const setoresMap={};setores.forEach(s=>{setoresMap[s.id]=s.nome_setor;});
+  const funcoesMap={};funcoes.forEach(f=>{funcoesMap[f.id]=f.nome_funcao;});
+
+  pg.innerHTML=`
+  ${phHeader('—')}
+  <div class="doc-section"><span class="num-secao">6</span>Plano de Ação</div>
+  <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a implementar, com responsáveis, prazos e status, seguindo a hierarquia da NR-1.</p>
+  ${!acoes.length?`<div class="em-breve"><div class="em-breve-icon">📋</div><div class="em-breve-label">Nenhuma ação selecionada.<br>Clique em "Revisar plano de ação" para selecionar.</div></div>`:`
+  <table class="doc-table">
+    <thead><tr><th style="width:35%;">Ação</th><th style="width:12%;">Origem</th><th style="width:10%;text-align:center;">Prioridade</th><th style="width:15%;">Responsável</th><th style="width:13%;text-align:center;">Prazo</th><th style="width:15%;text-align:center;">Status</th></tr></thead>
+    <tbody>${acoes.map(a=>{
+      const prior=a.prioridade||'Média';
+      const prazo=a.prazo?fmtData(a.prazo):'—';
+      const setor=a.setor_id?setoresMap[a.setor_id]||'—':'—';
+      const funcao=a.funcao_id?funcoesMap[a.funcao_id]||'—':'—';
+      return`<tr>
+        <td>
+          <div style="font-weight:500;font-size:9pt;">${h(a.titulo)}</div>
+          ${setor!=='—'?`<div style="font-size:7pt;color:#9ca3af;margin-top:2pt;">📁 ${h(setor)}</div>`:''}
+          ${funcao!=='—'?`<div style="font-size:7pt;color:#9ca3af;">👷 ${h(funcao)}</div>`:''}
+        </td>
+        <td style="font-size:8pt;">${h(a.origem||'Manual')}</td>
+        <td style="text-align:center;"><span style="background:${PRIOR_BG[prior]||'#f3f4f6'};color:${PRIOR_COR[prior]||'#374151'};padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${h(prior)}</span></td>
+        <td style="font-size:8pt;">${h(a.responsavel||'—')}</td>
+        <td style="text-align:center;font-size:8pt;font-family:'IBM Plex Mono',monospace;">${prazo}</td>
+        <td style="text-align:center;font-size:7.5pt;font-weight:500;">${h(a.status||'Pendente')}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`}
+
+  <div class="doc-subsection" style="margin-top:16pt;">Monitoramento e Revisão — NR-1</div>
+  <p class="doc-text">Este PGR deverá ser revisado: <strong>anualmente</strong> (revisão periódica obrigatória); após <strong>mudanças nos processos</strong> que alterem os riscos; após <strong>acidente grave, fatal</strong> ou diagnóstico de doença ocupacional; quando houver <strong>novos agentes de risco</strong>; quando solicitado por <strong>Auditor Fiscal do Trabalho</strong>.</p>
+
+  <div style="margin-top:30pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
+    ${['Elaborado por','Revisado por','Aprovado por'].map(l=>`<div style="text-align:center;">
+      <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:40pt;">
+        <div style="font-size:8pt;color:#6b7280;">${l}</div>
+        <div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">Data: ___/___/______</div>
+      </div>
+    </div>`).join('')}
+  </div>
+  ${pfFooter('—')}`;
+  return pg;
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function criarPagina(){const pg=document.createElement('div');pg.className='page';return pg;}
+function phHeader(n){return`<div class="page-header"><span class="ph-empresa">${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="ph-doc">PGR — ${fmtAno()}</span></div>`;}
+function pfFooter(n){return`<div class="page-footer"><span class="pf-label">Programa de Gerenciamento de Riscos — ${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="pf-page">Pág. ${n}</span></div>`;}
+
+// ── ELABORADORA ───────────────────────────────────────────────
+let elaboradora={nome:'',cnpj:'',responsavel:'',logoUrl:''};
+function toggleElaboradora(){const p=document.getElementById('painel-elaboradora');p.style.display=p.style.display==='none'?'block':'none';}
+function carregarLogo(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{elaboradora.logoUrl=e.target.result;
+    document.getElementById('logo-preview').innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;">`;
+    document.getElementById('btn-remover-logo').style.display='block';
+    atualizarLogoDocumento();};
+  reader.readAsDataURL(file);
+}
+function removerLogo(){
+  elaboradora.logoUrl='';
+  document.getElementById('logo-preview').innerHTML='📷<br>Logo';
+  document.getElementById('btn-remover-logo').style.display='none';
+  document.getElementById('elab-logo-input').value='';
+  atualizarLogoDocumento();
+}
+function atualizarLogoDocumento(){
+  const logoEl=document.getElementById('doc-elab-logo');if(!logoEl)return;
+  if(elaboradora.logoUrl){
+    logoEl.innerHTML=`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`;
+    logoEl.style.cssText='background:#fff;padding:4pt;';
+  }else{
+    const sigla=(elaboradora.nome||'SST').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'SST';
+    logoEl.innerHTML=`<span class="capa-logo-text">${sigla}</span>`;
+    logoEl.style.cssText='background:#0d2040;padding:0;';
+  }
+}
+function atualizarElaboradora(){
+  elaboradora.nome=document.getElementById('elab-nome').value.trim();
+  elaboradora.cnpj=document.getElementById('elab-cnpj').value.trim();
+  elaboradora.responsavel=document.getElementById('elab-responsavel').value.trim();
+  const nomeEl=document.getElementById('doc-elab-nome');
+  const footerEl=document.getElementById('doc-elab-footer');
+  if(nomeEl)nomeEl.textContent=elaboradora.nome||'Empresa Elaboradora';
+  if(footerEl)footerEl.textContent=elaboradora.responsavel||elaboradora.nome||'—';
+  atualizarLogoDocumento();
+}
+
+// ── PLANO DE AÇÃO MODAL ───────────────────────────────────────
 function abrirModalPlanoAcao(){
   const acoes=window.acoesData||[];
-  if(!acoes.length){
-    alert('Nenhuma ação cadastrada para esta empresa. Crie ações na Central de Ações.');
-    return;
-  }
+  if(!acoes.length){alert('Nenhuma ação cadastrada.');return;}
   const PRIOR_COR={'Crítica':'#e05555','Alta':'#e0a855','Média':'#7aabf7','Baixa':'#2dd4a0'};
-  const STATUS_COR={'Pendente':'#545e72','Em andamento':'#4a7cdc','Concluída':'#2dd4a0','Atrasada':'#e05555','Cancelada':'#e05555','Arquivada':'#3a3a4a'};
+  const STATUS_COR={'Pendente':'#545e72','Em andamento':'#4a7cdc','Concluída':'#2dd4a0','Atrasada':'#e05555'};
   const grupos={'Crítica':[],'Alta':[],'Média':[],'Baixa':[]};
   acoes.filter(a=>a.status!=='Arquivada'&&a.status!=='Cancelada').forEach(a=>{
-    if(grupos[a.prioridade])grupos[a.prioridade].push(a);
-    else grupos['Média'].push(a);
+    (grupos[a.prioridade]||grupos['Média']).push(a);
   });
   const ids=acoesSelecionadasIds||acoes.map(a=>a.id);
   document.getElementById('lista-plano-acoes').innerHTML=Object.entries(grupos).map(([prioridade,items])=>{
     if(!items.length)return'';
     return`<div style="margin-bottom:14px;">
-      <div style="font-size:11px;font-weight:600;color:${PRIOR_COR[prioridade]||'var(--text2)'};text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);">
-        ${prioridade} (${items.length})
-      </div>
-      ${items.map(a=>`
-      <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
-        <input type="checkbox" id="plano-acao-${a.id}" ${ids.includes(a.id)?'checked':''} onchange="atualizarCountPlano()"
-          style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin-top:2px;flex-shrink:0;">
+      <div style="font-size:11px;font-weight:600;color:${PRIOR_COR[prioridade]||'var(--text2)'};text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);">${prioridade} (${items.length})</div>
+      ${items.map(a=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="plano-acao-${a.id}" ${ids.includes(a.id)?'checked':''} onchange="atualizarCountPlano()" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin-top:2px;flex-shrink:0;">
         <label for="plano-acao-${a.id}" style="flex:1;cursor:pointer;">
-          <div style="font-size:13px;font-weight:500;color:var(--text);">${escHtml(a.titulo)}</div>
+          <div style="font-size:13px;font-weight:500;color:var(--text);">${h(a.titulo)}</div>
           <div style="font-size:11px;color:var(--text3);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;">
-            <span style="color:${STATUS_COR[a.status]||'var(--text3)'};">● ${a.status||'Pendente'}</span>
-            <span>📋 ${a.origem||'Manual'}</span>
-            ${a.responsavel?`<span>👤 ${escHtml(a.responsavel)}</span>`:''}
-            ${a.prazo?`<span>📅 ${new Date(a.prazo+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}
+            <span style="color:${STATUS_COR[a.status]||'var(--text3)'};">● ${h(a.status||'Pendente')}</span>
+            <span>📋 ${h(a.origem||'Manual')}</span>
+            ${a.responsavel?`<span>👤 ${h(a.responsavel)}</span>`:''}
+            ${a.prazo?`<span>📅 ${fmtData(a.prazo)}</span>`:''}
           </div>
         </label>
       </div>`).join('')}
@@ -841,7 +897,6 @@ function abrirModalPlanoAcao(){
   atualizarCountPlano();
   document.getElementById('modal-plano').style.display='flex';
 }
-
 function atualizarCountPlano(){
   const acoes=window.acoesData||[];
   const total=acoes.filter(a=>a.status!=='Arquivada'&&a.status!=='Cancelada').length;
@@ -849,185 +904,19 @@ function atualizarCountPlano(){
   document.getElementById('plano-count').textContent=`${sel} de ${total} selecionada(s)`;
   document.getElementById('plano-check-all').checked=sel===total;
 }
-
 function toggleTodasAcoes(checked){
-  const acoes=window.acoesData||[];
-  acoes.forEach(a=>{
-    const el=document.getElementById(`plano-acao-${a.id}`);
-    if(el)el.checked=checked;
-  });
+  (window.acoesData||[]).forEach(a=>{const el=document.getElementById(`plano-acao-${a.id}`);if(el)el.checked=checked;});
   atualizarCountPlano();
 }
-
-function fecharModalPlanoAcao(){
-  document.getElementById('modal-plano').style.display='none';
-}
-
+function fecharModalPlanoAcao(){document.getElementById('modal-plano').style.display='none';}
 function aplicarSelecaoPlano(){
   const acoes=window.acoesData||[];
   acoesSelecionadasIds=acoes.filter(a=>document.getElementById(`plano-acao-${a.id}`)?.checked).map(a=>a.id);
   fecharModalPlanoAcao();
-  // Re-renderiza só o plano de ação
   const wrap=document.getElementById('pages-wrap');
   const pages=wrap.querySelectorAll('.page');
-  const ultimaPagina=pages[pages.length-1];
-  const novaPlano=renderPlanoAcao();
-  wrap.replaceChild(novaPlano,ultimaPagina);
-}
-
-function renderPlanoAcao(){
-  const pg=document.createElement('div');pg.className='page';
-  const todasAcoes=window.acoesData||[];
-  const idsAtivos=acoesSelecionadasIds||todasAcoes.map(a=>a.id);
-  const acoes=todasAcoes.filter(a=>idsAtivos.includes(a.id)&&a.status!=='Arquivada'&&a.status!=='Cancelada');
-
-  const PRIOR_COR={'Crítica':'#991b1b','Alta':'#9a3412','Média':'#854d0e','Baixa':'#166534'};
-  const PRIOR_BG={'Crítica':'#fee2e2','Alta':'#ffedd5','Média':'#fef9c3','Baixa':'#dcfce7'};
-  const STATUS_PT={'Pendente':'Pendente','Em andamento':'Em andamento','Concluída':'Concluída','Atrasada':'Atrasada','Cancelada':'Cancelada','Arquivada':'Arquivada'};
-
-  const setoresMap={};
-  setores.forEach(s=>{setoresMap[s.id]=s.nome_setor;});
-
-  pg.innerHTML=`
-  <div class="page-header">
-    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="ph-doc">PGR — ${fmtAno()}</span>
-  </div>
-
-  <div class="doc-section"><span class="num-secao">6</span>Plano de Ação</div>
-
-  <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a serem implementadas, com responsáveis, prazos e status de acompanhamento, seguindo a hierarquia de controle estabelecida pela NR-1.</p>
-
-  ${!acoes.length?`
-  <div class="em-breve">
-    <div class="em-breve-icon">📋</div>
-    <div class="em-breve-label">Nenhuma ação selecionada para o plano.<br>Clique em "Revisar plano de ação" para selecionar as ações.</div>
-  </div>`:`
-  <table class="doc-table">
-    <thead>
-      <tr>
-        <th style="width:35%;">Ação</th>
-        <th style="width:12%;">Origem</th>
-        <th style="width:10%;text-align:center;">Prioridade</th>
-        <th style="width:15%;">Responsável</th>
-        <th style="width:13%;text-align:center;">Prazo</th>
-        <th style="width:15%;text-align:center;">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${acoes.map(a=>{
-        const prior=a.prioridade||'Média';
-        const status=a.status||'Pendente';
-        const prazo=a.prazo?new Date(a.prazo+'T00:00:00').toLocaleDateString('pt-BR'):'—';
-        const setor=a.setor_id?setoresMap[a.setor_id]||'—':'—';
-        return`<tr>
-          <td>
-            <div style="font-weight:500;font-size:9pt;">${escHtml(a.titulo)}</div>
-            ${setor!=='—'?`<div style="font-size:7.5pt;color:#9ca3af;margin-top:2pt;">📁 ${escHtml(setor)}</div>`:''}
-          </td>
-          <td style="font-size:8.5pt;">${escHtml(a.origem||'Manual')}</td>
-          <td style="text-align:center;">
-            <span style="background:${PRIOR_BG[prior]||'#f3f4f6'};color:${PRIOR_COR[prior]||'#374151'};padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${prior}</span>
-          </td>
-          <td style="font-size:8.5pt;">${escHtml(a.responsavel||'—')}</td>
-          <td style="text-align:center;font-size:8.5pt;font-family:'IBM Plex Mono',monospace;">${prazo}</td>
-          <td style="text-align:center;">
-            <span style="font-size:7.5pt;font-weight:500;">${escHtml(status)}</span>
-          </td>
-        </tr>`;
-      }).join('')}
-    </tbody>
-  </table>`}
-
-  <div class="doc-subsection" style="margin-top:16pt;">Monitoramento e revisão — NR-1</div>
-  <p class="doc-text">Conforme a NR-1 (Portaria MTE nº 672/2021), este PGR deverá ser revisado:</p>
-  <ul style="margin:8pt 0 8pt 16pt;font-size:9.5pt;color:#374151;line-height:1.8;">
-    <li><strong>Anualmente</strong> — revisão periódica obrigatória;</li>
-    <li>Sempre que houver <strong>mudança nos processos produtivos</strong> que implique alteração dos riscos ocupacionais;</li>
-    <li>Após <strong>acidente grave, acidente fatal</strong> ou diagnóstico de doença ocupacional;</li>
-    <li>Quando houver <strong>inclusão de novos agentes de risco</strong> não previstos no inventário;</li>
-    <li>Quando solicitado por <strong>Auditor Fiscal do Trabalho</strong>.</li>
-  </ul>
-  <p class="doc-text">* Independentemente das situações acima, a revisão anual é obrigatória mesmo que não haja alterações nos processos ou riscos identificados.</p>
-
-  <div style="margin-top:30pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
-    ${['Elaborado por','Revisado por','Aprovado por'].map(label=>`
-    <div style="text-align:center;">
-      <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:40pt;">
-        <div style="font-size:8pt;color:#6b7280;">${label}</div>
-        <div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">Data: ___/___/______</div>
-      </div>
-    </div>`).join('')}
-  </div>
-
-  <div class="page-footer">
-    <span class="pf-label">Programa de Gerenciamento de Riscos — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="pf-page">Página 7</span>
-  </div>`;
-  return pg;
-}
-
-// ── EMPRESA ELABORADORA ───────────────────────────────
-let elaboradora={nome:'',cnpj:'',responsavel:'',logoUrl:''};
-
-function toggleElaboradora(){
-  const p=document.getElementById('painel-elaboradora');
-  p.style.display=p.style.display==='none'?'block':'none';
-}
-
-function carregarLogo(input){
-  const file=input.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    elaboradora.logoUrl=e.target.result;
-    // Preview na barra
-    const prev=document.getElementById('logo-preview');
-    prev.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;">`;
-    document.getElementById('btn-remover-logo').style.display='block';
-    // Atualiza no documento
-    atualizarLogoDocumento();
-  };
-  reader.readAsDataURL(file);
-}
-
-function removerLogo(){
-  elaboradora.logoUrl='';
-  document.getElementById('logo-preview').innerHTML='📷<br>Logo';
-  document.getElementById('btn-remover-logo').style.display='none';
-  document.getElementById('elab-logo-input').value='';
-  atualizarLogoDocumento();
-}
-
-function atualizarLogoDocumento(){
-  const logoEl=document.getElementById('doc-elab-logo');
-  if(!logoEl)return;
-  if(elaboradora.logoUrl){
-    logoEl.innerHTML=`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`;
-    logoEl.style.background='#fff';
-    logoEl.style.padding='4pt';
-  }else{
-    const sigla=(elaboradora.nome||'SST').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'SST';
-    logoEl.innerHTML=`<span class="capa-logo-text">${sigla}</span>`;
-    logoEl.style.background='#0d2040';
-    logoEl.style.padding='0';
-  }
-}
-
-function atualizarElaboradora(){
-  elaboradora.nome=document.getElementById('elab-nome').value.trim();
-  elaboradora.cnpj=document.getElementById('elab-cnpj').value.trim();
-  elaboradora.responsavel=document.getElementById('elab-responsavel').value.trim();
-  // Atualiza capa
-  const nomeEl=document.getElementById('doc-elab-nome');
-  const footerEl=document.getElementById('doc-elab-footer');
-  if(nomeEl)nomeEl.textContent=elaboradora.nome||'Empresa Elaboradora';
-  if(footerEl)footerEl.textContent=elaboradora.nome||'—';
-  atualizarLogoDocumento();
-  // Atualiza campos dinâmicos
-  document.querySelectorAll('.elab-responsavel').forEach(el=>{el.textContent=elaboradora.responsavel||'—';});
-  document.querySelectorAll('.elab-nome-field').forEach(el=>{el.textContent=elaboradora.nome||'—';});
-  document.querySelectorAll('.elab-cnpj-field').forEach(el=>{el.textContent=elaboradora.cnpj||'—';});
+  const ultima=pages[pages.length-1];
+  wrap.replaceChild(renderPlanoAcao(),ultima);
 }
 
 carregar();
