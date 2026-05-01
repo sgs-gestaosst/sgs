@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avaliação de Bem-Estar no Trabalho</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f8fafc;--surface:#fff;--border:#e2e8f0;--accent:#4a7cdc;--accent2:#2dd4a0;
+    --text:#1a202c;--text2:#4a5568;--text3:#718096;--danger:#e05555;--success:#2dd4a0;
+    --radius:8px;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;min-height:100vh;padding-bottom:60px;}
+
+  /* Header */
+  .top-bar{background:var(--accent);padding:14px 24px;display:flex;align-items:center;gap:12px;}
+  .top-bar-logo{font-size:14px;font-weight:600;color:#fff;letter-spacing:.06em;}
+  .top-bar-titulo{font-size:13px;color:rgba(255,255,255,.8);}
+
+  /* Container */
+  .container{max-width:680px;margin:0 auto;padding:24px 16px;}
+
+  /* Card intro */
+  .intro-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;}
+  .intro-titulo{font-size:20px;font-weight:600;color:var(--text);margin-bottom:8px;}
+  .intro-sub{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:16px;}
+  .intro-info{background:#f0f4ff;border-radius:8px;padding:12px 16px;font-size:13px;color:#2a5298;line-height:1.5;}
+
+  /* Dados demográficos */
+  .demografico-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;}
+  .demografico-titulo{font-size:14px;font-weight:500;color:var(--text);margin-bottom:14px;}
+  .dem-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .dem-field label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px;}
+  .dem-field select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 10px;outline:none;}
+  .dem-field select:focus{border-color:var(--accent);}
+
+  /* Seção de perguntas */
+  .secao{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+  .secao-titulo{font-size:13px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .pergunta{margin-bottom:20px;}
+  .pergunta:last-child{margin-bottom:0;}
+  .pergunta-texto{font-size:14px;color:var(--text);line-height:1.5;margin-bottom:12px;font-weight:500;}
+  .pergunta-num{font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:500;}
+
+  /* Escala de resposta */
+  .escala{display:flex;gap:8px;flex-wrap:wrap;}
+  .escala-opcao{flex:1;min-width:60px;}
+  .escala-opcao input[type=radio]{display:none;}
+  .escala-opcao label{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;font-size:11px;color:var(--text2);text-align:center;line-height:1.3;}
+  .escala-opcao label:hover{border-color:var(--accent);background:#f0f4ff;}
+  .escala-opcao input[type=radio]:checked + label{border-color:var(--accent);background:#4a7cdc;color:#fff;}
+  .escala-num{font-size:16px;font-weight:600;}
+
+  /* Labels escala */
+  .escala-legenda{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;padding:0 2px;}
+
+  /* Progresso */
+  .progress-wrap{position:sticky;top:0;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;z-index:100;display:flex;align-items:center;gap:12px;}
+  .progress-bar-wrap{flex:1;height:6px;background:var(--border);border-radius:3px;}
+  .progress-bar{height:100%;border-radius:3px;background:var(--accent2);transition:width .3s;}
+  .progress-texto{font-size:12px;color:var(--text2);white-space:nowrap;}
+
+  /* Botões */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border-radius:var(--radius);font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+  .btn-primary{background:var(--accent);color:#fff;width:100%;}
+  .btn-primary:hover{background:#3a6ccc;}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;}
+
+  /* Telas de estado */
+  .tela-centro{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:24px;}
+  .tela-icon{font-size:48px;margin-bottom:16px;}
+  .tela-titulo{font-size:20px;font-weight:600;margin-bottom:8px;}
+  .tela-sub{font-size:14px;color:var(--text2);line-height:1.6;max-width:400px;}
+
+  /* Obrigatório */
+  .obrigatorio{color:var(--danger);font-size:11px;margin-top:6px;display:none;}
+  .obrigatorio.show{display:block;}
+
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .spinner.show{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  @media(max-width:500px){
+    .dem-grid{grid-template-columns:1fr;}
+    .escala-opcao label{padding:8px 4px;font-size:10px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-logo">SGS</div>
+  <div class="top-bar-titulo">Avaliação de Bem-Estar no Trabalho</div>
+</div>
+
+<div id="tela-carregando" class="tela-centro">
+  <div class="tela-icon">⏳</div>
+  <div class="tela-titulo">Carregando...</div>
+</div>
+
+<div id="tela-invalida" class="tela-centro" style="display:none;">
+  <div class="tela-icon">❌</div>
+  <div class="tela-titulo">Link inválido ou expirado</div>
+  <div class="tela-sub">Este link de avaliação não é válido ou a campanha já foi encerrada.</div>
+</div>
+
+<div id="tela-ja-respondeu" class="tela-centro" style="display:none;">
+  <div class="tela-icon">✅</div>
+  <div class="tela-titulo">Você já respondeu!</div>
+  <div class="tela-sub">Suas respostas já foram registradas. Agradecemos sua participação!</div>
+</div>
+
+<div id="tela-concluido" class="tela-centro" style="display:none;">
+  <div class="tela-icon">🎉</div>
+  <div class="tela-titulo">Avaliação concluída!</div>
+  <div class="tela-sub">Obrigado pela sua participação! Suas respostas foram registradas de forma anônima e contribuirão para melhorar as condições de trabalho.</div>
+</div>
+
+<div id="tela-questionario" style="display:none;">
+  <div class="progress-wrap">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:0%;"></div>
+    </div>
+    <div class="progress-texto" id="progress-texto">0 / 23</div>
+  </div>
+
+  <div class="container">
+    <div class="intro-card">
+      <div class="intro-titulo" id="q-titulo">Avaliação de Bem-Estar no Trabalho</div>
+      <div class="intro-sub" id="q-instrucoes"></div>
+      <div class="intro-info">
+        🔒 <strong>Suas respostas são totalmente anônimas.</strong> Não é possível identificar individualmente quem respondeu. Os resultados serão analisados apenas de forma coletiva por função.
+      </div>
+    </div>
+
+    <!-- Dados demográficos opcionais -->
+    <div class="demografico-card">
+      <div class="demografico-titulo">Informações gerais (opcional — não identificam você)</div>
+      <div class="dem-grid">
+        <div class="dem-field">
+          <label>Faixa etária</label>
+          <select id="dem-idade">
+            <option value="">Prefiro não informar</option>
+            <option value="18-24">18 a 24 anos</option>
+            <option value="25-34">25 a 34 anos</option>
+            <option value="35-44">35 a 44 anos</option>
+            <option value="45-54">45 a 54 anos</option>
+            <option value="55+">55 anos ou mais</option>
+          </select>
+        </div>
+        <div class="dem-field">
+          <label>Tempo na empresa</label>
+          <select id="dem-tempo">
+            <option value="">Prefiro não informar</option>
+            <option value="< 1 ano">Menos de 1 ano</option>
+            <option value="1-3 anos">1 a 3 anos</option>
+            <option value="3-5 anos">3 a 5 anos</option>
+            <option value="5-10 anos">5 a 10 anos</option>
+            <option value="> 10 anos">Mais de 10 anos</option>
+          </select>
+        </div>
+        <div class="dem-field">
+          <label>Gênero</label>
+          <select id="dem-genero">
+            <option value="">Prefiro não informar</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Feminino">Feminino</option>
+            <option value="Não binário">Não binário</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Perguntas -->
+    <div id="secoes-perguntas"></div>
+
+    <div style="margin-top:20px;">
+      <div class="obrigatorio" id="aviso-obrigatorio">⚠️ Por favor, responda todas as perguntas antes de enviar.</div>
+      <button class="btn btn-primary" id="btn-enviar" onclick="enviarRespostas()" disabled>
+        <span class="spinner" id="spinner-enviar"></span>
+        <span id="label-enviar">Enviar respostas</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const params=new URLSearchParams(window.location.search);
+const tokenUrl=params.get('token');
+
+let campanhaFuncaoId=null;
+let sessaoId=null;
+
+// Gera sessão anônima única por dispositivo/sessão
+function getSessaoId(){
+  let s=sessionStorage.getItem('copsoq_sessao');
+  if(!s){s=Math.random().toString(36).slice(2)+Date.now().toString(36);sessionStorage.setItem('copsoq_sessao',s);}
+  return s;
+}
+
+// Perguntas do COPSOQ III versão curta
+const PERGUNTAS=[
+  // Demandas quantitativas
+  {secao:'Demandas de trabalho',campo:'d01_ritmo_intenso',texto:'Com que frequência você tem que trabalhar em ritmo muito intenso?',escala:'frequencia'},
+  {secao:'Demandas de trabalho',campo:'d02_tarefas_demais',texto:'Com que frequência você tem tarefas demais para fazer?',escala:'frequencia'},
+  {secao:'Demandas de trabalho',campo:'d03_ritmo_alto',texto:'Você tem que trabalhar muito rápido?',escala:'frequencia'},
+  // Exigências cognitivas
+  {secao:'Exigências cognitivas',campo:'d04_concentracao',texto:'Seu trabalho exige muita concentração?',escala:'frequencia'},
+  {secao:'Exigências cognitivas',campo:'d05_memorizar',texto:'Seu trabalho exige que você memorize muitas coisas?',escala:'frequencia'},
+  // Exigências emocionais
+  {secao:'Exigências emocionais',campo:'d06_emocoes_difusas',texto:'Seu trabalho exige que você lide com emoções difíceis das pessoas?',escala:'frequencia'},
+  {secao:'Exigências emocionais',campo:'d07_situacoes_dificeis',texto:'Seu trabalho coloca você em situações emocionalmente perturbadoras?',escala:'frequencia'},
+  // Autonomia
+  {secao:'Autonomia e influência',campo:'d08_influencia',texto:'Você tem grande influência sobre como realiza seu trabalho?',escala:'concordancia'},
+  {secao:'Autonomia e influência',campo:'d09_decisoes',texto:'Você pode influenciar nas decisões que afetam seu trabalho?',escala:'concordancia'},
+  // Desenvolvimento
+  {secao:'Desenvolvimento profissional',campo:'d10_aprender',texto:'Seu trabalho lhe oferece oportunidades de aprender coisas novas?',escala:'concordancia'},
+  {secao:'Desenvolvimento profissional',campo:'d11_habilidades',texto:'Você tem a oportunidade de usar suas habilidades e conhecimentos no trabalho?',escala:'concordancia'},
+  // Suporte colegas
+  {secao:'Suporte e relações',campo:'d12_colegas_ajudam',texto:'Com que frequência seus colegas estão dispostos a ouvir seus problemas no trabalho?',escala:'frequencia'},
+  {secao:'Suporte e relações',campo:'d13_colegas_apoiam',texto:'Com que frequência seus colegas apoiam e ajudam uns aos outros?',escala:'frequencia'},
+  // Suporte chefia
+  {secao:'Suporte e relações',campo:'d14_chefia_ajuda',texto:'Com que frequência seu superior imediato está disposto a ouvir seus problemas no trabalho?',escala:'frequencia'},
+  {secao:'Suporte e relações',campo:'d15_chefia_apoio',texto:'Com que frequência seu superior imediato apoia e ajuda você?',escala:'frequencia'},
+  // Qualidade da liderança
+  {secao:'Qualidade da liderança',campo:'d16_lider_planeja',texto:'Seu superior imediato planeja bem o trabalho?',escala:'concordancia'},
+  {secao:'Qualidade da liderança',campo:'d17_lider_conflitos',texto:'Seu superior imediato sabe resolver conflitos?',escala:'concordancia'},
+  // Insegurança
+  {secao:'Segurança e satisfação',campo:'d18_perder_emprego',texto:'Você está preocupado em perder seu emprego?',escala:'concordancia'},
+  {secao:'Segurança e satisfação',campo:'d19_futuro_incerto',texto:'Você está preocupado com as perspectivas futuras do seu emprego?',escala:'concordancia'},
+  // Satisfação
+  {secao:'Segurança e satisfação',campo:'d20_satisfacao_geral',texto:'De um modo geral, você está satisfeito com seu trabalho?',escala:'concordancia'},
+  {secao:'Segurança e satisfação',campo:'d21_motivacao',texto:'Você se sente motivado e engajado com seu trabalho?',escala:'concordancia'},
+  // Burnout
+  {secao:'Bem-estar e esgotamento',campo:'d22_esgotamento',texto:'Com que frequência você se sente esgotado(a) no final de um dia de trabalho?',escala:'frequencia'},
+  {secao:'Bem-estar e esgotamento',campo:'d23_cansaco_emocional',texto:'Com que frequência você se sente emocionalmente exausto(a) pelo trabalho?',escala:'frequencia'},
+];
+
+const ESCALAS={
+  frequencia:{
+    1:'Nunca / Quase nunca',2:'Raramente',3:'Às vezes',4:'Com frequência',5:'Sempre / Quase sempre'
+  },
+  concordancia:{
+    1:'Discordo totalmente',2:'Discordo',3:'Nem concordo nem discordo',4:'Concordo',5:'Concordo totalmente'
+  }
+};
+
+async function inicializar(){
+  if(!tokenUrl){mostrarTela('invalida');return;}
+  sessaoId=getSessaoId();
+
+  // Verifica se já respondeu nesta sessão
+  const jaRespondeu=sessionStorage.getItem(`copsoq_respondeu_${tokenUrl}`);
+  if(jaRespondeu){mostrarTela('ja-respondeu');return;}
+
+  try{
+    // Busca campanha_funcao pelo token
+    const res=await fetch(
+      `${SUPA_URL}/rest/v1/campanha_funcoes?token=eq.${tokenUrl}&ativo=eq.true&select=*`,
+      {headers:{'apikey':SUPA_KEY}}
+    );
+    const data=await res.json();
+    if(!data.length){mostrarTela('invalida');return;}
+    const cf=data[0];
+    campanhaFuncaoId=cf.id;
+
+    // Verifica status da campanha
+    const resCamp=await fetch(
+      `${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${cf.campanha_id}&select=*`,
+      {headers:{'apikey':SUPA_KEY}}
+    );
+    const camps=await resCamp.json();
+    const camp=camps[0];
+    if(!camp||camp.status!=='Ativa'){mostrarTela('invalida');return;}
+
+    // Preenche intro
+    document.getElementById('q-titulo').textContent=camp.titulo||'Avaliação de Bem-Estar no Trabalho';
+    if(camp.instrucoes)document.getElementById('q-instrucoes').textContent=camp.instrucoes;
+
+    // Renderiza perguntas
+    renderPerguntas();
+    mostrarTela('questionario');
+  }catch(e){
+    console.error(e);
+    mostrarTela('invalida');
+  }
+}
+
+function mostrarTela(nome){
+  ['carregando','invalida','ja-respondeu','concluido','questionario'].forEach(t=>{
+    document.getElementById(`tela-${t}`).style.display='none';
+  });
+  document.getElementById(`tela-${nome}`).style.display='';
+}
+
+function renderPerguntas(){
+  const wrap=document.getElementById('secoes-perguntas');
+  // Agrupa por seção
+  const secoes={};
+  PERGUNTAS.forEach((p,i)=>{
+    if(!secoes[p.secao])secoes[p.secao]=[];
+    secoes[p.secao].push({...p,num:i+1});
+  });
+
+  wrap.innerHTML=Object.entries(secoes).map(([secao,perguntas])=>`
+    <div class="secao">
+      <div class="secao-titulo">${secao}</div>
+      ${perguntas.map(p=>{
+        const labels=ESCALAS[p.escala];
+        return`<div class="pergunta" id="perg-wrap-${p.campo}">
+          <div class="pergunta-num">Pergunta ${p.num} de ${PERGUNTAS.length}</div>
+          <div class="pergunta-texto">${p.texto}</div>
+          <div class="escala">
+            ${[1,2,3,4,5].map(v=>`
+              <div class="escala-opcao">
+                <input type="radio" name="${p.campo}" id="${p.campo}_${v}" value="${v}" onchange="atualizarProgresso()">
+                <label for="${p.campo}_${v}">
+                  <span class="escala-num">${v}</span>
+                  <span>${labels[v]}</span>
+                </label>
+              </div>`).join('')}
+          </div>
+          <div class="escala-legenda">
+            <span>${Object.values(labels)[0]}</span>
+            <span>${Object.values(labels)[4]}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function atualizarProgresso(){
+  const respondidas=PERGUNTAS.filter(p=>document.querySelector(`input[name="${p.campo}"]:checked`)).length;
+  const total=PERGUNTAS.length;
+  const pct=Math.round(respondidas/total*100);
+  document.getElementById('progress-bar').style.width=`${pct}%`;
+  document.getElementById('progress-texto').textContent=`${respondidas} / ${total}`;
+  document.getElementById('btn-enviar').disabled=respondidas<total;
+}
+
+async function enviarRespostas(){
+  // Valida todas respondidas
+  const naoRespondidas=PERGUNTAS.filter(p=>!document.querySelector(`input[name="${p.campo}"]:checked`));
+  if(naoRespondidas.length){
+    document.getElementById('aviso-obrigatorio').classList.add('show');
+    // Scroll para primeira não respondida
+    const el=document.getElementById(`perg-wrap-${naoRespondidas[0].campo}`);
+    el?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  document.getElementById('aviso-obrigatorio').classList.remove('show');
+  document.getElementById('btn-enviar').disabled=true;
+  document.getElementById('spinner-enviar').classList.add('show');
+  document.getElementById('label-enviar').textContent='Enviando...';
+
+  const payload={
+    campanha_funcao_id:campanhaFuncaoId,
+    sessao_id:sessaoId,
+    faixa_etaria:document.getElementById('dem-idade').value||null,
+    tempo_empresa:document.getElementById('dem-tempo').value||null,
+    genero:document.getElementById('dem-genero').value||null,
+    concluido:true
+  };
+
+  PERGUNTAS.forEach(p=>{
+    const val=document.querySelector(`input[name="${p.campo}"]:checked`)?.value;
+    payload[p.campo]=val?parseInt(val):null;
+  });
+
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/respostas_copsoq`,{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if(!res.ok)throw new Error('Erro ao salvar respostas');
+
+    // Atualiza contador de respondentes
+    await fetch(
+      `${SUPA_URL}/rest/v1/rpc/increment_respondentes`,
+      {method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+       body:JSON.stringify({p_campanha_funcao_id:campanhaFuncaoId})}
+    ).catch(()=>{}); // ignora se RPC não existir — atualizamos no encerramento
+
+    // Marca sessão como respondida
+    sessionStorage.setItem(`copsoq_respondeu_${tokenUrl}`,'1');
+    mostrarTela('concluido');
+  }catch(e){
+    document.getElementById('aviso-obrigatorio').textContent='❌ Erro ao enviar. Tente novamente.';
+    document.getElementById('aviso-obrigatorio').classList.add('show');
+    document.getElementById('btn-enviar').disabled=false;
+  }finally{
+    document.getElementById('spinner-enviar').classList.remove('show');
+    document.getElementById('label-enviar').textContent='Enviar respostas';
+  }
+}
+
+inicializar();
+</script>
+</body>
+</html>

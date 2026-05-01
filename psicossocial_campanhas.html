@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Avaliação Psicossocial</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+    --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+    --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+    --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+  .header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+  .header-title{font-size:13px;color:var(--text2);flex:1;}
+  .header-title span{color:var(--text);font-weight:500;}
+  .container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+  .voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+  .voltar:hover{color:var(--text);}
+  .hero{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;gap:16px;}
+  .hero-icon{width:44px;height:44px;border-radius:10px;background:#2a1530;border:1px solid #5a2550;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .hero-info{flex:1;}
+  .hero-nome{font-size:16px;font-weight:500;}
+  .hero-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#5a8ce8;}
+  .btn-success{background:var(--accent2);color:#0f1117;}
+  .btn-success:hover{background:#3de8b4;}
+  .btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--border-focus);}
+  .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+  .btn-danger:hover{background:#2a1515;}
+  .btn-sm{padding:5px 12px;font-size:12px;}
+  /* Cards de campanha */
+  .campanha-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:12px;transition:border-color .15s;}
+  .campanha-card:hover{border-color:var(--border-focus);}
+  .campanha-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;}
+  .campanha-info{flex:1;}
+  .campanha-titulo{font-size:15px;font-weight:500;}
+  .campanha-meta{font-size:12px;color:var(--text2);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap;}
+  .campanha-actions{display:flex;gap:8px;flex-shrink:0;}
+  /* Status badges */
+  .status-badge{font-size:10px;padding:3px 9px;border-radius:4px;font-weight:600;font-family:var(--mono);white-space:nowrap;}
+  .status-Rascunho{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+  .status-Ativa{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .status-Encerrada{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+  .status-Cancelada{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+  /* Progresso por função */
+  .funcoes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:12px;}
+  .funcao-progress{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;}
+  .funcao-progress-nome{font-size:12px;font-weight:500;margin-bottom:8px;}
+  .progress-bar-wrap{height:4px;background:var(--border);border-radius:2px;margin-bottom:6px;}
+  .progress-bar{height:100%;border-radius:2px;background:var(--accent2);transition:width .3s;}
+  .funcao-progress-meta{font-size:11px;color:var(--text2);display:flex;justify-content:space-between;}
+  .funcao-link{font-size:10px;color:var(--accent);cursor:pointer;margin-top:6px;display:flex;align-items:center;gap:4px;}
+  .funcao-link:hover{text-decoration:underline;}
+  /* Modal */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:660px;width:100%;margin:auto;}
+  .modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+  .modal-close{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;}
+  .modal-field{margin-bottom:14px;}
+  .modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+  .modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+  .modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+  .modal-field textarea{resize:vertical;min-height:70px;}
+  .modal-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  /* Seleção de funções */
+  .funcoes-check-lista{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;max-height:180px;overflow-y:auto;}
+  .funcao-check-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+  .funcao-check-item:last-child{border-bottom:none;}
+  .funcao-check-item input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;}
+  .funcao-check-item label{font-size:13px;cursor:pointer;flex:1;}
+  .funcao-check-meta{font-size:11px;color:var(--text3);}
+  /* Toggle */
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;}
+  .toggle{width:36px;height:20px;background:var(--border);border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+  .toggle.on{background:var(--accent2);}
+  .toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;}
+  .toggle.on::after{left:19px;}
+  /* Status e spinner */
+  .status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+  .status-bar.show{display:flex;}
+  .status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+  .status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+  .status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+  .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .spinner.show{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .empty{text-align:center;padding:60px 20px;color:var(--text2);}
+  .empty-icon{font-size:40px;margin-bottom:14px;}
+  .empty-title{font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;}
+  /* Toast */
+  .toast{position:fixed;bottom:24px;right:24px;background:#0e2820;border:1px solid #1a4a38;border-radius:8px;padding:12px 18px;z-index:9999;font-size:13px;color:#2dd4a0;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:slideIn .3s ease;}
+  @keyframes slideIn{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  /* Resultado dimensões */
+  .dim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px;}
+  .dim-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+  .dim-nome{font-size:11px;color:var(--text2);margin-bottom:6px;}
+  .dim-score{font-size:18px;font-weight:600;margin-bottom:4px;}
+  .dim-risco{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;display:inline-block;}
+  .risco-Verde{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+  .risco-Amarelo{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+  .risco-Vermelho{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+  @media(max-width:600px){.modal-grid-2{grid-template-columns:1fr;}.campanha-actions{flex-direction:column;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Avaliação Psicossocial</span></div>
+</div>
+
+<div class="container">
+  <a id="link-voltar" href="empresa_detalhe.html" class="voltar">← Voltar para empresa</a>
+
+  <div class="hero">
+    <div class="hero-icon">🧠</div>
+    <div class="hero-info">
+      <div class="hero-nome" id="hero-nome">Avaliação Psicossocial — COPSOQ III</div>
+      <div class="hero-sub" id="hero-sub">Gerencie as campanhas de avaliação de riscos psicossociais</div>
+    </div>
+    <button class="btn btn-primary" onclick="abrirModalCampanha()">+ Nova campanha</button>
+  </div>
+
+  <div class="status-bar" id="status-geral"></div>
+  <div id="lista-campanhas">
+    <div class="empty"><div class="empty-icon">🧠</div><div class="empty-title">Carregando...</div></div>
+  </div>
+</div>
+
+<!-- MODAL NOVA/EDITAR CAMPANHA -->
+<div class="modal-overlay" id="modal-campanha">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-titulo-texto">Nova campanha</span>
+      <button class="modal-close" onclick="fecharModalCampanha()">×</button>
+    </div>
+
+    <div class="modal-field">
+      <label>Título da campanha *</label>
+      <input type="text" id="c-titulo" placeholder="Ex: Avaliação Psicossocial 2025 — 1º Semestre">
+    </div>
+    <div class="modal-field">
+      <label>Instruções para os respondentes</label>
+      <textarea id="c-instrucoes" placeholder="Explique o objetivo da avaliação, garanta o sigilo, informe o prazo..."></textarea>
+    </div>
+    <div class="modal-grid-2">
+      <div class="modal-field">
+        <label>Data de início *</label>
+        <input type="date" id="c-inicio">
+      </div>
+      <div class="modal-field">
+        <label>Data de encerramento *</label>
+        <input type="date" id="c-fim">
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Prazo mínimo (dias) — campanha só encerra após este prazo</label>
+      <input type="number" id="c-prazo" value="7" min="1" max="90">
+    </div>
+    <div class="modal-field">
+      <label>Funções participantes *</label>
+      <div class="funcoes-check-lista" id="funcoes-check-lista">
+        <div style="font-size:12px;color:var(--text3);padding:8px 0;">Carregando funções...</div>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Opções de envio</label>
+      <div class="toggle-row">
+        <span style="font-size:13px;">Enviar link por e-mail</span>
+        <div class="toggle" id="toggle-email" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="toggle-row">
+        <span style="font-size:13px;">Enviar link por WhatsApp</span>
+        <div class="toggle" id="toggle-whatsapp" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-ghost" onclick="fecharModalCampanha()">Cancelar</button>
+      <button class="btn btn-success" id="btn-salvar-campanha" onclick="salvarCampanha()">
+        <span class="spinner" id="spinner-campanha"></span>
+        <span id="label-salvar-campanha">Salvar campanha</span>
+      </button>
+    </div>
+    <div class="status-bar" id="status-campanha"></div>
+  </div>
+</div>
+
+<!-- MODAL RESULTADOS -->
+<div class="modal-overlay" id="modal-resultado">
+  <div class="modal" style="max-width:800px;">
+    <div class="modal-titulo">
+      <span id="resultado-titulo">Resultados</span>
+      <button class="modal-close" onclick="document.getElementById('modal-resultado').classList.remove('show')">×</button>
+    </div>
+    <div id="resultado-corpo"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('modal-resultado').classList.remove('show')">Fechar</button>
+      <button class="btn btn-success" id="btn-integrar-inventario" onclick="integrarInventario()">
+        <span class="spinner" id="spinner-integrar"></span>
+        <span id="label-integrar">Integrar ao inventário de riscos</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const params=new URLSearchParams(window.location.search);
+const empresaId=params.get('empresa_id');
+if(!empresaId)window.location.href='empresas.html';
+
+let empresa=null,funcoes=[],campanhas=[],campanhaEditandoId=null,resultadoAtualCampanhaFuncaoId=null;
+
+function h(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function headers(){return{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'};}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className='status-bar show '+tipo;el.innerHTML=`<span>${{info:'↻',success:'✓',error:'✕'}[tipo]}</span><span>${msg}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function toast(msg){document.querySelectorAll('.toast').forEach(t=>t.remove());const t=document.createElement('div');t.className='toast';t.innerHTML=`<span>✓</span><span>${msg}</span><button onclick="this.parentNode.remove()" style="background:none;border:none;color:#545e72;cursor:pointer;font-size:16px;margin-left:8px;">×</button>`;document.body.appendChild(t);setTimeout(()=>t.remove(),5000);}
+
+async function inicializar(){
+  document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
+  try{
+    const [resEmp,resFuncs]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao,cbo&order=nome_funcao.asc`,{headers:headers()}),
+    ]);
+    empresa=(await resEmp.json())[0];
+    funcoes=await resFuncs.json();
+    const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+    document.getElementById('hero-nome').textContent=`Avaliação Psicossocial — ${nome}`;
+    document.getElementById('header-nome').textContent=nome;
+    await carregarCampanhas();
+  }catch(e){console.error(e);}
+}
+
+async function carregarCampanhas(){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:headers()});
+    campanhas=await res.json();
+    // Carrega campanha_funcoes para cada campanha
+    if(campanhas.length){
+      const ids=campanhas.map(c=>c.id).join(',');
+      const resCF=await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=in.(${ids})&ativo=eq.true&select=*`,{headers:headers()});
+      const cfs=await resCF.json();
+      campanhas.forEach(c=>{c.funcoes=cfs.filter(cf=>cf.campanha_id===c.id);});
+    }
+    renderCampanhas();
+  }catch(e){console.error(e);}
+}
+
+function renderCampanhas(){
+  const lista=document.getElementById('lista-campanhas');
+  if(!campanhas.length){
+    lista.innerHTML=`<div class="empty">
+      <div class="empty-icon">🧠</div>
+      <div class="empty-title">Nenhuma campanha criada</div>
+      <div>Crie uma campanha para começar a avaliar os riscos psicossociais por função.</div>
+    </div>`;
+    return;
+  }
+  lista.innerHTML=campanhas.map(c=>{
+    const inicio=c.data_inicio?new Date(c.data_inicio+'T00:00:00').toLocaleDateString('pt-BR'):'—';
+    const fim=c.data_fim?new Date(c.data_fim+'T00:00:00').toLocaleDateString('pt-BR'):'—';
+    const totalResp=c.funcoes?.reduce((acc,f)=>acc+f.total_respondentes,0)||0;
+    const totalMeta=c.funcoes?.reduce((acc,f)=>acc+f.meta_respondentes,0)||0;
+    const pct=totalMeta>0?Math.round(totalResp/totalMeta*100):0;
+
+    const funcoesHtml=(c.funcoes||[]).map(cf=>{
+      const func=funcoes.find(f=>f.id===cf.funcao_id);
+      const pctF=cf.meta_respondentes>0?Math.round(cf.total_respondentes/cf.meta_respondentes*100):0;
+      const linkUrl=`${window.location.origin}${window.location.pathname.replace('psicossocial_campanhas.html','psicossocial_responder.html')}?token=${cf.token}`;
+      return`<div class="funcao-progress">
+        <div class="funcao-progress-nome">${h(func?.nome_funcao||'Função')}</div>
+        <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pctF}%;"></div></div>
+        <div class="funcao-progress-meta">
+          <span>${cf.total_respondentes} respondentes</span>
+          <span>${pctF}%</span>
+        </div>
+        <div class="funcao-link" onclick="copiarLink('${linkUrl}')">📋 Copiar link</div>
+        ${c.status==='Encerrada'?`<div class="funcao-link" onclick="verResultados(${cf.id})">📊 Ver resultados</div>`:''}
+      </div>`;
+    }).join('');
+
+    return`<div class="campanha-card">
+      <div class="campanha-header">
+        <div class="campanha-info">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div class="campanha-titulo">${h(c.titulo)}</div>
+            <span class="status-badge status-${h(c.status)}">${h(c.status)}</span>
+          </div>
+          <div class="campanha-meta">
+            <span>📅 ${inicio} → ${fim}</span>
+            <span>⏱ Prazo mínimo: ${c.prazo_minimo_dias} dias</span>
+            <span>👥 ${totalResp}/${totalMeta} respondentes (${pct}%)</span>
+            <span>🔧 ${c.funcoes?.length||0} função(ões)</span>
+          </div>
+        </div>
+        <div class="campanha-actions">
+          ${c.status==='Rascunho'?`<button class="btn btn-success btn-sm" onclick="ativarCampanha(${c.id})">▶ Ativar</button>`:''}
+          ${c.status==='Ativa'?`<button class="btn btn-ghost btn-sm" onclick="encerrarCampanha(${c.id})">⏹ Encerrar</button>`:''}
+          ${c.status==='Rascunho'?`<button class="btn btn-ghost btn-sm" onclick="editarCampanha(${c.id})">✏️ Editar</button>`:''}
+          ${c.status==='Encerrada'?`<button class="btn btn-primary btn-sm" onclick="verTodosResultados(${c.id})">📊 Resultados</button>`:''}
+        </div>
+      </div>
+      ${c.funcoes?.length?`<div class="funcoes-grid">${funcoesHtml}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ── MODAL CAMPANHA ────────────────────────────────────────────
+function abrirModalCampanha(){
+  campanhaEditandoId=null;
+  document.getElementById('modal-titulo-texto').textContent='Nova campanha';
+  document.getElementById('label-salvar-campanha').textContent='Salvar campanha';
+  document.getElementById('c-titulo').value='';
+  document.getElementById('c-instrucoes').value='Prezado(a) colaborador(a),\n\nEsta avaliação é parte do Programa de Gerenciamento de Riscos (PGR) da empresa. Suas respostas são totalmente anônimas e serão analisadas de forma coletiva por função. Não há respostas certas ou erradas — responda com sinceridade.\n\nObrigado pela sua participação!';
+  document.getElementById('c-inicio').value=new Date().toISOString().slice(0,10);
+  document.getElementById('c-fim').value='';
+  document.getElementById('c-prazo').value='7';
+  document.getElementById('toggle-email').classList.remove('on');
+  document.getElementById('toggle-whatsapp').classList.remove('on');
+  clearStatus('status-campanha');
+  renderFuncoesCheck([]);
+  document.getElementById('modal-campanha').classList.add('show');
+}
+
+function fecharModalCampanha(){document.getElementById('modal-campanha').classList.remove('show');campanhaEditandoId=null;}
+
+function renderFuncoesCheck(selecionadas=[]){
+  const lista=document.getElementById('funcoes-check-lista');
+  if(!funcoes.length){lista.innerHTML=`<div style="font-size:12px;color:var(--text3);padding:8px 0;">Nenhuma função cadastrada.</div>`;return;}
+  lista.innerHTML=funcoes.map(f=>`
+    <div class="funcao-check-item">
+      <input type="checkbox" id="fc-${f.id}" value="${f.id}" ${selecionadas.includes(f.id)?'checked':''}>
+      <label for="fc-${f.id}">${h(f.nome_funcao)}</label>
+      ${f.cbo?`<span class="funcao-check-meta">CBO ${h(f.cbo)}</span>`:''}
+    </div>`).join('');
+}
+
+function getFuncoesSelecionadas(){
+  return funcoes.filter(f=>document.getElementById(`fc-${f.id}`)?.checked).map(f=>f.id);
+}
+
+function gerarToken(){
+  return Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)+Date.now().toString(36);
+}
+
+async function salvarCampanha(){
+  const titulo=document.getElementById('c-titulo').value.trim();
+  const inicio=document.getElementById('c-inicio').value;
+  const fim=document.getElementById('c-fim').value;
+  const prazo=parseInt(document.getElementById('c-prazo').value)||7;
+  const funcoesSel=getFuncoesSelecionadas();
+
+  if(!titulo){setStatus('status-campanha','error','Informe o título da campanha.');return;}
+  if(!inicio||!fim){setStatus('status-campanha','error','Informe as datas de início e encerramento.');return;}
+  if(new Date(fim)<new Date(inicio)){setStatus('status-campanha','error','A data de encerramento deve ser posterior ao início.');return;}
+  if(!funcoesSel.length){setStatus('status-campanha','error','Selecione ao menos uma função.');return;}
+
+  const diasDuracao=(new Date(fim)-new Date(inicio))/(1000*60*60*24);
+  if(diasDuracao<prazo){setStatus('status-campanha','error',`A duração da campanha (${Math.round(diasDuracao)} dias) é menor que o prazo mínimo (${prazo} dias).`);return;}
+
+  document.getElementById('btn-salvar-campanha').disabled=true;
+  document.getElementById('spinner-campanha').classList.add('show');
+  setStatus('status-campanha','info','Salvando campanha...');
+
+  const payload={
+    empresa_id:parseInt(empresaId),
+    titulo,
+    instrucoes:document.getElementById('c-instrucoes').value||null,
+    data_inicio:inicio,
+    data_fim:fim,
+    prazo_minimo_dias:prazo,
+    envio_email:document.getElementById('toggle-email').classList.contains('on'),
+    envio_whatsapp:document.getElementById('toggle-whatsapp').classList.contains('on'),
+    metodologia:'COPSOQ-III',
+    status:'Rascunho',
+    ativo:true,
+    atualizado_em:new Date().toISOString()
+  };
+
+  try{
+    let campanhaId;
+    if(campanhaEditandoId){
+      await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${campanhaEditandoId}`,{method:'PATCH',headers:headers(),body:JSON.stringify(payload)});
+      campanhaId=campanhaEditandoId;
+      // Remove funções antigas e recria
+      await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${campanhaId}`,{method:'DELETE',headers:headers()});
+    }else{
+      const res=await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial`,{method:'POST',headers:{...headers(),'Prefer':'return=representation'},body:JSON.stringify(payload)});
+      if(!res.ok)throw new Error('Erro ao criar campanha');
+      const data=await res.json();
+      campanhaId=data[0].id;
+    }
+
+    // Cria campanha_funcoes com token único por função
+    for(const funcaoId of funcoesSel){
+      const func=funcoes.find(f=>f.id===funcaoId);
+      await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes`,{
+        method:'POST',headers:headers(),
+        body:JSON.stringify({campanha_id:campanhaId,funcao_id:funcaoId,token:gerarToken(),meta_respondentes:func?.num_funcionarios_previsto||0,status:'Aguardando',ativo:true})
+      });
+    }
+
+    fecharModalCampanha();
+    await carregarCampanhas();
+    toast('Campanha salva com sucesso!');
+  }catch(e){
+    setStatus('status-campanha','error',`Erro: ${e.message}`);
+  }finally{
+    document.getElementById('btn-salvar-campanha').disabled=false;
+    document.getElementById('spinner-campanha').classList.remove('show');
+  }
+}
+
+async function editarCampanha(id){
+  const c=campanhas.find(x=>x.id===id);if(!c)return;
+  campanhaEditandoId=id;
+  document.getElementById('modal-titulo-texto').textContent='Editar campanha';
+  document.getElementById('label-salvar-campanha').textContent='Salvar alterações';
+  document.getElementById('c-titulo').value=c.titulo||'';
+  document.getElementById('c-instrucoes').value=c.instrucoes||'';
+  document.getElementById('c-inicio').value=c.data_inicio||'';
+  document.getElementById('c-fim').value=c.data_fim||'';
+  document.getElementById('c-prazo').value=c.prazo_minimo_dias||7;
+  if(c.envio_email)document.getElementById('toggle-email').classList.add('on');
+  else document.getElementById('toggle-email').classList.remove('on');
+  if(c.envio_whatsapp)document.getElementById('toggle-whatsapp').classList.add('on');
+  else document.getElementById('toggle-whatsapp').classList.remove('on');
+  const funcoesSel=(c.funcoes||[]).map(cf=>cf.funcao_id);
+  renderFuncoesCheck(funcoesSel);
+  clearStatus('status-campanha');
+  document.getElementById('modal-campanha').classList.add('show');
+}
+
+async function ativarCampanha(id){
+  if(!confirm('Ativar a campanha? Os links serão liberados para resposta.'))return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{method:'PATCH',headers:headers(),body:JSON.stringify({status:'Ativa',atualizado_em:new Date().toISOString()})});
+    // Atualiza status das campanha_funcoes
+    await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${id}`,{method:'PATCH',headers:headers(),body:JSON.stringify({status:'Em andamento'})});
+    await carregarCampanhas();
+    toast('Campanha ativada! Links disponíveis para envio.');
+  }catch(e){alert('Erro ao ativar campanha.');}
+}
+
+async function encerrarCampanha(id){
+  const c=campanhas.find(x=>x.id===id);
+  if(!c)return;
+  // Verifica prazo mínimo
+  const diasDecorridos=c.data_inicio?(new Date()-new Date(c.data_inicio+'T00:00:00'))/(1000*60*60*24):999;
+  if(diasDecorridos<c.prazo_minimo_dias){
+    if(!confirm(`A campanha tem prazo mínimo de ${c.prazo_minimo_dias} dias e só decorreram ${Math.round(diasDecorridos)} dias. Deseja encerrar mesmo assim?`))return;
+  }else{
+    if(!confirm('Encerrar a campanha? As respostas serão consolidadas e os resultados calculados.'))return;
+  }
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{method:'PATCH',headers:headers(),body:JSON.stringify({status:'Encerrada',atualizado_em:new Date().toISOString()})});
+    await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${id}`,{method:'PATCH',headers:headers(),body:JSON.stringify({status:'Concluída'})});
+    // Calcula resultados para cada função
+    const c2=campanhas.find(x=>x.id===id);
+    for(const cf of c2?.funcoes||[]){
+      await calcularResultados(cf.id);
+    }
+    await carregarCampanhas();
+    toast('Campanha encerrada e resultados calculados!');
+  }catch(e){alert('Erro ao encerrar campanha.');}
+}
+
+// ── CÁLCULO DE RESULTADOS ────────────────────────────────────
+async function calcularResultados(campanhaFuncaoId){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/respostas_copsoq?campanha_funcao_id=eq.${campanhaFuncaoId}&concluido=eq.true&select=*`,{headers:headers()});
+    const respostas=await res.json();
+    if(!respostas.length)return;
+    const n=respostas.length;
+
+    function media(campos){
+      const vals=respostas.flatMap(r=>campos.map(c=>r[c]).filter(v=>v!=null));
+      if(!vals.length)return null;
+      return vals.reduce((a,b)=>a+b,0)/vals.length;
+    }
+    // Converte média (1-5) para score 0-100
+    function score(m){return m!=null?Math.round((m-1)/4*100):null;}
+    // Classifica risco (para dimensões de demanda: maior = pior; para suporte/satisfação: menor = pior)
+    function riscoDemanda(s){if(s==null)return null;if(s>=67)return'Vermelho';if(s>=34)return'Amarelo';return'Verde';}
+    function riscoRecurso(s){if(s==null)return null;if(s<=33)return'Vermelho';if(s<=66)return'Amarelo';return'Verde';}
+
+    const scores={
+      demandas_quantitativas: score(media(['d01_ritmo_intenso','d02_tarefas_demais'])),
+      ritmo_trabalho:         score(media(['d03_ritmo_alto'])),
+      exigencias_cognitivas:  score(media(['d04_concentracao','d05_memorizar'])),
+      exigencias_emocionais:  score(media(['d06_emocoes_difusas','d07_situacoes_dificeis'])),
+      autonomia:              score(media(['d08_influencia','d09_decisoes'])),
+      desenvolvimento:        score(media(['d10_aprender','d11_habilidades'])),
+      suporte_colegas:        score(media(['d12_colegas_ajudam','d13_colegas_apoiam'])),
+      suporte_chefia:         score(media(['d14_chefia_ajuda','d15_chefia_apoio'])),
+      qualidade_lideranca:    score(media(['d16_lider_planeja','d17_lider_conflitos'])),
+      inseguranca:            score(media(['d18_perder_emprego','d19_futuro_incerto'])),
+      satisfacao:             score(media(['d20_satisfacao_geral','d21_motivacao'])),
+      burnout:                score(media(['d22_esgotamento','d23_cansaco_emocional'])),
+    };
+
+    const resultado={
+      campanha_funcao_id:campanhaFuncaoId,
+      total_respondentes:n,
+      score_demandas_quantitativas:scores.demandas_quantitativas,
+      score_ritmo_trabalho:scores.ritmo_trabalho,
+      score_exigencias_cognitivas:scores.exigencias_cognitivas,
+      score_exigencias_emocionais:scores.exigencias_emocionais,
+      score_autonomia:scores.autonomia,
+      score_desenvolvimento:scores.desenvolvimento,
+      score_suporte_colegas:scores.suporte_colegas,
+      score_suporte_chefia:scores.suporte_chefia,
+      score_qualidade_lideranca:scores.qualidade_lideranca,
+      score_inseguranca:scores.inseguranca,
+      score_satisfacao:scores.satisfacao,
+      score_burnout:scores.burnout,
+      risco_demandas_quantitativas:riscoDemanda(scores.demandas_quantitativas),
+      risco_ritmo_trabalho:riscoDemanda(scores.ritmo_trabalho),
+      risco_exigencias_cognitivas:riscoDemanda(scores.exigencias_cognitivas),
+      risco_exigencias_emocionais:riscoDemanda(scores.exigencias_emocionais),
+      risco_autonomia:riscoRecurso(scores.autonomia),
+      risco_desenvolvimento:riscoRecurso(scores.desenvolvimento),
+      risco_suporte_colegas:riscoRecurso(scores.suporte_colegas),
+      risco_suporte_chefia:riscoRecurso(scores.suporte_chefia),
+      risco_qualidade_lideranca:riscoRecurso(scores.qualidade_lideranca),
+      risco_inseguranca:riscoDemanda(scores.inseguranca),
+      risco_satisfacao:riscoRecurso(scores.satisfacao),
+      risco_burnout:riscoDemanda(scores.burnout),
+      calculado_em:new Date().toISOString()
+    };
+
+    // Upsert resultado
+    const resExiste=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${campanhaFuncaoId}&select=id`,{headers:headers()});
+    const existe=await resExiste.json();
+    if(existe.length){
+      await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${campanhaFuncaoId}`,{method:'PATCH',headers:headers(),body:JSON.stringify(resultado)});
+    }else{
+      await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq`,{method:'POST',headers:headers(),body:JSON.stringify(resultado)});
+    }
+    // Atualiza total_respondentes em campanha_funcoes
+    await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?id=eq.${campanhaFuncaoId}`,{method:'PATCH',headers:headers(),body:JSON.stringify({total_respondentes:n})});
+  }catch(e){console.error('Erro ao calcular resultados:',e);}
+}
+
+// ── VER RESULTADOS ────────────────────────────────────────────
+const DIMENSOES=[
+  {key:'demandas_quantitativas',nome:'Demandas quantitativas',tipo:'demanda'},
+  {key:'ritmo_trabalho',nome:'Ritmo de trabalho',tipo:'demanda'},
+  {key:'exigencias_cognitivas',nome:'Exigências cognitivas',tipo:'demanda'},
+  {key:'exigencias_emocionais',nome:'Exigências emocionais',tipo:'demanda'},
+  {key:'autonomia',nome:'Autonomia e influência',tipo:'recurso'},
+  {key:'desenvolvimento',nome:'Desenvolvimento profissional',tipo:'recurso'},
+  {key:'suporte_colegas',nome:'Suporte dos colegas',tipo:'recurso'},
+  {key:'suporte_chefia',nome:'Suporte da chefia',tipo:'recurso'},
+  {key:'qualidade_lideranca',nome:'Qualidade da liderança',tipo:'recurso'},
+  {key:'inseguranca',nome:'Insegurança no trabalho',tipo:'demanda'},
+  {key:'satisfacao',nome:'Satisfação no trabalho',tipo:'recurso'},
+  {key:'burnout',nome:'Esgotamento (Burnout)',tipo:'demanda'},
+];
+
+async function verResultados(campanhaFuncaoId){
+  resultadoAtualCampanhaFuncaoId=campanhaFuncaoId;
+  try{
+    const cf=campanhas.flatMap(c=>c.funcoes||[]).find(cf=>cf.id===campanhaFuncaoId);
+    const func=funcoes.find(f=>f.id===cf?.funcao_id);
+    document.getElementById('resultado-titulo').textContent=`Resultados — ${func?.nome_funcao||'Função'}`;
+
+    const res=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${campanhaFuncaoId}&select=*`,{headers:headers()});
+    const data=await res.json();
+    const r=data[0];
+
+    if(!r){
+      document.getElementById('resultado-corpo').innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);">Nenhum resultado calculado. Pode ser que não haja respostas suficientes.</div>`;
+    }else{
+      const dimHtml=DIMENSOES.map(d=>{
+        const score=r[`score_${d.key}`];
+        const risco=r[`risco_${d.key}`];
+        const cor=risco==='Verde'?'#2dd4a0':risco==='Amarelo'?'#e0a855':'#e05555';
+        return`<div class="dim-card">
+          <div class="dim-nome">${d.nome}</div>
+          <div class="dim-score" style="color:${cor};">${score!=null?score+'%':'—'}</div>
+          ${risco?`<span class="dim-risco risco-${risco}">${risco}</span>`:''}
+          <div style="font-size:10px;color:var(--text3);margin-top:4px;">${d.tipo==='demanda'?'↑ maior = pior':'↑ maior = melhor'}</div>
+        </div>`;
+      }).join('');
+
+      document.getElementById('resultado-corpo').innerHTML=`
+        <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+            <div style="font-size:11px;color:var(--text2);">Respondentes</div>
+            <div style="font-size:22px;font-weight:600;color:var(--text);">${r.total_respondentes}</div>
+          </div>
+          <div style="background:#2a1515;border:1px solid #4a2020;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+            <div style="font-size:11px;color:#e05555;">Dimensões em risco</div>
+            <div style="font-size:22px;font-weight:600;color:#e05555;">${DIMENSOES.filter(d=>r[`risco_${d.key}`]==='Vermelho').length}</div>
+          </div>
+          <div style="background:#2a2010;border:1px solid #4a3a10;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+            <div style="font-size:11px;color:#e0a855;">Atenção</div>
+            <div style="font-size:22px;font-weight:600;color:#e0a855;">${DIMENSOES.filter(d=>r[`risco_${d.key}`]==='Amarelo').length}</div>
+          </div>
+          <div style="background:#0e2820;border:1px solid #1a4a38;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+            <div style="font-size:11px;color:#2dd4a0;">Adequadas</div>
+            <div style="font-size:22px;font-weight:600;color:#2dd4a0;">${DIMENSOES.filter(d=>r[`risco_${d.key}`]==='Verde').length}</div>
+          </div>
+        </div>
+        <div class="dim-grid">${dimHtml}</div>
+        ${r.integrado_inventario?`<div style="margin-top:12px;font-size:12px;color:var(--success);">✓ Já integrado ao inventário de riscos em ${new Date(r.data_integracao).toLocaleDateString('pt-BR')}</div>`:''}
+      `;
+      document.getElementById('btn-integrar-inventario').style.display=r.integrado_inventario?'none':'inline-flex';
+    }
+    document.getElementById('modal-resultado').classList.add('show');
+  }catch(e){console.error(e);}
+}
+
+async function verTodosResultados(campanhaId){
+  const c=campanhas.find(x=>x.id===campanhaId);
+  if(!c||!c.funcoes?.length)return;
+  // Abre o primeiro que tiver resultado
+  verResultados(c.funcoes[0].id);
+}
+
+// ── INTEGRAR AO INVENTÁRIO ────────────────────────────────────
+async function integrarInventario(){
+  if(!resultadoAtualCampanhaFuncaoId)return;
+  document.getElementById('btn-integrar-inventario').disabled=true;
+  document.getElementById('spinner-integrar').classList.add('show');
+
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}&select=*`,{headers:headers()});
+    const data=await res.json();
+    const r=data[0];
+    if(!r)throw new Error('Resultado não encontrado');
+
+    const cf=campanhas.flatMap(c=>c.funcoes||[]).find(cf=>cf.id===resultadoAtualCampanhaFuncaoId);
+    if(!cf)throw new Error('Função não encontrada');
+
+    // Busca categoria psicossocial
+    const resCat=await fetch(`${SUPA_URL}/rest/v1/categorias_risco?nome=eq.Psicossocial&ativo=eq.true&select=id`,{headers:headers()});
+    const cats=await resCat.json();
+    const catId=cats[0]?.id;
+    if(!catId)throw new Error('Categoria Psicossocial não encontrada');
+
+    // Para cada dimensão em risco vermelho ou amarelo, verifica se há risco correspondente
+    const dimensoesRisco=DIMENSOES.filter(d=>['Vermelho','Amarelo'].includes(r[`risco_${d.key}`]));
+
+    // Busca perigos psicossociais para mapear
+    const resPerigos=await fetch(`${SUPA_URL}/rest/v1/perigos?categoria_risco_id=eq.${catId}&ativo=eq.true&select=id,nome`,{headers:headers()});
+    const perigos=await resPerigos.json();
+
+    // Mapeamento dimensão COPSOQ → perigo
+    const mapaPerigo={
+      demandas_quantitativas:'Sobrecarga quantitativa de trabalho',
+      ritmo_trabalho:'Pressão por metas e produtividade',
+      exigencias_cognitivas:'Sobrecarga qualitativa de trabalho',
+      exigencias_emocionais:'Trabalho emocional',
+      autonomia:'Falta de autonomia e controle',
+      desenvolvimento:'Falta de perspectiva de carreira',
+      suporte_colegas:'Falta de suporte dos colegas',
+      suporte_chefia:'Falta de suporte da liderança',
+      qualidade_lideranca:'Falta de suporte da liderança',
+      inseguranca:'Instabilidade no emprego',
+      satisfacao:'Nao reconhecimento profissional',
+      burnout:'Sobrecarga quantitativa de trabalho',
+    };
+
+    // Busca riscos psicossociais do catálogo
+    const resRiscos=await fetch(`${SUPA_URL}/rest/v1/riscos?categoria_risco_id=eq.${catId}&ativo=eq.true&select=id,nome_risco`,{headers:headers()});
+    const riscos=await resRiscos.json();
+
+    // Mapeia dimensão → risco_id
+    const mapaRisco={
+      demandas_quantitativas:'PSI-003',ritmo_trabalho:'PSI-004',
+      exigencias_cognitivas:'PSI-003',exigencias_emocionais:'PSI-006',
+      autonomia:'PSI-004',desenvolvimento:'PSI-004',
+      suporte_colegas:'PSI-001',suporte_chefia:'PSI-001',
+      qualidade_lideranca:'PSI-001',inseguranca:'PSI-007',
+      satisfacao:'PSI-004',burnout:'PSI-003',
+    };
+
+    // Busca riscos pelo código
+    const resRiscosCod=await fetch(`${SUPA_URL}/rest/v1/riscos?categoria_risco_id=eq.${catId}&ativo=eq.true&select=id,codigo_risco`,{headers:headers()});
+    const riscosCod=await resRiscosCod.json();
+
+    let integrados=0;
+    for(const dim of dimensoesRisco){
+      const codigoRisco=mapaRisco[dim.key];
+      const nomePer=mapaPerigo[dim.key];
+      const risco=riscosCod.find(r=>r.codigo_risco===codigoRisco);
+      const perigo=perigos.find(p=>p.nome===nomePer);
+      if(!risco)continue;
+
+      // Verifica se já existe em funcao_riscos
+      const resCheck=await fetch(
+        `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${cf.funcao_id}&risco_id=eq.${risco.id}&ativo=eq.true&select=id`,
+        {headers:headers()}
+      );
+      const existente=await resCheck.json();
+      if(existente.length)continue;
+
+      // Nível de risco baseado na classificação COPSOQ
+      const nivelRisco=r[`risco_${dim.key}`]==='Vermelho'?'ALTO':'MEDIO';
+
+      await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
+        method:'POST',headers:headers(),
+        body:JSON.stringify({
+          funcao_id:cf.funcao_id,
+          risco_id:risco.id,
+          perigo_id:perigo?.id||null,
+          nivel_risco:nivelRisco,
+          propagado_do_setor:false,
+          ativo:true
+        })
+      });
+      integrados++;
+    }
+
+    // Marca como integrado
+    await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}`,{
+      method:'PATCH',headers:headers(),
+      body:JSON.stringify({integrado_inventario:true,data_integracao:new Date().toISOString()})
+    });
+
+    document.getElementById('modal-resultado').classList.remove('show');
+    toast(`${integrados} risco(s) psicossocial(is) integrado(s) ao inventário de riscos!`);
+    await carregarCampanhas();
+  }catch(e){
+    alert('Erro ao integrar: '+e.message);
+  }finally{
+    document.getElementById('btn-integrar-inventario').disabled=false;
+    document.getElementById('spinner-integrar').classList.remove('show');
+  }
+}
+
+function copiarLink(url){
+  navigator.clipboard.writeText(url).then(()=>toast('Link copiado!')).catch(()=>{
+    prompt('Copie o link abaixo:',url);
+  });
+}
+
+inicializar();
+</script>
+</body>
+</html>
