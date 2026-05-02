@@ -359,7 +359,7 @@ function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)retu
 function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
 function escHtml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// ── CBO — BUSCA EM TEMPO REAL NA API DO MTE ───────────────────
+// ── CBO — BUSCA NO SUPABASE ───────────────────────────────────
 function filtrarCBO(){
   const termo=document.getElementById('f-cbo').value.trim();
   const dd=document.getElementById('cbo-dropdown');
@@ -368,60 +368,41 @@ function filtrarCBO(){
   document.getElementById('cbo-dica').classList.remove('show');
   if(!termo||termo.length<2){dd.classList.remove('show');return;}
   clearTimeout(cboTimer);
-  dd.innerHTML=`<div class="cbo-msg"><div style="width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;"></div>Buscando na CBO...</div>`;
+  dd.innerHTML=`<div class="cbo-msg"><div style="width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;"></div>Buscando...</div>`;
   dd.classList.add('show');
-  cboTimer=setTimeout(()=>buscarCBO(termo),450);
+  cboTimer=setTimeout(()=>buscarCBO(termo),350);
 }
 
 async function buscarCBO(termo){
   const dd=document.getElementById('cbo-dropdown');
   try{
-    const ehCodigo=/^\d+$/.test(termo.replace(/\D/g,''))&&termo.replace(/\D/g,'').length>=4;
-    let resultados=[];
-
+    const ehCodigo=/^\d/.test(termo);
+    let url;
     if(ehCodigo){
-      // Busca por código
       const codigo=termo.replace(/\D/g,'');
-      const res=await fetch(`${CBO_API}/ocupacoes/${codigo}`);
-      if(res.ok){const d=await res.json();if(d&&d.id)resultados=[d];}
-      if(!resultados.length){
-        const res2=await fetch(`${CBO_API}/subclasses/${codigo}`);
-        if(res2.ok){const d=await res2.json();if(Array.isArray(d))resultados=d.slice(0,10);else if(d&&d.id)resultados=[d];}
-      }
+      url=`${SUPA_URL}/rest/v1/cbo?codigo=ilike.${encodeURIComponent(codigo+'%')}&ativo=eq.true&select=codigo,titulo,descricao_atividades&limit=15&order=codigo.asc`;
+    }else{
+      url=`${SUPA_URL}/rest/v1/cbo?titulo=ilike.${encodeURIComponent('%'+termo+'%')}&ativo=eq.true&select=codigo,titulo,descricao_atividades&limit=15&order=titulo.asc`;
     }
-
-    if(!resultados.length){
-      // Busca por nome
-      const endpoints=[
-        `${CBO_API}/ocupacoes?busca=${encodeURIComponent(termo)}`,
-        `${CBO_API}/subclasses?busca=${encodeURIComponent(termo)}`,
-      ];
-      for(const url of endpoints){
-        try{const r=await fetch(url);if(r.ok){const d=await r.json();if(Array.isArray(d)&&d.length){resultados=d.slice(0,15);break;}}}catch(e){}
-      }
-    }
+    const res=await fetch(url,{headers:{'apikey':SUPA_KEY}});
+    const resultados=await res.json();
 
     if(!resultados.length){
       dd.innerHTML=`<div class="cbo-msg">Nenhuma ocupação encontrada para "${escHtml(termo)}"</div>`;
       return;
     }
-
     dd.innerHTML=resultados.map((r,i)=>{
-      const codigo=r.codigo||r.id||'';
-      const nome=r.titulo||r.descricao||r.nome||'';
-      const atividades=r.descricao_sumaria||r.descricao_atividades||'';
-      // Escapa aspas simples para uso em onclick
-      const nomeEsc=nome.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      const ativEsc=atividades.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return`<div class="cbo-option" id="cbo-opt-${i}" onclick="selecionarCBO('${codigo}','${nomeEsc}','${ativEsc}')">
-        <div class="cbo-code">${escHtml(String(codigo))}</div>
-        <div class="cbo-nome">${escHtml(nome)}</div>
-        ${atividades?`<div class="cbo-atividades">${escHtml(atividades.slice(0,120))}${atividades.length>120?'…':''}</div>`:''}
+      const nomeEsc=(r.titulo||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const ativEsc=(r.descricao_atividades||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      return`<div class="cbo-option" id="cbo-opt-${i}" onclick="selecionarCBO('${escHtml(r.codigo)}','${nomeEsc}','${ativEsc}')">
+        <div class="cbo-code">${escHtml(r.codigo)}</div>
+        <div class="cbo-nome">${escHtml(r.titulo)}</div>
+        ${r.descricao_atividades?`<div class="cbo-atividades">${escHtml(r.descricao_atividades.slice(0,120))}${r.descricao_atividades.length>120?'…':''}</div>`:''}
       </div>`;
     }).join('');
     dd.classList.add('show');
   }catch(e){
-    dd.innerHTML=`<div class="cbo-msg">Erro na busca. Verifique sua conexão.</div>`;
+    dd.innerHTML=`<div class="cbo-msg">Erro ao buscar. Tente novamente.</div>`;
   }
 }
 
