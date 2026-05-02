@@ -162,8 +162,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     min-height:auto!important;
     max-height:none!important;
     overflow:visible!important;
-    padding:10mm 15mm 10mm 20mm!important;
-    /* Sem page-break automático em cada .page */
+    padding:6mm 8mm 6mm 14mm!important;
     page-break-after:auto;
     break-after:auto;
   }
@@ -173,7 +172,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     page-break-after:always!important;
     break-after:page!important;
     min-height:277mm!important;
-    padding:20mm 20mm 20mm 25mm!important;
+    padding:16mm 8mm 16mm 14mm!important;
   }
 
   /* Listra azul fixa em todas as páginas */
@@ -227,7 +226,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   /* Sumário — mantém junto */
   .page:nth-child(2){page-break-after:always!important;break-after:page!important;}
 
-  @page{size:A4;margin:20mm 20mm 20mm 25mm;}
+  @page{size:A4;margin:12mm 8mm 12mm 14mm;}
 }
 @media(max-width:230mm){
   .page{width:100%;padding:15mm 12mm 15mm 18mm;}
@@ -943,7 +942,7 @@ function renderMatrizEPI(){
   pg.innerHTML=`
   ${phHeader('—')}
   <div class="doc-section"><span class="num-secao">5</span>Matriz de EPI por Função</div>
-  <p class="doc-text" style="margin-bottom:12pt;">A matriz a seguir consolida os Equipamentos de Proteção Individual obrigatórios para cada função, gerados automaticamente a partir das medidas de controle registradas no inventário de riscos. O fornecimento, higienização, manutenção e substituição dos EPIs listados é obrigação do empregador, conforme NR-6.</p>
+  <p class="doc-text" style="margin-bottom:12pt;">A matriz a seguir consolida os Equipamentos de Proteção Individual (EPIs) indicados para cada função, com base nos riscos ocupacionais identificados no inventário deste PGR e nas medidas de controle estabelecidas conforme a hierarquia da NR-1. Os EPIs relacionados foram selecionados considerando a natureza dos agentes de risco, a intensidade da exposição e a viabilidade técnica das medidas de proteção coletiva disponíveis, em conformidade com os requisitos da NR-6. O empregador é responsável pelo fornecimento gratuito, orientação de uso, manutenção e substituição dos EPIs sempre que necessário, bem como por exigir e fiscalizar seu uso correto pelos trabalhadores.</p>
   <table class="epi-matrix-table">
     <thead>
       <tr>
@@ -954,7 +953,7 @@ function renderMatrizEPI(){
     </thead>
     <tbody>${linhas}</tbody>
   </table>
-  <p class="doc-text" style="margin-top:12pt;font-size:8.5pt;">* O Certificado de Aprovação (CA) é emitido pelo MTE e deve estar válido. EPIs com CA vencido devem ser imediatamente substituídos. O trabalhador deve ser treinado para o uso correto de cada EPI.</p>
+  <p class="doc-text" style="margin-top:12pt;font-size:8.5pt;">* O Certificado de Aprovação (CA) é emitido pelo Ministério do Trabalho e Emprego (MTE) e atesta que o EPI passou pelos ensaios de resistência e eficácia exigidos. EPIs com CA vencido ou sem CA não devem ser fornecidos aos trabalhadores e devem ser imediatamente substituídos. O empregador deve capacitar o trabalhador quanto ao uso adequado, guarda e conservação de cada EPI, conforme NR-6.</p>
   ${pfFooter('—')}`;
   return pg;
 }
@@ -1038,12 +1037,21 @@ function renderAvaliacaoPsicossocial(){
   ${pfFooter(numSecao)}`;
   paginas.push(pg1);
 
-  // ── Páginas de resultados por função ──
+  // Pega apenas o resultado mais recente por função
+  const resultadosPorFuncao={};
   window.campanhasPsi.forEach(campanha=>{
     const cfs=window.campanhaFuncoesPsi.filter(cf=>cf.campanha_id===campanha.id);
     cfs.forEach(cf=>{
       const resultado=window.resultadosPsi.find(r=>r.campanha_funcao_id===cf.id);
       if(!resultado||!resultado.total_respondentes)return;
+      // Como campanhas estão ordenadas por data_fim desc, a primeira encontrada é a mais recente
+      if(!resultadosPorFuncao[cf.funcao_id]){
+        resultadosPorFuncao[cf.funcao_id]={campanha,cf,resultado};
+      }
+    });
+  });
+
+  Object.values(resultadosPorFuncao).forEach(({campanha,cf,resultado})=>{
       const funcao=funcoes.find(f=>f.id===cf.funcao_id);
       if(!funcao)return;
 
@@ -1120,7 +1128,6 @@ function renderAvaliacaoPsicossocial(){
       `}
       ${pfFooter(numSecao)}`;
       paginas.push(pg);
-    });
   });
 
   return paginas;
