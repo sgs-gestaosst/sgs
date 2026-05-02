@@ -705,10 +705,27 @@ async function integrarInventario(){
       return;
     }
 
+    // Busca número de funcionários previstos da função para num_expostos
+    const resFuncSet=await fetch(
+      `${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${cf.funcao_id}&ativo=eq.true&select=num_funcionarios_previsto`,
+      {headers:headers()}
+    );
+    const funcSets=await resFuncSet.json();
+    const numExpostos=funcSets.reduce((acc,fs)=>acc+(fs.num_funcionarios_previsto||0),0)||1;
+
     let integrados=0;
     for(const dim of dimensoesEmRisco){
       const codigoBuscado=mapaRisco[dim.key];
       const nomePericoBuscado=mapaPerigo[dim.key];
+      const classificacao=resultado[`risco_${dim.key}`]; // Vermelho ou Amarelo
+
+      // Probabilidade e Severidade baseadas na classificação COPSOQ
+      // Vermelho → Probabilidade 4 (Alta) + Severidade 4 (Grave)
+      // Amarelo  → Probabilidade 3 (Média) + Severidade 3 (Moderada)
+      const probabilidade=classificacao==='Vermelho'?4:3;
+      const severidade=classificacao==='Vermelho'?4:3;
+      const nivelRisco=classificacao==='Vermelho'?'ALTO':'MEDIO';
+      const gutTotal=probabilidade*severidade; // 16 para alto, 9 para médio
 
       // Encontra o risco pelo código
       const riscoEncontrado=todosRiscos.find(r=>r.codigo_risco===codigoBuscado);
@@ -727,12 +744,15 @@ async function integrarInventario(){
       );
       const existente=await resCheck.json();
       if(existente.length){
-        console.log(`Risco ${codigoBuscado} já existe para esta função.`);
+        // Já existe — atualiza probabilidade, severidade e num_expostos
+        await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${existente[0].id}`,{
+          method:'PATCH',headers:headers(),
+          body:JSON.stringify({probabilidade,severidade,nivel_risco:nivelRisco,num_expostos:numExpostos,atualizado_em:new Date().toISOString()})
+        });
         continue;
       }
 
-      // Insere em funcao_riscos
-      const nivelRisco=resultado[`risco_${dim.key}`]==='Vermelho'?'ALTO':'MEDIO';
+      // Insere em funcao_riscos com todos os dados preenchidos
       const resInsert=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
         method:'POST',
         headers:{...headers(),'Prefer':'return=representation'},
@@ -740,7 +760,10 @@ async function integrarInventario(){
           funcao_id:cf.funcao_id,
           risco_id:riscoEncontrado.id,
           perigo_id:perigoEncontrado?.id||null,
+          probabilidade,
+          severidade,
           nivel_risco:nivelRisco,
+          num_expostos:numExpostos,
           propagado_do_setor:false,
           ativo:true
         })
