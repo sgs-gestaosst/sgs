@@ -491,6 +491,7 @@ async function revogarAcesso(usuarioId) {
 
 function sair() {
   localStorage.removeItem('sgs_token');
+  localStorage.removeItem('sgs_refresh_token');
   localStorage.removeItem('sgs_user');
   window.location.href = 'login.html';
 }
