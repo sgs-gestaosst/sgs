@@ -225,6 +225,7 @@ if(!empresaId)window.location.href='empresas.html';
 let empresa=null,funcoes=[],campanhas=[],campanhaEditandoId=null,resultadoAtualCampanhaFuncaoId=null;
 
 function h(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escHtml(s){return h(s);}
 function headers(){return{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'};}
 function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className='status-bar show '+tipo;el.innerHTML=`<span>${{info:'↻',success:'✓',error:'✕'}[tipo]}</span><span>${msg}</span>`;}
 function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
