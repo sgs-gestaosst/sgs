@@ -641,28 +641,47 @@ async function integrarInventario(){
   document.getElementById('spinner-integrar').classList.add('show');
 
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}&select=*`,{headers:headers()});
-    const data=await res.json();
-    const r=data[0];
-    if(!r)throw new Error('Resultado não encontrado');
+    // 1. Busca resultado da avaliação
+    const resResultado=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}&select=*`,{headers:headers()});
+    const dataResultado=await resResultado.json();
+    const resultado=dataResultado[0];
+    if(!resultado)throw new Error('Resultado não encontrado. Encerre a campanha primeiro.');
 
-    const cf=campanhas.flatMap(c=>c.funcoes||[]).find(cf=>cf.id===resultadoAtualCampanhaFuncaoId);
-    if(!cf)throw new Error('Função não encontrada');
+    // 2. Busca campanha_funcao para obter funcao_id
+    const cf=campanhas.flatMap(c=>c.funcoes||[]).find(x=>x.id===resultadoAtualCampanhaFuncaoId);
+    if(!cf)throw new Error('Função da campanha não encontrada.');
 
-    // Busca categoria psicossocial
+    // 3. Busca categoria psicossocial
     const resCat=await fetch(`${SUPA_URL}/rest/v1/categorias_risco?nome=eq.Psicossocial&ativo=eq.true&select=id`,{headers:headers()});
     const cats=await resCat.json();
     const catId=cats[0]?.id;
-    if(!catId)throw new Error('Categoria Psicossocial não encontrada');
+    if(!catId)throw new Error('Categoria Psicossocial não encontrada no catálogo.');
 
-    // Para cada dimensão em risco vermelho ou amarelo, verifica se há risco correspondente
-    const dimensoesRisco=DIMENSOES.filter(d=>['Vermelho','Amarelo'].includes(r[`risco_${d.key}`]));
+    // 4. Busca todos os riscos psicossociais de uma vez
+    const resRiscos=await fetch(`${SUPA_URL}/rest/v1/riscos?categoria_risco_id=eq.${catId}&ativo=eq.true&select=id,codigo_risco`,{headers:headers()});
+    const todosRiscos=await resRiscos.json();
 
-    // Busca perigos psicossociais para mapear
+    // 5. Busca todos os perigos psicossociais de uma vez
     const resPerigos=await fetch(`${SUPA_URL}/rest/v1/perigos?categoria_risco_id=eq.${catId}&ativo=eq.true&select=id,nome`,{headers:headers()});
-    const perigos=await resPerigos.json();
+    const todosPerigos=await resPerigos.json();
 
-    // Mapeamento dimensão COPSOQ → perigo
+    // 6. Mapeamento dimensão COPSOQ → código do risco
+    const mapaRisco={
+      demandas_quantitativas:'PSI-003',
+      ritmo_trabalho:'PSI-004',
+      exigencias_cognitivas:'PSI-003',
+      exigencias_emocionais:'PSI-006',
+      autonomia:'PSI-004',
+      desenvolvimento:'PSI-004',
+      suporte_colegas:'PSI-001',
+      suporte_chefia:'PSI-001',
+      qualidade_lideranca:'PSI-001',
+      inseguranca:'PSI-008',
+      satisfacao:'PSI-004',
+      burnout:'PSI-003',
+    };
+
+    // 7. Mapeamento dimensão → nome do perigo
     const mapaPerigo={
       demandas_quantitativas:'Sobrecarga quantitativa de trabalho',
       ritmo_trabalho:'Pressão por metas e produtividade',
@@ -678,68 +697,69 @@ async function integrarInventario(){
       burnout:'Sobrecarga quantitativa de trabalho',
     };
 
-    // Busca riscos psicossociais do catálogo
-    const resRiscos=await fetch(`${SUPA_URL}/rest/v1/riscos?categoria_risco_id=eq.${catId}&ativo=eq.true&select=id,nome_risco`,{headers:headers()});
-    const riscos=await resRiscos.json();
+    // 8. Filtra apenas dimensões em risco (Vermelho ou Amarelo)
+    const dimensoesEmRisco=DIMENSOES.filter(d=>['Vermelho','Amarelo'].includes(resultado[`risco_${d.key}`]));
 
-    // Mapeia dimensão → risco_id
-    const mapaRisco={
-      demandas_quantitativas:'PSI-003',ritmo_trabalho:'PSI-004',
-      exigencias_cognitivas:'PSI-003',exigencias_emocionais:'PSI-006',
-      autonomia:'PSI-004',desenvolvimento:'PSI-004',
-      suporte_colegas:'PSI-001',suporte_chefia:'PSI-001',
-      qualidade_lideranca:'PSI-001',inseguranca:'PSI-007',
-      satisfacao:'PSI-004',burnout:'PSI-003',
-    };
-
-    // Busca riscos pelo código
-    const resRiscosCod=await fetch(`${SUPA_URL}/rest/v1/riscos?categoria_risco_id=eq.${catId}&ativo=eq.true&select=id,codigo_risco`,{headers:headers()});
-    const riscosCod=await resRiscosCod.json();
+    if(!dimensoesEmRisco.length){
+      alert('Nenhuma dimensão em risco identificada para integrar.');
+      return;
+    }
 
     let integrados=0;
-    for(const dim of dimensoesRisco){
-      const codigoRisco=mapaRisco[dim.key];
-      const nomePer=mapaPerigo[dim.key];
-      const risco=riscosCod.find(r=>r.codigo_risco===codigoRisco);
-      const perigo=perigos.find(p=>p.nome===nomePer);
-      if(!risco)continue;
+    for(const dim of dimensoesEmRisco){
+      const codigoBuscado=mapaRisco[dim.key];
+      const nomePericoBuscado=mapaPerigo[dim.key];
+
+      // Encontra o risco pelo código
+      const riscoEncontrado=todosRiscos.find(r=>r.codigo_risco===codigoBuscado);
+      if(!riscoEncontrado){
+        console.warn(`Risco ${codigoBuscado} não encontrado para dimensão ${dim.key}`);
+        continue;
+      }
+
+      // Encontra o perigo pelo nome
+      const perigoEncontrado=todosPerigos.find(p=>p.nome===nomePericoBuscado);
 
       // Verifica se já existe em funcao_riscos
       const resCheck=await fetch(
-        `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${cf.funcao_id}&risco_id=eq.${risco.id}&ativo=eq.true&select=id`,
+        `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${cf.funcao_id}&risco_id=eq.${riscoEncontrado.id}&ativo=eq.true&select=id`,
         {headers:headers()}
       );
       const existente=await resCheck.json();
-      if(existente.length)continue;
+      if(existente.length){
+        console.log(`Risco ${codigoBuscado} já existe para esta função.`);
+        continue;
+      }
 
-      // Nível de risco baseado na classificação COPSOQ
-      const nivelRisco=r[`risco_${dim.key}`]==='Vermelho'?'ALTO':'MEDIO';
-
-      await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
-        method:'POST',headers:headers(),
+      // Insere em funcao_riscos
+      const nivelRisco=resultado[`risco_${dim.key}`]==='Vermelho'?'ALTO':'MEDIO';
+      const resInsert=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
+        method:'POST',
+        headers:{...headers(),'Prefer':'return=representation'},
         body:JSON.stringify({
           funcao_id:cf.funcao_id,
-          risco_id:risco.id,
-          perigo_id:perigo?.id||null,
+          risco_id:riscoEncontrado.id,
+          perigo_id:perigoEncontrado?.id||null,
           nivel_risco:nivelRisco,
           propagado_do_setor:false,
           ativo:true
         })
       });
-      integrados++;
+      if(resInsert.ok)integrados++;
     }
 
-    // Marca como integrado
+    // 9. Marca resultado como integrado
     await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}`,{
       method:'PATCH',headers:headers(),
       body:JSON.stringify({integrado_inventario:true,data_integracao:new Date().toISOString()})
     });
 
     document.getElementById('modal-resultado').classList.remove('show');
-    toast(`${integrados} risco(s) psicossocial(is) integrado(s) ao inventário de riscos!`);
+    toast(`✓ ${integrados} risco(s) psicossocial(is) integrado(s) ao inventário!`);
     await carregarCampanhas();
   }catch(e){
     alert('Erro ao integrar: '+e.message);
+    console.error(e);
   }finally{
     document.getElementById('btn-integrar-inventario').disabled=false;
     document.getElementById('spinner-integrar').classList.remove('show');
