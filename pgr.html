@@ -426,6 +426,20 @@ async function carregar(){
     const resAcoes=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=prioridade.asc,prazo.asc`,{headers:headers()});
     window.acoesData=await resAcoes.json();
 
+    // Campanhas psicossociais encerradas com resultados
+    const resCampanhas=await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?empresa_id=eq.${empresaId}&status=eq.Encerrada&ativo=eq.true&select=*&order=data_fim.desc`,{headers:headers()});
+    window.campanhasPsi=await resCampanhas.json();
+    if(window.campanhasPsi.length){
+      const campIds=window.campanhasPsi.map(c=>c.id).join(',');
+      const resCF=await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=in.(${campIds})&ativo=eq.true&select=*`,{headers:headers()});
+      window.campanhaFuncoesPsi=await resCF.json();
+      if(window.campanhaFuncoesPsi.length){
+        const cfIds=window.campanhaFuncoesPsi.map(cf=>cf.id).join(',');
+        const resRes=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=in.(${cfIds})&select=*`,{headers:headers()});
+        window.resultadosPsi=await resRes.json();
+      }else{window.resultadosPsi=[];}
+    }else{window.campanhaFuncoesPsi=[];window.resultadosPsi=[];}
+
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro ao carregar: ${e.message}</div>`;
@@ -443,6 +457,10 @@ function renderDocumento(){
   wrap.appendChild(renderSESMT());
   renderInventarioRiscos().forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(renderMatrizEPI());
+  // Avaliação psicossocial — só renderiza se houver campanhas encerradas
+  if(window.campanhasPsi&&window.campanhasPsi.length){
+    renderAvaliacaoPsicossocial().forEach(pg=>wrap.appendChild(pg));
+  }
   wrap.appendChild(renderPlanoAcao());
 
   // Numeração automática de páginas
@@ -941,7 +959,174 @@ function renderMatrizEPI(){
   return pg;
 }
 
-// ── PLANO DE AÇÃO ─────────────────────────────────────────────
+// ── AVALIAÇÃO PSICOSSOCIAL ────────────────────────────────────
+function renderAvaliacaoPsicossocial(){
+  const paginas=[];
+  const DIMENSOES_INFO=[
+    {key:'demandas_quantitativas',nome:'Demandas Quantitativas',tipo:'demanda'},
+    {key:'ritmo_trabalho',nome:'Ritmo de Trabalho',tipo:'demanda'},
+    {key:'exigencias_cognitivas',nome:'Exigências Cognitivas',tipo:'demanda'},
+    {key:'exigencias_emocionais',nome:'Exigências Emocionais',tipo:'demanda'},
+    {key:'autonomia',nome:'Autonomia e Influência',tipo:'recurso'},
+    {key:'desenvolvimento',nome:'Desenvolvimento Profissional',tipo:'recurso'},
+    {key:'suporte_colegas',nome:'Suporte Social dos Colegas',tipo:'recurso'},
+    {key:'suporte_chefia',nome:'Suporte Social da Chefia',tipo:'recurso'},
+    {key:'qualidade_lideranca',nome:'Qualidade da Liderança',tipo:'recurso'},
+    {key:'inseguranca',nome:'Insegurança no Trabalho',tipo:'demanda'},
+    {key:'satisfacao',nome:'Satisfação no Trabalho',tipo:'recurso'},
+    {key:'burnout',nome:'Esgotamento (Burnout)',tipo:'demanda'},
+  ];
+
+  function corRisco(risco){
+    if(risco==='Vermelho')return{bg:'#fef2f2',border:'#fca5a5',text:'#991b1b',label:'Alto Risco'};
+    if(risco==='Amarelo')return{bg:'#fffbeb',border:'#fde68a',text:'#92400e',label:'Risco Moderado'};
+    return{bg:'#f0fdf4',border:'#86efac',text:'#166534',label:'Adequado'};
+  }
+
+  // Número da seção — conta seções existentes
+  const numSecao=5;
+
+  // ── Página 1: Introdução e metodologia ──
+  const pg1=criarPagina();
+  pg1.innerHTML=`
+  ${phHeader(numSecao)}
+  <div class="doc-section"><span class="num-secao">${numSecao}</span>Avaliação de Riscos Psicossociais</div>
+
+  <div class="doc-subsection">${numSecao}.1 Base Legal</div>
+  <p class="doc-text">A avaliação dos riscos psicossociais no trabalho é exigência da <strong>NR-1 — Disposições Gerais e Gerenciamento de Riscos Ocupacionais</strong>, atualizada pela Portaria MTE nº 1.419/2024, que incluiu os fatores psicossociais relacionados ao trabalho como agentes de risco a serem identificados, avaliados e controlados no Programa de Gerenciamento de Riscos (PGR). A referida norma determina que o empregador deve identificar os perigos e avaliar os riscos ocupacionais, incluindo aqueles decorrentes da organização do trabalho, das relações interpessoais e das condições psicossociais do ambiente laboral.</p>
+
+  <div class="doc-subsection" style="margin-top:12pt;">${numSecao}.2 Metodologia Aplicada — COPSOQ III</div>
+  <p class="doc-text">Para a avaliação dos riscos psicossociais foi adotada a metodologia <strong>COPSOQ III — Copenhagen Psychosocial Questionnaire</strong>, terceira versão do questionário desenvolvido pelo National Research Centre for the Working Environment (NRCWE) da Dinamarca, amplamente validado internacionalmente e adaptado para a língua portuguesa.</p>
+  <p class="doc-text" style="margin-top:6pt;">O COPSOQ III é considerado uma das ferramentas mais completas e cientificamente robustas para avaliação de riscos psicossociais no trabalho. Sua versão curta, composta por <strong>23 itens</strong> organizados em <strong>12 dimensões</strong>, permite avaliar aspectos fundamentais da organização do trabalho, das relações sociais e do bem-estar dos trabalhadores, atendendo plenamente às exigências da NR-1 atualizada.</p>
+
+  <div class="doc-subsection" style="margin-top:12pt;">${numSecao}.3 Dimensões Avaliadas</div>
+  <p class="doc-text" style="margin-bottom:8pt;">O instrumento avalia as seguintes dimensões, agrupadas em <strong>demandas</strong> (fatores que podem gerar sobrecarga) e <strong>recursos</strong> (fatores protetores do trabalhador):</p>
+  <table class="doc-table">
+    <thead><tr><th style="width:40%;">Dimensão</th><th style="width:15%;text-align:center;">Tipo</th><th>Descrição resumida</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Demandas quantitativas</strong></td><td style="text-align:center;"><span style="background:#fef2f2;color:#991b1b;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Demanda</span></td><td>Volume e ritmo de trabalho exigido</td></tr>
+      <tr><td><strong>Ritmo de trabalho</strong></td><td style="text-align:center;"><span style="background:#fef2f2;color:#991b1b;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Demanda</span></td><td>Velocidade exigida para execução das tarefas</td></tr>
+      <tr><td><strong>Exigências cognitivas</strong></td><td style="text-align:center;"><span style="background:#fef2f2;color:#991b1b;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Demanda</span></td><td>Concentração e memória exigidas pelo trabalho</td></tr>
+      <tr><td><strong>Exigências emocionais</strong></td><td style="text-align:center;"><span style="background:#fef2f2;color:#991b1b;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Demanda</span></td><td>Envolvimento emocional exigido no trabalho</td></tr>
+      <tr><td><strong>Autonomia e influência</strong></td><td style="text-align:center;"><span style="background:#f0fdf4;color:#166534;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Recurso</span></td><td>Capacidade de influenciar o próprio trabalho</td></tr>
+      <tr><td><strong>Desenvolvimento profissional</strong></td><td style="text-align:center;"><span style="background:#f0fdf4;color:#166534;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Recurso</span></td><td>Oportunidades de aprendizado e crescimento</td></tr>
+      <tr><td><strong>Suporte social dos colegas</strong></td><td style="text-align:center;"><span style="background:#f0fdf4;color:#166534;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Recurso</span></td><td>Apoio recebido dos colegas de trabalho</td></tr>
+      <tr><td><strong>Suporte social da chefia</strong></td><td style="text-align:center;"><span style="background:#f0fdf4;color:#166534;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Recurso</span></td><td>Apoio recebido do superior imediato</td></tr>
+      <tr><td><strong>Qualidade da liderança</strong></td><td style="text-align:center;"><span style="background:#f0fdf4;color:#166534;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Recurso</span></td><td>Competência e planejamento da liderança</td></tr>
+      <tr><td><strong>Insegurança no trabalho</strong></td><td style="text-align:center;"><span style="background:#fef2f2;color:#991b1b;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Demanda</span></td><td>Preocupação com a estabilidade no emprego</td></tr>
+      <tr><td><strong>Satisfação no trabalho</strong></td><td style="text-align:center;"><span style="background:#f0fdf4;color:#166534;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Recurso</span></td><td>Satisfação e motivação com o trabalho</td></tr>
+      <tr><td><strong>Esgotamento (Burnout)</strong></td><td style="text-align:center;"><span style="background:#fef2f2;color:#991b1b;padding:1pt 5pt;border-radius:3pt;font-size:8pt;">Demanda</span></td><td>Nível de esgotamento físico e emocional</td></tr>
+    </tbody>
+  </table>
+
+  <div class="doc-subsection" style="margin-top:12pt;">${numSecao}.4 Escala de Classificação</div>
+  <p class="doc-text">Os resultados são expressos em escores de <strong>0 a 100</strong>. Para as dimensões de demanda, escores mais altos indicam maior exposição ao risco. Para as dimensões de recurso, escores mais altos indicam melhor condição. A classificação segue três faixas:</p>
+  <div style="display:flex;gap:8pt;margin-top:8pt;">
+    <div style="flex:1;background:#f0fdf4;border:1pt solid #86efac;border-radius:4pt;padding:8pt;text-align:center;">
+      <div style="font-size:9pt;font-weight:700;color:#166534;">VERDE — Adequado</div>
+      <div style="font-size:8pt;color:#374151;margin-top:2pt;">Condição favorável. Manter e monitorar.</div>
+    </div>
+    <div style="flex:1;background:#fffbeb;border:1pt solid #fde68a;border-radius:4pt;padding:8pt;text-align:center;">
+      <div style="font-size:9pt;font-weight:700;color:#92400e;">AMARELO — Risco Moderado</div>
+      <div style="font-size:8pt;color:#374151;margin-top:2pt;">Atenção necessária. Implementar melhorias.</div>
+    </div>
+    <div style="flex:1;background:#fef2f2;border:1pt solid #fca5a5;border-radius:4pt;padding:8pt;text-align:center;">
+      <div style="font-size:9pt;font-weight:700;color:#991b1b;">VERMELHO — Alto Risco</div>
+      <div style="font-size:8pt;color:#374151;margin-top:2pt;">Risco elevado. Intervenção imediata.</div>
+    </div>
+  </div>
+  ${pfFooter(numSecao)}`;
+  paginas.push(pg1);
+
+  // ── Páginas de resultados por função ──
+  window.campanhasPsi.forEach(campanha=>{
+    const cfs=window.campanhaFuncoesPsi.filter(cf=>cf.campanha_id===campanha.id);
+    cfs.forEach(cf=>{
+      const resultado=window.resultadosPsi.find(r=>r.campanha_funcao_id===cf.id);
+      if(!resultado||!resultado.total_respondentes)return;
+      const funcao=funcoes.find(f=>f.id===cf.funcao_id);
+      if(!funcao)return;
+
+      const pg=criarPagina();
+      const dataFim=campanha.data_fim?new Date(campanha.data_fim+'T00:00:00').toLocaleDateString('pt-BR'):'—';
+
+      const dimHtml=DIMENSOES_INFO.map(d=>{
+        const score=resultado[`score_${d.key}`];
+        const risco=resultado[`risco_${d.key}`];
+        const c=corRisco(risco);
+        const pct=score!=null?Math.round(score):0;
+        return`<tr>
+          <td style="font-size:8.5pt;">${d.nome}</td>
+          <td style="text-align:center;font-size:7.5pt;">
+            <span style="background:${d.tipo==='demanda'?'#fef2f2':'#f0fdf4'};color:${d.tipo==='demanda'?'#991b1b':'#166534'};padding:1pt 5pt;border-radius:3pt;">${d.tipo==='demanda'?'Demanda':'Recurso'}</span>
+          </td>
+          <td style="text-align:center;">
+            <div style="background:#f3f4f6;border-radius:3pt;height:10pt;position:relative;overflow:hidden;">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:${pct}%;background:${c.text};opacity:.7;"></div>
+              <span style="position:relative;font-size:7.5pt;font-weight:600;color:#1f2937;line-height:10pt;">${score!=null?Math.round(score)+'%':'—'}</span>
+            </div>
+          </td>
+          <td style="text-align:center;">
+            <span style="background:${c.bg};border:1pt solid ${c.border};color:${c.text};padding:1pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${c.label}</span>
+          </td>
+        </tr>`;
+      }).join('');
+
+      const vermelhos=DIMENSOES_INFO.filter(d=>resultado[`risco_${d.key}`]==='Vermelho');
+      const amarelos=DIMENSOES_INFO.filter(d=>resultado[`risco_${d.key}`]==='Amarelo');
+
+      pg.innerHTML=`
+      ${phHeader(numSecao)}
+      <div class="doc-section"><span class="num-secao">${numSecao}</span>Avaliação Psicossocial — Resultados por Função</div>
+
+      <div style="background:#f0f4ff;border:1pt solid #c7d7f7;border-radius:4pt;padding:10pt;margin-bottom:12pt;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12pt;">
+          <div>
+            <div style="font-size:11pt;font-weight:700;color:#0d2040;">👷 ${h(funcao.nome_funcao)}</div>
+            ${funcao.cbo?`<div style="font-size:8pt;color:#6b7280;margin-top:2pt;">CBO: ${h(funcao.cbo)}</div>`:''}
+          </div>
+          <div style="text-align:right;font-size:8pt;color:#6b7280;">
+            <div>Campanha: ${h(campanha.titulo)}</div>
+            <div>Encerrada em: ${dataFim}</div>
+            <div>Respondentes: ${resultado.total_respondentes}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-subsection">${numSecao}.${numSecao} Resultados por Dimensão</div>
+      <table class="doc-table" style="margin-top:6pt;">
+        <thead>
+          <tr>
+            <th style="width:35%;">Dimensão</th>
+            <th style="width:15%;text-align:center;">Tipo</th>
+            <th style="width:25%;text-align:center;">Score</th>
+            <th style="width:25%;text-align:center;">Classificação</th>
+          </tr>
+        </thead>
+        <tbody>${dimHtml}</tbody>
+      </table>
+
+      ${vermelhos.length||amarelos.length?`
+      <div class="doc-subsection" style="margin-top:12pt;">Síntese e Encaminhamentos</div>
+      <p class="doc-text">Com base nos resultados obtidos, identificou-se que a função <strong>${h(funcao.nome_funcao)}</strong> apresenta os seguintes fatores de risco psicossocial que requerem atenção:</p>
+      ${vermelhos.length?`
+      <p class="doc-text" style="margin-top:6pt;"><strong>Dimensões em alto risco (intervenção imediata):</strong> ${vermelhos.map(d=>d.nome).join(', ')}.</p>`:''}
+      ${amarelos.length?`
+      <p class="doc-text" style="margin-top:4pt;"><strong>Dimensões em risco moderado (implementar melhorias):</strong> ${amarelos.map(d=>d.nome).join(', ')}.</p>`:''}
+      <p class="doc-text" style="margin-top:6pt;">Recomenda-se a implementação de medidas de controle organizacionais, incluindo revisão da organização do trabalho, programas de apoio psicossocial, capacitação de lideranças e acompanhamento periódico dos trabalhadores afetados. Os riscos psicossociais identificados foram inseridos no inventário de riscos desta função para rastreabilidade e controle.</p>
+      `:`
+      <div class="doc-subsection" style="margin-top:12pt;">Síntese</div>
+      <p class="doc-text">A avaliação psicossocial da função <strong>${h(funcao.nome_funcao)}</strong> não identificou dimensões em risco elevado ou moderado. As condições psicossociais do trabalho encontram-se dentro de parâmetros adequados. Recomenda-se monitoramento periódico.</p>
+      `}
+      ${pfFooter(numSecao)}`;
+      paginas.push(pg);
+    });
+  });
+
+  return paginas;
+}
+
+
 let acoesSelecionadasIds=null;
 
 function renderPlanoAcao(){
