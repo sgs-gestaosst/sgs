@@ -313,6 +313,8 @@ function renderCampanhas(){
           ${c.status==='Ativa'?`<button class="btn btn-ghost btn-sm" onclick="encerrarCampanha(${c.id})">⏹ Encerrar</button>`:''}
           ${c.status==='Rascunho'?`<button class="btn btn-ghost btn-sm" onclick="editarCampanha(${c.id})">✏️ Editar</button>`:''}
           ${c.status==='Encerrada'?`<button class="btn btn-primary btn-sm" onclick="verTodosResultados(${c.id})">📊 Resultados</button>`:''}
+          ${['Rascunho','Ativa'].includes(c.status)?`<button class="btn btn-danger btn-sm" onclick="excluirCampanha(${c.id},'${escHtml(c.titulo)}')">🗑 Excluir</button>`:''}
+          ${c.status==='Encerrada'?`<button class="btn btn-danger btn-sm" onclick="arquivarCampanha(${c.id},'${escHtml(c.titulo)}')">📦 Arquivar</button>`:''}
         </div>
       </div>
       ${c.funcoes?.length?`<div class="funcoes-grid">${funcoesHtml}</div>`:''}
@@ -787,6 +789,33 @@ async function integrarInventario(){
     document.getElementById('btn-integrar-inventario').disabled=false;
     document.getElementById('spinner-integrar').classList.remove('show');
   }
+}
+
+async function excluirCampanha(id,titulo){
+  if(!confirm(`Excluir a campanha "${titulo}"?\n\nTodas as respostas e resultados serão removidos permanentemente.`))return;
+  try{
+    const cfs=campanhas.find(c=>c.id===id)?.funcoes||[];
+    for(const cf of cfs){
+      await fetch(`${SUPA_URL}/rest/v1/respostas_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
+      await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
+    }
+    await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
+    await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{method:'DELETE',headers:headers()});
+    await carregarCampanhas();
+    toast('Campanha excluída com sucesso.');
+  }catch(e){alert('Erro ao excluir: '+e.message);}
+}
+
+async function arquivarCampanha(id,titulo){
+  if(!confirm(`Arquivar a campanha "${titulo}"?\n\nEla não aparecerá mais no PGR mas os dados serão preservados.`))return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{
+      method:'PATCH',headers:headers(),
+      body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})
+    });
+    await carregarCampanhas();
+    toast('Campanha arquivada. Não aparecerá mais no PGR.');
+  }catch(e){alert('Erro ao arquivar: '+e.message);}
 }
 
 function copiarLink(url){
