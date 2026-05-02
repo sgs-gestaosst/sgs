@@ -227,6 +227,29 @@
     .cat-grid{grid-template-columns:repeat(2,1fr);}
     .header-title{display:none;}
   }
+  @media(max-width:500px){
+    .avaliacao-grid{grid-template-columns:1fr;}
+    .cat-grid{grid-template-columns:repeat(2,1fr);}
+    /* Abas de setor/função em scroll horizontal */
+    .ctx-tabs{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
+    .ctx-tab{white-space:nowrap;flex-shrink:0;}
+    /* EPI grid em coluna no mobile */
+    .epi-grid-mobile{display:grid!important;grid-template-columns:1fr!important;}
+    /* Cabeçalho do risco */
+    .risco-info{min-width:0;}
+    /* Avaliação grid */
+    .avaliacao-grid input,.avaliacao-grid select{font-size:14px!important;padding:10px!important;}
+    /* Hierarquia */
+    .hier-nivel{gap:6px;}
+    .hier-num{width:26px;height:26px;font-size:10px;flex-shrink:0;}
+    .hier-label{font-size:10px;}
+    .hier-check label{font-size:12px;line-height:1.4;}
+    /* Painel */
+    .painel-body{padding:12px!important;}
+    .painel-header{padding:12px!important;}
+    /* Botão identificar risco */
+    .btn-identificar{font-size:12px!important;padding:8px 12px!important;}
+  }
 </style>
 </head>
 <body>
@@ -627,7 +650,7 @@ function renderHierarquia(sr){
             <label for="check-${sr.id}-${n.key}">${n.hint}</label>
           </div>
           <div class="hier-detalhe ${show}" id="det-${sr.id}-${n.key}">
-            <div style="display:grid;grid-template-columns:1fr 90px 110px;gap:8px;align-items:end;margin-bottom:8px;">
+            <div class="epi-grid-mobile" style="display:grid;grid-template-columns:1fr 90px 110px;gap:8px;align-items:end;margin-bottom:8px;">
               <div>
                 <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">EPI</div>
                 <select id="epi-sel-${sr.id}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;">
