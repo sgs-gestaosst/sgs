@@ -47,9 +47,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
 /* ── CAPA ── */
 .capa{display:flex;flex-direction:column;height:100%;min-height:257mm;}
-.capa-logo-wrap{display:flex;align-items:center;gap:12pt;margin-bottom:40pt;}
-.capa-logo-box{width:50pt;height:50pt;background:#0d2040;display:flex;align-items:center;justify-content:center;border-radius:6pt;}
+.capa-logos-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:40pt;}
+.capa-logo-esq{display:flex;align-items:center;gap:12pt;}
+.capa-logo-dir{display:flex;align-items:center;gap:10pt;opacity:.85;}
+.capa-logo-dir-label{font-size:7pt;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin-bottom:2pt;}
+.capa-logo-dir-nome{font-size:9pt;font-weight:600;color:#374151;}
+.capa-logo-box{width:50pt;height:50pt;background:#0d2040;display:flex;align-items:center;justify-content:center;border-radius:6pt;flex-shrink:0;}
+.capa-logo-box-sm{width:38pt;height:38pt;background:#f3f4f6;border:1pt solid #e5e7eb;display:flex;align-items:center;justify-content:center;border-radius:5pt;flex-shrink:0;}
 .capa-logo-text{font-family:'IBM Plex Mono',monospace;font-size:16pt;font-weight:700;color:#fff;}
+.capa-logo-text-sm{font-family:'IBM Plex Mono',monospace;font-size:11pt;font-weight:700;color:#374151;}
 .capa-divider{height:3pt;background:linear-gradient(90deg,#1a3a6e,#2a5298,#4a7cdc);margin:20pt 0;border-radius:2pt;}
 .capa-titulo-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;}
 .capa-pre{font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#2a5298;margin-bottom:8pt;}
@@ -97,12 +103,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .ficha-value{font-size:9.5pt;color:#1a1a2e;font-weight:500;}
 .ficha-full{grid-column:1/-1;border-right:none!important;}
 
-/* ── INVENTÁRIO DE RISCOS ── */
-.funcao-bloco{border:1pt solid #e5e7eb;border-radius:4pt;margin:10pt 0;overflow:hidden;page-break-inside:avoid;}
-.funcao-bloco-header{background:#f0f4ff;padding:7pt 10pt;border-bottom:1pt solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;gap:8pt;}
-.funcao-bloco-nome{font-size:10pt;font-weight:700;color:#0d2040;}
-.funcao-bloco-cbo{font-size:8pt;color:#6b7280;font-family:'IBM Plex Mono',monospace;}
-.funcao-bloco-setores{font-size:8pt;color:#4a7cdc;background:#e8f0fe;padding:2pt 8pt;border-radius:10pt;border:1pt solid #c7d7f9;}
+/* ── INVENTÁRIO DE RISCOS — OPÇÃO C ── */
+.funcao-bloco{
+  border:1.5pt solid #c7d7f9;
+  border-radius:6pt;
+  margin:14pt 0;
+  overflow:hidden;
+  page-break-inside:avoid;
+  box-shadow:0 1pt 4pt rgba(42,82,152,.08);
+}
+.funcao-bloco-header{
+  background:linear-gradient(90deg,#0d2040 0%,#1a3a6e 100%);
+  padding:9pt 12pt;
+  border-bottom:2pt solid #2a5298;
+  display:flex;align-items:center;justify-content:space-between;gap:8pt;
+}
+.funcao-bloco-nome{font-size:11pt;font-weight:700;color:#ffffff;}
+.funcao-bloco-cbo{font-size:8pt;color:#93c5fd;font-family:'IBM Plex Mono',monospace;}
+.funcao-bloco-setores{font-size:8pt;color:#bfdbfe;background:rgba(255,255,255,.12);padding:2pt 8pt;border-radius:10pt;border:1pt solid rgba(255,255,255,.2);}
 
 /* Risco dentro da função */
 .risco-funcao{border-bottom:1pt solid #f3f4f6;padding:8pt 10pt;}
@@ -154,7 +172,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .screen-body{padding:0!important;}
   .pages-wrap{gap:0!important;display:block!important;}
 
-  /* Na impressão, .page deixa de ser uma folha rígida e vira um bloco contínuo */
+  /* Contador de páginas automático */
+  @page{
+    size:A4;
+    margin:12mm 8mm 12mm 0mm;
+    counter-increment:pagina;
+  }
+  body{counter-reset:pagina 0;}
+
+  /* Na impressão, .page vira bloco contínuo */
   .page{
     box-shadow:none!important;
     margin:0!important;
@@ -162,29 +188,36 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     min-height:auto!important;
     max-height:none!important;
     overflow:visible!important;
-    padding:6mm 8mm 6mm 14mm!important;
+    padding:6mm 8mm 6mm 18mm!important;
     page-break-after:auto;
     break-after:auto;
+    counter-increment:pagina;
   }
 
-  /* Só a CAPA força quebra depois */
-  .page:first-child{
-    page-break-after:always!important;
-    break-after:page!important;
-    min-height:277mm!important;
-    padding:16mm 8mm 16mm 14mm!important;
-  }
-
-  /* Listra azul fixa em todas as páginas */
+  /* Listra azul colada na borda esquerda via @page margin */
   .page::before{
     content:''!important;
     display:block!important;
     position:fixed!important;
     left:0!important;top:0!important;bottom:0!important;
-    width:6mm!important;
+    width:8mm!important;
     background:linear-gradient(180deg,#1a3a6e 0%,#0d2040 100%)!important;
     -webkit-print-color-adjust:exact!important;
     print-color-adjust:exact!important;
+  }
+
+  /* Numeração automática via CSS counter */
+  .pf-page::after{
+    content:'Pág. ' counter(pagina);
+  }
+  .pf-page-num{display:none;}
+
+  /* Capa */
+  .page:first-child{
+    page-break-after:always!important;
+    break-after:page!important;
+    min-height:277mm!important;
+    padding:16mm 8mm 16mm 18mm!important;
   }
 
   /* Seções principais quebram para nova página */
@@ -194,7 +227,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     padding-top:0!important;
     margin-top:0!important;
   }
-  /* Exceto a primeira seção de cada página (que já começou numa nova página) */
   .page:first-child .doc-section,
   .page .doc-section:first-of-type,
   .doc-section.primeira-secao{
@@ -202,7 +234,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     break-before:avoid;
   }
 
-  /* Evita corte no meio de elementos */
+  /* Evita corte */
   .funcao-bloco{page-break-inside:avoid;break-inside:avoid;margin-bottom:8pt;}
   .risco-funcao{page-break-inside:avoid;break-inside:avoid;}
   .danos-box{page-break-inside:avoid;break-inside:avoid;}
@@ -223,10 +255,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     break-inside:avoid;
   }
 
-  /* Sumário — mantém junto */
+  /* Sumário */
   .page:nth-child(2){page-break-after:always!important;break-after:page!important;}
-
-  @page{size:A4;margin:12mm 8mm 12mm 14mm;}
 }
 @media(max-width:230mm){
   .page{width:100%;padding:15mm 12mm 15mm 18mm;}
@@ -479,13 +509,34 @@ function renderCapa(){
   const gr=empresa.grau_risco;
   const cnpj=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'Não informado';
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
+  const nomeEmpresa=empresa.nome_fantasia||empresa.razao_social||'—';
+  const siglaEmpresa=nomeEmpresa.replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'EMP';
   pg.innerHTML=`
   <div class="capa">
-    <div class="capa-logo-wrap">
-      <div id="doc-elab-logo" class="capa-logo-box"><span class="capa-logo-text">SST</span></div>
-      <div>
-        <div id="doc-elab-nome" style="font-size:10pt;font-weight:700;color:#0d2040;">Empresa Elaboradora</div>
-        <div style="font-size:9pt;color:#6b7280;">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
+    <div class="capa-logos-wrap">
+      <!-- ESQUERDA: Logo da empresa cliente -->
+      <div class="capa-logo-esq">
+        <div id="doc-empresa-logo" class="capa-logo-box" style="background:#1a3a6e;">
+          <span class="capa-logo-text">${siglaEmpresa}</span>
+        </div>
+        <div>
+          <div style="font-size:10pt;font-weight:700;color:#0d2040;">${h(nomeEmpresa)}</div>
+          <div style="font-size:8pt;color:#6b7280;">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
+        </div>
+      </div>
+      <!-- DIREITA: Logo da empresa elaboradora (opcional) -->
+      <div class="capa-logo-dir" id="capa-elab-wrap" style="display:none;">
+        <div style="text-align:right;">
+          <div class="capa-logo-dir-label">Elaborado por</div>
+          <div class="capa-logo-dir-nome" id="doc-elab-nome-dir">—</div>
+        </div>
+        <div id="doc-elab-logo" class="capa-logo-box-sm">
+          <span class="capa-logo-text-sm">SST</span>
+        </div>
+      </div>
+      <!-- Fallback quando não há elaboradora -->
+      <div id="capa-elab-fallback">
+        <div id="doc-elab-logo" class="capa-logo-box"><span class="capa-logo-text">SST</span></div>
       </div>
     </div>
     <div class="capa-divider"></div>
@@ -1214,7 +1265,7 @@ function renderPlanoAcao(){
 // ── HELPERS ───────────────────────────────────────────────────
 function criarPagina(){const pg=document.createElement('div');pg.className='page';return pg;}
 function phHeader(n){return`<div class="page-header"><span class="ph-empresa">${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="ph-doc">PGR — ${fmtAno()}</span></div>`;}
-function pfFooter(n){return`<div class="page-footer"><span class="pf-label">Programa de Gerenciamento de Riscos — ${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="pf-page">Pág. ${n}</span></div>`;}
+function pfFooter(n){return`<div class="page-footer"><span class="pf-label">Programa de Gerenciamento de Riscos — ${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="pf-page"><span class="pf-page-num">Pág. ${n}</span></span></div>`;}
 
 // ── ELABORADORA ───────────────────────────────────────────────
 let elaboradora={nome:'',cnpj:'',responsavel:'',logoUrl:''};
@@ -1225,7 +1276,7 @@ function carregarLogo(input){
   reader.onload=e=>{elaboradora.logoUrl=e.target.result;
     document.getElementById('logo-preview').innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;">`;
     document.getElementById('btn-remover-logo').style.display='block';
-    atualizarLogoDocumento();};
+    atualizarElaboradora();};
   reader.readAsDataURL(file);
 }
 function removerLogo(){
@@ -1233,28 +1284,40 @@ function removerLogo(){
   document.getElementById('logo-preview').innerHTML='📷<br>Logo';
   document.getElementById('btn-remover-logo').style.display='none';
   document.getElementById('elab-logo-input').value='';
-  atualizarLogoDocumento();
-}
-function atualizarLogoDocumento(){
-  const logoEl=document.getElementById('doc-elab-logo');if(!logoEl)return;
-  if(elaboradora.logoUrl){
-    logoEl.innerHTML=`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`;
-    logoEl.style.cssText='background:#fff;padding:4pt;';
-  }else{
-    const sigla=(elaboradora.nome||'SST').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'SST';
-    logoEl.innerHTML=`<span class="capa-logo-text">${sigla}</span>`;
-    logoEl.style.cssText='background:#0d2040;padding:0;';
-  }
+  atualizarElaboradora();
 }
 function atualizarElaboradora(){
   elaboradora.nome=document.getElementById('elab-nome').value.trim();
   elaboradora.cnpj=document.getElementById('elab-cnpj').value.trim();
   elaboradora.responsavel=document.getElementById('elab-responsavel').value.trim();
-  const nomeEl=document.getElementById('doc-elab-nome');
+
+  const temElaboradora=!!(elaboradora.nome||elaboradora.logoUrl);
+  const elabWrap=document.getElementById('capa-elab-wrap');
+  const elabFallback=document.getElementById('capa-elab-fallback');
+
+  if(elabWrap)elabWrap.style.display=temElaboradora?'flex':'none';
+  if(elabFallback)elabFallback.style.display=temElaboradora?'none':'block';
+
+  // Atualiza nome da elaboradora no lado direito da capa
+  const nomeDir=document.getElementById('doc-elab-nome-dir');
+  if(nomeDir)nomeDir.textContent=elaboradora.nome||'Empresa Elaboradora';
+
+  // Atualiza logo da elaboradora
+  const logoEl=document.getElementById('doc-elab-logo');
+  if(logoEl){
+    if(elaboradora.logoUrl){
+      logoEl.innerHTML=`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`;
+      logoEl.style.cssText='background:#fff;padding:4pt;';
+    }else{
+      const sigla=(elaboradora.nome||'SST').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'SST';
+      logoEl.innerHTML=`<span class="capa-logo-text-sm">${sigla}</span>`;
+      logoEl.style.cssText='';
+    }
+  }
+
+  // Atualiza rodapé de elaboração
   const footerEl=document.getElementById('doc-elab-footer');
-  if(nomeEl)nomeEl.textContent=elaboradora.nome||'Empresa Elaboradora';
   if(footerEl)footerEl.textContent=elaboradora.responsavel||elaboradora.nome||'—';
-  atualizarLogoDocumento();
 }
 
 // ── PLANO DE AÇÃO MODAL ───────────────────────────────────────
