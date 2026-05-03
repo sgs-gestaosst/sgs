@@ -167,84 +167,56 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 /* ── PRINT ── */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  body{background:#fff!important;}
+  body{background:#fff!important;margin:0!important;padding:0!important;}
   .screen-header{display:none!important;}
   .screen-body{padding:0!important;}
   .pages-wrap{gap:0!important;display:block!important;}
 
-  /* Contador de páginas automático */
+  @page{size:A4;margin:0;}
+
   body{counter-reset:pagina 0;}
-  .page{counter-increment:pagina;}
 
-  /* Esconde número hardcoded e mostra só o counter */
-  .pf-page-num{display:none!important;}
-  .pf-page::after{content:'Pág. ' counter(pagina);}
-
-  /* Listra azul — usando bordas do @page não funciona em todos os browsers.
-     Solução: padding-left maior e borda esquerda colorida no .page */
   .page{
     box-shadow:none!important;
     margin:0!important;
-    width:100%!important;
-    min-height:auto!important;
-    max-height:none!important;
-    overflow:visible!important;
-    padding:6mm 8mm 6mm 18mm!important;
+    width:210mm!important;
+    height:297mm!important;
+    min-height:297mm!important;
+    max-height:297mm!important;
+    overflow:hidden!important;
+    padding:12mm 14mm 14mm 20mm!important;
     border-left:8mm solid #0d2040!important;
-    page-break-after:auto;
-    break-after:auto;
-  }
-
-  /* Remove o ::before na impressão (substituído pela border-left) */
-  .page::before{display:none!important;}
-
-  @page{size:A4;margin:12mm 8mm 12mm 0mm;}
-
-  /* Capa */
-  .page:first-child{
     page-break-after:always!important;
     break-after:page!important;
-    min-height:277mm!important;
-    padding:16mm 8mm 16mm 18mm!important;
+    position:relative!important;
+    counter-increment:pagina!important;
+  }
+  .page::before{display:none!important;}
+  .page:last-child{page-break-after:auto!important;break-after:auto!important;}
+
+  /* Rodapé absoluto dentro da página */
+  .page-footer{
+    position:absolute!important;
+    bottom:8mm!important;
+    left:20mm!important;
+    right:14mm!important;
+    margin-top:0!important;
+    border-top:1pt solid #e5e7eb!important;
+    padding-top:4pt!important;
+    display:flex!important;
+    justify-content:space-between!important;
   }
 
-  /* Seções principais quebram para nova página */
-  .doc-section{
-    page-break-before:always;
-    break-before:page;
-    padding-top:0!important;
-    margin-top:0!important;
-  }
-  .page:first-child .doc-section,
-  .page .doc-section:first-of-type,
-  .doc-section.primeira-secao{
-    page-break-before:avoid;
-    break-before:avoid;
-  }
+  /* Numeração automática */
+  .pf-page::after{content:'Pág. ' counter(pagina);}
 
   /* Evita corte */
-  .funcao-bloco{page-break-inside:avoid;break-inside:avoid;margin-bottom:8pt;}
+  .funcao-bloco{page-break-inside:avoid;break-inside:avoid;}
   .risco-funcao{page-break-inside:avoid;break-inside:avoid;}
   .danos-box{page-break-inside:avoid;break-inside:avoid;}
-  .medidas-box{page-break-inside:avoid;break-inside:avoid;}
   .ficha-grid{page-break-inside:avoid;break-inside:avoid;}
-  .ficha-item{page-break-inside:avoid;break-inside:avoid;}
-  .doc-table{page-break-inside:auto;width:100%;}
   .doc-table tr{page-break-inside:avoid;break-inside:avoid;}
   .doc-table thead{display:table-header-group;}
-  .doc-subsection{page-break-after:avoid;break-after:avoid;}
-
-  /* Rodapé no fluxo normal */
-  .page-footer{
-    position:relative!important;
-    bottom:auto!important;left:auto!important;right:auto!important;
-    margin-top:16pt;
-    page-break-inside:avoid;
-    break-inside:avoid;
-  }
-
-  /* Sumário */
-  .page:nth-child(2){page-break-after:always!important;break-after:page!important;}
 }
 @media(max-width:230mm){
   .page{width:100%;padding:15mm 12mm 15mm 18mm;}
@@ -558,7 +530,7 @@ function renderCapa(){
 function renderSumario(){
   const pg=criarPagina();
   pg.innerHTML=`
-  ${phHeader(2)}
+  ${phHeader()}
   <div class="doc-section">Sumário</div>
   <table class="doc-table" style="margin-top:16pt;">
     <tbody>
@@ -581,7 +553,7 @@ function renderSumario(){
       </tr>`).join('')}
     </tbody>
   </table>
-  ${pfFooter(2)}`;
+  ${pfFooter()}`;
   return pg;
 }
 
@@ -592,7 +564,7 @@ function renderIdentificacao(){
   const gr=empresa.grau_risco;
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
   pg.innerHTML=`
-  ${phHeader(3)}
+  ${phHeader()}
   <div class="doc-section"><span class="num-secao">1</span>Identificação da Empresa</div>
   <div class="ficha-grid">
     <div class="ficha-item ficha-full"><div class="ficha-label">Razão Social</div><div class="ficha-value" style="font-size:11pt;">${h(empresa.razao_social||'—')}</div></div>
@@ -619,7 +591,7 @@ function renderIdentificacao(){
       <td>${c.grau_risco?grInfo[c.grau_risco]?.label:'—'}</td>
     </tr>`).join('')}</tbody>
   </table>`:''}
-  ${pfFooter(3)}`;
+  ${pfFooter()}`;
   return pg;
 }
 
@@ -673,7 +645,7 @@ function renderCaracterizacao(){
   }).join('');
 
   pg.innerHTML=`
-  ${phHeader(4)}
+  ${phHeader()}
   <div class="doc-section"><span class="num-secao">2</span>Caracterização do Estabelecimento</div>
   <div class="ficha-grid ficha-grid-3">
     <div class="ficha-item"><div class="ficha-label">Trabalhadores cobertos</div><div class="ficha-value" style="font-size:16pt;color:#0d2040;font-weight:700;">${empresa.total_funcionarios_previsto||0}</div></div>
@@ -710,7 +682,7 @@ function renderCaracterizacao(){
     </div>`;
   }).join(''):`<div class="em-breve"><div class="em-breve-icon">👷</div><div class="em-breve-label">Nenhuma função cadastrada.</div></div>`}
 
-  ${pfFooter(4)}`;
+  ${pfFooter()}`;
   return pg;
 }
 
@@ -740,7 +712,7 @@ function renderSESMT(){
     {cargo:'Auxiliar de Enfermagem do Trabalho',cbo:'3222-05',qtd:aux,regime:'Parcial'},
   ];
   pg.innerHTML=`
-  ${phHeader(5)}
+  ${phHeader()}
   <div class="doc-section"><span class="num-secao">3</span>Dimensionamento do SESMT — NR-4</div>
   <p class="doc-text" style="margin-bottom:12pt;">O dimensionamento do SESMT foi realizado conforme o Quadro I da NR-4, considerando o Grau de Risco da atividade principal e o número de empregados do estabelecimento.</p>
   <div class="ficha-grid ficha-grid-3" style="margin-bottom:14pt;">
@@ -769,14 +741,13 @@ function renderSESMT(){
     <div class="ficha-item"><div class="ficha-label">Requer CIPATR (NR-31)</div><div class="ficha-value" style="${requerCipatr?'color:#166534;font-weight:600;':'color:#6b7280;'}">${requerCipatr?'Sim':'Não'}</div></div>
     <div class="ficha-item"><div class="ficha-label">Nº de membros CIPATR</div><div class="ficha-value">${requerCipatr?(membrosCipatr||'—'):'—'}</div></div>
   </div>
-  ${pfFooter(5)}`;
+  ${pfFooter()}`;
   return pg;
 }
 
 // ── INVENTÁRIO DE RISCOS POR FUNÇÃO ───────────────────────────
 function renderInventarioRiscos(){
   const paginas=[];
-  const pg=criarPagina();
 
   // Mapa setor por função
   const setoresPorFuncao={};
@@ -786,39 +757,26 @@ function renderInventarioRiscos(){
     if(s)setoresPorFuncao[fs.funcao_id].push(s.nome_setor);
   });
 
-  // Funções com riscos
-  const funcoesComRiscos=funcoes.filter(f=>{
-    const frs=funcao_riscos.filter(fr=>fr.funcao_id===f.id);
-    return frs.length>0;
-  });
+  const funcoesComRiscos=funcoes.filter(f=>funcao_riscos.filter(fr=>fr.funcao_id===f.id).length>0);
 
   if(!funcoesComRiscos.length){
+    const pg=criarPagina();
     pg.innerHTML=`
-    ${phHeader(6)}
+    ${phHeader()}
     <div class="doc-section"><span class="num-secao">4</span>Inventário de Riscos Ocupacionais</div>
     <div class="em-breve">
       <div class="em-breve-icon">⚠️</div>
       <div class="em-breve-label">Nenhum risco identificado ainda.<br>Acesse o módulo de Riscos para vincular perigos e riscos às funções.</div>
     </div>
-    ${pfFooter(6)}`;
+    ${pfFooter()}`;
     paginas.push(pg);
     return paginas;
   }
 
-  let paginaAtual=pg;
-  let conteudoPagina='';
-  let numPagina=6;
-
-  conteudoPagina+=`
-  ${phHeader(numPagina)}
-  <div class="doc-section"><span class="num-secao">4</span>Inventário de Riscos Ocupacionais por Função</div>
-  <p class="doc-text" style="margin-bottom:12pt;">O inventário a seguir apresenta os perigos identificados e os riscos associados, organizados por função, conforme levantamento realizado nos setores de trabalho. Para cada risco são indicados o nível de risco (Probabilidade × Severidade), os danos à saúde potenciais e as medidas de controle previstas na hierarquia da NR-1.</p>`;
-
-  funcoesComRiscos.forEach((funcao,fi)=>{
+  // Gera HTML de cada bloco de função
+  function gerarBlocoFuncao(funcao){
     const frs=funcao_riscos.filter(fr=>fr.funcao_id===funcao.id);
     const setoresNomes=setoresPorFuncao[funcao.id]||[];
-
-    // Coleta agentes únicos presentes nos setores desta função
     const setoresDaFuncao=funcaoSetores.filter(fs=>fs.funcao_id===funcao.id).map(fs=>setores.find(s=>s.id===fs.setor_id)).filter(Boolean);
     const agentesMap=[
       {key:'tem_agente_fisico',label:'Físico',cls:'agente-fisico'},
@@ -828,11 +786,9 @@ function renderInventarioRiscos(){
       {key:'tem_agente_acidente',label:'Acidente',cls:'agente-acidente'},
       {key:'tem_agente_psicossocial',label:'Psicossocial',cls:'agente-psicossocial'},
     ];
-    const badgesAgentes=agentesMap
-      .filter(a=>setoresDaFuncao.some(s=>s[a.key]))
-      .map(a=>`<span class="agente-badge ${a.cls}">${a.label}</span>`).join('');
+    const badgesAgentes=agentesMap.filter(a=>setoresDaFuncao.some(s=>s[a.key])).map(a=>`<span class="agente-badge ${a.cls}">${a.label}</span>`).join('');
 
-    let blocoHtml=`<div class="funcao-bloco">
+    let html=`<div class="funcao-bloco">
       <div class="funcao-bloco-header">
         <div>
           <div class="funcao-bloco-nome">👷 ${h(funcao.nome_funcao)}</div>
@@ -845,39 +801,26 @@ function renderInventarioRiscos(){
         </div>
       </div>`;
 
+    const PROB_LABEL={1:'Muito baixa',2:'Baixa',3:'Média',4:'Alta',5:'Muito alta'};
+    const SEV_LABEL={1:'Insignificante',2:'Leve',3:'Moderada',4:'Grave',5:'Catastrófica'};
+
     frs.forEach(fr=>{
-      const risco=getRisco(fr.risco_id);
-      if(!risco)return;
+      const risco=getRisco(fr.risco_id);if(!risco)return;
       const catCor=getCatCor(risco.categoria_risco_id);
       const catNome=getCatNome(risco.categoria_risco_id);
       const perigo=fr.perigo_id?getPerigo(fr.perigo_id):null;
-      const nivel=fr.nivel_risco;
-
-      // Busca medidas — inclui setor_risco_medidas via origem
       const mds=medidas_funcao.filter(m=>m.funcao_risco_id===fr.id);
-      // Busca EPIs — tanto de funcao_risco_medidas quanto propagados do setor
       const episFr=mds.filter(m=>m.nivel==='EPI'&&m.epi_id);
-
-      // Labels descritivos sem o número
-      const PROB_LABEL={1:'Muito baixa',2:'Baixa',3:'Média',4:'Alta',5:'Muito alta'};
-      const SEV_LABEL={1:'Insignificante',2:'Leve',3:'Moderada',4:'Grave',5:'Catastrófica'};
-
-      // Medidas preenchidas
       const medidasItens=MEDIDAS_CONFIG.map(mc=>{
         if(mc.key==='epi'){
-          if(!episFr.length&&!fr.medida_epi)return'';
           if(!episFr.length)return'';
           return`<div class="medida-item">
             <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">5</div>
             <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
-            <div class="medida-desc">${episFr.map(e=>{
-              const epiDados=epis.find(x=>x.id===e.epi_id);
-              return`${h(epiDados?.nome||'EPI')}${e.ca?' (CA:'+h(e.ca)+')':''}${e.validade_ca?' Val:'+fmtData(e.validade_ca):''}`;
-            }).join(' · ')}</div>
+            <div class="medida-desc">${episFr.map(e=>{const epiDados=epis.find(x=>x.id===e.epi_id);return`${h(epiDados?.nome||'EPI')}${e.ca?' (CA:'+h(e.ca)+')':''}${e.validade_ca?' Val:'+fmtData(e.validade_ca):''}`;}).join(' · ')}</div>
           </div>`;
         }
-        const marcada=fr[`medida_${mc.key}`];
-        const desc=fr[`medida_${mc.key}_desc`];
+        const marcada=fr[`medida_${mc.key}`];const desc=fr[`medida_${mc.key}_desc`];
         if(!marcada&&!desc)return'';
         return`<div class="medida-item">
           <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">${{elim:1,subs:2,eng:3,adm:4}[mc.key]}</div>
@@ -886,48 +829,76 @@ function renderInventarioRiscos(){
         </div>`;
       }).filter(Boolean).join('');
 
-      blocoHtml+=`<div class="risco-funcao">
+      html+=`<div class="risco-funcao">
         <div class="risco-funcao-header">
           <span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
           ${perigo?`<span class="risco-perigo-pill">⚠ Perigo: ${h(perigo.nome)}</span>`:''}
           <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
-          ${nivel?`<span class="nivel-pill nivel-${nivel}">${nivelLabel(nivel)}</span>`:''}
+          ${fr.nivel_risco?`<span class="nivel-pill nivel-${fr.nivel_risco}">${nivelLabel(fr.nivel_risco)}</span>`:''}
         </div>
         <div class="risco-funcao-grid" style="grid-template-columns:1fr 1fr 1fr;">
           <div class="rf-field"><div class="lbl">Probabilidade</div><div class="val">${fr.probabilidade?h(PROB_LABEL[fr.probabilidade]||'—'):'—'}</div></div>
           <div class="rf-field"><div class="lbl">Severidade</div><div class="val">${fr.severidade?h(SEV_LABEL[fr.severidade]||'—'):'—'}</div></div>
           <div class="rf-field"><div class="lbl">Nº de expostos</div><div class="val">${fr.num_expostos||'—'}</div></div>
         </div>
-        ${risco.danos_saude?`<div class="danos-box">
-          <div class="danos-label">🩺 Danos à saúde potenciais</div>
-          <div class="danos-text">${h(risco.danos_saude)}</div>
-        </div>`:''}
-        ${medidasItens?`<div class="medidas-box">
-          <div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>
-          ${medidasItens}
-        </div>`:''}
+        ${risco.danos_saude?`<div class="danos-box"><div class="danos-label">🩺 Danos à saúde potenciais</div><div class="danos-text">${h(risco.danos_saude)}</div></div>`:''}
+        ${medidasItens?`<div class="medidas-box"><div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>${medidasItens}</div>`:''}
       </div>`;
     });
 
-    blocoHtml+='</div>';
+    html+='</div>';
+    return html;
+  }
 
-    // Verifica se precisa nova página (heurística: a cada 2 funções com muitos riscos)
-    if(fi>0&&fi%2===0){
-      conteudoPagina+=blocoHtml;
-      conteudoPagina+=pfFooter(numPagina);
-      paginaAtual.innerHTML=conteudoPagina;
+  // Paginação por altura real — usa elemento temporário fora da tela
+  const ALTURA_UTIL_MM=247; // 297mm - 12mm top - 12mm bottom - 16mm header - 10mm footer
+  const MM_TO_PX=96/25.4;
+  const ALTURA_UTIL_PX=ALTURA_UTIL_MM*MM_TO_PX;
+
+  const container=document.createElement('div');
+  container.style.cssText=`position:absolute;left:-9999px;top:0;width:170mm;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;`;
+  document.body.appendChild(container);
+
+  let paginaAtual=criarPagina();
+  let alturaUsada=0;
+  let primeiraPagina=true;
+
+  // Intro da seção
+  const introHtml=`<div class="doc-section" style="margin-top:0;"><span class="num-secao">4</span>Inventário de Riscos Ocupacionais por Função</div>
+  <p class="doc-text" style="margin-bottom:12pt;">O inventário a seguir apresenta os perigos identificados e os riscos associados, organizados por função, conforme levantamento realizado nos setores de trabalho. Para cada risco são indicados o nível de risco (Probabilidade × Severidade), os danos à saúde potenciais e as medidas de controle previstas na hierarquia da NR-1.</p>`;
+
+  // Mede altura do intro
+  container.innerHTML=introHtml;
+  const alturaIntro=container.getBoundingClientRect().height;
+
+  let htmlPaginaAtual=phHeader()+introHtml;
+  alturaUsada=alturaIntro+60; // 60px para header+footer estimado
+  primeiraPagina=true;
+
+  funcoesComRiscos.forEach(funcao=>{
+    const blocoHtml=gerarBlocoFuncao(funcao);
+    container.innerHTML=blocoHtml;
+    const alturaBloco=container.getBoundingClientRect().height;
+
+    // Se não cabe na página atual, fecha e abre nova
+    if(alturaUsada+alturaBloco>ALTURA_UTIL_PX&&!primeiraPagina){
+      paginaAtual.innerHTML=htmlPaginaAtual+pfFooter();
       paginas.push(paginaAtual);
       paginaAtual=criarPagina();
-      numPagina++;
-      conteudoPagina=phHeader(numPagina);
-    }else{
-      conteudoPagina+=blocoHtml;
+      htmlPaginaAtual=phHeader();
+      alturaUsada=60;
     }
+
+    htmlPaginaAtual+=blocoHtml;
+    alturaUsada+=alturaBloco;
+    primeiraPagina=false;
   });
 
-  conteudoPagina+=pfFooter(numPagina);
-  paginaAtual.innerHTML=conteudoPagina;
+  // Última página
+  paginaAtual.innerHTML=htmlPaginaAtual+pfFooter();
   paginas.push(paginaAtual);
+
+  document.body.removeChild(container);
   return paginas;
 }
 
@@ -951,13 +922,13 @@ function renderMatrizEPI(){
 
   if(!funcoesComEpi.length){
     pg.innerHTML=`
-    ${phHeader('—')}
+    ${phHeader()}
     <div class="doc-section"><span class="num-secao">5</span>Matriz de EPI por Função</div>
     <div class="em-breve">
       <div class="em-breve-icon">🛡️</div>
       <div class="em-breve-label">Nenhum EPI vinculado às funções ainda.<br>Adicione EPIs nos riscos do módulo de Gestão de Riscos para gerar esta matriz.</div>
     </div>
-    ${pfFooter('—')}`;
+    ${pfFooter()}`;
     return pg;
   }
 
@@ -979,7 +950,7 @@ function renderMatrizEPI(){
   }).join('');
 
   pg.innerHTML=`
-  ${phHeader('—')}
+  ${phHeader()}
   <div class="doc-section"><span class="num-secao">5</span>Matriz de EPI por Função</div>
   <p class="doc-text" style="margin-bottom:12pt;">A matriz a seguir consolida os Equipamentos de Proteção Individual (EPIs) indicados para cada função, com base nos riscos ocupacionais identificados no inventário deste PGR e nas medidas de controle estabelecidas conforme a hierarquia da NR-1. Os EPIs relacionados foram selecionados considerando a natureza dos agentes de risco, a intensidade da exposição e a viabilidade técnica das medidas de proteção coletiva disponíveis, em conformidade com os requisitos da NR-6. O empregador é responsável pelo fornecimento gratuito, orientação de uso, manutenção e substituição dos EPIs sempre que necessário, bem como por exigir e fiscalizar seu uso correto pelos trabalhadores.</p>
   <table class="epi-matrix-table">
@@ -993,7 +964,7 @@ function renderMatrizEPI(){
     <tbody>${linhas}</tbody>
   </table>
   <p class="doc-text" style="margin-top:12pt;font-size:8.5pt;">* O Certificado de Aprovação (CA) é emitido pelo Ministério do Trabalho e Emprego (MTE) e atesta que o EPI passou pelos ensaios de resistência e eficácia exigidos. EPIs com CA vencido ou sem CA não devem ser fornecidos aos trabalhadores e devem ser imediatamente substituídos. O empregador deve capacitar o trabalhador quanto ao uso adequado, guarda e conservação de cada EPI, conforme NR-6.</p>
-  ${pfFooter('—')}`;
+  ${pfFooter()}`;
   return pg;
 }
 
@@ -1214,7 +1185,7 @@ function renderPlanoAcao(){
   });
 
   pg.innerHTML=`
-  ${phHeader('—')}
+  ${phHeader()}
   <div class="doc-section"><span class="num-secao">6</span>Plano de Ação</div>
   <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a implementar, com responsáveis, prazos e status, seguindo a hierarquia da NR-1.</p>
   ${!acoesAgrupadas.length?`<div class="em-breve"><div class="em-breve-icon">📋</div><div class="em-breve-label">Nenhuma ação selecionada.<br>Clique em "Revisar plano de ação" para selecionar.</div></div>`:`
@@ -1246,14 +1217,14 @@ function renderPlanoAcao(){
       </div>
     </div>`).join('')}
   </div>
-  ${pfFooter('—')}`;
+  ${pfFooter()}`;
   return pg;
 }
 
 // ── HELPERS ───────────────────────────────────────────────────
 function criarPagina(){const pg=document.createElement('div');pg.className='page';return pg;}
-function phHeader(n){return`<div class="page-header"><span class="ph-empresa">${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="ph-doc">PGR — ${fmtAno()}</span></div>`;}
-function pfFooter(n){return`<div class="page-footer"><span class="pf-label">Programa de Gerenciamento de Riscos — ${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="pf-page"><span class="pf-page-num">Pág. ${n}</span></span></div>`;}
+function phHeader(){return`<div class="page-header"><span class="ph-empresa">${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="ph-doc">PGR — ${fmtAno()}</span></div>`;}
+function pfFooter(){return`<div class="page-footer"><span class="pf-label">Programa de Gerenciamento de Riscos — ${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="pf-page"></span></div>`;}
 
 // ── ELABORADORA ───────────────────────────────────────────────
 let elaboradora={nome:'',cnpj:'',responsavel:'',logoUrl:''};
