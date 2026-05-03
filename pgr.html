@@ -173,14 +173,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .pages-wrap{gap:0!important;display:block!important;}
 
   /* Contador de páginas automático */
-  @page{
-    size:A4;
-    margin:12mm 8mm 12mm 0mm;
-    counter-increment:pagina;
-  }
   body{counter-reset:pagina 0;}
+  .page{counter-increment:pagina;}
 
-  /* Na impressão, .page vira bloco contínuo */
+  /* Esconde número hardcoded e mostra só o counter */
+  .pf-page-num{display:none!important;}
+  .pf-page::after{content:'Pág. ' counter(pagina);}
+
+  /* Listra azul — usando bordas do @page não funciona em todos os browsers.
+     Solução: padding-left maior e borda esquerda colorida no .page */
   .page{
     box-shadow:none!important;
     margin:0!important;
@@ -189,28 +190,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     max-height:none!important;
     overflow:visible!important;
     padding:6mm 8mm 6mm 18mm!important;
+    border-left:8mm solid #0d2040!important;
     page-break-after:auto;
     break-after:auto;
-    counter-increment:pagina;
   }
 
-  /* Listra azul colada na borda esquerda via @page margin */
-  .page::before{
-    content:''!important;
-    display:block!important;
-    position:fixed!important;
-    left:0!important;top:0!important;bottom:0!important;
-    width:8mm!important;
-    background:linear-gradient(180deg,#1a3a6e 0%,#0d2040 100%)!important;
-    -webkit-print-color-adjust:exact!important;
-    print-color-adjust:exact!important;
-  }
+  /* Remove o ::before na impressão (substituído pela border-left) */
+  .page::before{display:none!important;}
 
-  /* Numeração automática via CSS counter */
-  .pf-page::after{
-    content:'Pág. ' counter(pagina);
-  }
-  .pf-page-num{display:none;}
+  @page{size:A4;margin:12mm 8mm 12mm 0mm;}
 
   /* Capa */
   .page:first-child{
