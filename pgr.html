@@ -84,6 +84,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .pf-page{font-family:'IBM Plex Mono',monospace;font-size:8pt;color:#6b7280;}
 /* Garante espaço para o rodapé absoluto na tela */
 .page{padding-bottom:28mm;}
+.page-footer{position:absolute;bottom:12mm;left:25mm;right:14mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #e5e7eb;padding-top:6pt;}
 
 /* ── TABELAS ── */
 .doc-table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:8.5pt;}
@@ -167,24 +168,23 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 /* ── PRINT ── */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  body{background:#fff!important;margin:0!important;padding:0!important;}
+  body{background:#fff!important;margin:0!important;padding:0!important;counter-reset:pagina 0;}
   .screen-header{display:none!important;}
   .screen-body{padding:0!important;}
   .pages-wrap{gap:0!important;display:block!important;}
 
   @page{size:A4;margin:0;}
 
-  body{counter-reset:pagina 0;}
-
+  /* Cada .page = uma página do PDF */
   .page{
     box-shadow:none!important;
     margin:0!important;
     width:210mm!important;
-    height:297mm!important;
     min-height:297mm!important;
-    max-height:297mm!important;
-    overflow:hidden!important;
-    padding:12mm 14mm 14mm 20mm!important;
+    max-height:none!important;
+    overflow:visible!important;
+    /* padding-bottom grande garante espaço para o rodapé */
+    padding:12mm 14mm 22mm 20mm!important;
     border-left:8mm solid #0d2040!important;
     page-break-after:always!important;
     break-after:page!important;
@@ -194,7 +194,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .page::before{display:none!important;}
   .page:last-child{page-break-after:auto!important;break-after:auto!important;}
 
-  /* Rodapé absoluto dentro da página */
+  /* Rodapé fixo no fundo de cada página */
   .page-footer{
     position:absolute!important;
     bottom:8mm!important;
@@ -205,18 +205,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     padding-top:4pt!important;
     display:flex!important;
     justify-content:space-between!important;
+    background:#fff!important;
   }
 
-  /* Numeração automática */
-  .pf-page::after{content:'Pág. ' counter(pagina);}
+  /* Numeração automática — zera texto existente e usa counter */
+  .pf-page{font-size:0!important;color:transparent!important;}
+  .pf-page::after{
+    font-size:8pt!important;
+    color:#6b7280!important;
+    content:'Pág. ' counter(pagina);
+    font-family:'IBM Plex Mono',monospace;
+  }
 
-  /* Evita corte */
+  /* Evita corte de elementos */
   .funcao-bloco{page-break-inside:avoid;break-inside:avoid;}
   .risco-funcao{page-break-inside:avoid;break-inside:avoid;}
   .danos-box{page-break-inside:avoid;break-inside:avoid;}
+  .medidas-box{page-break-inside:avoid;break-inside:avoid;}
   .ficha-grid{page-break-inside:avoid;break-inside:avoid;}
+  .ficha-item{page-break-inside:avoid;break-inside:avoid;}
+  .setor-detalhe{page-break-inside:avoid;break-inside:avoid;}
+  .doc-table{page-break-inside:auto;}
   .doc-table tr{page-break-inside:avoid;break-inside:avoid;}
   .doc-table thead{display:table-header-group;}
+  .doc-subsection{page-break-after:avoid;break-after:avoid;}
+  .capa-footer{page-break-inside:avoid;break-inside:avoid;}
 }
 @media(max-width:230mm){
   .page{width:100%;padding:15mm 12mm 15mm 18mm;}
@@ -851,7 +864,7 @@ function renderInventarioRiscos(){
   }
 
   // Paginação por altura real — usa elemento temporário fora da tela
-  const ALTURA_UTIL_MM=247; // 297mm - 12mm top - 12mm bottom - 16mm header - 10mm footer
+  const ALTURA_UTIL_MM=230; // 297mm - 12mm top - 22mm bottom - 16mm header - 10mm footer - margem de segurança
   const MM_TO_PX=96/25.4;
   const ALTURA_UTIL_PX=ALTURA_UTIL_MM*MM_TO_PX;
 
