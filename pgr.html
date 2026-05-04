@@ -454,7 +454,7 @@ function renderDocumento(){
   const pgCapa=renderCapa();
   const pgSumario=renderSumario();
   const pgsIdent=renderIdentificacao();
-  const pgCaract=renderCaracterizacao();
+  const pgsCaract=renderCaracterizacao();
   const pgSesmt=renderSESMT();
   const pgsInv=renderInventarioRiscos();
   const pgEpi=renderMatrizEPI();
@@ -464,7 +464,7 @@ function renderDocumento(){
   wrap.appendChild(pgCapa);
   wrap.appendChild(pgSumario);
   pgsIdent.forEach(pg=>wrap.appendChild(pg));
-  wrap.appendChild(pgCaract);
+  pgsCaract.forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(pgSesmt);
   pgsInv.forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(pgEpi);
@@ -486,7 +486,7 @@ function renderDocumento(){
   function nrPag(el){const idx=paginas.indexOf(el);return idx>=0?String(idx+1):'—';}
   const setPg=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=n;};
   setPg('sumario-1',pgsIdent.length?nrPag(pgsIdent[0]):'—');
-  setPg('sumario-2',nrPag(pgCaract));
+  setPg('sumario-2',pgsCaract.length?nrPag(pgsCaract[0]):'—');
   setPg('sumario-3',nrPag(pgSesmt));
   const nrInv=pgsInv.length?nrPag(pgsInv[0]):'—';
   setPg('sumario-4',nrInv);setPg('sumario-41',nrInv);setPg('sumario-42',nrInv);setPg('sumario-43',nrInv);setPg('sumario-44',nrInv);
@@ -653,7 +653,12 @@ function renderIdentificacao(){
 
 // ── CARACTERIZAÇÃO ────────────────────────────────────────────
 function renderCaracterizacao(){
-  const pg=criarPagina();
+  const ALTURA_UTIL_PX=210*96/25.4;
+  const cont=document.createElement('div');
+  cont.style.cssText=`position:absolute;left:-9999px;top:0;width:168mm;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;`;
+  document.body.appendChild(cont);
+  const medir=html=>{cont.innerHTML=html;return cont.getBoundingClientRect().height;};
+
   const funcoesPorSetor={};
   funcaoSetores.forEach(fs=>{
     if(!funcoesPorSetor[fs.setor_id])funcoesPorSetor[fs.setor_id]=[];
@@ -661,7 +666,6 @@ function renderCaracterizacao(){
     if(f)funcoesPorSetor[fs.setor_id].push(f.nome_funcao);
   });
 
-  // Monta badge de agentes para cada setor
   function agentesSetor(s){
     const mapa=[
       {key:'tem_agente_fisico',label:'Físico',cls:'agente-fisico'},
@@ -674,17 +678,14 @@ function renderCaracterizacao(){
     return mapa.filter(a=>s[a.key]).map(a=>`<span class="agente-badge ${a.cls}">${a.label}</span>`).join('');
   }
 
-  // Monta bloco de detalhes por setor
-  const setoresDetalhes=setores.map(s=>{
+  function gerarSetorHtml(s){
     const fns=funcoesPorSetor[s.id]||[];
     const badges=agentesSetor(s);
-    // Campos opcionais — só mostra se preenchido
     const detalhes=[];
     if(s.descricao)detalhes.push(`<div class="rf-field"><div class="lbl">Descrição</div><div class="val" style="font-size:8.5pt;">${h(s.descricao)}</div></div>`);
     if(s.responsavel_setor)detalhes.push(`<div class="rf-field"><div class="lbl">Responsável</div><div class="val">${h(s.responsavel_setor)}</div></div>`);
     if(s.andar)detalhes.push(`<div class="rf-field"><div class="lbl">Localização</div><div class="val">${h(s.andar)}</div></div>`);
     if(s.area_m2)detalhes.push(`<div class="rf-field"><div class="lbl">Área</div><div class="val">${h(String(s.area_m2))} m²</div></div>`);
-
     return`<div class="setor-detalhe">
       <div class="setor-detalhe-header">
         <div>
@@ -698,22 +699,9 @@ function renderCaracterizacao(){
       </div>
       ${detalhes.length?`<div class="setor-detalhe-body">${detalhes.join('')}</div>`:''}
     </div>`;
-  }).join('');
+  }
 
-  pg.innerHTML=`
-  ${phHeader()}
-  <div class="doc-section"><span class="num-secao">2</span>Caracterização do Estabelecimento</div>
-  <div class="ficha-grid ficha-grid-3">
-    <div class="ficha-item"><div class="ficha-label">Trabalhadores cobertos</div><div class="ficha-value" style="font-size:16pt;color:#0d2040;font-weight:700;">${empresa.total_funcionarios_previsto||0}</div></div>
-    <div class="ficha-item"><div class="ficha-label">Setores de trabalho</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${setores.length}</div></div>
-    <div class="ficha-item"><div class="ficha-label">Funções mapeadas</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${funcoes.length}</div></div>
-  </div>
-
-  <div class="doc-subsection" style="margin-top:14pt;">Detalhamento dos setores</div>
-  ${setoresDetalhes}
-
-  <div class="doc-subsection" style="margin-top:14pt;">Quadro de funções</div>
-  ${funcoes.length?funcoes.map(f=>{
+  function gerarFuncaoHtml(f){
     const setoresNomes=funcaoSetores.filter(fs=>fs.funcao_id===f.id).map(fs=>setores.find(s=>s.id===fs.setor_id)?.nome_setor).filter(Boolean);
     const numTrab=funcaoSetores.filter(fs=>fs.funcao_id===f.id).reduce((acc,fs)=>acc+(fs.num_funcionarios_previsto||0),0)||f.num_funcionarios_previsto||0;
     return`<div class="setor-detalhe" style="margin-bottom:8pt;">
@@ -736,10 +724,34 @@ function renderCaracterizacao(){
         <div style="font-size:8.5pt;color:#374151;line-height:1.5;">${h(f.descricao)}</div>
       </div>`:''}
     </div>`;
-  }).join(''):`<div class="em-breve"><div class="em-breve-icon">👷</div><div class="em-breve-label">Nenhuma função cadastrada.</div></div>`}
+  }
 
-  ${pfFooter()}`;
-  return pg;
+  const paginas=[];
+  let paginaAtual=criarPagina();
+  let htmlAtual='';
+  let alturaUsada=0;
+  function fecharPagina(){paginaAtual.innerHTML=htmlAtual+pfFooter();paginas.push(paginaAtual);}
+  function novaPagina(){paginaAtual=criarPagina();htmlAtual=phHeader();alturaUsada=60;}
+  function adicionar(html){const ha=medir(html);if(alturaUsada+ha>ALTURA_UTIL_PX){fecharPagina();novaPagina();}htmlAtual+=html;alturaUsada+=ha;}
+
+  const introHtml=`${phHeader()}
+  <div class="doc-section"><span class="num-secao">2</span>Caracterização do Estabelecimento</div>
+  <div class="ficha-grid ficha-grid-3">
+    <div class="ficha-item"><div class="ficha-label">Trabalhadores cobertos</div><div class="ficha-value" style="font-size:16pt;color:#0d2040;font-weight:700;">${empresa.total_funcionarios_previsto||0}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Setores de trabalho</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${setores.length}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Funções mapeadas</div><div class="ficha-value" style="font-size:16pt;color:#2a5298;font-weight:700;">${funcoes.length}</div></div>
+  </div>`;
+  htmlAtual=introHtml;alturaUsada=medir(introHtml);
+
+  adicionar(`<div class="doc-subsection" style="margin-top:14pt;">Detalhamento dos setores</div>`);
+  setores.forEach(s=>adicionar(gerarSetorHtml(s)));
+  adicionar(`<div class="doc-subsection" style="margin-top:14pt;">Quadro de funções</div>`);
+  if(funcoes.length){funcoes.forEach(f=>adicionar(gerarFuncaoHtml(f)));}
+  else{adicionar(`<div class="em-breve"><div class="em-breve-icon">👷</div><div class="em-breve-label">Nenhuma função cadastrada.</div></div>`);}
+
+  fecharPagina();
+  document.body.removeChild(cont);
+  return paginas;
 }
 
 // ── SESMT ─────────────────────────────────────────────────────
@@ -804,8 +816,8 @@ function renderSESMT(){
 // ── INVENTÁRIO DE RISCOS POR FUNÇÃO ───────────────────────────
 function renderInventarioRiscos(){
   const paginas=[];
+  const ALTURA_UTIL_PX=210*96/25.4;
 
-  // Mapa setor por função
   const setoresPorFuncao={};
   funcaoSetores.forEach(fs=>{
     if(!setoresPorFuncao[fs.funcao_id])setoresPorFuncao[fs.funcao_id]=[];
@@ -829,131 +841,123 @@ function renderInventarioRiscos(){
     return paginas;
   }
 
-  // Gera HTML de cada bloco de função
-  function gerarBlocoFuncao(funcao){
-    const frs=funcao_riscos.filter(fr=>fr.funcao_id===funcao.id);
+  const container=document.createElement('div');
+  container.style.cssText=`position:absolute;left:-9999px;top:0;width:168mm;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;`;
+  document.body.appendChild(container);
+  const medir=html=>{container.innerHTML=html;return container.getBoundingClientRect().height;};
+
+  const PROB_LABEL={1:'Muito baixa',2:'Baixa',3:'Média',4:'Alta',5:'Muito alta'};
+  const SEV_LABEL={1:'Insignificante',2:'Leve',3:'Moderada',4:'Grave',5:'Catastrófica'};
+  const agentesMap=[
+    {key:'tem_agente_fisico',label:'Físico',cls:'agente-fisico'},
+    {key:'tem_agente_quimico',label:'Químico',cls:'agente-quimico'},
+    {key:'tem_agente_biologico',label:'Biológico',cls:'agente-biologico'},
+    {key:'tem_agente_ergonomico',label:'Ergonômico',cls:'agente-ergonomico'},
+    {key:'tem_agente_acidente',label:'Acidente',cls:'agente-acidente'},
+    {key:'tem_agente_psicossocial',label:'Psicossocial',cls:'agente-psicossocial'},
+  ];
+
+  function gerarFuncHeaderInner(funcao,cont){
     const setoresNomes=setoresPorFuncao[funcao.id]||[];
     const setoresDaFuncao=funcaoSetores.filter(fs=>fs.funcao_id===funcao.id).map(fs=>setores.find(s=>s.id===fs.setor_id)).filter(Boolean);
-    const agentesMap=[
-      {key:'tem_agente_fisico',label:'Físico',cls:'agente-fisico'},
-      {key:'tem_agente_quimico',label:'Químico',cls:'agente-quimico'},
-      {key:'tem_agente_biologico',label:'Biológico',cls:'agente-biologico'},
-      {key:'tem_agente_ergonomico',label:'Ergonômico',cls:'agente-ergonomico'},
-      {key:'tem_agente_acidente',label:'Acidente',cls:'agente-acidente'},
-      {key:'tem_agente_psicossocial',label:'Psicossocial',cls:'agente-psicossocial'},
-    ];
     const badgesAgentes=agentesMap.filter(a=>setoresDaFuncao.some(s=>s[a.key])).map(a=>`<span class="agente-badge ${a.cls}">${a.label}</span>`).join('');
-
-    let html=`<div class="funcao-bloco">
-      <div class="funcao-bloco-header">
-        <div>
-          <div class="funcao-bloco-nome">👷 ${h(funcao.nome_funcao)}</div>
-          ${funcao.cbo?`<div class="funcao-bloco-cbo">CBO: ${h(funcao.cbo)}</div>`:''}
-          ${badgesAgentes?`<div style="margin-top:4pt;">${badgesAgentes}</div>`:''}
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4pt;">
-          ${setoresNomes.length?`<span class="funcao-bloco-setores">📁 Setor(es): ${h(setoresNomes.join(' · '))}</span>`:''}
-          <span style="font-size:7.5pt;color:#9ca3af;">${frs.length} risco(s)</span>
-        </div>
+    const frs=funcao_riscos.filter(fr=>fr.funcao_id===funcao.id);
+    return`<div>
+        <div class="funcao-bloco-nome">👷 ${h(funcao.nome_funcao)}${cont?` <span style="font-size:8pt;font-weight:400;opacity:.7;">(continuação)</span>`:''}</div>
+        ${funcao.cbo?`<div class="funcao-bloco-cbo">CBO: ${h(funcao.cbo)}</div>`:''}
+        ${badgesAgentes?`<div style="margin-top:4pt;">${badgesAgentes}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4pt;">
+        ${setoresNomes.length?`<span class="funcao-bloco-setores">📁 Setor(es): ${h(setoresNomes.join(' · '))}</span>`:''}
+        <span style="font-size:7.5pt;color:#9ca3af;">${frs.length} risco(s)</span>
       </div>`;
-
-    const PROB_LABEL={1:'Muito baixa',2:'Baixa',3:'Média',4:'Alta',5:'Muito alta'};
-    const SEV_LABEL={1:'Insignificante',2:'Leve',3:'Moderada',4:'Grave',5:'Catastrófica'};
-
-    frs.forEach(fr=>{
-      const risco=getRisco(fr.risco_id);if(!risco)return;
-      const catCor=getCatCor(risco.categoria_risco_id);
-      const catNome=getCatNome(risco.categoria_risco_id);
-      const perigo=fr.perigo_id?getPerigo(fr.perigo_id):null;
-      const mds=medidas_funcao.filter(m=>m.funcao_risco_id===fr.id);
-      const episFr=mds.filter(m=>m.nivel==='EPI'&&m.epi_id);
-      const medidasItens=MEDIDAS_CONFIG.map(mc=>{
-        if(mc.key==='epi'){
-          if(!episFr.length)return'';
-          return`<div class="medida-item">
-            <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">5</div>
-            <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
-            <div class="medida-desc">${episFr.map(e=>{const epiDados=epis.find(x=>x.id===e.epi_id);return`${h(epiDados?.nome||'EPI')}${e.ca?' (CA:'+h(e.ca)+')':''}${e.validade_ca?' Val:'+fmtData(e.validade_ca):''}`;}).join(' · ')}</div>
-          </div>`;
-        }
-        const marcada=fr[`medida_${mc.key}`];const desc=fr[`medida_${mc.key}_desc`];
-        if(!marcada&&!desc)return'';
-        return`<div class="medida-item">
-          <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">${{elim:1,subs:2,eng:3,adm:4}[mc.key]}</div>
-          <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
-          <div class="medida-desc">${desc?h(desc):'<span style="color:#9ca3af;font-style:italic;">Medida indicada — descrição não preenchida</span>'}</div>
-        </div>`;
-      }).filter(Boolean).join('');
-
-      html+=`<div class="risco-funcao">
-        <div class="risco-funcao-header">
-          <span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
-          ${perigo?`<span class="risco-perigo-pill">⚠ Perigo: ${h(perigo.nome)}</span>`:''}
-          <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
-          ${fr.nivel_risco?`<span class="nivel-pill nivel-${fr.nivel_risco}">${nivelLabel(fr.nivel_risco)}</span>`:''}
-        </div>
-        <div class="risco-funcao-grid" style="grid-template-columns:1fr 1fr 1fr;">
-          <div class="rf-field"><div class="lbl">Probabilidade</div><div class="val">${fr.probabilidade?h(PROB_LABEL[fr.probabilidade]||'—'):'—'}</div></div>
-          <div class="rf-field"><div class="lbl">Severidade</div><div class="val">${fr.severidade?h(SEV_LABEL[fr.severidade]||'—'):'—'}</div></div>
-          <div class="rf-field"><div class="lbl">Nº de expostos</div><div class="val">${fr.num_expostos||'—'}</div></div>
-        </div>
-        ${risco.danos_saude?`<div class="danos-box"><div class="danos-label">🩺 Danos à saúde potenciais</div><div class="danos-text">${h(risco.danos_saude)}</div></div>`:''}
-        ${medidasItens?`<div class="medidas-box"><div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>${medidasItens}</div>`:''}
-      </div>`;
-    });
-
-    html+='</div>';
-    return html;
   }
 
-  // Paginação por altura real — usa elemento temporário fora da tela
-  const ALTURA_UTIL_MM=210; // 297mm - 12mm top - 22mm bottom - 16mm header - 10mm footer - 27mm margem de segurança
-  const MM_TO_PX=96/25.4;
-  const ALTURA_UTIL_PX=ALTURA_UTIL_MM*MM_TO_PX;
-
-  const container=document.createElement('div');
-  container.style.cssText=`position:absolute;left:-9999px;top:0;width:170mm;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;`;
-  document.body.appendChild(container);
+  function gerarRiscoHtml(fr){
+    const risco=getRisco(fr.risco_id);if(!risco)return'';
+    const catCor=getCatCor(risco.categoria_risco_id);
+    const catNome=getCatNome(risco.categoria_risco_id);
+    const perigo=fr.perigo_id?getPerigo(fr.perigo_id):null;
+    const mds=medidas_funcao.filter(m=>m.funcao_risco_id===fr.id);
+    const episFr=mds.filter(m=>m.nivel==='EPI'&&m.epi_id);
+    const medidasItens=MEDIDAS_CONFIG.map(mc=>{
+      if(mc.key==='epi'){
+        if(!episFr.length)return'';
+        return`<div class="medida-item">
+          <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">5</div>
+          <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
+          <div class="medida-desc">${episFr.map(e=>{const epiDados=epis.find(x=>x.id===e.epi_id);return`${h(epiDados?.nome||'EPI')}${e.ca?' (CA:'+h(e.ca)+')':''}${e.validade_ca?' Val:'+fmtData(e.validade_ca):''}`;}).join(' · ')}</div>
+        </div>`;
+      }
+      const marcada=fr[`medida_${mc.key}`];const desc=fr[`medida_${mc.key}_desc`];
+      if(!marcada&&!desc)return'';
+      return`<div class="medida-item">
+        <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">${{elim:1,subs:2,eng:3,adm:4}[mc.key]}</div>
+        <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
+        <div class="medida-desc">${desc?h(desc):'<span style="color:#9ca3af;font-style:italic;">Medida indicada — descrição não preenchida</span>'}</div>
+      </div>`;
+    }).filter(Boolean).join('');
+    return`<div class="risco-funcao">
+      <div class="risco-funcao-header">
+        <span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
+        ${perigo?`<span class="risco-perigo-pill">⚠ Perigo: ${h(perigo.nome)}</span>`:''}
+        <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
+        ${fr.nivel_risco?`<span class="nivel-pill nivel-${fr.nivel_risco}">${nivelLabel(fr.nivel_risco)}</span>`:''}
+      </div>
+      <div class="risco-funcao-grid" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="rf-field"><div class="lbl">Probabilidade</div><div class="val">${fr.probabilidade?h(PROB_LABEL[fr.probabilidade]||'—'):'—'}</div></div>
+        <div class="rf-field"><div class="lbl">Severidade</div><div class="val">${fr.severidade?h(SEV_LABEL[fr.severidade]||'—'):'—'}</div></div>
+        <div class="rf-field"><div class="lbl">Nº de expostos</div><div class="val">${fr.num_expostos||'—'}</div></div>
+      </div>
+      ${risco.danos_saude?`<div class="danos-box"><div class="danos-label">🩺 Danos à saúde potenciais</div><div class="danos-text">${h(risco.danos_saude)}</div></div>`:''}
+      ${medidasItens?`<div class="medidas-box"><div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>${medidasItens}</div>`:''}
+    </div>`;
+  }
 
   let paginaAtual=criarPagina();
+  let htmlAtual='';
   let alturaUsada=0;
-  let primeiraPagina=true;
+  function fecharPagina(){paginaAtual.innerHTML=htmlAtual+pfFooter();paginas.push(paginaAtual);}
+  function novaPagina(){paginaAtual=criarPagina();htmlAtual=phHeader();alturaUsada=60;}
+  function abrirBloco(funcao,cont){
+    const inner=gerarFuncHeaderInner(funcao,cont);
+    const blocoHeaderHtml=`<div class="funcao-bloco"><div class="funcao-bloco-header">${inner}</div>`;
+    const altH=medir(blocoHeaderHtml+'</div>');
+    if(alturaUsada+altH>ALTURA_UTIL_PX){fecharPagina();novaPagina();}
+    htmlAtual+=blocoHeaderHtml;
+    alturaUsada+=altH;
+    return altH;
+  }
 
-  // Intro da seção
-  const introHtml=`<div class="doc-section" style="margin-top:0;"><span class="num-secao">4</span>Inventário de Riscos Ocupacionais por Função</div>
+  // Intro
+  const introHtml=`${phHeader()}
+  <div class="doc-section" style="margin-top:0;"><span class="num-secao">4</span>Inventário de Riscos Ocupacionais por Função</div>
   <p class="doc-text" style="margin-bottom:12pt;">O inventário a seguir apresenta os perigos identificados e os riscos associados, organizados por função, conforme levantamento realizado nos setores de trabalho. Para cada risco são indicados o nível de risco (Probabilidade × Severidade), os danos à saúde potenciais e as medidas de controle previstas na hierarquia da NR-1.</p>`;
-
-  // Mede altura do intro
-  container.innerHTML=introHtml;
-  const alturaIntro=container.getBoundingClientRect().height;
-
-  let htmlPaginaAtual=phHeader()+introHtml;
-  alturaUsada=alturaIntro+60; // 60px para header+footer estimado
-  primeiraPagina=true;
+  htmlAtual=introHtml;
+  alturaUsada=medir(introHtml);
 
   funcoesComRiscos.forEach(funcao=>{
-    const blocoHtml=gerarBlocoFuncao(funcao);
-    container.innerHTML=blocoHtml;
-    const alturaBloco=container.getBoundingClientRect().height;
+    const frs=funcao_riscos.filter(fr=>fr.funcao_id===funcao.id);
+    const altH=abrirBloco(funcao,false);
 
-    // Se não cabe na página atual, fecha e abre nova
-    if(alturaUsada+alturaBloco>ALTURA_UTIL_PX&&!primeiraPagina){
-      paginaAtual.innerHTML=htmlPaginaAtual+pfFooter();
-      paginas.push(paginaAtual);
-      paginaAtual=criarPagina();
-      htmlPaginaAtual=phHeader();
-      alturaUsada=60;
-    }
+    frs.forEach(fr=>{
+      const riscoHtml=gerarRiscoHtml(fr);
+      if(!riscoHtml)return;
+      const altR=medir(riscoHtml);
+      if(alturaUsada+altR>ALTURA_UTIL_PX){
+        htmlAtual+='</div>'; // fecha funcao-bloco atual
+        fecharPagina();
+        novaPagina();
+        abrirBloco(funcao,true);
+      }
+      htmlAtual+=riscoHtml;
+      alturaUsada+=altR;
+    });
 
-    htmlPaginaAtual+=blocoHtml;
-    alturaUsada+=alturaBloco;
-    primeiraPagina=false;
+    htmlAtual+='</div>'; // fecha funcao-bloco
   });
 
-  // Última página
-  paginaAtual.innerHTML=htmlPaginaAtual+pfFooter();
-  paginas.push(paginaAtual);
-
+  fecharPagina();
   document.body.removeChild(container);
   return paginas;
 }
