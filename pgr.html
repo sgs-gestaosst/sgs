@@ -168,28 +168,28 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 /* ── PRINT ── */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  body{background:#fff!important;margin:0!important;padding:0!important;counter-reset:pagina 0;}
+  body{background:#fff!important;margin:0!important;padding:0!important;}
   .screen-header{display:none!important;}
-  .screen-body{padding:0!important;}
-  .pages-wrap{gap:0!important;display:block!important;}
+  .screen-body{padding:0!important;display:block!important;}
+  .pages-wrap{gap:0!important;display:block!important;align-items:unset!important;}
 
   @page{size:A4;margin:0;}
 
-  /* Cada .page = uma página do PDF */
+  /* Cada .page = uma página A4 exata */
   .page{
     box-shadow:none!important;
     margin:0!important;
     width:210mm!important;
-    min-height:297mm!important;
-    max-height:none!important;
-    overflow:visible!important;
-    /* padding-bottom grande garante espaço para o rodapé */
+    height:297mm!important;
+    min-height:unset!important;
+    max-height:unset!important;
+    overflow:hidden!important;
     padding:12mm 14mm 22mm 20mm!important;
     border-left:8mm solid #0d2040!important;
     page-break-after:always!important;
     break-after:page!important;
+    page-break-before:auto!important;
     position:relative!important;
-    counter-increment:pagina!important;
   }
   .page::before{display:none!important;}
   .page:last-child{page-break-after:auto!important;break-after:auto!important;}
@@ -208,13 +208,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     background:#fff!important;
   }
 
-  /* Numeração automática — zera texto existente e usa counter */
-  .pf-page{font-size:0!important;color:transparent!important;}
-  .pf-page::after{
+  /* Numeração de página — exibe exatamente o texto definido pelo JS */
+  .pf-page{
     font-size:8pt!important;
     color:#6b7280!important;
-    content:'Pág. ' counter(pagina);
-    font-family:'IBM Plex Mono',monospace;
+    font-family:'IBM Plex Mono',monospace!important;
   }
 
   /* Evita corte de elementos */
@@ -452,28 +450,54 @@ async function carregar(){
 function renderDocumento(){
   const wrap=document.getElementById('pages-wrap');
   wrap.innerHTML='';
-  wrap.appendChild(renderCapa());
-  wrap.appendChild(renderSumario());
-  wrap.appendChild(renderIdentificacao());
-  wrap.appendChild(renderCaracterizacao());
-  wrap.appendChild(renderSESMT());
-  renderInventarioRiscos().forEach(pg=>wrap.appendChild(pg));
-  wrap.appendChild(renderMatrizEPI());
-  // Avaliação psicossocial — só renderiza se houver campanhas encerradas
-  if(window.campanhasPsi&&window.campanhasPsi.length){
-    renderAvaliacaoPsicossocial().forEach(pg=>wrap.appendChild(pg));
-  }
-  wrap.appendChild(renderPlanoAcao());
 
-  // Numeração automática de páginas
-  const paginas=document.querySelectorAll('.page');
+  const pgCapa=renderCapa();
+  const pgSumario=renderSumario();
+  const pgIdent=renderIdentificacao();
+  const pgCaract=renderCaracterizacao();
+  const pgSesmt=renderSESMT();
+  const pgsInv=renderInventarioRiscos();
+  const pgEpi=renderMatrizEPI();
+  const pgsPsi=[];
+  const pgPlano=renderPlanoAcao();
+
+  wrap.appendChild(pgCapa);
+  wrap.appendChild(pgSumario);
+  wrap.appendChild(pgIdent);
+  wrap.appendChild(pgCaract);
+  wrap.appendChild(pgSesmt);
+  pgsInv.forEach(pg=>wrap.appendChild(pg));
+  wrap.appendChild(pgEpi);
+  if(window.campanhasPsi&&window.campanhasPsi.length){
+    renderAvaliacaoPsicossocial().forEach(pg=>{pgsPsi.push(pg);wrap.appendChild(pg);});
+  }
+  wrap.appendChild(pgPlano);
+
+  // Numeração de páginas (JS define o número — mesma lógica na tela e na impressão)
+  const paginas=Array.from(document.querySelectorAll('#pages-wrap .page'));
   paginas.forEach((pg,i)=>{
     const numEl=pg.querySelector('.pf-page');
     if(numEl)numEl.textContent=`Pág. ${i+1}`;
-    // Marca primeira doc-section de cada página para não quebrar antes
     const primSec=pg.querySelector('.doc-section');
     if(primSec)primSec.classList.add('primeira-secao');
   });
+
+  // Atualiza sumário com páginas reais
+  function nrPag(el){const idx=paginas.indexOf(el);return idx>=0?String(idx+1):'—';}
+  const setPg=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=n;};
+  setPg('sumario-1',nrPag(pgIdent));
+  setPg('sumario-2',nrPag(pgCaract));
+  setPg('sumario-3',nrPag(pgSesmt));
+  const nrInv=pgsInv.length?nrPag(pgsInv[0]):'—';
+  setPg('sumario-4',nrInv);
+  setPg('sumario-41',nrInv);
+  setPg('sumario-42',nrInv);
+  setPg('sumario-43',nrInv);
+  setPg('sumario-44',nrInv);
+  setPg('sumario-5',nrPag(pgEpi));
+  setPg('sumario-6',pgsPsi.length?nrPag(pgsPsi[0]):'—');
+  setPg('sumario-7',nrPag(pgPlano));
+  setPg('sumario-8','—');
 }
 
 // ── CAPA ──────────────────────────────────────────────────────
@@ -548,21 +572,22 @@ function renderSumario(){
   <table class="doc-table" style="margin-top:16pt;">
     <tbody>
       ${[
-        ['1','Identificação da Empresa','3'],
-        ['2','Caracterização do Estabelecimento','4'],
-        ['3','Dimensionamento do SESMT — NR-4','5'],
-        ['4','Inventário de Riscos Ocupacionais por Função','6'],
-        ['4.1','Identificação de Perigos e Riscos','6'],
-        ['4.2','Avaliação e Nível de Risco','6'],
-        ['4.3','Danos à Saúde Potenciais','6'],
-        ['4.4','Medidas de Prevenção e Controle','6'],
-        ['5','Matriz de EPI por Função','—'],
-        ['6','Plano de Ação','—'],
-        ['7','Monitoramento e Revisão','—'],
-      ].map(([n,t,p])=>`<tr>
+        ['1','Identificação da Empresa','sumario-1'],
+        ['2','Caracterização do Estabelecimento','sumario-2'],
+        ['3','Dimensionamento do SESMT — NR-4','sumario-3'],
+        ['4','Inventário de Riscos Ocupacionais por Função','sumario-4'],
+        ['4.1','Identificação de Perigos e Riscos','sumario-41'],
+        ['4.2','Avaliação e Nível de Risco','sumario-42'],
+        ['4.3','Danos à Saúde Potenciais','sumario-43'],
+        ['4.4','Medidas de Prevenção e Controle','sumario-44'],
+        ['5','Matriz de EPI por Função','sumario-5'],
+        ['6','Avaliação Psicossocial','sumario-6'],
+        ['7','Plano de Ação','sumario-7'],
+        ['8','Monitoramento e Revisão','sumario-8'],
+      ].map(([n,t,id])=>`<tr>
         <td style="width:30pt;"><span class="num-secao">${n}</span></td>
         <td style="color:#1a1a2e;">${t}</td>
-        <td style="text-align:right;color:#6b7280;font-family:'IBM Plex Mono',monospace;font-size:9pt;">${p}</td>
+        <td id="${id}" style="text-align:right;color:#6b7280;font-family:'IBM Plex Mono',monospace;font-size:9pt;">—</td>
       </tr>`).join('')}
     </tbody>
   </table>
@@ -1344,6 +1369,11 @@ function aplicarSelecaoPlano(){
   const pages=wrap.querySelectorAll('.page');
   const ultima=pages[pages.length-1];
   wrap.replaceChild(renderPlanoAcao(),ultima);
+  // Re-numera todas as páginas após substituição
+  Array.from(document.querySelectorAll('#pages-wrap .page')).forEach((pg,i)=>{
+    const numEl=pg.querySelector('.pf-page');
+    if(numEl)numEl.textContent=`Pág. ${i+1}`;
+  });
 }
 
 carregar();
