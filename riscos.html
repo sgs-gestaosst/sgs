@@ -227,7 +227,37 @@
     .cat-grid{grid-template-columns:repeat(2,1fr);}
     .header-title{display:none;}
   }
-  @media(max-width:500px){
+
+  /* ── DASHBOARD ── */
+  .dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:24px;}
+  .dashboard-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;}
+  .dashboard-card-icon{font-size:24px;margin-bottom:8px;}
+  .dashboard-card-valor{font-size:20px;font-weight:600;color:var(--accent);}
+  .dashboard-card-titulo{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-top:4px;}
+  .dashboard-card.card-alto .dashboard-card-valor{color:#e05555;}
+  .dashboard-card.card-medio .dashboard-card-valor{color:#e0a855;}
+  .dashboard-card.card-baixo .dashboard-card-valor{color:#2dd4a0;}
+
+  /* Gráfico simples */
+  .chart-bars{display:flex;gap:8px;align-items:flex-end;height:100px;margin:12px 0;}
+  .chart-bar{flex:1;background:var(--accent);border-radius:4px 4px 0 0;position:relative;min-height:20px;}
+  .chart-bar-label{font-size:10px;color:var(--text2);margin-top:4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* Top riscos */
+  .top-riscos{margin-top:12px;}
+  .top-risco-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  .top-risco-item:last-child{border-bottom:none;}
+  .top-risco-nome{flex:1;color:var(--text2);}
+  .top-risco-score{font-weight:600;padding:2px 6px;border-radius:4px;background:var(--surface2);color:var(--accent);}
+
+  @media(max-width:768px){
+    .layout{grid-template-columns:1fr;}
+    .painel-setores{position:static;}
+    .avaliacao-grid{grid-template-columns:1fr 1fr;}
+    .cat-grid{grid-template-columns:repeat(2,1fr);}
+    .header-title{display:none;}
+    .dashboard{grid-template-columns:1fr;}
+  }
     .avaliacao-grid{grid-template-columns:1fr;}
     .cat-grid{grid-template-columns:repeat(2,1fr);}
     /* Abas de setor/função em scroll horizontal */
@@ -288,6 +318,9 @@
           <div class="painel-sub" id="painel-sub">Clique em um setor para gerenciar os riscos</div>
         </div>
         <div id="painel-actions"></div>
+      </div>
+      <div id="painel-dashboard" style="padding:20px;border-bottom:1px solid var(--border);">
+        <!-- Dashboard será renderizado aqui -->
       </div>
       <div class="painel-body" id="painel-body">
         <div class="empty">
@@ -578,6 +611,12 @@ function renderPainel(){
 
   const statusHtml=`<div class="status-bar" id="status-riscos"></div>`;
 
+  // Renderiza dashboard se houver riscos
+  let dashboardHtml='';
+  if(riscosAtivos.length>0){
+    dashboardHtml=renderDashboard(riscosAtivos);
+  }
+
   let riscosHtml='';
   if(!riscosAtivos.length){
     riscosHtml=`<div class="empty"><div class="empty-icon">🛡️</div><div class="empty-title">Nenhum risco identificado</div><div>${contexto==='setor'?'Clique em "+ Identificar perigo / risco" para começar.':'Nenhum risco associado a esta função ainda.'}</div></div>`;
@@ -592,6 +631,7 @@ function renderPainel(){
     }
   }
 
+  document.getElementById('painel-dashboard').innerHTML=dashboardHtml;
   document.getElementById('painel-body').innerHTML=tabs+statusHtml+riscosHtml;
 }
 
@@ -730,6 +770,104 @@ function renderHierarquia(sr){
       </div>
     </div>`;
   }).join('');
+}
+
+
+// ── DASHBOARD COM MÉTRICAS ────────────────────────────────────
+function renderDashboard(riscosAtivos){
+  // Calcula métricas
+  const metricas=calcularMetricas(riscosAtivos);
+  
+  // Cards de resumo
+  const cards=`
+    <div class="dashboard">
+      <div class="dashboard-card card-alto">
+        <div class="dashboard-card-icon">🔴</div>
+        <div class="dashboard-card-valor">${metricas.muitoAlto}</div>
+        <div class="dashboard-card-titulo">Muito Altos</div>
+      </div>
+      <div class="dashboard-card card-alto">
+        <div class="dashboard-card-icon">🟠</div>
+        <div class="dashboard-card-valor">${metricas.alto}</div>
+        <div class="dashboard-card-titulo">Altos</div>
+      </div>
+      <div class="dashboard-card card-medio">
+        <div class="dashboard-card-icon">🟡</div>
+        <div class="dashboard-card-valor">${metricas.medio}</div>
+        <div class="dashboard-card-titulo">Médios</div>
+      </div>
+      <div class="dashboard-card card-baixo">
+        <div class="dashboard-card-icon">🟢</div>
+        <div class="dashboard-card-valor">${metricas.baixo}</div>
+        <div class="dashboard-card-titulo">Baixos</div>
+      </div>
+    </div>
+  `;
+  
+  // Distribuição por categoria (gráfico simples)
+  const catDist=`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px;">Distribuição por categoria</div>
+      <div class="chart-bars">
+        ${Object.entries(metricas.porCategoria).map(([cat,count])=>{
+          const maxCount=Math.max(...Object.values(metricas.porCategoria),1);
+          const altura=(count/maxCount)*100;
+          return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+            <div class="chart-bar" style="height:${altura}%;background:${getCatEstilo(categoriasRisco.find(c=>c.nome===cat)?.id)?.color||'#4a7cdc'};"></div>
+            <div class="chart-bar-label">${cat}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  
+  // Top riscos por GUT
+  const topRiscos=`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;">
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px;">Top 5 riscos (GUT)</div>
+      <div class="top-riscos">
+        ${metricas.topRiscos.map(r=>{
+          const risco=todosRiscos.find(x=>x.id===r.risco_id);
+          return `<div class="top-risco-item">
+            <div class="top-risco-nome">${h(risco?.nome_risco||'Risco')}</div>
+            <div class="top-risco-score">${r.gut}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  
+  return cards+catDist+topRiscos;
+}
+
+function calcularMetricas(riscosAtivos){
+  let muitoAlto=0,alto=0,medio=0,baixo=0;
+  const porCategoria={};
+  const riscosComGut=[];
+  
+  riscosAtivos.forEach(sr=>{
+    const nivel=sr.nivel_risco||calcularNivel(sr.probabilidade,sr.severidade);
+    if(nivel==='MUITO-ALTO')muitoAlto++;
+    else if(nivel==='ALTO')alto++;
+    else if(nivel==='MEDIO')medio++;
+    else if(nivel==='BAIXO')baixo++;
+    
+    const risco=todosRiscos.find(r=>r.id===sr.risco_id);
+    if(risco){
+      const cat=categoriasRisco.find(c=>c.id===risco.categoria_risco_id)?.nome||'Outros';
+      porCategoria[cat]=(porCategoria[cat]||0)+1;
+    }
+    
+    // Calcula GUT (Gravidade × Urgência × Tendência)
+    const prob=sr.probabilidade||1;
+    const sev=sr.severidade||1;
+    const gut=Math.round(prob*sev*100)/100;
+    riscosComGut.push({...sr,gut});
+  });
+  
+  const topRiscos=riscosComGut.sort((a,b)=>b.gut-a.gut).slice(0,5);
+  
+  return {muitoAlto,alto,medio,baixo,porCategoria,topRiscos};
 }
 
 // ── LAZY LOADING ──────────────────────────────────────────────
