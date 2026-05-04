@@ -453,17 +453,17 @@ function renderDocumento(){
 
   const pgCapa=renderCapa();
   const pgSumario=renderSumario();
-  const pgIdent=renderIdentificacao();
+  const pgsIdent=renderIdentificacao();
   const pgCaract=renderCaracterizacao();
   const pgSesmt=renderSESMT();
   const pgsInv=renderInventarioRiscos();
   const pgEpi=renderMatrizEPI();
   const pgsPsi=[];
-  const pgPlano=renderPlanoAcao();
+  const pgsPlano=renderPlanoAcao();
 
   wrap.appendChild(pgCapa);
   wrap.appendChild(pgSumario);
-  wrap.appendChild(pgIdent);
+  pgsIdent.forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(pgCaract);
   wrap.appendChild(pgSesmt);
   pgsInv.forEach(pg=>wrap.appendChild(pg));
@@ -471,9 +471,9 @@ function renderDocumento(){
   if(window.campanhasPsi&&window.campanhasPsi.length){
     renderAvaliacaoPsicossocial().forEach(pg=>{pgsPsi.push(pg);wrap.appendChild(pg);});
   }
-  wrap.appendChild(pgPlano);
+  pgsPlano.forEach(pg=>wrap.appendChild(pg));
 
-  // Numeração de páginas (JS define o número — mesma lógica na tela e na impressão)
+  // Numeração de páginas
   const paginas=Array.from(document.querySelectorAll('#pages-wrap .page'));
   paginas.forEach((pg,i)=>{
     const numEl=pg.querySelector('.pf-page');
@@ -485,19 +485,16 @@ function renderDocumento(){
   // Atualiza sumário com páginas reais
   function nrPag(el){const idx=paginas.indexOf(el);return idx>=0?String(idx+1):'—';}
   const setPg=(id,n)=>{const el=document.getElementById(id);if(el)el.textContent=n;};
-  setPg('sumario-1',nrPag(pgIdent));
+  setPg('sumario-1',pgsIdent.length?nrPag(pgsIdent[0]):'—');
   setPg('sumario-2',nrPag(pgCaract));
   setPg('sumario-3',nrPag(pgSesmt));
   const nrInv=pgsInv.length?nrPag(pgsInv[0]):'—';
-  setPg('sumario-4',nrInv);
-  setPg('sumario-41',nrInv);
-  setPg('sumario-42',nrInv);
-  setPg('sumario-43',nrInv);
-  setPg('sumario-44',nrInv);
+  setPg('sumario-4',nrInv);setPg('sumario-41',nrInv);setPg('sumario-42',nrInv);setPg('sumario-43',nrInv);setPg('sumario-44',nrInv);
   setPg('sumario-5',nrPag(pgEpi));
   setPg('sumario-6',pgsPsi.length?nrPag(pgsPsi[0]):'—');
-  setPg('sumario-7',nrPag(pgPlano));
-  setPg('sumario-8','—');
+  setPg('sumario-7',pgsPlano.length?nrPag(pgsPlano[0]):'—');
+  // Monitoramento está na última página do plano
+  setPg('sumario-8',pgsPlano.length?nrPag(pgsPlano[pgsPlano.length-1]):'—');
 }
 
 // ── CAPA ──────────────────────────────────────────────────────
@@ -597,11 +594,10 @@ function renderSumario(){
 
 // ── IDENTIFICAÇÃO ─────────────────────────────────────────────
 function renderIdentificacao(){
-  const pg=criarPagina();
   const cnpj=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'—';
   const gr=empresa.grau_risco;
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
-  pg.innerHTML=`
+  const fichaHtml=`
   ${phHeader()}
   <div class="doc-section"><span class="num-secao">1</span>Identificação da Empresa</div>
   <div class="ficha-grid">
@@ -617,20 +613,42 @@ function renderIdentificacao(){
     <div class="ficha-item"><div class="ficha-label">Telefone</div><div class="ficha-value">${h(empresa.telefone||'—')}</div></div>
     <div class="ficha-item"><div class="ficha-label">E-mail</div><div class="ficha-value">${h(empresa.email||'—')}</div></div>
     <div class="ficha-item"><div class="ficha-label">Atividade Rural</div><div class="ficha-value">${empresa.atividade_rural?'Sim':'Não'}</div></div>
-  </div>
-  ${cnaes.length?`
-  <div class="doc-subsection" style="margin-top:14pt;">CNAEs cadastrados</div>
-  <table class="doc-table">
-    <thead><tr><th>Tipo</th><th>Código</th><th>Descrição</th><th>GR</th></tr></thead>
-    <tbody>${cnaes.map(c=>`<tr>
-      <td>${h(c.tipo)}</td>
-      <td style="font-family:'IBM Plex Mono',monospace;">${h(c.cnae)}</td>
-      <td>${h(c.descricao||'—')}</td>
-      <td>${c.grau_risco?grInfo[c.grau_risco]?.label:'—'}</td>
-    </tr>`).join('')}</tbody>
-  </table>`:''}
-  ${pfFooter()}`;
-  return pg;
+  </div>`;
+
+  const paginas=[];
+  const theadHtml=`<thead><tr><th>Tipo</th><th>Código</th><th>Descrição</th><th>GR</th></tr></thead>`;
+  const rowCnae=c=>`<tr>
+    <td>${h(c.tipo)}</td>
+    <td style="font-family:'IBM Plex Mono',monospace;">${h(c.cnae)}</td>
+    <td>${h(c.descricao||'—')}</td>
+    <td>${c.grau_risco?grInfo[c.grau_risco]?.label:'—'}</td>
+  </tr>`;
+
+  if(!cnaes.length){
+    const pg=criarPagina();pg.innerHTML=fichaHtml+pfFooter();paginas.push(pg);return paginas;
+  }
+
+  // Primeira página: ficha + até 6 CNAEs; continuações: até 20 por página
+  const ROWS_FIRST=6,ROWS_CONT=20;
+  const lotes=[cnaes.slice(0,ROWS_FIRST)];
+  for(let i=ROWS_FIRST;i<cnaes.length;i+=ROWS_CONT)lotes.push(cnaes.slice(i,i+ROWS_CONT));
+
+  lotes.forEach((lote,idx)=>{
+    const pg=criarPagina();
+    if(idx===0){
+      pg.innerHTML=fichaHtml+`
+      <div class="doc-subsection" style="margin-top:14pt;">CNAEs cadastrados</div>
+      <table class="doc-table">${theadHtml}<tbody>${lote.map(rowCnae).join('')}</tbody></table>
+      ${pfFooter()}`;
+    }else{
+      pg.innerHTML=`${phHeader()}
+      <div class="doc-subsection" style="margin-top:6pt;">CNAEs cadastrados (continuação)</div>
+      <table class="doc-table">${theadHtml}<tbody>${lote.map(rowCnae).join('')}</tbody></table>
+      ${pfFooter()}`;
+    }
+    paginas.push(pg);
+  });
+  return paginas;
 }
 
 // ── CARACTERIZAÇÃO ────────────────────────────────────────────
@@ -1185,7 +1203,6 @@ function renderAvaliacaoPsicossocial(){
 let acoesSelecionadasIds=null;
 
 function renderPlanoAcao(){
-  const pg=criarPagina();
   const todasAcoes=window.acoesData||[];
   const idsAtivos=acoesSelecionadasIds||todasAcoes.map(a=>a.id);
   const acoes=todasAcoes.filter(a=>idsAtivos.includes(a.id)&&a.status!=='Arquivada'&&a.status!=='Cancelada');
@@ -1194,22 +1211,18 @@ function renderPlanoAcao(){
   const setoresMap={};setores.forEach(s=>{setoresMap[s.id]=s.nome_setor;});
   const funcoesMap={};funcoes.forEach(f=>{funcoesMap[f.id]=f.nome_funcao;});
 
-  // Agrupa ações por título (Opção A — deduplicação na renderização)
   const acoesAgrupadas=[];
   const titlosVistos={};
   acoes.forEach(a=>{
     const titulo=a.titulo.trim();
     if(titlosVistos[titulo]!==undefined){
-      // Adiciona vínculo ao grupo existente
       const grupo=acoesAgrupadas[titlosVistos[titulo]];
       const setor=a.setor_id?setoresMap[a.setor_id]:null;
       const funcao=a.funcao_id?funcoesMap[a.funcao_id]:null;
       if(setor&&!grupo.vinculos.includes('📁 '+setor))grupo.vinculos.push('📁 '+setor);
       if(funcao&&!grupo.vinculos.includes('👷 '+funcao))grupo.vinculos.push('👷 '+funcao);
-      // Mantém a prioridade mais alta
       const priorOrdem={Crítica:4,Alta:3,Média:2,Baixa:1};
       if((priorOrdem[a.prioridade]||0)>(priorOrdem[grupo.prioridade]||0))grupo.prioridade=a.prioridade;
-      // Mantém o prazo mais próximo
       if(a.prazo&&(!grupo.prazo||a.prazo<grupo.prazo))grupo.prazo=a.prazo;
     }else{
       titlosVistos[titulo]=acoesAgrupadas.length;
@@ -1222,41 +1235,82 @@ function renderPlanoAcao(){
     }
   });
 
-  pg.innerHTML=`
-  ${phHeader()}
-  <div class="doc-section"><span class="num-secao">6</span>Plano de Ação</div>
-  <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a implementar, com responsáveis, prazos e status, seguindo a hierarquia da NR-1.</p>
-  ${!acoesAgrupadas.length?`<div class="em-breve"><div class="em-breve-icon">📋</div><div class="em-breve-label">Nenhuma ação selecionada.<br>Clique em "Revisar plano de ação" para selecionar.</div></div>`:`
-  <table class="doc-table">
-    <thead><tr><th style="width:35%;">Ação</th><th style="width:12%;">Origem</th><th style="width:10%;text-align:center;">Prioridade</th><th style="width:15%;">Responsável</th><th style="width:13%;text-align:center;">Prazo</th><th style="width:15%;text-align:center;">Status</th></tr></thead>
-    <tbody>${acoesAgrupadas.map(a=>{
-      const prior=a.prioridade||'Média';
-      const prazo=a.prazo?fmtData(a.prazo):'—';
-      return`<tr>
-        <td>
-          <div style="font-weight:500;font-size:9pt;">${h(a.titulo)}</div>
-          ${a.vinculos.length?`<div style="font-size:7pt;color:#9ca3af;margin-top:2pt;">${a.vinculos.map(v=>h(v)).join(' · ')}</div>`:''}
-        </td>
-        <td style="font-size:8pt;">${h(a.origem||'Manual')}</td>
-        <td style="text-align:center;"><span style="background:${PRIOR_BG[prior]||'#f3f4f6'};color:${PRIOR_COR[prior]||'#374151'};padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${h(prior)}</span></td>
-        <td style="font-size:8pt;">${h(a.responsavel||'—')}</td>
-        <td style="text-align:center;font-size:8pt;font-family:'IBM Plex Mono',monospace;">${prazo}</td>
-        <td style="text-align:center;font-size:7.5pt;font-weight:500;">${h(a.status||'Pendente')}</td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table>`}
-  <div class="doc-subsection" style="margin-top:16pt;">Monitoramento e Revisão — NR-1</div>
-  <p class="doc-text">Este PGR deverá ser revisado: <strong>anualmente</strong> (revisão periódica obrigatória); após <strong>mudanças nos processos</strong> que alterem os riscos; após <strong>acidente grave, fatal</strong> ou diagnóstico de doença ocupacional; quando houver <strong>novos agentes de risco</strong>; quando solicitado por <strong>Auditor Fiscal do Trabalho</strong>.</p>
-  <div style="margin-top:30pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
+  const theadHtml=`<thead><tr><th style="width:35%;">Ação</th><th style="width:12%;">Origem</th><th style="width:10%;text-align:center;">Prioridade</th><th style="width:15%;">Responsável</th><th style="width:13%;text-align:center;">Prazo</th><th style="width:15%;text-align:center;">Status</th></tr></thead>`;
+  const rowHtml=a=>{
+    const prior=a.prioridade||'Média';
+    const prazo=a.prazo?fmtData(a.prazo):'—';
+    return`<tr>
+      <td><div style="font-weight:500;font-size:9pt;">${h(a.titulo)}</div>${a.vinculos.length?`<div style="font-size:7pt;color:#9ca3af;margin-top:2pt;">${a.vinculos.map(v=>h(v)).join(' · ')}</div>`:''}</td>
+      <td style="font-size:8pt;">${h(a.origem||'Manual')}</td>
+      <td style="text-align:center;"><span style="background:${PRIOR_BG[prior]||'#f3f4f6'};color:${PRIOR_COR[prior]||'#374151'};padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${h(prior)}</span></td>
+      <td style="font-size:8pt;">${h(a.responsavel||'—')}</td>
+      <td style="text-align:center;font-size:8pt;font-family:'IBM Plex Mono',monospace;">${prazo}</td>
+      <td style="text-align:center;font-size:7.5pt;font-weight:500;">${h(a.status||'Pendente')}</td>
+    </tr>`;
+  };
+
+  const monitHtml=`
+  <div class="doc-section" style="margin-top:20pt;"><span class="num-secao">8</span>Monitoramento e Revisão — NR-1</div>
+  <p class="doc-text">Este PGR deverá ser revisado:</p>
+  <ul style="margin:8pt 0 0 0;padding:0;list-style:none;">
+    ${[
+      ['anualmente','revisão periódica obrigatória'],
+      ['após mudanças nos processos','que alterem os riscos'],
+      ['após acidente grave, fatal','ou diagnóstico de doença ocupacional'],
+      ['quando houver novos agentes de risco',''],
+      ['quando solicitado por Auditor Fiscal do Trabalho',''],
+    ].map(([forte,resto])=>`<li style="display:flex;gap:8pt;padding:4pt 0;border-bottom:1pt solid #f3f4f6;align-items:baseline;">
+      <span style="color:#2a5298;font-size:9pt;flex-shrink:0;">▸</span>
+      <span class="doc-text"><strong>${forte}</strong>${resto?` — ${resto}`:''}</span>
+    </li>`).join('')}
+  </ul>
+  <div style="margin-top:36pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
     ${['Elaborado por','Revisado por','Aprovado por'].map(l=>`<div style="text-align:center;">
       <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:40pt;">
         <div style="font-size:8pt;color:#6b7280;">${l}</div>
         <div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">Data: ___/___/______</div>
       </div>
     </div>`).join('')}
-  </div>
-  ${pfFooter()}`;
-  return pg;
+  </div>`;
+
+  const paginas=[];
+  const ROWS_FIRST=10,ROWS_CONT=15;
+
+  if(!acoesAgrupadas.length){
+    const pg=criarPagina();
+    pg.innerHTML=`${phHeader()}
+    <div class="doc-section"><span class="num-secao">7</span>Plano de Ação</div>
+    <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a implementar, com responsáveis, prazos e status, seguindo a hierarquia da NR-1.</p>
+    <div class="em-breve"><div class="em-breve-icon">📋</div><div class="em-breve-label">Nenhuma ação selecionada.<br>Clique em "Revisar plano de ação" para selecionar.</div></div>
+    ${monitHtml}
+    ${pfFooter()}`;
+    paginas.push(pg);
+    return paginas;
+  }
+
+  const lotes=[acoesAgrupadas.slice(0,ROWS_FIRST)];
+  for(let i=ROWS_FIRST;i<acoesAgrupadas.length;i+=ROWS_CONT)lotes.push(acoesAgrupadas.slice(i,i+ROWS_CONT));
+
+  lotes.forEach((lote,idx)=>{
+    const pg=criarPagina();
+    const isLast=idx===lotes.length-1;
+    if(idx===0){
+      pg.innerHTML=`${phHeader()}
+      <div class="doc-section"><span class="num-secao">7</span>Plano de Ação</div>
+      <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a implementar, com responsáveis, prazos e status, seguindo a hierarquia da NR-1.</p>
+      <table class="doc-table">${theadHtml}<tbody>${lote.map(rowHtml).join('')}</tbody></table>
+      ${isLast?monitHtml:''}
+      ${pfFooter()}`;
+    }else{
+      pg.innerHTML=`${phHeader()}
+      <div class="doc-subsection" style="margin-top:6pt;">Plano de Ação (continuação)</div>
+      <table class="doc-table">${theadHtml}<tbody>${lote.map(rowHtml).join('')}</tbody></table>
+      ${isLast?monitHtml:''}
+      ${pfFooter()}`;
+    }
+    paginas.push(pg);
+  });
+  return paginas;
 }
 
 // ── HELPERS ───────────────────────────────────────────────────
@@ -1365,15 +1419,7 @@ function aplicarSelecaoPlano(){
   const acoes=window.acoesData||[];
   acoesSelecionadasIds=acoes.filter(a=>document.getElementById(`plano-acao-${a.id}`)?.checked).map(a=>a.id);
   fecharModalPlanoAcao();
-  const wrap=document.getElementById('pages-wrap');
-  const pages=wrap.querySelectorAll('.page');
-  const ultima=pages[pages.length-1];
-  wrap.replaceChild(renderPlanoAcao(),ultima);
-  // Re-numera todas as páginas após substituição
-  Array.from(document.querySelectorAll('#pages-wrap .page')).forEach((pg,i)=>{
-    const numEl=pg.querySelector('.pf-page');
-    if(numEl)numEl.textContent=`Pág. ${i+1}`;
-  });
+  renderDocumento();
 }
 
 carregar();
