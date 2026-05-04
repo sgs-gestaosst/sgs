@@ -514,12 +514,15 @@ async function selecionarSetor(setorId){
 
 async function carregarRiscosSetor(setorId){
   try{
+    // Carrega riscos do setor
     const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${setorId}&ativo=eq.true&select=*`,{headers:h2()});
     riscosSetor=await res.json();
-    // Carrega EPIs para cada risco do setor
+    // Se houver riscos, carrega medidas em paralelo
     if(riscosSetor.length){
       const ids=riscosSetor.map(r=>r.id).join(',');
-      const resM=await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=in.(${ids})&ativo=eq.true&nivel=eq.EPI&select=*`,{headers:h2()});
+      const [resM]=await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=in.(${ids})&ativo=eq.true&nivel=eq.EPI&select=*`,{headers:h2()})
+      ]);
       const medidas=await resM.json();
       // Agrupa medidas por setor_risco_id para acesso O(1)
       const medidasPorSR={};
@@ -534,12 +537,15 @@ async function carregarRiscosSetor(setorId){
 
 async function carregarRiscosFuncao(funcaoId){
   try{
+    // Carrega riscos da função
     const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&ativo=eq.true&select=*&order=id.asc`,{headers:h2()});
     riscosFuncao=await res.json();
-    // Carrega medidas em lote — apenas se houver riscos
+    // Se houver riscos, carrega medidas em paralelo
     if(riscosFuncao.length){
       const ids=riscosFuncao.map(r=>r.id).join(',');
-      const resM=await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=in.(${ids})&ativo=eq.true&nivel=eq.EPI&select=*`,{headers:h2()});
+      const [resM]=await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=in.(${ids})&ativo=eq.true&nivel=eq.EPI&select=*`,{headers:h2()})
+      ]);
       const medidas=await resM.json();
       // Agrupa medidas por funcao_risco_id para acesso O(1)
       const medidasPorFR={};
