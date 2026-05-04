@@ -258,27 +258,50 @@
     .header-title{display:none;}
     .dashboard{grid-template-columns:1fr;}
   }
-    .avaliacao-grid{grid-template-columns:1fr;}
-    .cat-grid{grid-template-columns:repeat(2,1fr);}
+
+  @media(max-width:500px){
     /* Abas de setor/função em scroll horizontal */
     .ctx-tabs{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;}
     .ctx-tab{white-space:nowrap;flex-shrink:0;}
-    /* EPI grid em coluna no mobile */
-    .epi-grid-mobile{display:grid!important;grid-template-columns:1fr!important;}
-    /* Cabeçalho do risco */
-    .risco-info{min-width:0;}
-    /* Avaliação grid */
-    .avaliacao-grid input,.avaliacao-grid select{font-size:14px!important;padding:10px!important;}
-    /* Hierarquia */
-    .hier-nivel{gap:6px;}
-    .hier-num{width:26px;height:26px;font-size:10px;flex-shrink:0;}
-    .hier-label{font-size:10px;}
-    .hier-check label{font-size:12px;line-height:1.4;}
+
+    /* Avaliação: 1 coluna com inputs grandes (toque fácil) */
+    .avaliacao-grid{grid-template-columns:1fr;gap:8px;}
+    .avaliacao-grid input,.avaliacao-grid select{font-size:15px!important;padding:12px 10px!important;}
+
+    /* Cabeçalho do risco: badge+actions na 1ª linha, nome na 2ª */
+    .risco-card-header{flex-wrap:wrap;gap:8px;}
+    .risco-cat-badge{order:1;}
+    .risco-actions{order:2;margin-left:auto;align-items:center;}
+    .risco-info{order:3;width:100%;min-width:0;}
+
+    /* Hierarquia: label sem largura fixa, conteúdo ocupa resto */
+    .hier-nivel{gap:8px;flex-wrap:nowrap;}
+    .hier-num{width:28px;height:28px;font-size:11px;flex-shrink:0;}
+    .hier-label{width:auto;flex:0 0 auto;font-size:11px;max-width:90px;}
+    .hier-conteudo{flex:1;min-width:0;}
+    .hier-check label{font-size:13px;line-height:1.4;}
+    .hier-check input[type=checkbox]{width:18px;height:18px;}
+
+    /* Textarea de medida: altura razoável, fonte legível */
+    .hier-detalhe textarea{font-size:14px!important;padding:10px!important;min-height:70px;}
+
+    /* EPI grid: empilhado, campos grandes */
+    .epi-grid-mobile{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;}
+    .epi-grid-mobile input,.epi-grid-mobile select{font-size:15px!important;padding:12px 10px!important;}
+
     /* Painel */
     .painel-body{padding:12px!important;}
     .painel-header{padding:12px!important;}
-    /* Botão identificar risco */
     .btn-identificar{font-size:12px!important;padding:8px 12px!important;}
+
+    /* Dashboard */
+    .dashboard{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
+    .dashboard-card{padding:12px;text-align:center;}
+    .dashboard-card-icon{font-size:20px;margin-bottom:4px;}
+    .dashboard-card-valor{font-size:18px;}
+    .dashboard-card-titulo{font-size:10px;margin-top:2px;}
+    .top-risco-item{font-size:11px;padding:6px 0;}
+    .top-risco-score{font-size:10px;padding:1px 4px;}
   }
 </style>
 </head>
@@ -741,7 +764,7 @@ function renderHierarquia(sr){
                 <input type="date" id="epi-validade-${sr.id}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:7px 10px;outline:none;">
               </div>
             </div>
-            <button onclick="adicionarEPI(${sr.id})" style="padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:11px;cursor:pointer;width:100%;">+ Adicionar EPI (propaga para todas as funções do setor)</button>
+            <button onclick="adicionarEPI(${sr.id})" style="padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer;width:100%;">+ Adicionar EPI</button>
             <div class="epis-lista" id="epis-${sr.id}">
               ${(sr.epis||[]).map(e=>{
                 const epiDados=todosEpis.find(x=>x.id===e.epi_id);
@@ -837,7 +860,7 @@ function renderDashboard(riscosAtivos){
     </div>
   `;
   
-  return cards+catDist+topRiscos;
+  return cards+topRiscos;
 }
 
 function calcularMetricas(riscosAtivos){
