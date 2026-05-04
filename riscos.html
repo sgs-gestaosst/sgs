@@ -519,9 +519,15 @@ async function carregarRiscosSetor(setorId){
     // Carrega EPIs para cada risco do setor
     if(riscosSetor.length){
       const ids=riscosSetor.map(r=>r.id).join(',');
-      const resM=await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=in.(${ids})&ativo=eq.true&select=*`,{headers:h2()});
+      const resM=await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=in.(${ids})&ativo=eq.true&nivel=eq.EPI&select=*`,{headers:h2()});
       const medidas=await resM.json();
-      riscosSetor.forEach(sr=>{sr.epis=medidas.filter(m=>m.setor_risco_id===sr.id&&m.nivel==='EPI');});
+      // Agrupa medidas por setor_risco_id para acesso O(1)
+      const medidasPorSR={};
+      medidas.forEach(m=>{
+        if(!medidasPorSR[m.setor_risco_id])medidasPorSR[m.setor_risco_id]=[];
+        medidasPorSR[m.setor_risco_id].push(m);
+      });
+      riscosSetor.forEach(sr=>{sr.epis=medidasPorSR[sr.id]||[];});
     }
   }catch(e){riscosSetor=[];}
 }
