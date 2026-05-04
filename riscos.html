@@ -410,6 +410,8 @@ let setorAtivo=null,contexto='setor',funcaoAtiva=null;
 let riscosSetor=[],riscosFuncao=[],funcoesSetor=[];
 // Modal state
 let catSelecionada=null,perigoSelecionado=null,riscosSelecionados=new Set(),stepAtual=0;
+// Cache e lazy loading
+let renderedRiscosCache={},lazyLoadOffset=0,lazyLoadMax=15;
 
 // ── UTILS ──────────────────────────────────────────────────────
 function esc(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -558,7 +560,7 @@ async function carregarRiscosFuncao(funcaoId){
   }catch(e){riscosFuncao=[];}
 }
 
-// ── RENDER PAINEL ──────────────────────────────────────────────
+// ── RENDER PAINEL COM LAZY LOADING ────────────────────────────
 function renderPainel(){
   if(!setorAtivo)return;
   const riscosAtivos=contexto==='setor'?riscosSetor:riscosFuncao;
@@ -580,13 +582,23 @@ function renderPainel(){
   if(!riscosAtivos.length){
     riscosHtml=`<div class="empty"><div class="empty-icon">🛡️</div><div class="empty-title">Nenhum risco identificado</div><div>${contexto==='setor'?'Clique em "+ Identificar perigo / risco" para começar.':'Nenhum risco associado a esta função ainda.'}</div></div>`;
   }else{
-    riscosHtml=riscosAtivos.map(sr=>renderRiscoCard(sr)).join('');
+    // Lazy loading: renderiza primeiros riscos, carrega rest ao scroll
+    lazyLoadOffset=0;
+    const riscosIniciais=riscosAtivos.slice(0,lazyLoadMax);
+    riscosHtml=riscosIniciais.map(sr=>renderRiscoCard(sr)).join('');
+    if(riscosAtivos.length>lazyLoadMax){
+      riscosHtml+=`<div id="lazy-load-trigger" style="height:1px;margin:20px 0;" data-total="${riscosAtivos.length}" data-rendered="${lazyLoadMax}"></div>`;
+      setTimeout(()=>setupLazyLoad(riscosAtivos),100);
+    }
   }
 
   document.getElementById('painel-body').innerHTML=tabs+statusHtml+riscosHtml;
 }
 
 function renderRiscoCard(sr){
+  // Verifica cache de renderização
+  if(renderedRiscosCache[sr.id])return renderedRiscosCache[sr.id];
+  
   const risco=todosRiscos.find(r=>r.id===sr.risco_id);
   if(!risco)return'';
   const estilo=getCatEstilo(risco.categoria_risco_id);
@@ -646,6 +658,9 @@ function renderRiscoCard(sr){
       ${renderHierarquia(sr)}
     </div>
   </div>`;
+  
+  renderedRiscosCache[sr.id]=html;
+  return html;
 }
 
 function renderHierarquia(sr){
@@ -717,10 +732,33 @@ function renderHierarquia(sr){
   }).join('');
 }
 
+// ── LAZY LOADING ──────────────────────────────────────────────
+function setupLazyLoad(riscosAtivos){
+  const trigger=document.getElementById('lazy-load-trigger');
+  if(!trigger)return;
+  const obs=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){
+      const rendered=parseInt(trigger.dataset.rendered)||0;
+      const proximos=riscosAtivos.slice(rendered,rendered+lazyLoadMax);
+      if(proximos.length){
+        const html=proximos.map(sr=>renderRiscoCard(sr)).join('');
+        trigger.insertAdjacentHTML('beforebegin',html);
+        trigger.dataset.rendered=(rendered+proximos.length).toString();
+        if(rendered+proximos.length>=riscosAtivos.length){
+          obs.disconnect();
+          trigger.remove();
+        }
+      }
+    }
+  },{threshold:0.1});
+  obs.observe(trigger);
+}
+
 // ── CONTEXTO ───────────────────────────────────────────────────
-async function mudarContexto(ctx){contexto=ctx;funcaoAtiva=null;renderPainel();}
+async function mudarContexto(ctx){contexto=ctx;funcaoAtiva=null;renderedRiscosCache={};renderPainel();}
 async function mudarContextoFuncao(funcaoId){
   contexto='funcao';funcaoAtiva=funcoes.find(f=>f.id===funcaoId);
+  renderedRiscosCache={};
   await carregarRiscosFuncao(funcaoId);renderPainel();
 }
 
