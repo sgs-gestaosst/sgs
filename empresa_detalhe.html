@@ -738,23 +738,70 @@ async function salvarFuncao(){
 // ── SINCRONIZAÇÃO DE RISCOS E EPIs ────────────────────────────
 async function sincronizarRiscosEPIsParaFuncao(funcaoId,setorId){
   try{
-    const resSR=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${setorId}&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-    const setorRiscos=await resSR.json();if(!setorRiscos.length)return;
+    const h=()=>({'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'});
+    // 1. Busca riscos do setor
+    const resSR=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=eq.${setorId}&ativo=eq.true&select=*`,{headers:h()});
+    const setorRiscos=await resSR.json();
+    if(!setorRiscos.length)return;
+    
+    // 2. Para cada risco do setor, insere/atualiza em funcao_riscos e propaga EPIs
     for(const sr of setorRiscos){
-      const resCheck=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&risco_id=eq.${sr.risco_id}&ativo=eq.true&select=id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-      const existente=await resCheck.json();let frId;
-      const dados={probabilidade:sr.probabilidade||null,severidade:sr.severidade||null,nivel_risco:sr.nivel_risco||null,num_expostos:sr.num_expostos||0,medida_elim:sr.medida_elim||false,medida_elim_desc:sr.medida_elim_desc||null,medida_subs:sr.medida_subs||false,medida_subs_desc:sr.medida_subs_desc||null,medida_eng:sr.medida_eng||false,medida_eng_desc:sr.medida_eng_desc||null,medida_adm:sr.medida_adm||false,medida_adm_desc:sr.medida_adm_desc||null,medida_epi:sr.medida_epi||false,origem_setor_risco_id:sr.id,propagado_do_setor:true};
-      if(existente.length){frId=existente[0].id;await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${frId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({...dados,atualizado_em:new Date().toISOString()})});}
-      else{const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify({funcao_id:funcaoId,risco_id:sr.risco_id,perigo_id:sr.perigo_id||null,...dados,ativo:true})});if(!res.ok)continue;frId=(await res.json())[0].id;}
-      const resMedidas=await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=eq.${sr.id}&nivel=eq.EPI&ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-      for(const m of await resMedidas.json()){
-        if(!m.epi_id)continue;
-        const resEpiCheck=await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=eq.${frId}&epi_id=eq.${m.epi_id}&ativo=eq.true&select=id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-        if((await resEpiCheck.json()).length)continue;
-        await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({funcao_risco_id:frId,nivel:'EPI',epi_id:m.epi_id,ca:m.ca||null,validade_ca:m.validade_ca||null,origem_setor_medida_id:m.id,propagado_do_setor:true,ativo:true})});
-      }
+      try{
+        // Verifica se já existe
+        const resCheck=await fetch(
+          `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&risco_id=eq.${sr.risco_id}&select=id&limit=1`,
+          {headers:h()}
+        );
+        const existente=await resCheck.json();
+        
+        // Dados do risco a sincronizar
+        const dadosRisco={
+          probabilidade:sr.probabilidade||null,severidade:sr.severidade||null,nivel_risco:sr.nivel_risco||null,
+          num_expostos:sr.num_expostos||0,medida_elim:sr.medida_elim||false,medida_elim_desc:sr.medida_elim_desc||null,
+          medida_subs:sr.medida_subs||false,medida_subs_desc:sr.medida_subs_desc||null,
+          medida_eng:sr.medida_eng||false,medida_eng_desc:sr.medida_eng_desc||null,
+          medida_adm:sr.medida_adm||false,medida_adm_desc:sr.medida_adm_desc||null,
+          medida_epi:sr.medida_epi||false,origem_setor_risco_id:sr.id,propagado_do_setor:true,ativo:true
+        };
+        
+        let frId;
+        if(existente.length){
+          // Atualiza risco existente
+          frId=existente[0].id;
+          await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${frId}`,
+            {method:'PATCH',headers:h(),body:JSON.stringify({...dadosRisco,atualizado_em:new Date().toISOString()})}
+          );
+        }else{
+          // Cria novo risco
+          const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,
+            {method:'POST',headers:{...h(),'Prefer':'return=representation'},body:JSON.stringify({funcao_id:funcaoId,risco_id:sr.risco_id,perigo_id:sr.perigo_id||null,...dadosRisco})}
+          );
+          if(!res.ok)continue;
+          frId=(await res.json())[0].id;
+        }
+        
+        // 3. Propaga EPIs do setor para a função
+        const resMedidas=await fetch(
+          `${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=eq.${sr.id}&nivel=eq.EPI&ativo=eq.true&select=*`,
+          {headers:h()}
+        );
+        const medidas=await resMedidas.json();
+        for(const m of medidas){
+          if(!m.epi_id)continue;
+          // Verifica se EPI já foi propagado
+          const resEpiCheck=await fetch(
+            `${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=eq.${frId}&epi_id=eq.${m.epi_id}&nivel=eq.EPI&select=id&limit=1`,
+            {headers:h()}
+          );
+          if((await resEpiCheck.json()).length)continue;
+          // Insere EPI propagado
+          await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas`,
+            {method:'POST',headers:h(),body:JSON.stringify({funcao_risco_id:frId,nivel:'EPI',epi_id:m.epi_id,ca:m.ca||null,validade_ca:m.validade_ca||null,origem_setor_medida_id:m.id,propagado_do_setor:true,ativo:true})}
+          );
+        }
+      }catch(e){console.error(`Erro ao sincronizar risco ${sr.risco_id}:`,e);}
     }
-  }catch(e){console.error('Erro ao sincronizar:',e);}
+  }catch(e){console.error('Erro geral ao sincronizar:',e);}
 }
 
 // ── EXCLUSÃO GENÉRICA ─────────────────────────────────────────
