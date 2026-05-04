@@ -528,13 +528,20 @@ async function carregarRiscosSetor(setorId){
 
 async function carregarRiscosFuncao(funcaoId){
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&ativo=eq.true&select=*`,{headers:h2()});
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&ativo=eq.true&select=*&order=id.asc`,{headers:h2()});
     riscosFuncao=await res.json();
+    // Carrega medidas em lote — apenas se houver riscos
     if(riscosFuncao.length){
       const ids=riscosFuncao.map(r=>r.id).join(',');
-      const resM=await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=in.(${ids})&ativo=eq.true&select=*`,{headers:h2()});
+      const resM=await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=in.(${ids})&ativo=eq.true&nivel=eq.EPI&select=*`,{headers:h2()});
       const medidas=await resM.json();
-      riscosFuncao.forEach(fr=>{fr.epis=medidas.filter(m=>m.funcao_risco_id===fr.id&&m.nivel==='EPI');});
+      // Agrupa medidas por funcao_risco_id para acesso O(1)
+      const medidasPorFR={};
+      medidas.forEach(m=>{
+        if(!medidasPorFR[m.funcao_risco_id])medidasPorFR[m.funcao_risco_id]=[];
+        medidasPorFR[m.funcao_risco_id].push(m);
+      });
+      riscosFuncao.forEach(fr=>{fr.epis=medidasPorFR[fr.id]||[];});
     }
   }catch(e){riscosFuncao=[];}
 }
@@ -1007,26 +1014,35 @@ async function confirmarAdicionarRiscos(){
 async function propagarRiscoParaFuncoes(setorRisco){
   if(!funcoesSetor.length)return;
   for(const funcao of funcoesSetor){
-    // Verifica se já existe
-    const resCheck=await fetch(
-      `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcao.id}&risco_id=eq.${setorRisco.risco_id}&ativo=eq.true&select=id`,
-      {headers:h2()}
-    );
-    const existente=await resCheck.json();
-    if(existente.length)continue; // já existe, pula
-
-    await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
-      method:'POST',
-      headers:{...h2(),'Prefer':'return=representation'},
-      body:JSON.stringify({
-        funcao_id:funcao.id,
-        risco_id:setorRisco.risco_id,
-        perigo_id:setorRisco.perigo_id||null,
-        origem_setor_risco_id:setorRisco.id,
-        propagado_do_setor:true,
-        ativo:true
-      })
-    });
+    try{
+      // Verifica se já existe com um select minimalista
+      const resCheck=await fetch(
+        `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcao.id}&risco_id=eq.${setorRisco.risco_id}&select=id&limit=1`,
+        {headers:h2()}
+      );
+      const existente=await resCheck.json();
+      // Se existe (ativo ou não), atualiza; se não existe, insere
+      if(existente.length){
+        // Já existe — apenas garante que está ativo se foi desativado
+        await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${existente[0].id}`,{
+          method:'PATCH',headers:h2(),
+          body:JSON.stringify({ativo:true,atualizado_em:new Date().toISOString()})
+        });
+      }else{
+        // Não existe — cria com todas as flags de propagação
+        await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
+          method:'POST',headers:h2(),
+          body:JSON.stringify({
+            funcao_id:funcao.id,
+            risco_id:setorRisco.risco_id,
+            perigo_id:setorRisco.perigo_id||null,
+            origem_setor_risco_id:setorRisco.id,
+            propagado_do_setor:true,
+            ativo:true
+          })
+        });
+      }
+    }catch(e){console.error(`Erro ao propagar risco para função ${funcao.id}:`,e);}
   }
 }
 
@@ -1190,48 +1206,63 @@ async function adicionarEPI(srId){
 }
 
 async function salvarEPIComPropagacao(srId,epiId,ca,validade){
-  // 1. Salva no setor_risco_medidas
-  await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas`,{
-    method:'POST',headers:h2(),
-    body:JSON.stringify({setor_risco_id:srId,nivel:'EPI',epi_id:epiId,ca:ca||null,validade_ca:validade||null,ativo:true})
-  });
+  const srDados=riscosSetor.find(x=>x.id===srId);
+  if(!srDados)return;
+  
+  // 1. Salva no setor_risco_medidas (ou atualiza se já existe)
+  const resCheckMedida=await fetch(
+    `${SUPA_URL}/rest/v1/setor_risco_medidas?setor_risco_id=eq.${srId}&epi_id=eq.${epiId}&nivel=eq.EPI&select=id&limit=1`,
+    {headers:h2()}
+  );
+  const existenteMedida=await resCheckMedida.json();
+  if(!existenteMedida.length){
+    await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas`,{
+      method:'POST',headers:h2(),
+      body:JSON.stringify({setor_risco_id:srId,nivel:'EPI',epi_id:epiId,ca:ca||null,validade_ca:validade||null,ativo:true})
+    });
+  }
+  
   // 2. Atualiza flag medida_epi no setor_riscos
   await fetch(`${SUPA_URL}/rest/v1/setor_riscos?id=eq.${srId}`,{
-    method:'PATCH',headers:h2(),body:JSON.stringify({medida_epi:true})
+    method:'PATCH',headers:h2(),body:JSON.stringify({medida_epi:true,atualizado_em:new Date().toISOString()})
   });
-  // 3. Propaga para funcao_risco_medidas de todas as funções do setor
-  const srDados=riscosSetor.find(x=>x.id===srId);
-  if(!srDados||!funcoesSetor.length)return;
+  
+  // 3. Propaga para funcao_risco_medidas de todas as funções do setor (apenas as que têm este risco)
+  if(!funcoesSetor.length)return;
+  
   for(const funcao of funcoesSetor){
     try{
       // Acha o funcao_risco correspondente
       const resFR=await fetch(
-        `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcao.id}&risco_id=eq.${srDados.risco_id}&ativo=eq.true&select=id`,
+        `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcao.id}&risco_id=eq.${srDados.risco_id}&select=id&limit=1`,
         {headers:h2()}
       );
       const frData=await resFR.json();
-      if(!frData.length)continue;
+      if(!frData.length)continue; // função não tem este risco
       const frId=frData[0].id;
+      
       // Verifica se EPI já foi propagado
       const resCheck=await fetch(
-        `${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=eq.${frId}&epi_id=eq.${epiId}&ativo=eq.true&select=id`,
+        `${SUPA_URL}/rest/v1/funcao_risco_medidas?funcao_risco_id=eq.${frId}&epi_id=eq.${epiId}&nivel=eq.EPI&select=id&limit=1`,
         {headers:h2()}
       );
       const jaExiste=await resCheck.json();
-      if(jaExiste.length)continue;
+      if(jaExiste.length)continue; // já foi propagado
+      
       // Insere com flag de propagado
       await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas`,{
         method:'POST',headers:h2(),
         body:JSON.stringify({
           funcao_risco_id:frId,nivel:'EPI',epi_id:epiId,
           ca:ca||null,validade_ca:validade||null,
-          origem_setor_medida_id:srId,
+          origem_setor_medida_id:existenteMedida.length?existenteMedida[0].id:null,
           propagado_do_setor:true,ativo:true
         })
       });
+      
       // Atualiza flag medida_epi no funcao_riscos
       await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${frId}`,{
-        method:'PATCH',headers:h2(),body:JSON.stringify({medida_epi:true})
+        method:'PATCH',headers:h2(),body:JSON.stringify({medida_epi:true,atualizado_em:new Date().toISOString()})
       });
     }catch(e){console.error('Erro ao propagar EPI para função:',e);}
   }
