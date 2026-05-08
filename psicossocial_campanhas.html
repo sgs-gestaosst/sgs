@@ -237,8 +237,9 @@
       <button class="modal-close" onclick="document.getElementById('modal-resultado').classList.remove('show')">×</button>
     </div>
     <div id="resultado-corpo"></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap;">
       <button class="btn btn-ghost" onclick="document.getElementById('modal-resultado').classList.remove('show')">Fechar</button>
+      <button class="btn btn-ghost" id="btn-ver-respostas" onclick="verRespostasIndividuais()" style="display:none;">📋 Respostas individuais</button>
       <button class="btn btn-success" id="btn-integrar-inventario" onclick="integrarInventario()">
         <span class="spinner" id="spinner-integrar"></span>
         <span id="label-integrar">Integrar ao inventário de riscos</span>
@@ -744,6 +745,15 @@ async function verResultados(campanhaFuncaoId,metodologia='COPSOQ-III'){
     const func=funcoes.find(f=>f.id===cf?.funcao_id);
     document.getElementById('resultado-titulo').textContent=`Resultados — ${func?.nome_funcao||'Função'}`;
 
+    document.getElementById('btn-ver-respostas').style.display='none';
+
+    function alertaGrupoReduzido(n){
+      if(n>=5)return'';
+      return`<div style="background:#2a2010;border:1px solid #4a3a10;border-radius:6px;padding:10px 14px;font-size:12px;color:#e0a855;margin-bottom:14px;">
+        ⚠️ <strong>Grupo reduzido (${n} respondente${n!==1?'s':''}).</strong> Resultados podem não ser representativos. Interprete com cautela.
+      </div>`;
+    }
+
     if(metodologia==='Checklist-NR01'){
       const res=await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${campanhaFuncaoId}&select=*`,{headers:headers()});
       const data=await res.json();
@@ -765,7 +775,9 @@ async function verResultados(campanhaFuncaoId,metodologia='COPSOQ-III'){
             <div style="font-size:10px;color:var(--text3);margin-top:4px;">↑ maior = pior</div>
           </div>`;
         }).join('');
+        document.getElementById('btn-ver-respostas').style.display='inline-flex';
         document.getElementById('resultado-corpo').innerHTML=`
+          ${alertaGrupoReduzido(r.total_respondentes)}
           <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
             <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
               <div style="font-size:11px;color:var(--text2);">Respondentes</div>
@@ -814,7 +826,9 @@ async function verResultados(campanhaFuncaoId,metodologia='COPSOQ-III'){
         const vermelhos=dims.filter(d=>getRisco(r,d.key)==='Vermelho').length;
         const amarelos=dims.filter(d=>getRisco(r,d.key)==='Amarelo').length;
         const verdes=dims.filter(d=>getRisco(r,d.key)==='Verde').length;
+        document.getElementById('btn-ver-respostas').style.display='inline-flex';
         document.getElementById('resultado-corpo').innerHTML=`
+          ${alertaGrupoReduzido(r.total_respondentes)}
           <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
             <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
               <div style="font-size:11px;color:var(--text2);">Respondentes</div>
@@ -1046,6 +1060,84 @@ async function arquivarCampanha(id,titulo){
     await carregarCampanhas();
     toast('Campanha arquivada. Respostas e riscos do PGR removidos.');
   }catch(e){alert('Erro ao arquivar: '+e.message);}
+}
+
+// ── RESPOSTAS INDIVIDUAIS (psicólogo) ────────────────────────
+async function verRespostasIndividuais(){
+  if(!resultadoAtualCampanhaFuncaoId)return;
+  const met=resultadoAtualMetodologia||'COPSOQ-III';
+  try{
+    let respostas=[];
+    if(met==='Checklist-NR01'){
+      const res=await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_respostas?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}&concluido=eq.true&select=criado_em,modo_entrada,faixa_etaria,genero,tempo_empresa,respostas&order=criado_em.asc`,{headers:headers()});
+      respostas=await res.json();
+    }else{
+      const campos=met==='COPSOQ-III-Media'?'criado_em,modo_entrada,faixa_etaria,genero,tempo_empresa,respostas_json':'criado_em,modo_entrada,faixa_etaria,genero,tempo_empresa,d01_ritmo_intenso,d02_tarefas_demais,d03_ritmo_alto,d04_concentracao,d05_memorizar,d06_emocoes_difusas,d07_situacoes_dificeis,d08_influencia,d09_decisoes,d10_aprender,d11_habilidades,d12_colegas_ajudam,d13_colegas_apoiam,d14_chefia_ajuda,d15_chefia_apoio,d16_lider_planeja,d17_lider_conflitos,d18_perder_emprego,d19_futuro_incerto,d20_satisfacao_geral,d21_motivacao,d22_esgotamento,d23_cansaco_emocional';
+      const res=await fetch(`${SUPA_URL}/rest/v1/respostas_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}&concluido=eq.true&select=${campos}&order=criado_em.asc`,{headers:headers()});
+      respostas=await res.json();
+    }
+    if(!respostas.length){alert('Nenhuma resposta encontrada.');return;}
+
+    const linhas=respostas.map((r,i)=>{
+      const data=new Date(r.criado_em).toLocaleDateString('pt-BR');
+      const modo=r.modo_entrada==='manual'?'Manual':'Online';
+      const dem=[r.faixa_etaria,r.genero,r.tempo_empresa].filter(Boolean).join(' · ')||'—';
+      let vals='';
+      if(met==='Checklist-NR01'){
+        const rj=r.respostas||{};
+        vals=`<td style="font-size:10px;color:var(--text2);max-width:300px;word-break:break-all;">${JSON.stringify(rj)}</td>`;
+      }else if(met==='COPSOQ-III-Media'){
+        const rj=r.respostas_json||{};
+        const qs=Object.entries(rj).map(([k,v])=>`${k}:${v}`).join(' ');
+        vals=`<td style="font-size:10px;color:var(--text2);max-width:300px;word-break:break-all;">${qs}</td>`;
+      }else{
+        const campos=['d01','d02','d03','d04','d05','d06','d07','d08','d09','d10','d11','d12','d13','d14','d15','d16','d17','d18','d19','d20','d21','d22','d23'];
+        const ks=Object.keys(r).filter(k=>k.startsWith('d0')||k.startsWith('d1')||k.startsWith('d2'));
+        vals=`<td style="font-size:11px;color:var(--text2);">${ks.map(k=>`${k.replace(/_.*$/,'')}:${r[k]??'—'}`).join(' ')}</td>`;
+      }
+      return`<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:8px 10px;font-size:12px;color:var(--text2);">${i+1}</td>
+        <td style="padding:8px 10px;font-size:12px;">${data}</td>
+        <td style="padding:8px 10px;font-size:12px;">${modo}</td>
+        <td style="padding:8px 10px;font-size:12px;color:var(--text2);">${dem}</td>
+        ${vals}
+      </tr>`;
+    }).join('');
+
+    const html=`
+      <div style="margin-bottom:10px;font-size:12px;color:var(--text2);">
+        📋 ${respostas.length} resposta(s) individual(is) — anônimas, vinculadas apenas à função.
+        <span style="margin-left:8px;color:#e0a855;">Acesso restrito ao profissional aplicador.</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr style="background:var(--surface2);font-size:11px;color:var(--text2);text-transform:uppercase;">
+            <th style="padding:8px 10px;text-align:left;">#</th>
+            <th style="padding:8px 10px;text-align:left;">Data</th>
+            <th style="padding:8px 10px;text-align:left;">Modo</th>
+            <th style="padding:8px 10px;text-align:left;">Perfil</th>
+            <th style="padding:8px 10px;text-align:left;">Respostas</th>
+          </tr></thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      </div>`;
+
+    const corpo=document.getElementById('resultado-corpo');
+    const existente=corpo.innerHTML;
+    const verBtn=document.getElementById('btn-ver-respostas');
+
+    // Toggle: se já está mostrando, volta ao resumo
+    if(verBtn.dataset.expanded==='1'){
+      corpo.innerHTML=verBtn.dataset.resumo||'';
+      verBtn.dataset.expanded='0';
+      verBtn.textContent='📋 Respostas individuais';
+    }else{
+      verBtn.dataset.resumo=existente;
+      corpo.innerHTML=html;
+      verBtn.dataset.expanded='1';
+      verBtn.textContent='← Voltar ao resumo';
+    }
+  }catch(e){console.error(e);alert('Erro ao carregar respostas.');}
 }
 
 function copiarLink(url){
