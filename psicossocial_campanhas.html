@@ -148,6 +148,40 @@
       <label>Título da campanha *</label>
       <input type="text" id="c-titulo" placeholder="Ex: Avaliação Psicossocial 2025 — 1º Semestre">
     </div>
+
+    <div class="modal-field">
+      <label>Metodologia *</label>
+      <select id="c-metodologia" onchange="onMetodologiaChange()">
+        <option value="COPSOQ-III">COPSOQ-III Versão Curta (23 itens)</option>
+        <option value="COPSOQ-III-Media">COPSOQ-III Versão Média (76 itens) — requer psicólogo</option>
+        <option value="Checklist-NR01">Checklist NR-01 (26 fatores) — pode ser aplicado por técnico</option>
+      </select>
+    </div>
+    <div id="alerta-psicologo" style="display:none;background:#2a1530;border:1px solid #5a2550;border-radius:6px;padding:10px 14px;font-size:12px;color:#c878e8;margin-top:-8px;margin-bottom:14px;">
+      ⚠️ <strong>Atenção:</strong> O COPSOQ-III é um instrumento psicológico. Sua aplicação formal deve ser conduzida ou supervisionada por psicólogo habilitado junto ao CFP (Conselho Federal de Psicologia).
+    </div>
+
+    <div class="modal-grid-2">
+      <div class="modal-field">
+        <label>Nome do aplicador *</label>
+        <input type="text" id="c-aplicador-nome" placeholder="Nome completo">
+      </div>
+      <div class="modal-field">
+        <label id="label-registro">Registro profissional *</label>
+        <input type="text" id="c-aplicador-registro" placeholder="CRP 00/00000">
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Tipo de aplicador *</label>
+      <select id="c-aplicador-tipo" onchange="onAplicadorTipoChange()">
+        <option value="">Selecione...</option>
+        <option value="psicologo">Psicólogo(a)</option>
+        <option value="tecnico">Técnico(a) de Segurança do Trabalho</option>
+        <option value="engenheiro">Engenheiro(a) de Segurança do Trabalho</option>
+        <option value="medico">Médico(a) do Trabalho</option>
+      </select>
+    </div>
+
     <div class="modal-field">
       <label>Instruções para os respondentes</label>
       <textarea id="c-instrucoes" placeholder="Explique o objetivo da avaliação, garanta o sigilo, informe o prazo..."></textarea>
@@ -222,7 +256,30 @@ const params=new URLSearchParams(window.location.search);
 const empresaId=params.get('empresa_id');
 if(!empresaId)window.location.href='empresas.html';
 
-let empresa=null,funcoes=[],campanhas=[],campanhaEditandoId=null,resultadoAtualCampanhaFuncaoId=null;
+let empresa=null,funcoes=[],campanhas=[],campanhaEditandoId=null,resultadoAtualCampanhaFuncaoId=null,resultadoAtualMetodologia=null;
+
+function onMetodologiaChange(){
+  const met=document.getElementById('c-metodologia').value;
+  const alerta=document.getElementById('alerta-psicologo');
+  const labelReg=document.getElementById('label-registro');
+  const tipSel=document.getElementById('c-aplicador-tipo');
+  alerta.style.display=(met==='COPSOQ-III'||met==='COPSOQ-III-Media')?'block':'none';
+  if(met==='COPSOQ-III-Media'){
+    tipSel.value='psicologo';
+    onAplicadorTipoChange();
+  }
+}
+
+function onAplicadorTipoChange(){
+  const tipo=document.getElementById('c-aplicador-tipo').value;
+  const labelReg=document.getElementById('label-registro');
+  const reg=document.getElementById('c-aplicador-registro');
+  if(tipo==='psicologo'){labelReg.textContent='Registro CRP *';reg.placeholder='CRP 00/00000';}
+  else if(tipo==='tecnico'){labelReg.textContent='Registro CREA/MTE *';reg.placeholder='MTE 000000';}
+  else if(tipo==='engenheiro'){labelReg.textContent='Registro CREA *';reg.placeholder='CREA 000000';}
+  else if(tipo==='medico'){labelReg.textContent='Registro CRM *';reg.placeholder='CRM/UF 000000';}
+  else{labelReg.textContent='Registro profissional *';reg.placeholder='';}
+}
 
 function h(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function escHtml(s){return h(s);}
@@ -279,10 +336,13 @@ function renderCampanhas(){
     const totalMeta=c.funcoes?.reduce((acc,f)=>acc+f.meta_respondentes,0)||0;
     const pct=totalMeta>0?Math.round(totalResp/totalMeta*100):0;
 
+    const responderBase=`${window.location.origin}${window.location.pathname.replace('psicossocial_campanhas.html','psicossocial_responder.html')}`;
+    const metNome={'COPSOQ-III':'COPSOQ-III Curta','COPSOQ-III-Media':'COPSOQ-III Média','Checklist-NR01':'Checklist NR-01'};
     const funcoesHtml=(c.funcoes||[]).map(cf=>{
       const func=funcoes.find(f=>f.id===cf.funcao_id);
       const pctF=cf.meta_respondentes>0?Math.round(cf.total_respondentes/cf.meta_respondentes*100):0;
-      const linkUrl=`${window.location.origin}${window.location.pathname.replace('psicossocial_campanhas.html','psicossocial_responder.html')}?token=${cf.token}`;
+      const linkUrl=`${responderBase}?token=${cf.token}`;
+      const linkManual=`${responderBase}?token=${cf.token}&modo=manual`;
       return`<div class="funcao-progress">
         <div class="funcao-progress-nome">${h(func?.nome_funcao||'Função')}</div>
         <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pctF}%;"></div></div>
@@ -290,8 +350,9 @@ function renderCampanhas(){
           <span>${cf.total_respondentes} respondentes</span>
           <span>${pctF}%</span>
         </div>
-        <div class="funcao-link" onclick="copiarLink('${linkUrl}')">📋 Copiar link</div>
-        ${c.status==='Encerrada'?`<div class="funcao-link" onclick="verResultados(${cf.id})">📊 Ver resultados</div>`:''}
+        ${c.status==='Ativa'?`<div class="funcao-link" onclick="copiarLink('${linkUrl}')">📋 Copiar link</div>`:''}
+        ${c.status==='Ativa'?`<div class="funcao-link" onclick="window.open('${linkManual}','_blank')">✏️ Lançar manual</div>`:''}
+        ${c.status==='Encerrada'?`<div class="funcao-link" onclick="verResultados(${cf.id},'${escHtml(c.metodologia||'COPSOQ-III')}')">📊 Ver resultados</div>`:''}
       </div>`;
     }).join('');
 
@@ -301,12 +362,14 @@ function renderCampanhas(){
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
             <div class="campanha-titulo">${h(c.titulo)}</div>
             <span class="status-badge status-${h(c.status)}">${h(c.status)}</span>
+            <span class="status-badge" style="background:#1a2540;color:#7aabf7;border:1px solid #2a4070;">${h(metNome[c.metodologia]||c.metodologia||'COPSOQ-III')}</span>
           </div>
           <div class="campanha-meta">
             <span>📅 ${inicio} → ${fim}</span>
             <span>⏱ Prazo mínimo: ${c.prazo_minimo_dias} dias</span>
             <span>👥 ${totalResp}/${totalMeta} respondentes (${pct}%)</span>
             <span>🔧 ${c.funcoes?.length||0} função(ões)</span>
+            ${c.aplicador_nome?`<span>👤 ${h(c.aplicador_nome)} (${h(c.aplicador_registro||'')})</span>`:''}
           </div>
         </div>
         <div class="campanha-actions">
@@ -329,6 +392,13 @@ function abrirModalCampanha(){
   document.getElementById('modal-titulo-texto').textContent='Nova campanha';
   document.getElementById('label-salvar-campanha').textContent='Salvar campanha';
   document.getElementById('c-titulo').value='';
+  document.getElementById('c-metodologia').value='COPSOQ-III';
+  document.getElementById('c-aplicador-nome').value='';
+  document.getElementById('c-aplicador-registro').value='';
+  document.getElementById('c-aplicador-tipo').value='';
+  document.getElementById('alerta-psicologo').style.display='block';
+  document.getElementById('label-registro').textContent='Registro profissional *';
+  document.getElementById('c-aplicador-registro').placeholder='CRP 00/00000';
   document.getElementById('c-instrucoes').value='Prezado(a) colaborador(a),\n\nEsta avaliação é parte do Programa de Gerenciamento de Riscos (PGR) da empresa. Suas respostas são totalmente anônimas e serão analisadas de forma coletiva por função. Não há respostas certas ou erradas — responda com sinceridade.\n\nObrigado pela sua participação!';
   document.getElementById('c-inicio').value=new Date().toISOString().slice(0,10);
   document.getElementById('c-fim').value='';
@@ -380,6 +450,16 @@ async function salvarCampanha(){
   document.getElementById('spinner-campanha').classList.add('show');
   setStatus('status-campanha','info','Salvando campanha...');
 
+  const aplicadorNome=document.getElementById('c-aplicador-nome').value.trim();
+  const aplicadorReg=document.getElementById('c-aplicador-registro').value.trim();
+  const aplicadorTipo=document.getElementById('c-aplicador-tipo').value;
+  const metodologia=document.getElementById('c-metodologia').value;
+
+  if(!aplicadorNome){setStatus('status-campanha','error','Informe o nome do aplicador.');return;}
+  if(!aplicadorTipo){setStatus('status-campanha','error','Selecione o tipo de aplicador.');return;}
+  if(!aplicadorReg){setStatus('status-campanha','error','Informe o registro profissional do aplicador.');return;}
+  if((metodologia==='COPSOQ-III'||metodologia==='COPSOQ-III-Media')&&aplicadorTipo!=='psicologo'&&!confirm('O COPSOQ-III deve ser aplicado por psicólogo. Deseja continuar mesmo assim?'))return;
+
   const payload={
     empresa_id:parseInt(empresaId),
     titulo,
@@ -389,7 +469,10 @@ async function salvarCampanha(){
     prazo_minimo_dias:prazo,
     envio_email:document.getElementById('toggle-email').classList.contains('on'),
     envio_whatsapp:document.getElementById('toggle-whatsapp').classList.contains('on'),
-    metodologia:'COPSOQ-III',
+    metodologia,
+    aplicador_nome:aplicadorNome,
+    aplicador_registro:aplicadorReg,
+    aplicador_tipo:aplicadorTipo,
     status:'Rascunho',
     ativo:true,
     atualizado_em:new Date().toISOString()
@@ -435,6 +518,12 @@ async function editarCampanha(id){
   document.getElementById('modal-titulo-texto').textContent='Editar campanha';
   document.getElementById('label-salvar-campanha').textContent='Salvar alterações';
   document.getElementById('c-titulo').value=c.titulo||'';
+  document.getElementById('c-metodologia').value=c.metodologia||'COPSOQ-III';
+  document.getElementById('c-aplicador-nome').value=c.aplicador_nome||'';
+  document.getElementById('c-aplicador-registro').value=c.aplicador_registro||'';
+  document.getElementById('c-aplicador-tipo').value=c.aplicador_tipo||'';
+  onMetodologiaChange();
+  onAplicadorTipoChange();
   document.getElementById('c-instrucoes').value=c.instrucoes||'';
   document.getElementById('c-inicio').value=c.data_inicio||'';
   document.getElementById('c-fim').value=c.data_fim||'';
@@ -473,10 +562,12 @@ async function encerrarCampanha(id){
   try{
     await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{method:'PATCH',headers:headers(),body:JSON.stringify({status:'Encerrada',atualizado_em:new Date().toISOString()})});
     await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${id}`,{method:'PATCH',headers:headers(),body:JSON.stringify({status:'Concluída'})});
-    // Calcula resultados para cada função
+    // Calcula resultados para cada função conforme metodologia
     const c2=campanhas.find(x=>x.id===id);
+    const met=c2?.metodologia||'COPSOQ-III';
     for(const cf of c2?.funcoes||[]){
-      await calcularResultados(cf.id);
+      if(met==='Checklist-NR01') await calcularResultadosChecklist(cf.id);
+      else await calcularResultados(cf.id,met);
     }
     await carregarCampanhas();
     toast('Campanha encerrada e resultados calculados!');
@@ -484,70 +575,102 @@ async function encerrarCampanha(id){
 }
 
 // ── CÁLCULO DE RESULTADOS ────────────────────────────────────
-async function calcularResultados(campanhaFuncaoId){
+// Mapeamento de itens por dimensão para COPSOQ-III Média
+const DIMS_MEDIA={
+  exig_quantitativas:   {campos:['q01','q02','q03','q04'],tipo:'demanda'},
+  ritmo_trabalho:       {campos:['q05'],tipo:'demanda'},
+  exig_cognitivas:      {campos:['q06','q07','q08','q09'],tipo:'demanda'},
+  exig_emocionais:      {campos:['q10','q11','q12','q13'],tipo:'demanda'},
+  esconder_emocoes:     {campos:['q14','q15'],tipo:'demanda'},
+  influencia:           {campos:['q16','q17','q18','q19'],tipo:'recurso'},
+  desenvolvimento:      {campos:['q20','q21','q22','q23'],tipo:'recurso'},
+  significado:          {campos:['q24','q25','q26'],tipo:'recurso'},
+  comprometimento:      {campos:['q27','q28','q29'],tipo:'recurso'},
+  previsibilidade:      {campos:['q30','q31'],tipo:'recurso'},
+  reconhecimento:       {campos:['q32','q33','q34'],tipo:'recurso'},
+  clareza_papel:        {campos:['q35','q36','q37','q38'],tipo:'recurso'},
+  conflito_papel:       {campos:['q39','q40','q41','q42'],tipo:'demanda'},
+  qualidade_lideranca:  {campos:['q43','q44','q45','q46'],tipo:'recurso'},
+  suporte_chefia:       {campos:['q47','q48','q49'],tipo:'recurso'},
+  suporte_colegas:      {campos:['q50','q51','q52'],tipo:'recurso'},
+  comunidade_social:    {campos:['q53','q54','q55'],tipo:'recurso'},
+  satisfacao:           {campos:['q56','q57','q58','q59'],tipo:'recurso'},
+  conflito_trab_familia:{campos:['q60','q61','q62'],tipo:'demanda'},
+  valores:              {campos:['q63','q64','q65'],tipo:'recurso'},
+  saude_geral:          {campos:['q66','q67','q68','q69'],tipo:'recurso'},
+  burnout:              {campos:['q70','q71','q72','q73'],tipo:'demanda'},
+  stress:               {campos:['q74','q75','q76'],tipo:'demanda'},
+};
+
+async function calcularResultados(campanhaFuncaoId,metodologia='COPSOQ-III'){
   try{
     const res=await fetch(`${SUPA_URL}/rest/v1/respostas_copsoq?campanha_funcao_id=eq.${campanhaFuncaoId}&concluido=eq.true&select=*`,{headers:headers()});
     const respostas=await res.json();
     if(!respostas.length)return;
     const n=respostas.length;
 
-    function media(campos){
-      const vals=respostas.flatMap(r=>campos.map(c=>r[c]).filter(v=>v!=null));
-      if(!vals.length)return null;
-      return vals.reduce((a,b)=>a+b,0)/vals.length;
-    }
-    // Converte média (1-5) para score 0-100
     function score(m){return m!=null?Math.round((m-1)/4*100):null;}
-    // Classifica risco (para dimensões de demanda: maior = pior; para suporte/satisfação: menor = pior)
     function riscoDemanda(s){if(s==null)return null;if(s>=67)return'Vermelho';if(s>=34)return'Amarelo';return'Verde';}
     function riscoRecurso(s){if(s==null)return null;if(s<=33)return'Vermelho';if(s<=66)return'Amarelo';return'Verde';}
 
-    const scores={
-      demandas_quantitativas: score(media(['d01_ritmo_intenso','d02_tarefas_demais'])),
-      ritmo_trabalho:         score(media(['d03_ritmo_alto'])),
-      exigencias_cognitivas:  score(media(['d04_concentracao','d05_memorizar'])),
-      exigencias_emocionais:  score(media(['d06_emocoes_difusas','d07_situacoes_dificeis'])),
-      autonomia:              score(media(['d08_influencia','d09_decisoes'])),
-      desenvolvimento:        score(media(['d10_aprender','d11_habilidades'])),
-      suporte_colegas:        score(media(['d12_colegas_ajudam','d13_colegas_apoiam'])),
-      suporte_chefia:         score(media(['d14_chefia_ajuda','d15_chefia_apoio'])),
-      qualidade_lideranca:    score(media(['d16_lider_planeja','d17_lider_conflitos'])),
-      inseguranca:            score(media(['d18_perder_emprego','d19_futuro_incerto'])),
-      satisfacao:             score(media(['d20_satisfacao_geral','d21_motivacao'])),
-      burnout:                score(media(['d22_esgotamento','d23_cansaco_emocional'])),
-    };
+    let resultado={campanha_funcao_id:campanhaFuncaoId,total_respondentes:n,calculado_em:new Date().toISOString()};
 
-    const resultado={
-      campanha_funcao_id:campanhaFuncaoId,
-      total_respondentes:n,
-      score_demandas_quantitativas:scores.demandas_quantitativas,
-      score_ritmo_trabalho:scores.ritmo_trabalho,
-      score_exigencias_cognitivas:scores.exigencias_cognitivas,
-      score_exigencias_emocionais:scores.exigencias_emocionais,
-      score_autonomia:scores.autonomia,
-      score_desenvolvimento:scores.desenvolvimento,
-      score_suporte_colegas:scores.suporte_colegas,
-      score_suporte_chefia:scores.suporte_chefia,
-      score_qualidade_lideranca:scores.qualidade_lideranca,
-      score_inseguranca:scores.inseguranca,
-      score_satisfacao:scores.satisfacao,
-      score_burnout:scores.burnout,
-      risco_demandas_quantitativas:riscoDemanda(scores.demandas_quantitativas),
-      risco_ritmo_trabalho:riscoDemanda(scores.ritmo_trabalho),
-      risco_exigencias_cognitivas:riscoDemanda(scores.exigencias_cognitivas),
-      risco_exigencias_emocionais:riscoDemanda(scores.exigencias_emocionais),
-      risco_autonomia:riscoRecurso(scores.autonomia),
-      risco_desenvolvimento:riscoRecurso(scores.desenvolvimento),
-      risco_suporte_colegas:riscoRecurso(scores.suporte_colegas),
-      risco_suporte_chefia:riscoRecurso(scores.suporte_chefia),
-      risco_qualidade_lideranca:riscoRecurso(scores.qualidade_lideranca),
-      risco_inseguranca:riscoDemanda(scores.inseguranca),
-      risco_satisfacao:riscoRecurso(scores.satisfacao),
-      risco_burnout:riscoDemanda(scores.burnout),
-      calculado_em:new Date().toISOString()
-    };
+    if(metodologia==='COPSOQ-III-Media'){
+      // Calcula 23 dimensões a partir de respostas_json
+      function mediaDim(campos){
+        const vals=respostas.flatMap(r=>{
+          const rj=r.respostas_json||{};
+          return campos.map(c=>rj[c]).filter(v=>v!=null&&v>=1&&v<=5);
+        });
+        if(!vals.length)return null;
+        return vals.reduce((a,b)=>a+b,0)/vals.length;
+      }
+      const resultadosJson={};
+      for(const [dim,def] of Object.entries(DIMS_MEDIA)){
+        const m=mediaDim(def.campos);
+        const s=score(m);
+        const r=def.tipo==='demanda'?riscoDemanda(s):riscoRecurso(s);
+        resultadosJson[`score_${dim}`]=s;
+        resultadosJson[`risco_${dim}`]=r;
+      }
+      resultado.resultados_json=resultadosJson;
+    }else{
+      // COPSOQ-III Curta — lógica original com colunas d01-d23
+      function media(campos){
+        const vals=respostas.flatMap(r=>campos.map(c=>r[c]).filter(v=>v!=null));
+        if(!vals.length)return null;
+        return vals.reduce((a,b)=>a+b,0)/vals.length;
+      }
+      const s={
+        demandas_quantitativas: score(media(['d01_ritmo_intenso','d02_tarefas_demais'])),
+        ritmo_trabalho:         score(media(['d03_ritmo_alto'])),
+        exigencias_cognitivas:  score(media(['d04_concentracao','d05_memorizar'])),
+        exigencias_emocionais:  score(media(['d06_emocoes_difusas','d07_situacoes_dificeis'])),
+        autonomia:              score(media(['d08_influencia','d09_decisoes'])),
+        desenvolvimento:        score(media(['d10_aprender','d11_habilidades'])),
+        suporte_colegas:        score(media(['d12_colegas_ajudam','d13_colegas_apoiam'])),
+        suporte_chefia:         score(media(['d14_chefia_ajuda','d15_chefia_apoio'])),
+        qualidade_lideranca:    score(media(['d16_lider_planeja','d17_lider_conflitos'])),
+        inseguranca:            score(media(['d18_perder_emprego','d19_futuro_incerto'])),
+        satisfacao:             score(media(['d20_satisfacao_geral','d21_motivacao'])),
+        burnout:                score(media(['d22_esgotamento','d23_cansaco_emocional'])),
+      };
+      Object.assign(resultado,{
+        score_demandas_quantitativas:s.demandas_quantitativas,score_ritmo_trabalho:s.ritmo_trabalho,
+        score_exigencias_cognitivas:s.exigencias_cognitivas,score_exigencias_emocionais:s.exigencias_emocionais,
+        score_autonomia:s.autonomia,score_desenvolvimento:s.desenvolvimento,score_suporte_colegas:s.suporte_colegas,
+        score_suporte_chefia:s.suporte_chefia,score_qualidade_lideranca:s.qualidade_lideranca,
+        score_inseguranca:s.inseguranca,score_satisfacao:s.satisfacao,score_burnout:s.burnout,
+        risco_demandas_quantitativas:riscoDemanda(s.demandas_quantitativas),risco_ritmo_trabalho:riscoDemanda(s.ritmo_trabalho),
+        risco_exigencias_cognitivas:riscoDemanda(s.exigencias_cognitivas),risco_exigencias_emocionais:riscoDemanda(s.exigencias_emocionais),
+        risco_autonomia:riscoRecurso(s.autonomia),risco_desenvolvimento:riscoRecurso(s.desenvolvimento),
+        risco_suporte_colegas:riscoRecurso(s.suporte_colegas),risco_suporte_chefia:riscoRecurso(s.suporte_chefia),
+        risco_qualidade_lideranca:riscoRecurso(s.qualidade_lideranca),risco_inseguranca:riscoDemanda(s.inseguranca),
+        risco_satisfacao:riscoRecurso(s.satisfacao),risco_burnout:riscoDemanda(s.burnout),
+      });
+    }
 
-    // Upsert resultado
+    // Upsert
     const resExiste=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${campanhaFuncaoId}&select=id`,{headers:headers()});
     const existe=await resExiste.json();
     if(existe.length){
@@ -555,9 +678,46 @@ async function calcularResultados(campanhaFuncaoId){
     }else{
       await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq`,{method:'POST',headers:headers(),body:JSON.stringify(resultado)});
     }
-    // Atualiza total_respondentes em campanha_funcoes
     await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?id=eq.${campanhaFuncaoId}`,{method:'PATCH',headers:headers(),body:JSON.stringify({total_respondentes:n})});
-  }catch(e){console.error('Erro ao calcular resultados:',e);}
+  }catch(e){console.error('Erro ao calcular resultados COPSOQ:',e);}
+}
+
+async function calcularResultadosChecklist(campanhaFuncaoId){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_respostas?campanha_funcao_id=eq.${campanhaFuncaoId}&concluido=eq.true&select=*`,{headers:headers()});
+    const respostas=await res.json();
+    if(!respostas.length)return;
+    const n=respostas.length;
+
+    // Agrega médias por fator
+    const totais={}, contagens={};
+    respostas.forEach(r=>{
+      const rj=r.respostas||{};
+      Object.entries(rj).forEach(([fator,val])=>{
+        if(val!=null&&val>=1&&val<=4){
+          totais[fator]=(totais[fator]||0)+val;
+          contagens[fator]=(contagens[fator]||0)+1;
+        }
+      });
+    });
+    const resultadosJson={};
+    Object.keys(totais).forEach(fator=>{
+      const media=totais[fator]/contagens[fator];
+      const score=Math.round((media-1)/3*100);
+      const risco=score>=67?'Vermelho':score>=34?'Amarelo':'Verde';
+      resultadosJson[fator]={media:parseFloat(media.toFixed(2)),score,risco};
+    });
+
+    const payload={campanha_funcao_id:campanhaFuncaoId,total_respondentes:n,resultados_json:resultadosJson,calculado_em:new Date().toISOString()};
+    const resExiste=await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${campanhaFuncaoId}&select=id`,{headers:headers()});
+    const existe=await resExiste.json();
+    if(existe.length){
+      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${campanhaFuncaoId}`,{method:'PATCH',headers:headers(),body:JSON.stringify(payload)});
+    }else{
+      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados`,{method:'POST',headers:headers(),body:JSON.stringify(payload)});
+    }
+    await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?id=eq.${campanhaFuncaoId}`,{method:'PATCH',headers:headers(),body:JSON.stringify({total_respondentes:n})});
+  }catch(e){console.error('Erro ao calcular resultados Checklist:',e);}
 }
 
 // ── VER RESULTADOS ────────────────────────────────────────────
@@ -576,55 +736,108 @@ const DIMENSOES=[
   {key:'burnout',nome:'Esgotamento (Burnout)',tipo:'demanda'},
 ];
 
-async function verResultados(campanhaFuncaoId){
+async function verResultados(campanhaFuncaoId,metodologia='COPSOQ-III'){
   resultadoAtualCampanhaFuncaoId=campanhaFuncaoId;
+  resultadoAtualMetodologia=metodologia;
   try{
     const cf=campanhas.flatMap(c=>c.funcoes||[]).find(cf=>cf.id===campanhaFuncaoId);
     const func=funcoes.find(f=>f.id===cf?.funcao_id);
     document.getElementById('resultado-titulo').textContent=`Resultados — ${func?.nome_funcao||'Função'}`;
 
-    const res=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${campanhaFuncaoId}&select=*`,{headers:headers()});
-    const data=await res.json();
-    const r=data[0];
-
-    if(!r){
-      document.getElementById('resultado-corpo').innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);">Nenhum resultado calculado. Pode ser que não haja respostas suficientes.</div>`;
+    if(metodologia==='Checklist-NR01'){
+      const res=await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${campanhaFuncaoId}&select=*`,{headers:headers()});
+      const data=await res.json();
+      const r=data[0];
+      if(!r){
+        document.getElementById('resultado-corpo').innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);">Nenhum resultado calculado.</div>`;
+        document.getElementById('btn-integrar-inventario').style.display='none';
+      }else{
+        const rj=r.resultados_json||{};
+        const fatores=Object.entries(rj);
+        const vermelhos=fatores.filter(([,v])=>v.risco==='Vermelho').length;
+        const amarelos=fatores.filter(([,v])=>v.risco==='Amarelo').length;
+        const dimHtml=fatores.map(([fator,v])=>{
+          const cor=v.risco==='Vermelho'?'#e05555':v.risco==='Amarelo'?'#e0a855':'#2dd4a0';
+          return`<div class="dim-card">
+            <div class="dim-nome">${fator}</div>
+            <div class="dim-score" style="color:${cor};">${v.score}%</div>
+            <span class="dim-risco risco-${v.risco}">${v.risco}</span>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px;">↑ maior = pior</div>
+          </div>`;
+        }).join('');
+        document.getElementById('resultado-corpo').innerHTML=`
+          <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+              <div style="font-size:11px;color:var(--text2);">Respondentes</div>
+              <div style="font-size:22px;font-weight:600;">${r.total_respondentes}</div>
+            </div>
+            <div style="background:#2a1515;border:1px solid #4a2020;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+              <div style="font-size:11px;color:#e05555;">Fatores em risco alto</div>
+              <div style="font-size:22px;font-weight:600;color:#e05555;">${vermelhos}</div>
+            </div>
+            <div style="background:#2a2010;border:1px solid #4a3a10;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+              <div style="font-size:11px;color:#e0a855;">Atenção</div>
+              <div style="font-size:22px;font-weight:600;color:#e0a855;">${amarelos}</div>
+            </div>
+          </div>
+          <div class="dim-grid">${dimHtml}</div>
+          ${r.integrado_inventario?`<div style="margin-top:12px;font-size:12px;color:var(--success);">✓ Integrado em ${new Date(r.data_integracao).toLocaleDateString('pt-BR')}</div>`:''}
+        `;
+        document.getElementById('btn-integrar-inventario').style.display=r.integrado_inventario?'none':'inline-flex';
+      }
     }else{
-      const dimHtml=DIMENSOES.map(d=>{
-        const score=r[`score_${d.key}`];
-        const risco=r[`risco_${d.key}`];
-        const cor=risco==='Verde'?'#2dd4a0':risco==='Amarelo'?'#e0a855':'#e05555';
-        return`<div class="dim-card">
-          <div class="dim-nome">${d.nome}</div>
-          <div class="dim-score" style="color:${cor};">${score!=null?score+'%':'—'}</div>
-          ${risco?`<span class="dim-risco risco-${risco}">${risco}</span>`:''}
-          <div style="font-size:10px;color:var(--text3);margin-top:4px;">${d.tipo==='demanda'?'↑ maior = pior':'↑ maior = melhor'}</div>
-        </div>`;
-      }).join('');
+      const res=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${campanhaFuncaoId}&select=*`,{headers:headers()});
+      const data=await res.json();
+      const r=data[0];
 
-      document.getElementById('resultado-corpo').innerHTML=`
-        <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
-          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
-            <div style="font-size:11px;color:var(--text2);">Respondentes</div>
-            <div style="font-size:22px;font-weight:600;color:var(--text);">${r.total_respondentes}</div>
+      // Para COPSOQ-III Média usa resultados_json; para curta usa colunas individuais
+      const dims=metodologia==='COPSOQ-III-Media'
+        ? Object.entries(DIMS_MEDIA).map(([k,def])=>({key:k,nome:k.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase()),tipo:def.tipo}))
+        : DIMENSOES;
+      const getRisco=(r,k)=>metodologia==='COPSOQ-III-Media'?(r?.resultados_json?.[`risco_${k}`]):r?.[`risco_${k}`];
+      const getScore=(r,k)=>metodologia==='COPSOQ-III-Media'?(r?.resultados_json?.[`score_${k}`]):r?.[`score_${k}`];
+
+      if(!r){
+        document.getElementById('resultado-corpo').innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);">Nenhum resultado calculado.</div>`;
+      }else{
+        const dimHtml=dims.map(d=>{
+          const score=getScore(r,d.key);
+          const risco=getRisco(r,d.key);
+          const cor=risco==='Verde'?'#2dd4a0':risco==='Amarelo'?'#e0a855':'#e05555';
+          return`<div class="dim-card">
+            <div class="dim-nome">${d.nome}</div>
+            <div class="dim-score" style="color:${cor};">${score!=null?score+'%':'—'}</div>
+            ${risco?`<span class="dim-risco risco-${risco}">${risco}</span>`:''}
+            <div style="font-size:10px;color:var(--text3);margin-top:4px;">${d.tipo==='demanda'?'↑ maior = pior':'↑ maior = melhor'}</div>
+          </div>`;
+        }).join('');
+        const vermelhos=dims.filter(d=>getRisco(r,d.key)==='Vermelho').length;
+        const amarelos=dims.filter(d=>getRisco(r,d.key)==='Amarelo').length;
+        const verdes=dims.filter(d=>getRisco(r,d.key)==='Verde').length;
+        document.getElementById('resultado-corpo').innerHTML=`
+          <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+              <div style="font-size:11px;color:var(--text2);">Respondentes</div>
+              <div style="font-size:22px;font-weight:600;">${r.total_respondentes}</div>
+            </div>
+            <div style="background:#2a1515;border:1px solid #4a2020;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+              <div style="font-size:11px;color:#e05555;">Dimensões em risco</div>
+              <div style="font-size:22px;font-weight:600;color:#e05555;">${vermelhos}</div>
+            </div>
+            <div style="background:#2a2010;border:1px solid #4a3a10;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+              <div style="font-size:11px;color:#e0a855;">Atenção</div>
+              <div style="font-size:22px;font-weight:600;color:#e0a855;">${amarelos}</div>
+            </div>
+            <div style="background:#0e2820;border:1px solid #1a4a38;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
+              <div style="font-size:11px;color:#2dd4a0;">Adequadas</div>
+              <div style="font-size:22px;font-weight:600;color:#2dd4a0;">${verdes}</div>
+            </div>
           </div>
-          <div style="background:#2a1515;border:1px solid #4a2020;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
-            <div style="font-size:11px;color:#e05555;">Dimensões em risco</div>
-            <div style="font-size:22px;font-weight:600;color:#e05555;">${DIMENSOES.filter(d=>r[`risco_${d.key}`]==='Vermelho').length}</div>
-          </div>
-          <div style="background:#2a2010;border:1px solid #4a3a10;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
-            <div style="font-size:11px;color:#e0a855;">Atenção</div>
-            <div style="font-size:22px;font-weight:600;color:#e0a855;">${DIMENSOES.filter(d=>r[`risco_${d.key}`]==='Amarelo').length}</div>
-          </div>
-          <div style="background:#0e2820;border:1px solid #1a4a38;border-radius:8px;padding:12px 16px;flex:1;min-width:120px;">
-            <div style="font-size:11px;color:#2dd4a0;">Adequadas</div>
-            <div style="font-size:22px;font-weight:600;color:#2dd4a0;">${DIMENSOES.filter(d=>r[`risco_${d.key}`]==='Verde').length}</div>
-          </div>
-        </div>
-        <div class="dim-grid">${dimHtml}</div>
-        ${r.integrado_inventario?`<div style="margin-top:12px;font-size:12px;color:var(--success);">✓ Já integrado ao inventário de riscos em ${new Date(r.data_integracao).toLocaleDateString('pt-BR')}</div>`:''}
-      `;
-      document.getElementById('btn-integrar-inventario').style.display=r.integrado_inventario?'none':'inline-flex';
+          <div class="dim-grid">${dimHtml}</div>
+          ${r.integrado_inventario?`<div style="margin-top:12px;font-size:12px;color:var(--success);">✓ Integrado em ${new Date(r.data_integracao).toLocaleDateString('pt-BR')}</div>`:''}
+        `;
+        document.getElementById('btn-integrar-inventario').style.display=r.integrado_inventario?'none':'inline-flex';
+      }
     }
     document.getElementById('modal-resultado').classList.add('show');
   }catch(e){console.error(e);}
@@ -633,8 +846,7 @@ async function verResultados(campanhaFuncaoId){
 async function verTodosResultados(campanhaId){
   const c=campanhas.find(x=>x.id===campanhaId);
   if(!c||!c.funcoes?.length)return;
-  // Abre o primeiro que tiver resultado
-  verResultados(c.funcoes[0].id);
+  verResultados(c.funcoes[0].id,c.metodologia||'COPSOQ-III');
 }
 
 // ── INTEGRAR AO INVENTÁRIO ────────────────────────────────────
@@ -650,9 +862,14 @@ async function integrarInventario(){
     const resultado=dataResultado[0];
     if(!resultado)throw new Error('Resultado não encontrado. Encerre a campanha primeiro.');
 
-    // 2. Busca campanha_funcao para obter funcao_id
+    // 2. Busca campanha_funcao para obter funcao_id e campanha
     const cf=campanhas.flatMap(c=>c.funcoes||[]).find(x=>x.id===resultadoAtualCampanhaFuncaoId);
     if(!cf)throw new Error('Função da campanha não encontrada.');
+    const campanha=campanhas.find(c=>c.id===cf.campanha_id);
+    const campanhaId=cf.campanha_id;
+
+    // Remove riscos de campanhas anteriores desta função para substituir
+    await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${cf.funcao_id}&origem_campanha_id=not.is.null&origem_campanha_id=neq.${campanhaId}`,{method:'DELETE',headers:headers()});
 
     // 3. Busca categoria psicossocial
     const resCat=await fetch(`${SUPA_URL}/rest/v1/categorias_risco?nome=eq.Psicossocial&ativo=eq.true&select=id`,{headers:headers()});
@@ -747,15 +964,13 @@ async function integrarInventario(){
       );
       const existente=await resCheck.json();
       if(existente.length){
-        // Já existe — atualiza probabilidade, severidade e num_expostos
         await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${existente[0].id}`,{
           method:'PATCH',headers:headers(),
-          body:JSON.stringify({probabilidade,severidade,nivel_risco:nivelRisco,num_expostos:numExpostos,atualizado_em:new Date().toISOString()})
+          body:JSON.stringify({probabilidade,severidade,nivel_risco:nivelRisco,num_expostos:numExpostos,origem_campanha_id:campanhaId,atualizado_em:new Date().toISOString()})
         });
         continue;
       }
 
-      // Insere em funcao_riscos com todos os dados preenchidos
       const resInsert=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
         method:'POST',
         headers:{...headers(),'Prefer':'return=representation'},
@@ -763,10 +978,10 @@ async function integrarInventario(){
           funcao_id:cf.funcao_id,
           risco_id:riscoEncontrado.id,
           perigo_id:perigoEncontrado?.id||null,
-          probabilidade,
-          severidade,
+          probabilidade,severidade,
           nivel_risco:nivelRisco,
           num_expostos:numExpostos,
+          origem_campanha_id:campanhaId,
           propagado_do_setor:false,
           ativo:true
         })
@@ -799,7 +1014,11 @@ async function excluirCampanha(id,titulo){
     for(const cf of cfs){
       await fetch(`${SUPA_URL}/rest/v1/respostas_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
       await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
+      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_respostas?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
+      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
     }
+    // Remove riscos do PGR gerados por esta campanha
+    await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?origem_campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
     await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
     await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{method:'DELETE',headers:headers()});
     await carregarCampanhas();
@@ -808,14 +1027,24 @@ async function excluirCampanha(id,titulo){
 }
 
 async function arquivarCampanha(id,titulo){
-  if(!confirm(`Arquivar a campanha "${titulo}"?\n\nEla não aparecerá mais no PGR mas os dados serão preservados.`))return;
+  if(!confirm(`Arquivar a campanha "${titulo}"?\n\nTodas as respostas serão removidas e os riscos psicossociais gerados serão removidos do PGR.`))return;
   try{
+    const cfs=campanhas.find(c=>c.id===id)?.funcoes||[];
+    for(const cf of cfs){
+      await fetch(`${SUPA_URL}/rest/v1/respostas_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
+      await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
+      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_respostas?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
+      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
+    }
+    // Remove riscos do PGR gerados por esta campanha
+    await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?origem_campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
+    await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
     await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{
       method:'PATCH',headers:headers(),
       body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})
     });
     await carregarCampanhas();
-    toast('Campanha arquivada. Não aparecerá mais no PGR.');
+    toast('Campanha arquivada. Respostas e riscos do PGR removidos.');
   }catch(e){alert('Erro ao arquivar: '+e.message);}
 }
 
