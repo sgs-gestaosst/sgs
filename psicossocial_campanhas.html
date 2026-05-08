@@ -870,108 +870,120 @@ async function integrarInventario(){
   document.getElementById('spinner-integrar').classList.add('show');
 
   try{
-    // 1. Busca resultado da avaliação
-    const resResultado=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}&select=*`,{headers:headers()});
-    const dataResultado=await resResultado.json();
-    const resultado=dataResultado[0];
-    if(!resultado)throw new Error('Resultado não encontrado. Encerre a campanha primeiro.');
-
-    // 2. Busca campanha_funcao para obter funcao_id e campanha
     const cf=campanhas.flatMap(c=>c.funcoes||[]).find(x=>x.id===resultadoAtualCampanhaFuncaoId);
     if(!cf)throw new Error('Função da campanha não encontrada.');
-    const campanha=campanhas.find(c=>c.id===cf.campanha_id);
     const campanhaId=cf.campanha_id;
 
     // Remove riscos de campanhas anteriores desta função para substituir
     await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${cf.funcao_id}&origem_campanha_id=not.is.null&origem_campanha_id=neq.${campanhaId}`,{method:'DELETE',headers:headers()});
 
-    // 3. Busca categoria psicossocial
     const resCat=await fetch(`${SUPA_URL}/rest/v1/categorias_risco?nome=eq.Psicossocial&ativo=eq.true&select=id`,{headers:headers()});
     const cats=await resCat.json();
     const catId=cats[0]?.id;
     if(!catId)throw new Error('Categoria Psicossocial não encontrada no catálogo.');
 
-    // 4. Busca todos os riscos psicossociais de uma vez
     const resRiscos=await fetch(`${SUPA_URL}/rest/v1/riscos?categoria_risco_id=eq.${catId}&ativo=eq.true&select=id,codigo_risco`,{headers:headers()});
     const todosRiscos=await resRiscos.json();
-
-    // 5. Busca todos os perigos psicossociais de uma vez
     const resPerigos=await fetch(`${SUPA_URL}/rest/v1/perigos?categoria_risco_id=eq.${catId}&ativo=eq.true&select=id,nome`,{headers:headers()});
     const todosPerigos=await resPerigos.json();
 
-    // 6. Mapeamento dimensão COPSOQ → código do risco
-    const mapaRisco={
-      demandas_quantitativas:'PSI-003',
-      ritmo_trabalho:'PSI-004',
-      exigencias_cognitivas:'PSI-003',
-      exigencias_emocionais:'PSI-006',
-      autonomia:'PSI-004',
-      desenvolvimento:'PSI-004',
-      suporte_colegas:'PSI-001',
-      suporte_chefia:'PSI-001',
-      qualidade_lideranca:'PSI-001',
-      inseguranca:'PSI-008',
-      satisfacao:'PSI-004',
-      burnout:'PSI-003',
-    };
-
-    // 7. Mapeamento dimensão → nome do perigo
-    const mapaPerigo={
-      demandas_quantitativas:'Sobrecarga quantitativa de trabalho',
-      ritmo_trabalho:'Pressão por metas e produtividade',
-      exigencias_cognitivas:'Sobrecarga qualitativa de trabalho',
-      exigencias_emocionais:'Trabalho emocional',
-      autonomia:'Falta de autonomia e controle',
-      desenvolvimento:'Falta de perspectiva de carreira',
-      suporte_colegas:'Falta de suporte dos colegas',
-      suporte_chefia:'Falta de suporte da liderança',
-      qualidade_lideranca:'Falta de suporte da liderança',
-      inseguranca:'Instabilidade no emprego',
-      satisfacao:'Nao reconhecimento profissional',
-      burnout:'Sobrecarga quantitativa de trabalho',
-    };
-
-    // 8. Filtra apenas dimensões em risco (Vermelho ou Amarelo)
-    const dimensoesEmRisco=DIMENSOES.filter(d=>['Vermelho','Amarelo'].includes(resultado[`risco_${d.key}`]));
-
-    if(!dimensoesEmRisco.length){
-      alert('Nenhuma dimensão em risco identificada para integrar.');
-      return;
-    }
-
-    // Busca número de funcionários previstos da função para num_expostos
-    const resFuncSet=await fetch(
-      `${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${cf.funcao_id}&ativo=eq.true&select=num_funcionarios_previsto`,
-      {headers:headers()}
-    );
+    const resFuncSet=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${cf.funcao_id}&ativo=eq.true&select=num_funcionarios_previsto`,{headers:headers()});
     const funcSets=await resFuncSet.json();
     const numExpostos=funcSets.reduce((acc,fs)=>acc+(fs.num_funcionarios_previsto||0),0)||1;
 
-    let integrados=0;
-    for(const dim of dimensoesEmRisco){
-      const codigoBuscado=mapaRisco[dim.key];
-      const nomePericoBuscado=mapaPerigo[dim.key];
-      const classificacao=resultado[`risco_${dim.key}`]; // Vermelho ou Amarelo
+    const riscoOrdem={Verde:0,Amarelo:1,Vermelho:2};
+    let itensEmRisco=[];
 
-      // Probabilidade e Severidade baseadas na classificação COPSOQ
-      // Vermelho → Probabilidade 4 (Alta) + Severidade 4 (Grave)
-      // Amarelo  → Probabilidade 3 (Média) + Severidade 3 (Moderada)
+    if(resultadoAtualMetodologia==='Checklist-NR01'){
+      const resR=await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}&select=*`,{headers:headers()});
+      const dataR=await resR.json();
+      const resultado=dataR[0];
+      if(!resultado)throw new Error('Resultado não encontrado. Encerre a campanha primeiro.');
+      const rj=resultado.resultados_json||{};
+
+      // Mapeamento bloco → PSI: usa o pior risco entre os fatores do bloco
+      const MAPA_BLOCOS=[
+        {fatores:['B1F1','B1F2','B1F3','B1F4'],codigo:'PSI-003',perigo:'Sobrecarga quantitativa de trabalho'},
+        {fatores:['B2F1','B2F2','B2F3'],        codigo:'PSI-004',perigo:'Falta de autonomia e controle'},
+        {fatores:['B3F1','B3F2','B3F3'],        codigo:'PSI-001',perigo:'Falta de suporte da liderança'},
+        {fatores:['B4F1','B4F2','B4F3','B4F4'],codigo:'PSI-006',perigo:'Trabalho emocional'},
+        {fatores:['B5F1','B5F2','B5F3'],        codigo:'PSI-004',perigo:'Falta de autonomia e controle'},
+        {fatores:['B6F1','B6F2','B6F3'],        codigo:'PSI-004',perigo:'Nao reconhecimento profissional'},
+        {fatores:['B7F1','B7F2','B7F3'],        codigo:'PSI-008',perigo:'Instabilidade no emprego'},
+        {fatores:['B8F1','B8F2','B8F3'],        codigo:'PSI-003',perigo:'Sobrecarga quantitativa de trabalho'},
+      ];
+      MAPA_BLOCOS.forEach(({fatores,codigo,perigo})=>{
+        let pior='Verde';
+        fatores.forEach(f=>{const r=rj[f]?.risco||'Verde';if((riscoOrdem[r]||0)>(riscoOrdem[pior]||0))pior=r;});
+        if(pior!=='Verde')itensEmRisco.push({codigo,perigo,classificacao:pior});
+      });
+      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}`,{
+        method:'PATCH',headers:headers(),body:JSON.stringify({integrado_inventario:true,data_integracao:new Date().toISOString()})
+      });
+    }else{
+      // COPSOQ — curta ou média
+      const resR=await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}&select=*`,{headers:headers()});
+      const dataR=await resR.json();
+      const resultado=dataR[0];
+      if(!resultado)throw new Error('Resultado não encontrado. Encerre a campanha primeiro.');
+
+      const mapaRisco={
+        demandas_quantitativas:'PSI-003',ritmo_trabalho:'PSI-004',exigencias_cognitivas:'PSI-003',
+        exigencias_emocionais:'PSI-006',autonomia:'PSI-004',desenvolvimento:'PSI-004',
+        suporte_colegas:'PSI-001',suporte_chefia:'PSI-001',qualidade_lideranca:'PSI-001',
+        inseguranca:'PSI-008',satisfacao:'PSI-004',burnout:'PSI-003',
+        exig_quantitativas:'PSI-003',exig_cognitivas:'PSI-003',exig_emocionais:'PSI-006',
+        esconder_emocoes:'PSI-006',influencia:'PSI-004',significado:'PSI-004',
+        comprometimento:'PSI-004',previsibilidade:'PSI-004',reconhecimento:'PSI-004',
+        clareza_papel:'PSI-004',conflito_papel:'PSI-004',comunidade_social:'PSI-001',
+        conflito_trab_familia:'PSI-006',valores:'PSI-004',saude_geral:'PSI-003',stress:'PSI-003',
+      };
+      const mapaPerigo={
+        demandas_quantitativas:'Sobrecarga quantitativa de trabalho',
+        ritmo_trabalho:'Pressão por metas e produtividade',
+        exigencias_cognitivas:'Sobrecarga qualitativa de trabalho',
+        exigencias_emocionais:'Trabalho emocional',autonomia:'Falta de autonomia e controle',
+        desenvolvimento:'Falta de perspectiva de carreira',suporte_colegas:'Falta de suporte dos colegas',
+        suporte_chefia:'Falta de suporte da liderança',qualidade_lideranca:'Falta de suporte da liderança',
+        inseguranca:'Instabilidade no emprego',satisfacao:'Nao reconhecimento profissional',
+        burnout:'Sobrecarga quantitativa de trabalho',
+        exig_quantitativas:'Sobrecarga quantitativa de trabalho',exig_cognitivas:'Sobrecarga qualitativa de trabalho',
+        exig_emocionais:'Trabalho emocional',esconder_emocoes:'Trabalho emocional',
+        influencia:'Falta de autonomia e controle',significado:'Nao reconhecimento profissional',
+        comprometimento:'Nao reconhecimento profissional',previsibilidade:'Falta de autonomia e controle',
+        reconhecimento:'Nao reconhecimento profissional',clareza_papel:'Falta de autonomia e controle',
+        conflito_papel:'Falta de autonomia e controle',comunidade_social:'Falta de suporte dos colegas',
+        conflito_trab_familia:'Trabalho emocional',valores:'Nao reconhecimento profissional',
+        saude_geral:'Sobrecarga quantitativa de trabalho',stress:'Sobrecarga quantitativa de trabalho',
+      };
+
+      const isMedia=resultadoAtualMetodologia==='COPSOQ-III-Media';
+      const dimKeys=isMedia?Object.keys(DIMS_MEDIA):DIMENSOES.map(d=>d.key);
+      const getRisco=k=>isMedia?(resultado.resultados_json?.[`risco_${k}`]):(resultado[`risco_${k}`]);
+
+      dimKeys.filter(k=>['Vermelho','Amarelo'].includes(getRisco(k))).forEach(k=>{
+        if(mapaRisco[k])itensEmRisco.push({codigo:mapaRisco[k],perigo:mapaPerigo[k]||'Sobrecarga quantitativa de trabalho',classificacao:getRisco(k)});
+      });
+      await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}`,{
+        method:'PATCH',headers:headers(),body:JSON.stringify({integrado_inventario:true,data_integracao:new Date().toISOString()})
+      });
+    }
+
+    if(!itensEmRisco.length){
+      alert('Nenhum fator em risco identificado para integrar.');
+      return;
+    }
+
+    let integrados=0;
+    for(const {codigo,perigo,classificacao} of itensEmRisco){
       const probabilidade=classificacao==='Vermelho'?4:3;
       const severidade=classificacao==='Vermelho'?4:3;
       const nivelRisco=classificacao==='Vermelho'?'ALTO':'MEDIO';
-      const gutTotal=probabilidade*severidade; // 16 para alto, 9 para médio
 
-      // Encontra o risco pelo código
-      const riscoEncontrado=todosRiscos.find(r=>r.codigo_risco===codigoBuscado);
-      if(!riscoEncontrado){
-        console.warn(`Risco ${codigoBuscado} não encontrado para dimensão ${dim.key}`);
-        continue;
-      }
+      const riscoEncontrado=todosRiscos.find(r=>r.codigo_risco===codigo);
+      if(!riscoEncontrado){console.warn(`Risco ${codigo} não encontrado`);continue;}
+      const perigoEncontrado=todosPerigos.find(p=>p.nome===perigo);
 
-      // Encontra o perigo pelo nome
-      const perigoEncontrado=todosPerigos.find(p=>p.nome===nomePericoBuscado);
-
-      // Verifica se já existe em funcao_riscos
       const resCheck=await fetch(
         `${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${cf.funcao_id}&risco_id=eq.${riscoEncontrado.id}&ativo=eq.true&select=id`,
         {headers:headers()}
@@ -984,30 +996,12 @@ async function integrarInventario(){
         });
         continue;
       }
-
       const resInsert=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
-        method:'POST',
-        headers:{...headers(),'Prefer':'return=representation'},
-        body:JSON.stringify({
-          funcao_id:cf.funcao_id,
-          risco_id:riscoEncontrado.id,
-          perigo_id:perigoEncontrado?.id||null,
-          probabilidade,severidade,
-          nivel_risco:nivelRisco,
-          num_expostos:numExpostos,
-          origem_campanha_id:campanhaId,
-          propagado_do_setor:false,
-          ativo:true
-        })
+        method:'POST',headers:{...headers(),'Prefer':'return=representation'},
+        body:JSON.stringify({funcao_id:cf.funcao_id,risco_id:riscoEncontrado.id,perigo_id:perigoEncontrado?.id||null,probabilidade,severidade,nivel_risco:nivelRisco,num_expostos:numExpostos,origem_campanha_id:campanhaId,propagado_do_setor:false,ativo:true})
       });
       if(resInsert.ok)integrados++;
     }
-
-    // 9. Marca resultado como integrado
-    await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${resultadoAtualCampanhaFuncaoId}`,{
-      method:'PATCH',headers:headers(),
-      body:JSON.stringify({integrado_inventario:true,data_integracao:new Date().toISOString()})
-    });
 
     document.getElementById('modal-resultado').classList.remove('show');
     toast(`✓ ${integrados} risco(s) psicossocial(is) integrado(s) ao inventário!`);
