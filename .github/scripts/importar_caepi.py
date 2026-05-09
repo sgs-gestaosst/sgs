@@ -7,6 +7,7 @@ import io
 import sys
 import json
 import zipfile
+import rarfile
 import requests
 
 SUPA_URL     = os.environ['SUPA_URL']
@@ -73,7 +74,6 @@ def baixar_arquivo():
     raise RuntimeError(f"Todas as URLs falharam. Último erro: {ultimo_erro}")
 
 def extrair_e_parsear(conteudo):
-    # Tenta como ZIP primeiro
     if conteudo[:2] == b'PK':
         print("Formato: ZIP")
         z = zipfile.ZipFile(io.BytesIO(conteudo))
@@ -83,8 +83,19 @@ def extrair_e_parsear(conteudo):
         if not txt:
             raise ValueError(f"Nenhum .txt no ZIP. Arquivos: {nomes}")
         texto = z.read(txt).decode('latin-1', errors='replace')
+    elif conteudo[:4] == b'Rar!':
+        print("Formato: RAR")
+        tmp = '/tmp/caepi.rar'
+        with open(tmp, 'wb') as f:
+            f.write(conteudo)
+        rf = rarfile.RarFile(tmp)
+        nomes = rf.namelist()
+        print(f"Arquivos no RAR: {nomes}")
+        txt = next((n for n in nomes if n.lower().endswith('.txt')), None)
+        if not txt:
+            raise ValueError(f"Nenhum .txt no RAR. Arquivos: {nomes}")
+        texto = rf.read(txt).decode('latin-1', errors='replace')
     else:
-        # Assume texto direto
         print("Formato: TXT direto")
         texto = conteudo.decode('latin-1', errors='replace')
 
