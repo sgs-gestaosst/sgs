@@ -152,13 +152,22 @@
     <div class="modal-field">
       <label>Metodologia *</label>
       <select id="c-metodologia" onchange="onMetodologiaChange()">
-        <option value="COPSOQ-III">COPSOQ-III Versão Curta (23 itens)</option>
-        <option value="COPSOQ-III-Media">COPSOQ-III Versão Média (76 itens) — requer psicólogo</option>
-        <option value="Checklist-NR01">Checklist NR-01 (26 fatores) — pode ser aplicado por técnico</option>
+        <option value="COPSOQ-III">COPSOQ-III Versão Curta (23 itens) — recomendado para início</option>
+        <option value="COPSOQ-III-Media">COPSOQ-III Versão Média (76 itens) — ⚠️ exige psicólogo (CRP)</option>
+        <option value="Checklist-NR01">Checklist NR-01 (26 fatores) — aplicável por técnico SST</option>
       </select>
     </div>
-    <div id="alerta-psicologo" style="display:none;background:#2a1530;border:1px solid #5a2550;border-radius:6px;padding:10px 14px;font-size:12px;color:#c878e8;margin-top:-8px;margin-bottom:14px;">
-      ⚠️ <strong>Atenção:</strong> O COPSOQ-III é um instrumento psicológico. Sua aplicação formal deve ser conduzida ou supervisionada por psicólogo habilitado junto ao CFP (Conselho Federal de Psicologia).
+    <!-- Aviso COPSOQ-III Curta -->
+    <div id="aviso-curta" style="display:none;background:#1a2540;border:1px solid #2a4070;border-radius:6px;padding:10px 14px;font-size:12px;color:#7aabf7;margin-top:-8px;margin-bottom:14px;line-height:1.6;">
+      🔵 <strong>Instrumento psicológico:</strong> a aplicação é recomendada por psicólogo, mas pode ser conduzida por técnico habilitado em SST com supervisão de profissional de saúde mental.
+    </div>
+    <!-- Aviso COPSOQ-III Média -->
+    <div id="aviso-media" style="display:none;background:#2a1f0a;border:1px solid #5a3f10;border-radius:6px;padding:12px 14px;font-size:12px;color:#e0a855;margin-top:-8px;margin-bottom:14px;line-height:1.6;">
+      ⚠️ <strong>Atenção — psicólogo obrigatório:</strong> o COPSOQ-III Versão Média é um instrumento de avaliação psicológica e sua aplicação e análise dos resultados <strong>exigem psicólogo habilitado com registro no CRP</strong> (Conselho Federal de Psicologia). Confirme a disponibilidade do profissional antes de criar a campanha.
+    </div>
+    <!-- Aviso Checklist NR-01 -->
+    <div id="aviso-checklist" style="display:none;background:#0e2820;border:1px solid #1a4a38;border-radius:6px;padding:10px 14px;font-size:12px;color:#2dd4a0;margin-top:-8px;margin-bottom:14px;line-height:1.6;">
+      ✅ <strong>Não requer psicólogo:</strong> este instrumento pode ser aplicado por técnico de segurança do trabalho, engenheiro de segurança ou médico do trabalho, sem necessidade de psicólogo.
     </div>
 
     <div class="modal-grid-2">
@@ -261,10 +270,19 @@ let empresa=null,funcoes=[],campanhas=[],campanhaEditandoId=null,resultadoAtualC
 
 function onMetodologiaChange(){
   const met=document.getElementById('c-metodologia').value;
-  const alerta=document.getElementById('alerta-psicologo');
-  const labelReg=document.getElementById('label-registro');
   const tipSel=document.getElementById('c-aplicador-tipo');
-  alerta.style.display=(met==='COPSOQ-III'||met==='COPSOQ-III-Media')?'block':'none';
+
+  // Oculta todos os avisos
+  document.getElementById('aviso-curta').style.display    = 'none';
+  document.getElementById('aviso-media').style.display    = 'none';
+  document.getElementById('aviso-checklist').style.display = 'none';
+
+  // Exibe o aviso correspondente
+  if(met==='COPSOQ-III')        document.getElementById('aviso-curta').style.display    = 'block';
+  if(met==='COPSOQ-III-Media')  document.getElementById('aviso-media').style.display    = 'block';
+  if(met==='Checklist-NR01')    document.getElementById('aviso-checklist').style.display = 'block';
+
+  // Versão Média força seleção de psicólogo
   if(met==='COPSOQ-III-Media'){
     tipSel.value='psicologo';
     onAplicadorTipoChange();
@@ -398,7 +416,7 @@ function abrirModalCampanha(){
   document.getElementById('c-aplicador-nome').value='';
   document.getElementById('c-aplicador-registro').value='';
   document.getElementById('c-aplicador-tipo').value='';
-  document.getElementById('alerta-psicologo').style.display='block';
+  onMetodologiaChange(); // exibe aviso correto para a metodologia padrão
   document.getElementById('label-registro').textContent='Registro profissional *';
   document.getElementById('c-aplicador-registro').placeholder='CRP 00/00000';
   document.getElementById('c-instrucoes').value='Prezado(a) colaborador(a),\n\nEsta avaliação é parte do Programa de Gerenciamento de Riscos (PGR) da empresa. Suas respostas são totalmente anônimas e serão analisadas de forma coletiva por função. Não há respostas certas ou erradas — responda com sinceridade.\n\nObrigado pela sua participação!';
