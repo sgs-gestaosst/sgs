@@ -1667,7 +1667,7 @@ async function buscarEPIPorNome(srId,termo){
   if(!termo||termo.length<2){if(dd)dd.classList.remove('show');return;}
   _epiDebounce=setTimeout(async()=>{
     try{
-      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?nome_equipamento=ilike.*${encodeURIComponent(termo)}*&situacao=eq.Ativo&select=numero_ca,nome_equipamento,data_validade,situacao&order=nome_equipamento.asc&limit=12`,{headers:h2()});
+      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?nome_equipamento=ilike.*${encodeURIComponent(termo)}*&select=numero_ca,nome_equipamento,data_validade,situacao&order=nome_equipamento.asc&limit=12`,{headers:h2()});
       const data=await res.json();
       if(!dd)return;
       if(!data.length){
