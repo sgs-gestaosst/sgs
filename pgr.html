@@ -127,11 +127,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 }
 .ghe-nome-input{
   border:1pt dashed #93c5fd;border-radius:3pt;padding:2pt 8pt;
-  font-size:8.5pt;color:#1e3a5f;background:#fff;outline:none;
+  font-size:11pt;font-weight:700;color:#1e3a5f;background:#fff;outline:none;
   min-width:140pt;font-family:'IBM Plex Sans',sans-serif;
 }
 .ghe-nome-input:focus{border-color:#2a5298;border-style:solid;}
-.ghe-nome-texto{font-size:9pt;font-weight:600;color:#1e3a5f;}
+.ghe-nome-texto{font-size:11pt;font-weight:700;color:#1e3a5f;}
 .ghe-funcoes{font-size:8pt;color:#374151;margin-top:4pt;}
 .ghe-funcoes strong{color:#0d2040;}
 .ghe-count{font-size:7.5pt;color:#6b7280;white-space:nowrap;flex-shrink:0;}
@@ -202,6 +202,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   body{background:#fff!important;margin:0!important;padding:0!important;}
+  .funcao-bloco-header{background:#fff!important;border-bottom:1.5pt solid #c7d7f9!important;}
+  .ghe-nome-input{background:#fff!important;border:none!important;}
+
   .screen-header{display:none!important;}
   .screen-body{padding:0!important;display:block!important;}
   .pages-wrap{gap:0!important;display:block!important;align-items:unset!important;}
