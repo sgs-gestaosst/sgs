@@ -76,6 +76,32 @@
   .locked-upgrade-btn{display:block;text-align:center;margin-top:16px;background:#4a7cdc;color:#fff;text-decoration:none;padding:10px;border-radius:6px;font-size:12px;font-weight:600;transition:background .15s;}
   .locked-upgrade-btn:hover{background:#5d8fe8;}
 
+  /* ── FAIXA UPGRADE (topo, abaixo do header) ── */
+  .faixa-upgrade{display:none;background:#0d1f3c;border-bottom:1px solid #2a4070;padding:8px 32px;position:sticky;top:57px;z-index:99;}
+  .faixa-upgrade.urgente{background:#2a1a0a;border-bottom-color:#4a3010;}
+  .faixa-inner{max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .faixa-texto{font-size:12px;color:#7aabf7;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .faixa-upgrade.urgente .faixa-texto{color:#e0a855;}
+  .faixa-uso{font-family:var(--mono);font-weight:600;}
+  .faixa-uso.cheio{color:#e05555;}
+  .faixa-lock{background:#2a1515;color:#e05555;border:1px solid #4a2020;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:700;letter-spacing:.04em;}
+  .faixa-cta{font-size:11px;font-weight:700;color:#2dd4a0;background:#0e2820;border:1px solid #1a4a38;border-radius:4px;padding:4px 12px;text-decoration:none;white-space:nowrap;transition:background .15s;}
+  .faixa-cta:hover{background:#1a4a38;}
+
+  /* ── UPGRADE CARD (no menu grid) ── */
+  .upgrade-card{grid-column:1/-1;background:linear-gradient(135deg,#0d1f3c,#0a1628);border:1px solid #2a4070;border-radius:12px;padding:20px 24px;text-decoration:none;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;transition:border-color .2s,transform .15s;}
+  .upgrade-card:hover{border-color:#4a7cdc;transform:translateY(-2px);}
+  .upgrade-card-left{flex:1;}
+  .upgrade-card-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#2dd4a0;margin-bottom:6px;}
+  .upgrade-card-titulo{font-size:15px;font-weight:600;color:#e8eaf0;margin-bottom:10px;}
+  .upgrade-feats{display:flex;flex-wrap:wrap;gap:8px;}
+  .upgrade-feat{font-size:11px;color:#8892a4;display:flex;align-items:center;gap:5px;}
+  .upgrade-feat::before{content:'✓';color:#2dd4a0;font-weight:700;}
+  .upgrade-preco{text-align:right;flex-shrink:0;}
+  .upgrade-preco-label{font-size:11px;color:#8892a4;margin-bottom:4px;}
+  .upgrade-preco-val{font-family:var(--mono);font-size:20px;font-weight:700;color:#2dd4a0;}
+  .upgrade-preco-btn{display:inline-block;margin-top:10px;background:#4a7cdc;color:#fff;padding:8px 18px;border-radius:6px;font-size:12px;font-weight:600;}
+
   /* ── MENU CARDS ── */
   .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px;}
   .menu-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:border-color .15s,transform .15s;text-decoration:none;display:block;}
@@ -108,6 +134,11 @@
     .container{padding:24px 12px;}
     .bloco-assinatura{flex-direction:column;}
     .assin-btn{width:100%;text-align:center;}
+    .faixa-upgrade{padding:8px 16px;top:53px;}
+    .faixa-texto{gap:6px;font-size:11px;}
+    .upgrade-card{flex-direction:column;}
+    .upgrade-preco{text-align:left;}
+    .upgrade-preco-btn{display:block;text-align:center;}
   }
 </style>
 <script src="trial_check.js"></script>
@@ -132,6 +163,21 @@
     </div>
 
     <button class="btn-logout" onclick="sair()">Sair</button>
+  </div>
+</div>
+
+<!-- Faixa upgrade (só Free) -->
+<div class="faixa-upgrade" id="faixa-upgrade">
+  <div class="faixa-inner">
+    <span class="faixa-texto">
+      ✨ Plano Free &nbsp;·&nbsp;
+      <span class="faixa-uso" id="faixa-empresas">0/2 empresas</span>
+      &nbsp;·&nbsp;
+      <span class="faixa-uso" id="faixa-func">0/25 funcionários</span>
+      &nbsp;·&nbsp;
+      <span class="faixa-lock">eSocial bloqueado</span>
+    </span>
+    <a href="assinar.html" class="faixa-cta">Fazer upgrade →</a>
   </div>
 </div>
 
@@ -222,6 +268,24 @@
       <div class="menu-title">Relatórios <span class="badge badge-new">ativo</span></div>
       <div class="menu-desc">Gráficos e indicadores SST consolidados — riscos, exames, treinamentos, ações e muito mais.</div>
     </a>
+    <!-- Card upgrade (só Free) -->
+    <a href="assinar.html" class="upgrade-card" id="upgrade-card" style="display:none;">
+      <div class="upgrade-card-left">
+        <div class="upgrade-card-tag">🚀 Planos pagos</div>
+        <div class="upgrade-card-titulo">Desbloqueie o eSocial e amplie seus limites</div>
+        <div class="upgrade-feats">
+          <span class="upgrade-feat">eSocial S-2210 / S-2220 / S-2240</span>
+          <span class="upgrade-feat">Até 60 empresas</span>
+          <span class="upgrade-feat">Até 1.500 funcionários</span>
+          <span class="upgrade-feat">Múltiplos usuários</span>
+        </div>
+      </div>
+      <div class="upgrade-preco">
+        <div class="upgrade-preco-label">A partir de</div>
+        <div class="upgrade-preco-val">R$ 79<small style="font-size:12px;font-weight:400;">/mês</small></div>
+        <span class="upgrade-preco-btn">Ver planos →</span>
+      </div>
+    </a>
   </div>
 
   <div class="section-title">Acesso rápido</div>
@@ -270,6 +334,11 @@ document.addEventListener('click', function(e) {
   }
 });
 
+// ── Faixa Free ───────────────────────────────────────
+function mostrarFaixaFree() {
+  document.getElementById('faixa-upgrade').style.display = 'block';
+}
+
 // ── Stats ────────────────────────────────────────────
 async function carregarStats() {
   try {
@@ -281,9 +350,22 @@ async function carregarStats() {
 
     if (resEmpresas.ok) {
       const data = await resEmpresas.json();
-      document.getElementById('stat-empresas').textContent = data.length;
+      const nEmpresas = data.length;
       const totalFuncs = data.reduce((acc, e) => acc + (e.total_funcionarios_cadastrados || 0), 0);
+      document.getElementById('stat-empresas').textContent    = nEmpresas;
       document.getElementById('stat-funcionarios').textContent = totalFuncs;
+
+      // Atualiza faixa Free com dados reais
+      const faixa = document.getElementById('faixa-upgrade');
+      if (faixa && faixa.style.display !== 'none') {
+        const elEmp  = document.getElementById('faixa-empresas');
+        const elFunc = document.getElementById('faixa-func');
+        elEmp.textContent  = `${nEmpresas}/2 empresas`;
+        elFunc.textContent = `${totalFuncs}/25 funcionários`;
+        if (nEmpresas >= 2)   elEmp.classList.add('cheio');
+        if (totalFuncs >= 25) elFunc.classList.add('cheio');
+        if (nEmpresas >= 2 || totalFuncs >= 25) faixa.classList.add('urgente');
+      }
     }
 
     if (resAcoes.ok) {
@@ -340,6 +422,8 @@ async function verificarAssinatura() {
       });
       bloco.style.display = 'flex';
       document.getElementById('locked-section').style.display = 'block';
+      document.getElementById('upgrade-card').style.display   = 'flex';
+      mostrarFaixaFree();
       return;
     }
 
@@ -349,10 +433,12 @@ async function verificarAssinatura() {
       return;
     }
 
-    // Plano Free: exibe banner + seção de recursos bloqueados
+    // Plano Free: exibe todos os CTAs de upgrade
     if (assin.status === 'Free') {
       bloco.style.display = 'flex';
       document.getElementById('locked-section').style.display = 'block';
+      document.getElementById('upgrade-card').style.display   = 'flex';
+      mostrarFaixaFree();
       return;
     }
 
