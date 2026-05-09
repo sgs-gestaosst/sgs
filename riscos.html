@@ -1617,7 +1617,18 @@ function toggleEpiBusca(srId,modo){
   if(prev){prev.className='epi-preview';prev.innerHTML='';}
 }
 
-function _epiStatusBadge(situacao, dataValidade){
+function _atualizarBadgeValidade(srId,dataISO){
+  const badge=document.getElementById(`epi-badge-${srId}`);
+  if(!badge)return;
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const val=new Date(dataISO+'T00:00:00');
+  if(isNaN(val))return;
+  badge.outerHTML=val>=hoje
+    ?`<span class="badge-ativo" id="epi-badge-${srId}">🟢 Válido</span>`
+    :`<span class="badge-vencido" id="epi-badge-${srId}">🔴 Vencido</span>`;
+}
+
+function _epiStatusBadge(situacao){
   if(!situacao)return'';
   const s=situacao.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
   if(s==='VALIDO')return`<span class="badge-ativo">🟢 Válido</span>`;
@@ -1645,13 +1656,13 @@ function _mostrarPreviewEPI(srId,dado){
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <span class="epi-preview-nome">🛡 ${h(dado.nome_equipamento||dado.epi_nome||'EPI')}</span>
       ${dado.numero_ca?`<span class="epi-preview-ca">CA: ${h(dado.numero_ca)}</span>`:''}
-      ${_epiStatusBadge(dado.situacao)}
+      <span id="epi-badge-${srId}">${_epiStatusBadge(dado.situacao)}</span>
       ${linkCA}
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <label style="font-size:11px;color:var(--text2);white-space:nowrap;">Validade (confirmar no ConsultaCA):</label>
       <input type="date" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;"
-        onchange="_epiSelecionado[${srId}].validade_confirmada=this.value">
+        onchange="_epiSelecionado[${srId}].validade_confirmada=this.value;_atualizarBadgeValidade(${srId},this.value)" id="epi-val-input-${srId}">
     </div>`;
 }
 
