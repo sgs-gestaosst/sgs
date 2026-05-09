@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Pagamento em processamento</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--border:#2a3044;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;
+  --radius:8px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;display:flex;flex-direction:column;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--accent);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.center{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:48px 40px;max-width:480px;width:100%;text-align:center;}
+.icon{font-size:56px;margin-bottom:24px;}
+.titulo{font-size:22px;font-weight:600;margin-bottom:12px;color:var(--accent2);}
+.descricao{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:32px;}
+.plano-badge{display:inline-block;background:#0e2820;border:1px solid #1a4a38;color:var(--accent2);font-family:var(--mono);font-size:12px;padding:4px 14px;border-radius:20px;margin-bottom:24px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;border-radius:var(--radius);font-family:var(--sans);font-size:14px;font-weight:500;text-decoration:none;transition:all .15s;cursor:pointer;border:none;}
+.btn-primary{background:var(--accent2);color:#0f1117;}
+.btn-primary:hover{background:#3de8b4;}
+.btn-ghost{background:var(--bg);color:var(--text2);border:1px solid var(--border);margin-top:10px;}
+.btn-ghost:hover{border-color:var(--accent);}
+.btns{display:flex;flex-direction:column;gap:10px;align-items:center;}
+.nota{font-size:11px;color:var(--text2);margin-top:24px;line-height:1.6;opacity:.7;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+</div>
+
+<div class="center">
+  <div class="card">
+    <div class="icon">⏳</div>
+    <div id="plano-badge" class="plano-badge" style="display:none;"></div>
+    <div class="titulo">Pagamento em processamento</div>
+    <div class="descricao">
+      Seu pagamento foi recebido e está sendo confirmado pelo Mercado Pago.<br>
+      Assim que aprovado, seu plano será ativado automaticamente — isso pode levar alguns minutos.
+    </div>
+    <div class="btns">
+      <a href="index.html" class="btn btn-primary">🏠 Ir para o dashboard</a>
+      <a href="assinar.html" class="btn btn-ghost">Ver minha assinatura</a>
+    </div>
+    <div class="nota">
+      Dúvidas? Fale com a gente via
+      <a href="https://wa.me/5594981564271" style="color:var(--accent2);">WhatsApp</a>
+      ou <a href="mailto:sgs.gestaosst@gmail.com" style="color:var(--accent2);">e-mail</a>.
+    </div>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const plano  = params.get('plano');
+if (plano) {
+  const badge = document.getElementById('plano-badge');
+  badge.textContent = 'Plano ' + plano;
+  badge.style.display = 'inline-block';
+}
+</script>
+</body>
+</html>

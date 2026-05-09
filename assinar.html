@@ -379,8 +379,8 @@ if (!token) { window.location.href = 'login.html'; }
 const user = userRaw ? JSON.parse(userRaw) : {};
 document.getElementById('user-email').textContent = user.email || '';
 
-// Preços dos planos (espelho do banco — para não precisar de fetch extra no summary)
-const PRECOS_PLANOS = { Free: 0, Starter: 79, Pro: 279, Business: 549, Enterprise: 949 };
+// IDs dos planos no banco
+const PLANO_IDS = { Free: 7, Starter: 8, Pro: 9, Business: 10, Enterprise: 11 };
 
 let cupomAtivo      = null;
 let valorFinal      = 0;
@@ -431,7 +431,8 @@ async function inicializar() {
 
     // Pré-seleciona o plano acima do atual para sugerir upgrade
     const escala = ['Free','Starter','Pro','Business','Enterprise'];
-    const idxAtual = escala.indexOf(planoAtualNome);
+    const nomePlanoAtual = assinaturaAtual?.planos?.nome || 'Free';
+    const idxAtual = escala.indexOf(nomePlanoAtual);
     const sugestao = idxAtual >= 0 && idxAtual < escala.length - 1 ? escala[idxAtual + 1] : null;
     if (sugestao && sugestao !== 'Enterprise') selecionarPlano(sugestao);
 
@@ -449,14 +450,16 @@ function renderStatusBox() {
     return;
   }
   const status = assinaturaAtual.status;
-  if (status === 'Ativo' || status === 'Enterprise') {
+  const nomePlano = assinaturaAtual?.planos?.nome || status;
+
+  if (status === 'Ativo') {
     box.style.background  = '#0e2820';
     box.style.borderColor = '#1a4a38';
     texto.style.color     = '#2dd4a0';
-    texto.innerHTML = `✅ Plano <strong>${planoAtualNome}</strong> ativo.`;
+    texto.innerHTML = `✅ Plano <strong>${nomePlano}</strong> ativo.`;
     document.getElementById('area-pagamento').innerHTML = `
       <div style="background:#0e2820;border:1px solid #1a4a38;border-radius:10px;padding:20px;text-align:center;color:#2dd4a0;font-size:14px;">
-        ✅ Plano ${planoAtualNome} ativo. Para fazer upgrade, selecione um plano acima e pague.
+        ✅ Plano <strong>${nomePlano}</strong> ativo. Para fazer upgrade, selecione um plano acima e confirme o pagamento.
       </div>`;
     return;
   }
@@ -464,25 +467,15 @@ function renderStatusBox() {
     texto.innerHTML = `Você está no plano <strong>Free</strong>. Faça upgrade para desbloquear o eSocial e ampliar seus limites.`;
     return;
   }
+  if (status === 'Pendente') {
+    box.className = 'trial-box vencendo';
+    texto.innerHTML = `⏳ Pagamento em processamento para o plano <strong>${nomePlano}</strong>. Aguarde a confirmação.`;
+    return;
+  }
   if (status === 'Suspenso' || status === 'Cancelado') {
     box.className = 'trial-box vencido';
     texto.innerHTML = `🔴 Assinatura <strong>${status.toLowerCase()}</strong>. Selecione um plano abaixo para reativar.`;
     return;
-  }
-  // Trial legado
-  if (status === 'Trial') {
-    const fim  = new Date((assinaturaAtual.data_fim_trial || '') + 'T00:00:00');
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const dias = isNaN(fim) ? 0 : Math.ceil((fim - hoje) / 86400000);
-    if (dias > 0) {
-      box.className = dias <= 7 ? 'trial-box vencendo' : 'trial-box';
-      texto.innerHTML = dias > 7
-        ? `🎯 Trial ativo — <strong>${dias} dias restantes</strong>.`
-        : `⚠️ Trial vence em <strong>${dias} dia(s)</strong>. Assine para não perder o acesso.`;
-    } else {
-      box.className = 'trial-box vencido';
-      texto.innerHTML = `🔴 Trial <strong>encerrado</strong>. Assine para continuar usando o SGS.`;
-    }
   }
 }
 
@@ -499,7 +492,11 @@ function destacarPlanoAtual() {
 
 // ── Selecionar plano ─────────────────────────────────
 function selecionarPlano(nome) {
-  if (nome === 'Enterprise' || nome === 'Free') return;
+  if (nome === 'Enterprise') return;
+  if (nome === 'Free') {
+    setStatus('info', 'Você já está no plano Free. Selecione um plano pago para fazer upgrade.');
+    return;
+  }
 
   const plano = todosPlanos.find(p => p.nome === nome);
   if (!plano) return;
@@ -746,8 +743,8 @@ async function pagarCartao() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erro ao criar assinatura.');
 
-    setStatus('success', 'Assinatura criada com sucesso! Redirecionando...');
-    setTimeout(() => { window.location.href = 'pagamento_sucesso.html'; }, 2000);
+    setStatus('success', 'Assinatura criada! Redirecionando...');
+    setTimeout(() => { window.location.href = 'pagamento_sucesso.html?plano=' + encodeURIComponent(planoSelecionado.nome); }, 1500);
 
   } catch(e) {
     setStatus('error', `Erro: ${e.message}`);
@@ -782,9 +779,10 @@ async function pagarPix() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erro ao criar pagamento.');
 
-    if (data.mp_init_point) {
-      setStatus('success', 'Redirecionando...');
-      setTimeout(() => { window.location.href = data.mp_init_point; }, 1000);
+    const initPoint = data.mp_init_point || data.mp_sandbox_init_point;
+    if (initPoint) {
+      setStatus('success', 'Redirecionando para o Mercado Pago...');
+      setTimeout(() => { window.location.href = initPoint; }, 1000);
     } else {
       throw new Error('Link de pagamento não gerado.');
     }

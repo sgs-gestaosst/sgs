@@ -273,8 +273,24 @@ async function verificarAssinatura() {
     const sub    = document.getElementById('assin-sub');
     const btn    = document.getElementById('assin-btn');
 
-    // Sem assinatura: não deveria acontecer após migração, oculta silenciosamente
-    if (!assin) return;
+    // Sem assinatura: novo usuário → ativa plano Free automaticamente
+    if (!assin) {
+      await fetch(`${SUPA_URL}/rest/v1/assinaturas`, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          user_id:  user.id,
+          plano_id: 7,        // Free
+          status:   'Free',
+          data_inicio: new Date().toISOString().split('T')[0],
+          ativo: true,
+        })
+      });
+      bloco.style.display = 'flex';
+      titulo.textContent  = 'Plano Free';
+      sub.textContent     = 'Faça upgrade para desbloquear o eSocial e ampliar seus limites.';
+      return;
+    }
 
     // Plano pago ativo ou Enterprise: oculta bloco
     if (assin.status === 'Ativo' || assin.status === 'Enterprise') {
@@ -285,50 +301,33 @@ async function verificarAssinatura() {
     // Plano Free: exibe banner suave de upgrade
     if (assin.status === 'Free') {
       bloco.style.display = 'flex';
-      titulo.textContent = `Plano Free`;
-      sub.textContent = 'Faça upgrade para desbloquear o eSocial e ampliar seus limites.';
+      titulo.textContent  = 'Plano Free — ' + (assin.planos?.nome || 'Free');
+      sub.textContent     = 'Faça upgrade para desbloquear o eSocial e ampliar seus limites.';
+      return;
+    }
+
+    // Pendente (aguardando confirmação de pagamento)
+    if (assin.status === 'Pendente') {
+      bloco.style.display = 'flex';
+      bloco.style.background  = '#1a2a1a';
+      bloco.style.borderColor = '#2a4a2a';
+      titulo.textContent = '⏳ Pagamento em processamento';
+      sub.style.color    = '#2dd4a0';
+      sub.textContent    = 'Seu pagamento está sendo confirmado. Pode levar alguns minutos.';
+      btn.textContent    = 'Ver planos';
       return;
     }
 
     // Suspenso ou Cancelado
     if (assin.status === 'Suspenso' || assin.status === 'Cancelado') {
       bloco.style.display = 'flex';
-      bloco.style.background = '#2a1515';
+      bloco.style.background  = '#2a1515';
       bloco.style.borderColor = '#4a2020';
       titulo.textContent = '🔴 Assinatura inativa';
-      sub.style.color = '#e05555';
-      sub.textContent = 'Regularize sua assinatura para continuar usando o SGS.';
+      sub.style.color    = '#e05555';
+      sub.textContent    = 'Regularize sua assinatura para continuar usando o SGS.';
       btn.style.background = '#e05555';
       return;
-    }
-
-    // Trial legado ainda vigente
-    if (assin.status === 'Trial') {
-      const fim  = new Date((assin.data_fim_trial || '') + 'T00:00:00');
-      const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-      const dias = isNaN(fim) ? 0 : Math.ceil((fim - hoje) / 86400000);
-
-      bloco.style.display = 'flex';
-
-      if (dias <= 0) {
-        bloco.style.background = '#2a1515';
-        bloco.style.borderColor = '#4a2020';
-        titulo.textContent = '🔴 Período de teste encerrado';
-        sub.style.color = '#e05555';
-        sub.textContent = 'Assine agora para continuar usando o SGS.';
-        btn.style.background = '#e05555';
-      } else if (dias <= 7) {
-        bloco.style.background = '#2a2010';
-        bloco.style.borderColor = '#4a3a10';
-        titulo.textContent = `⚠️ Trial vence em ${dias} dia(s)!`;
-        sub.style.color = '#e0a855';
-        sub.textContent = 'Assine agora para não perder o acesso.';
-        btn.style.background = '#e0a855';
-        btn.style.color = '#0f1117';
-      } else {
-        titulo.textContent = `🎯 Trial ativo — ${dias} dias restantes`;
-        sub.textContent = 'Assine antes do vencimento para não perder o acesso.';
-      }
     }
 
   } catch(e) {
