@@ -1617,12 +1617,18 @@ function toggleEpiBusca(srId,modo){
   if(prev){prev.className='epi-preview';prev.innerHTML='';}
 }
 
-function _epiStatusBadge(situacao){
-  if(!situacao)return'';
-  const s=situacao.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
-  if(s==='VALIDO'||s==='ATIVO'||s==='A')return`<span class="badge-ativo">${h(situacao)}</span>`;
-  if(s.includes('VENCIDO')||s.includes('CANCELADO')||s.includes('SUSPENSO'))return`<span class="badge-vencido">${h(situacao)}</span>`;
-  return`<span class="badge-nao-encontrado">${h(situacao)}</span>`;
+function _epiStatusBadge(situacao, dataValidade){
+  if(!dataValidade)return'';
+  const valISO=(()=>{
+    const p=dataValidade.split('/');
+    return p.length===3?`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`:dataValidade;
+  })();
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const val=new Date(valISO+'T00:00:00');
+  if(isNaN(val))return'';
+  return val>=hoje
+    ? `<span class="badge-ativo">✅ Válido</span>`
+    : `<span class="badge-vencido">🔴 Vencido</span>`;
 }
 
 function _parseDateCAEPI(s){
@@ -1643,7 +1649,7 @@ function _mostrarPreviewEPI(srId,dado){
     <span class="epi-preview-nome">🛡 ${h(dado.nome_equipamento||dado.epi_nome||'EPI')}</span>
     ${dado.numero_ca?`<span class="epi-preview-ca">CA: ${h(dado.numero_ca)}</span>`:''}
     ${val?`<span class="epi-preview-val">Val: ${val}</span>`:''}
-    ${_epiStatusBadge(dado.situacao)}`;
+    ${_epiStatusBadge(dado.situacao, dado.data_validade)}`;
 }
 
 async function buscarEPIPorCA(srId,ca){
