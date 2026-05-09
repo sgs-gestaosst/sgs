@@ -29,28 +29,28 @@ HEADERS_HTTP = {
 # Mapeamento flexível: nome no arquivo MTE → coluna no Supabase
 # O arquivo pode ter variações entre versões — incluímos aliases
 COL_MAP = {
+    # Formato atual do MTE (sem underscores, com # no primeiro campo)
+    '#NRREGISTROCA':             'numero_ca',
+    'NOMEEQUIPAMENTO':           'nome_equipamento',
+    'DESCRICAOEQUIPAMENTO':      'descricao_equipamento',
+    'MARCACA':                   'marca',
+    'REFERENCIA':                'referencia',
+    'DATAVALIDADE':              'data_validade',
+    'SITUACAO':                  'situacao',
+    'NORMA':                     'norma',
+    'CNPJ':                      'cnpj_fabricante',
+    'RAZAOSOCIAL':               'razao_social_fabricante',
+    # Aliases para versões anteriores do arquivo
     'NR_CA':                     'numero_ca',
     'REGISTRO_CA':               'numero_ca',
-    'CA':                        'numero_ca',
+    'NRREGISTROCA':              'numero_ca',
     'NOME_EPI':                  'nome_equipamento',
     'NOME_EQUIPAMENTO':          'nome_equipamento',
     'DESCRICAO_EPI':             'descricao_equipamento',
     'DESCRICAO_EQUIPAMENTO':     'descricao_equipamento',
-    'DESCRICAO':                 'descricao_equipamento',
-    'MARCA':                     'marca',
     'MARCA_CA':                  'marca',
-    'REFERENCIA':                'referencia',
     'DATA_VALIDADE':             'data_validade',
-    'VALIDADE':                  'data_validade',
-    'SITUACAO':                  'situacao',
-    'STATUS':                    'situacao',
-    'NORMA':                     'norma',
-    'NORMAS':                    'norma',
-    'CNPJ':                      'cnpj_fabricante',
-    'CNPJ_FABRICANTE':           'cnpj_fabricante',
     'RAZAO_SOCIAL':              'razao_social_fabricante',
-    'RAZAO_SOCIAL_FABRICANTE':   'razao_social_fabricante',
-    'EMPRESA':                   'razao_social_fabricante',
 }
 
 def baixar_arquivo():
