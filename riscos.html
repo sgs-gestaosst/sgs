@@ -931,10 +931,13 @@ function renderHierarquia(sr){
             <div class="epis-lista" id="epis-${sr.id}">
               ${(sr.epis||[]).map(e=>{
                 const nome=e.epi_nome||(todosEpis.find(x=>x.id===e.epi_id)?.nome)||'EPI';
-                return`<div class="epi-tag" id="epitag-${sr.id}-${e.epi_id||e.id}">
+                const valDisp=e.validade_ca?new Date(e.validade_ca+'T00:00:00').toLocaleDateString('pt-BR'):'';
+                const tagId=`epitag-${sr.id}-${e.epi_id||e.id}`;
+                return`<div class="epi-tag" id="${tagId}">
                   <span class="epi-tag-nome">🛡 ${h(nome)}</span>
                   ${e.ca?`<span class="epi-tag-ca">CA:${h(e.ca)}</span>`:''}
-                  ${e.validade_ca?`<span class="epi-tag-ca">Val:${new Date(e.validade_ca+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}
+                  ${valDisp?`<span class="epi-tag-ca">Val:${valDisp}</span>`:''}
+                  <button onclick="removerEPITag('${tagId}',${sr.id},${e.epi_id||'null'})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;" title="Remover">✕</button>
                 </div>`;
               }).join('')}
             </div>
@@ -1705,9 +1708,15 @@ async function adicionarEPI(srId){
   const dado=_epiSelecionado[srId];
   if(!dado){alert('Selecione um EPI antes de adicionar.');return;}
 
-  const nome    = dado.nome_equipamento||dado.epi_nome||'';
-  const ca      = dado.numero_ca||'';
-  const validade= dado.data_validade||'';
+  const nome     = dado.nome_equipamento||dado.epi_nome||'';
+  const ca       = dado.numero_ca||'';
+  const validadeRaw = dado.data_validade||'';
+  // Converte DD/MM/AAAA → YYYY-MM-DD para o banco
+  const validadeISO = validadeRaw ? (()=>{
+    const p=validadeRaw.split('/');
+    return p.length===3?`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`:validadeRaw;
+  })() : '';
+  const validadeDisplay = validadeISO ? new Date(validadeISO+'T00:00:00').toLocaleDateString('pt-BR') : '';
   if(!nome){alert('Nenhum EPI selecionado.');return;}
 
   // Tenta encontrar no catalogo_epis pelo nome; se não achar, cria
@@ -1725,19 +1734,20 @@ async function adicionarEPI(srId){
     epiId=newCat[0]?.id||null;
   }
 
-  // Adiciona tag visual
+  // Adiciona tag visual com botão de remover
   const lista=document.getElementById(`epis-${srId}`);
-  const tagKey=`epitag-${srId}-${epiId||nome}`;
+  const tagKey=`epitag-${srId}-${epiId||nome.replace(/\s/g,'_')}`;
   if(!document.getElementById(tagKey)){
     const tag=document.createElement('div');
     tag.id=tagKey;tag.className='epi-tag';
     tag.innerHTML=`<span class="epi-tag-nome">🛡 ${h(nome)}</span>
       ${ca?`<span class="epi-tag-ca">CA:${h(ca)}</span>`:''}
-      ${validade?`<span class="epi-tag-ca">Val:${new Date(validade+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}`;
+      ${validadeDisplay?`<span class="epi-tag-ca">Val:${validadeDisplay}</span>`:''}
+      <button onclick="removerEPITag('${tagKey}',${srId},${epiId||'null'})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;" title="Remover">✕</button>`;
     lista.appendChild(tag);
   }
 
-  await salvarEPIComPropagacao(srId,epiId,ca,validade,nome);
+  await salvarEPIComPropagacao(srId,epiId,ca,validadeISO,nome);
 
   // Limpa preview e inputs
   delete _epiSelecionado[srId];
@@ -1747,6 +1757,20 @@ async function adicionarEPI(srId){
   if(caInp)caInp.value='';
   const nomeInp=document.getElementById(`epi-nome-input-${srId}`);
   if(nomeInp)nomeInp.value='';
+}
+
+async function removerEPITag(tagId,srId,epiId){
+  document.getElementById(tagId)?.remove();
+  // Remove do banco
+  const tabela=contexto==='setor'?'setor_risco_medidas':'funcao_risco_medidas';
+  const campo=contexto==='setor'?'setor_risco_id':'funcao_risco_id';
+  if(epiId){
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?${campo}=eq.${srId}&epi_id=eq.${epiId}&nivel=eq.EPI`,{
+      method:'PATCH',headers:h2(),body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})
+    });
+  }
+  // Invalida cache de renderização para atualizar
+  delete renderedRiscosCache[srId];
 }
 
 async function salvarEPIComPropagacao(srId,epiId,ca,validade,epiNome){
