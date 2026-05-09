@@ -255,9 +255,43 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .doc-subsection{page-break-after:avoid;break-after:avoid;}
   .capa-footer{page-break-inside:avoid;break-inside:avoid;}
 }
-@media(max-width:230mm){
-  .page{width:100%;padding:15mm 12mm 15mm 18mm;}
-  .page::before{width:5mm;}
+/* ── MOBILE DROPDOWN MENU ── */
+.btn-mobile-menu{display:none;position:relative;}
+.mobile-dropdown{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;min-width:200px;z-index:200;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);overflow:hidden;
+}
+.mobile-dropdown.open{display:block;}
+.mobile-dropdown button,.mobile-dropdown a{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:12px 16px;background:none;border:none;border-bottom:1px solid var(--border);
+  color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;
+  cursor:pointer;text-decoration:none;transition:background .15s;
+}
+.mobile-dropdown button:last-child,.mobile-dropdown a:last-child{border-bottom:none;}
+.mobile-dropdown button:hover,.mobile-dropdown a:hover{background:var(--surface2);}
+
+/* ── MOBILE RESPONSIVO ── */
+@media(max-width:860px){
+  /* Header compacto */
+  .screen-header{padding:10px 16px;gap:10px;}
+  .screen-header > span{display:none;}
+  .screen-actions .btn-edit:not(#btn-voltar){display:none;}
+  .btn-mobile-menu{display:inline-flex;}
+
+  /* Corpo com margem mínima para escala funcionar */
+  .screen-body{padding:16px 0;}
+
+  /* Escala da página A4 para caber na tela */
+  .page{
+    transform-origin:top center;
+    transform:scale(var(--page-scale,1));
+    /* Compensa o espaço morto após scale: 297mm*(scale-1) ≈ negativo */
+    margin-bottom:calc(297mm * (var(--page-scale,1) - 1) + 20px);
+  }
+  .pages-wrap{gap:0;}
 }
 /* ── BADGES AGENTES SETOR ── */
 .agente-badge{display:inline-block;padding:2pt 7pt;border-radius:10pt;font-size:7pt;font-weight:600;margin:1pt 2pt 1pt 0;border:1pt solid;}
@@ -284,6 +318,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     <button class="btn btn-edit" onclick="abrirModalPlanoAcao()">📋 Revisar plano de ação</button>
     <a id="btn-voltar" href="#" class="btn btn-edit">← Voltar</a>
     <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+    <!-- Menu mobile: substitui os dois primeiros botões em telas pequenas -->
+    <div class="btn-mobile-menu" id="mobile-menu-wrap">
+      <button class="btn btn-edit" onclick="toggleMobileMenu(event)" style="font-size:18px;padding:6px 12px;">⋮</button>
+      <div class="mobile-dropdown" id="mobile-dropdown">
+        <button onclick="toggleElaboradora();fecharMobileMenu()">✏️ Empresa elaboradora</button>
+        <button onclick="abrirModalPlanoAcao();fecharMobileMenu()">📋 Revisar plano de ação</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1942,6 +1984,28 @@ function aplicarSelecaoPlano(){
   fecharModalPlanoAcao();
   renderDocumento();
 }
+
+// ── ESCALA MOBILE DA PÁGINA A4 ──────────────────────────────
+const A4_PX = 210 * 96 / 25.4; // largura A4 em pixels a 96dpi ≈ 793.7
+
+function ajustarEscala(){
+  const vw = window.innerWidth;
+  const escala = vw < A4_PX ? (vw - 16) / A4_PX : 1;
+  document.documentElement.style.setProperty('--page-scale', escala.toFixed(4));
+}
+
+window.addEventListener('resize', ajustarEscala);
+ajustarEscala();
+
+// ── DROPDOWN MOBILE ──────────────────────────────────────────
+function toggleMobileMenu(e){
+  e.stopPropagation();
+  document.getElementById('mobile-dropdown').classList.toggle('open');
+}
+function fecharMobileMenu(){
+  document.getElementById('mobile-dropdown').classList.remove('open');
+}
+document.addEventListener('click', fecharMobileMenu);
 
 carregar();
 </script>
