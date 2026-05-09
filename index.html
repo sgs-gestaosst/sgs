@@ -145,8 +145,8 @@
   <!-- Bloco assinatura/trial -->
   <div class="bloco-assinatura" id="bloco-assinatura">
     <div class="assin-info">
-      <div class="assin-titulo" id="assin-titulo">Você está no período Trial</div>
-      <div class="assin-sub" id="assin-sub">30 dias grátis com acesso completo.</div>
+      <div class="assin-titulo" id="assin-titulo">Você está no plano Free</div>
+      <div class="assin-sub" id="assin-sub">Faça upgrade para desbloquear o eSocial e ampliar seus limites.</div>
     </div>
     <a href="assinar.html" class="assin-btn" id="assin-btn">Assinar plano</a>
   </div>
@@ -250,62 +250,85 @@ async function carregarStats() {
   }
 }
 
-// ── Assinatura / Trial ───────────────────────────────
+// ── Assinatura / Plano ───────────────────────────────
 async function verificarAssinatura() {
   try {
     const headers = { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` };
 
-    // Verifica se é SUPERADMIN (não exibe bloco)
+    // SUPERADMIN: oculta bloco
     const resPerfil = await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${user.id}&select=perfil`, { headers });
     const perfil = await resPerfil.json();
     if (perfil[0]?.perfil === 'SUPERADMIN') return;
 
     const res = await fetch(
-      `${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=status,data_fim_trial&order=criado_em.desc&limit=1`,
+      `${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true` +
+      `&select=status,data_fim_trial,planos(nome)&order=criado_em.desc&limit=1`,
       { headers }
     );
     const assinaturas = await res.json();
     const assin = assinaturas[0];
 
-    const bloco   = document.getElementById('bloco-assinatura');
-    const titulo  = document.getElementById('assin-titulo');
-    const sub     = document.getElementById('assin-sub');
-    const btn     = document.getElementById('assin-btn');
+    const bloco  = document.getElementById('bloco-assinatura');
+    const titulo = document.getElementById('assin-titulo');
+    const sub    = document.getElementById('assin-sub');
+    const btn    = document.getElementById('assin-btn');
 
-    // Assinatura ativa: oculta bloco
-    if (assin?.status === 'Ativo') {
+    // Sem assinatura: não deveria acontecer após migração, oculta silenciosamente
+    if (!assin) return;
+
+    // Plano pago ativo ou Enterprise: oculta bloco
+    if (assin.status === 'Ativo' || assin.status === 'Enterprise') {
       bloco.style.display = 'none';
       return;
     }
 
-    // Calcula dias restantes do trial
-    const fim  = assin ? new Date(assin.data_fim_trial + 'T00:00:00') : null;
-    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-    const dias = fim ? Math.ceil((fim - hoje) / (1000 * 60 * 60 * 24)) : 0;
+    // Plano Free: exibe banner suave de upgrade
+    if (assin.status === 'Free') {
+      bloco.style.display = 'flex';
+      titulo.textContent = `Plano Free`;
+      sub.textContent = 'Faça upgrade para desbloquear o eSocial e ampliar seus limites.';
+      return;
+    }
 
-    bloco.style.display = 'flex';
-
-    if (!assin || dias <= 0) {
-      // Trial encerrado
+    // Suspenso ou Cancelado
+    if (assin.status === 'Suspenso' || assin.status === 'Cancelado') {
+      bloco.style.display = 'flex';
       bloco.style.background = '#2a1515';
       bloco.style.borderColor = '#4a2020';
-      titulo.textContent = '🔴 Período de teste encerrado';
+      titulo.textContent = '🔴 Assinatura inativa';
       sub.style.color = '#e05555';
-      sub.textContent = 'Assine agora para continuar usando o SGS.';
+      sub.textContent = 'Regularize sua assinatura para continuar usando o SGS.';
       btn.style.background = '#e05555';
-    } else if (dias <= 7) {
-      // Trial vencendo em breve
-      bloco.style.background = '#2a2010';
-      bloco.style.borderColor = '#4a3a10';
-      titulo.textContent = `⚠️ Trial vence em ${dias} dia(s)!`;
-      sub.style.color = '#e0a855';
-      sub.textContent = 'Assine agora para não perder o acesso.';
-      btn.style.background = '#e0a855';
-      btn.style.color = '#0f1117';
-    } else {
-      // Trial ativo com folga
-      titulo.textContent = `🎯 Período de teste — ${dias} dias restantes`;
-      sub.textContent = '30 dias grátis com acesso completo.';
+      return;
+    }
+
+    // Trial legado ainda vigente
+    if (assin.status === 'Trial') {
+      const fim  = new Date((assin.data_fim_trial || '') + 'T00:00:00');
+      const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+      const dias = isNaN(fim) ? 0 : Math.ceil((fim - hoje) / 86400000);
+
+      bloco.style.display = 'flex';
+
+      if (dias <= 0) {
+        bloco.style.background = '#2a1515';
+        bloco.style.borderColor = '#4a2020';
+        titulo.textContent = '🔴 Período de teste encerrado';
+        sub.style.color = '#e05555';
+        sub.textContent = 'Assine agora para continuar usando o SGS.';
+        btn.style.background = '#e05555';
+      } else if (dias <= 7) {
+        bloco.style.background = '#2a2010';
+        bloco.style.borderColor = '#4a3a10';
+        titulo.textContent = `⚠️ Trial vence em ${dias} dia(s)!`;
+        sub.style.color = '#e0a855';
+        sub.textContent = 'Assine agora para não perder o acesso.';
+        btn.style.background = '#e0a855';
+        btn.style.color = '#0f1117';
+      } else {
+        titulo.textContent = `🎯 Trial ativo — ${dias} dias restantes`;
+        sub.textContent = 'Assine antes do vencimento para não perder o acesso.';
+      }
     }
 
   } catch(e) {
