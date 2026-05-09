@@ -126,11 +126,12 @@ select option{background:var(--surface2);}
     <div class="field">
       <label>Riscos a que ficam expostos no local</label>
       <div class="checkbox-group" id="riscos-checks">
-        ${['Físico','Químico','Biológico','Ergonômico','Acidente','Psicossocial'].map(r=>`
-          <div class="checkbox-item">
-            <input type="checkbox" id="risco-${r}" value="${r}">
-            <label for="risco-${r}">${r}</label>
-          </div>`).join('')}
+        <div class="checkbox-item"><input type="checkbox" id="risco-fisico" value="Físico"><label for="risco-fisico">Físico</label></div>
+        <div class="checkbox-item"><input type="checkbox" id="risco-quimico" value="Químico"><label for="risco-quimico">Químico</label></div>
+        <div class="checkbox-item"><input type="checkbox" id="risco-biologico" value="Biológico"><label for="risco-biologico">Biológico</label></div>
+        <div class="checkbox-item"><input type="checkbox" id="risco-ergonomico" value="Ergonômico"><label for="risco-ergonomico">Ergonômico</label></div>
+        <div class="checkbox-item"><input type="checkbox" id="risco-acidente" value="Acidente"><label for="risco-acidente">Acidente</label></div>
+        <div class="checkbox-item"><input type="checkbox" id="risco-psicossocial" value="Psicossocial"><label for="risco-psicossocial">Psicossocial</label></div>
       </div>
     </div>
     <div class="field">
@@ -220,8 +221,9 @@ function abrirModal(c=null){
   document.getElementById('f-setores').value=c?.setores_atuacao||'';
   document.getElementById('f-medidas').value=c?.medidas_acordadas||'';
   const riscosAtivos=(c?.riscos_categorias||'').split(',').map(r=>r.trim());
-  ['Físico','Químico','Biológico','Ergonômico','Acidente','Psicossocial'].forEach(r=>{
-    document.getElementById(`risco-${r}`).checked=riscosAtivos.includes(r);
+  const riscoIds={Físico:'fisico',Químico:'quimico',Biológico:'biologico',Ergonômico:'ergonomico',Acidente:'acidente',Psicossocial:'psicossocial'};
+  Object.entries(riscoIds).forEach(([label,id])=>{
+    document.getElementById(`risco-${id}`).checked=riscosAtivos.includes(label);
   });
   document.getElementById('status-modal').className='status-bar';
   document.getElementById('modal').classList.add('show');
@@ -235,8 +237,8 @@ async function salvar(){
   const razao=document.getElementById('f-razao').value.trim();
   const servico=document.getElementById('f-servico').value.trim();
   if(!razao||!servico){setStatus('error','Preencha Razão Social e Serviço.');return;}
-  const riscosMarcados=['Físico','Químico','Biológico','Ergonômico','Acidente','Psicossocial']
-    .filter(r=>document.getElementById(`risco-${r}`).checked).join(', ');
+  const riscosMarcados=[['Físico','fisico'],['Químico','quimico'],['Biológico','biologico'],['Ergonômico','ergonomico'],['Acidente','acidente'],['Psicossocial','psicossocial']]
+    .filter(([,id])=>document.getElementById(`risco-${id}`).checked).map(([label])=>label).join(', ');
   const payload={
     empresa_id:parseInt(empresaId),
     razao_social:razao,
