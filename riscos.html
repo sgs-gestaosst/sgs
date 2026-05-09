@@ -210,6 +210,29 @@
 
   /* EPIs */
   .epis-lista{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+
+  /* Busca EPI CAEPI */
+  .epi-busca-tabs{display:flex;gap:6px;margin-bottom:8px;}
+  .epi-busca-tab{padding:4px 12px;border-radius:4px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text2);transition:all .15s;}
+  .epi-busca-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .epi-busca-wrap{position:relative;margin-bottom:8px;}
+  .epi-busca-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 12px;outline:none;transition:border-color .15s;}
+  .epi-busca-input:focus{border-color:var(--border-focus);}
+  .epi-busca-dropdown{display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);z-index:200;max-height:180px;overflow-y:auto;}
+  .epi-busca-dropdown.show{display:block;}
+  .epi-busca-option{padding:8px 12px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+  .epi-busca-option:last-child{border-bottom:none;}
+  .epi-busca-option:hover{background:var(--surface);}
+  .epi-busca-option-nome{color:var(--text);flex:1;}
+  .epi-busca-option-ca{font-size:10px;color:var(--text3);font-family:var(--mono);}
+  .epi-preview{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;margin-bottom:8px;display:none;}
+  .epi-preview.show{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .epi-preview-nome{font-size:12px;font-weight:500;color:var(--text);flex:1;}
+  .epi-preview-ca{font-size:11px;color:var(--text2);font-family:var(--mono);}
+  .epi-preview-val{font-size:11px;color:var(--text2);}
+  .badge-ativo{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;}
+  .badge-vencido{background:#2a1515;color:#e05555;border:1px solid #4a2020;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;}
+  .badge-nao-encontrado{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;padding:1px 7px;border-radius:4px;font-size:10px;font-weight:600;}
   .epi-tag{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:11px;display:flex;align-items:center;gap:6px;}
   .epi-tag-nome{color:#a78bfa;}
   .epi-tag-ca{color:var(--text3);}
@@ -882,29 +905,34 @@ function renderHierarquia(sr){
             <label for="check-${sr.id}-${n.key}">${n.hint}</label>
           </div>
           <div class="hier-detalhe ${show}" id="det-${sr.id}-${n.key}">
-            <div class="epi-grid-mobile" style="display:grid;grid-template-columns:1fr 90px 110px;gap:8px;align-items:end;margin-bottom:8px;">
-              <div>
-                <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">EPI</div>
-                <select id="epi-sel-${sr.id}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;">
-                  <option value="">— Selecionar —</option>
-                  ${todosEpis.map(e=>`<option value="${e.id}">${h(e.nome)} (${h(e.categoria||'')})</option>`).join('')}
-                </select>
-              </div>
-              <div>
-                <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">Nº CA</div>
-                <input type="text" id="epi-ca-${sr.id}" placeholder="Ex: 12345" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:7px 10px;outline:none;">
-              </div>
-              <div>
-                <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;">Validade CA</div>
-                <input type="date" id="epi-validade-${sr.id}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:7px 10px;outline:none;">
-              </div>
+            <!-- Tabs de busca -->
+            <div class="epi-busca-tabs">
+              <button class="epi-busca-tab active" id="tab-ca-${sr.id}" onclick="toggleEpiBusca(${sr.id},'ca')">Por Nº CA</button>
+              <button class="epi-busca-tab" id="tab-nome-${sr.id}" onclick="toggleEpiBusca(${sr.id},'nome')">Por nome</button>
             </div>
-            <button onclick="adicionarEPI(${sr.id})" style="padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer;width:100%;">+ Adicionar EPI</button>
+            <!-- Busca por CA -->
+            <div id="busca-ca-${sr.id}" class="epi-busca-wrap">
+              <input type="text" class="epi-busca-input" id="epi-ca-input-${sr.id}"
+                placeholder="Digite o Nº CA..."
+                oninput="buscarEPIPorCA(${sr.id},this.value)"
+                autocomplete="off">
+            </div>
+            <!-- Busca por Nome -->
+            <div id="busca-nome-${sr.id}" class="epi-busca-wrap" style="display:none;">
+              <input type="text" class="epi-busca-input" id="epi-nome-input-${sr.id}"
+                placeholder="Digite o nome do EPI..."
+                oninput="buscarEPIPorNome(${sr.id},this.value)"
+                autocomplete="off">
+              <div class="epi-busca-dropdown" id="epi-nome-dd-${sr.id}"></div>
+            </div>
+            <!-- Preview do EPI selecionado -->
+            <div class="epi-preview" id="epi-preview-${sr.id}"></div>
+            <button onclick="adicionarEPI(${sr.id})" style="padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer;width:100%;margin-bottom:8px;">+ Adicionar EPI</button>
             <div class="epis-lista" id="epis-${sr.id}">
               ${(sr.epis||[]).map(e=>{
-                const epiDados=todosEpis.find(x=>x.id===e.epi_id);
-                return`<div class="epi-tag" id="epitag-${sr.id}-${e.epi_id}">
-                  <span class="epi-tag-nome">🛡 ${h(epiDados?.nome||'EPI')}</span>
+                const nome=e.epi_nome||(todosEpis.find(x=>x.id===e.epi_id)?.nome)||'EPI';
+                return`<div class="epi-tag" id="epitag-${sr.id}-${e.epi_id||e.id}">
+                  <span class="epi-tag-nome">🛡 ${h(nome)}</span>
                   ${e.ca?`<span class="epi-tag-ca">CA:${h(e.ca)}</span>`:''}
                   ${e.validade_ca?`<span class="epi-tag-ca">Val:${new Date(e.validade_ca+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}
                 </div>`;
@@ -1572,36 +1600,148 @@ async function criarAcaoFromMedida(srId,nivel,descricao){
 }
 
 // ── EPIs ───────────────────────────────────────────────────────
+// ── BUSCA EPI DA BASE CAEPI ───────────────────────────────────
+const _epiSelecionado={};
+let _epiDebounce=null;
+
+function toggleEpiBusca(srId,modo){
+  document.getElementById(`busca-ca-${srId}`).style.display   = modo==='ca'   ? 'block' : 'none';
+  document.getElementById(`busca-nome-${srId}`).style.display = modo==='nome' ? 'block' : 'none';
+  document.getElementById(`tab-ca-${srId}`).classList.toggle('active',   modo==='ca');
+  document.getElementById(`tab-nome-${srId}`).classList.toggle('active', modo==='nome');
+  delete _epiSelecionado[srId];
+  const prev=document.getElementById(`epi-preview-${srId}`);
+  if(prev){prev.className='epi-preview';prev.innerHTML='';}
+}
+
+function _epiStatusBadge(situacao){
+  if(!situacao)return'';
+  const s=situacao.toUpperCase();
+  if(s.includes('ATIVO')||s==='A')return`<span class="badge-ativo">Ativo</span>`;
+  if(s.includes('VENCIDO')||s.includes('CANCELADO'))return`<span class="badge-vencido">${h(situacao)}</span>`;
+  return`<span class="badge-nao-encontrado">${h(situacao)}</span>`;
+}
+
+function _mostrarPreviewEPI(srId,dado){
+  _epiSelecionado[srId]=dado;
+  const prev=document.getElementById(`epi-preview-${srId}`);
+  if(!prev)return;
+  const val=dado.data_validade?new Date(dado.data_validade+'T00:00:00').toLocaleDateString('pt-BR'):'';
+  prev.className='epi-preview show';
+  prev.innerHTML=`
+    <span class="epi-preview-nome">🛡 ${h(dado.nome_equipamento||dado.epi_nome||'EPI')}</span>
+    ${dado.numero_ca?`<span class="epi-preview-ca">CA: ${h(dado.numero_ca)}</span>`:''}
+    ${val?`<span class="epi-preview-val">Val: ${val}</span>`:''}
+    ${_epiStatusBadge(dado.situacao)}`;
+}
+
+async function buscarEPIPorCA(srId,ca){
+  clearTimeout(_epiDebounce);
+  const prev=document.getElementById(`epi-preview-${srId}`);
+  if(!ca||ca.length<3){
+    if(prev){prev.className='epi-preview';prev.innerHTML='';}
+    delete _epiSelecionado[srId];
+    return;
+  }
+  _epiDebounce=setTimeout(async()=>{
+    try{
+      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?numero_ca=eq.${encodeURIComponent(ca.trim())}&select=numero_ca,nome_equipamento,data_validade,situacao&limit=1`,{headers:h2()});
+      const data=await res.json();
+      if(data.length){
+        _mostrarPreviewEPI(srId,data[0]);
+      } else {
+        delete _epiSelecionado[srId];
+        if(prev){
+          prev.className='epi-preview show';
+          prev.innerHTML=`<span class="badge-nao-encontrado">⚠ CA não encontrado — preencha manualmente</span>
+            <input type="text" class="epi-busca-input" id="epi-nome-manual-${srId}" placeholder="Nome do EPI" style="margin-top:6px;" oninput="_epiSelecionado[${srId}]={epi_nome:this.value,numero_ca:'${ca}',data_validade:null,situacao:null}">`;
+        }
+      }
+    }catch(e){console.error(e);}
+  },400);
+}
+
+async function buscarEPIPorNome(srId,termo){
+  clearTimeout(_epiDebounce);
+  const dd=document.getElementById(`epi-nome-dd-${srId}`);
+  if(!termo||termo.length<2){if(dd)dd.classList.remove('show');return;}
+  _epiDebounce=setTimeout(async()=>{
+    try{
+      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?nome_equipamento=ilike.*${encodeURIComponent(termo)}*&situacao=eq.Ativo&select=numero_ca,nome_equipamento,data_validade,situacao&order=nome_equipamento.asc&limit=12`,{headers:h2()});
+      const data=await res.json();
+      if(!dd)return;
+      if(!data.length){
+        dd.innerHTML=`<div class="epi-busca-option" style="color:var(--text3);cursor:default;">Nenhum resultado</div>`;
+        dd.classList.add('show');
+        return;
+      }
+      dd.innerHTML=data.map(d=>`
+        <div class="epi-busca-option" onclick="selecionarEpiDaLista(${srId},${JSON.stringify(d).replace(/"/g,'&quot;')})">
+          <span class="epi-busca-option-nome">${h(d.nome_equipamento)}</span>
+          <span class="epi-busca-option-ca">CA:${h(d.numero_ca)}</span>
+        </div>`).join('');
+      dd.classList.add('show');
+    }catch(e){console.error(e);}
+  },300);
+}
+
+function selecionarEpiDaLista(srId,dado){
+  _mostrarPreviewEPI(srId,dado);
+  const inp=document.getElementById(`epi-nome-input-${srId}`);
+  if(inp)inp.value=dado.nome_equipamento||'';
+  const dd=document.getElementById(`epi-nome-dd-${srId}`);
+  if(dd)dd.classList.remove('show');
+}
+
 async function adicionarEPI(srId){
-  const sel=document.getElementById(`epi-sel-${srId}`);
-  const caInp=document.getElementById(`epi-ca-${srId}`);
-  const validadeInp=document.getElementById(`epi-validade-${srId}`);
-  if(!sel?.value)return;
-  const epi=todosEpis.find(e=>e.id==sel.value);
-  if(!epi)return;
-  const ca=caInp?.value||'';
-  const validade=validadeInp?.value||'';
+  const dado=_epiSelecionado[srId];
+  if(!dado){alert('Selecione um EPI antes de adicionar.');return;}
+
+  const nome    = dado.nome_equipamento||dado.epi_nome||'';
+  const ca      = dado.numero_ca||'';
+  const validade= dado.data_validade||'';
+  if(!nome){alert('Nenhum EPI selecionado.');return;}
+
+  // Tenta encontrar no catalogo_epis pelo nome; se não achar, cria
+  let epiId=null;
+  const resCat=await fetch(`${SUPA_URL}/rest/v1/catalogo_epis?nome=eq.${encodeURIComponent(nome)}&select=id&limit=1`,{headers:h2()});
+  const cat=await resCat.json();
+  if(cat.length){
+    epiId=cat[0].id;
+  } else {
+    const resNew=await fetch(`${SUPA_URL}/rest/v1/catalogo_epis`,{
+      method:'POST',headers:{...h2(),'Prefer':'return=representation'},
+      body:JSON.stringify({nome,ativo:true})
+    });
+    const newCat=await resNew.json();
+    epiId=newCat[0]?.id||null;
+  }
 
   // Adiciona tag visual
   const lista=document.getElementById(`epis-${srId}`);
-  const tagId=`epitag-${srId}-${epi.id}`;
-  if(!document.getElementById(tagId)){
+  const tagKey=`epitag-${srId}-${epiId||nome}`;
+  if(!document.getElementById(tagKey)){
     const tag=document.createElement('div');
-    tag.id=tagId;tag.className='epi-tag';
-    tag.innerHTML=`<span class="epi-tag-nome">🛡 ${h(epi.nome)}</span>
+    tag.id=tagKey;tag.className='epi-tag';
+    tag.innerHTML=`<span class="epi-tag-nome">🛡 ${h(nome)}</span>
       ${ca?`<span class="epi-tag-ca">CA:${h(ca)}</span>`:''}
       ${validade?`<span class="epi-tag-ca">Val:${new Date(validade+'T00:00:00').toLocaleDateString('pt-BR')}</span>`:''}`;
     lista.appendChild(tag);
   }
 
-  // Salva no banco e propaga
-  await salvarEPIComPropagacao(srId,epi.id,ca,validade);
+  await salvarEPIComPropagacao(srId,epiId,ca,validade,nome);
+
+  // Limpa preview e inputs
+  delete _epiSelecionado[srId];
+  const prev=document.getElementById(`epi-preview-${srId}`);
+  if(prev){prev.className='epi-preview';prev.innerHTML='';}
+  const caInp=document.getElementById(`epi-ca-input-${srId}`);
   if(caInp)caInp.value='';
-  if(validadeInp)validadeInp.value='';
-  sel.value='';
+  const nomeInp=document.getElementById(`epi-nome-input-${srId}`);
+  if(nomeInp)nomeInp.value='';
 }
 
-async function salvarEPIComPropagacao(srId,epiId,ca,validade){
+async function salvarEPIComPropagacao(srId,epiId,ca,validade,epiNome){
   const srDados=riscosSetor.find(x=>x.id===srId);
   if(!srDados)return;
   
@@ -1614,7 +1754,7 @@ async function salvarEPIComPropagacao(srId,epiId,ca,validade){
   if(!existenteMedida.length){
     await fetch(`${SUPA_URL}/rest/v1/setor_risco_medidas`,{
       method:'POST',headers:h2(),
-      body:JSON.stringify({setor_risco_id:srId,nivel:'EPI',epi_id:epiId,ca:ca||null,validade_ca:validade||null,ativo:true})
+      body:JSON.stringify({setor_risco_id:srId,nivel:'EPI',epi_id:epiId||null,epi_nome:epiNome||null,ca:ca||null,validade_ca:validade||null,ativo:true})
     });
   }
   
@@ -1649,7 +1789,7 @@ async function salvarEPIComPropagacao(srId,epiId,ca,validade){
       await fetch(`${SUPA_URL}/rest/v1/funcao_risco_medidas`,{
         method:'POST',headers:h2(),
         body:JSON.stringify({
-          funcao_risco_id:frId,nivel:'EPI',epi_id:epiId,
+          funcao_risco_id:frId,nivel:'EPI',epi_id:epiId||null,epi_nome:epiNome||null,
           ca:ca||null,validade_ca:validade||null,
           origem_setor_medida_id:existenteMedida.length?existenteMedida[0].id:null,
           propagado_do_setor:true,ativo:true
