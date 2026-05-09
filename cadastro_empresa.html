@@ -87,6 +87,7 @@
   @media(max-width:600px){.header-title{display:none;}.user-email{display:none;}.grid-2,.grid-3{grid-template-columns:1fr;}.cnpj-row{flex-direction:column;}.cnpj-row .field{width:100%;}.header{padding:10px 12px;}.container{padding:16px 12px 60px;}}
 </style>
 <script src="trial_check.js"></script>
+<script src="plano_utils.js"></script>
 </head>
 <body>
 <div class="header">
@@ -505,6 +506,9 @@ function atualizarTipoAtividade(){} // placeholder
 function toggleAtivo(){ativo=!ativo;document.getElementById('toggle-ativo').classList.toggle('on',ativo);}
 
 async function salvarEmpresa(){
+  const podeEmpresas = await verificarLimiteEmpresas();
+  if (!podeEmpresas) return;
+
   if (_temDuplicata) {
     setStatus('status-salvar','error','Esta empresa já está cadastrada. Clique em "Ver cadastro existente" ou limpe o formulário.');
     return;

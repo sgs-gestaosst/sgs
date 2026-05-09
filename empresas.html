@@ -86,6 +86,8 @@
     .badges{display:none;}
   }
 </style>
+<script src="trial_check.js"></script>
+<script src="plano_utils.js"></script>
 </head>
 <body>
 
@@ -105,7 +107,7 @@
       <div class="page-title">Empresas</div>
       <div class="page-sub" id="page-sub">Carregando...</div>
     </div>
-    <a href="cadastro_empresa.html" class="btn btn-primary">+ Nova empresa</a>
+    <button class="btn btn-primary" onclick="novaEmpresa()">+ Nova empresa</button>
   </div>
 
   <div class="stats">
@@ -145,6 +147,11 @@ const user = userRaw ? JSON.parse(userRaw) : {};
 document.getElementById('user-email').textContent = user.email || '';
 
 let todasEmpresas = [];
+
+async function novaEmpresa() {
+  const ok = await verificarLimiteEmpresas();
+  if (ok) window.location.href = 'cadastro_empresa.html';
+}
 
 function iniciais(nome) {
   if (!nome) return '?';

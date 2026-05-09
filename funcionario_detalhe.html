@@ -105,6 +105,7 @@
   }
 </style>
 <script src="trial_check.js"></script>
+<script src="plano_utils.js"></script>
 </head>
 <body>
 <div class="header">
@@ -543,18 +544,10 @@ async function salvarFuncionario(){
   const admissao=getVal('data_admissao')||funcionario?.data_admissao;
   if(!admissao){alert('Informe a data de admissão.');return;}
 
-  // Verifica limite de 1.000 funcionários apenas para novos cadastros
+  // Verifica limite de funcionários do plano atual
   if(isNovo){
-    try{
-      const resTotal=await fetch(`${SUPA_URL}/rest/v1/funcionarios?select=id&ativo=eq.true`,{
-        headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'count=exact','Range':'0-0'}
-      });
-      const totalCadastrados=parseInt(resTotal.headers.get('content-range')?.split('/')[1]||'0');
-      if(totalCadastrados>=1000){
-        alert(`Limite de 1.000 funcionários cadastrados individualmente atingido no plano Essencial.\n\nEntre em contato para upgrade ao plano Enterprise.`);
-        return;
-      }
-    }catch(e){console.log('Erro ao verificar limite:',e);}
+    const podeFuncionarios = await verificarLimiteFuncionarios();
+    if(!podeFuncionarios) return;
   }
 
   const btns=document.querySelectorAll('.btn-save');

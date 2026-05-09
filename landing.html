@@ -102,32 +102,35 @@ section{padding:80px 40px;}
 .plano-section{background:linear-gradient(135deg,var(--azul),var(--azul2));}
 .plano-section .section-titulo{color:#fff;}
 .plano-section .section-desc{color:rgba(255,255,255,.7);}
-.plano-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px;max-width:800px;margin-left:auto;margin-right:auto;}
-.plano-card{border-radius:20px;padding:36px;position:relative;}
-.plano-card.essencial{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);}
-.plano-card.enterprise{background:var(--verde);border:1px solid var(--verde);}
-.plano-nome{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;}
-.plano-card.essencial .plano-nome{color:rgba(255,255,255,.6);}
-.plano-card.enterprise .plano-nome{color:var(--azul);}
-.plano-preco{font-family:'Syne',sans-serif;font-size:42px;font-weight:800;margin-bottom:4px;}
-.plano-card.essencial .plano-preco{color:#fff;}
-.plano-card.enterprise .plano-preco{color:var(--azul);}
-.plano-periodo{font-size:14px;margin-bottom:24px;}
-.plano-card.essencial .plano-periodo{color:rgba(255,255,255,.5);}
-.plano-card.enterprise .plano-periodo{color:rgba(10,22,40,.6);}
-.plano-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
-.plano-features li{font-size:14px;display:flex;align-items:center;gap:10px;}
-.plano-card.essencial .plano-features li{color:rgba(255,255,255,.8);}
-.plano-card.enterprise .plano-features li{color:var(--azul);}
-.plano-features li::before{content:'✓';font-weight:700;flex-shrink:0;}
-.plano-card.essencial .plano-features li::before{color:var(--verde);}
-.plano-card.enterprise .plano-features li::before{color:var(--azul);}
-.plano-btn{display:block;text-align:center;padding:14px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;}
-.plano-card.essencial .plano-btn{background:var(--verde);color:var(--azul);}
-.plano-card.essencial .plano-btn:hover{background:#00e0a8;}
-.plano-card.enterprise .plano-btn{background:var(--azul);color:#fff;}
-.plano-card.enterprise .plano-btn:hover{background:#0d2d52;}
-.plano-trial{text-align:center;margin-top:20px;font-size:13px;color:rgba(255,255,255,.5);}
+.plano-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:48px;}
+.plano-card{border-radius:16px;padding:24px;position:relative;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);transition:transform .2s,border-color .2s;}
+.plano-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.3);}
+.plano-card.destaque{background:var(--verde);border-color:var(--verde);}
+.plano-tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:20px;display:inline-block;margin-bottom:12px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.7);}
+.plano-card.destaque .plano-tag{background:rgba(10,22,40,.2);color:var(--azul);}
+.plano-nome{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;margin-bottom:6px;}
+.plano-card.destaque .plano-nome{color:var(--azul);}
+.plano-preco{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#fff;margin-bottom:2px;line-height:1;}
+.plano-card.destaque .plano-preco{color:var(--azul);}
+.plano-periodo{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:16px;}
+.plano-card.destaque .plano-periodo{color:rgba(10,22,40,.55);}
+.plano-limite{font-size:11px;color:rgba(255,255,255,.6);background:rgba(255,255,255,.08);border-radius:6px;padding:6px 10px;margin-bottom:16px;line-height:1.5;}
+.plano-card.destaque .plano-limite{background:rgba(10,22,40,.12);color:rgba(10,22,40,.7);}
+.plano-features{list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:20px;}
+.plano-features li{font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:7px;}
+.plano-card.destaque .plano-features li{color:var(--azul);}
+.plano-features li::before{content:'✓';font-weight:700;flex-shrink:0;color:var(--verde);}
+.plano-card.destaque .plano-features li::before{color:var(--azul);}
+.plano-features li.lock::before{content:'—';color:rgba(255,255,255,.3);}
+.plano-features li.lock{opacity:.5;}
+.plano-btn{display:block;text-align:center;padding:11px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.2);}
+.plano-btn:hover{background:rgba(255,255,255,.25);}
+.plano-card.destaque .plano-btn{background:var(--azul);color:#fff;border-color:var(--azul);}
+.plano-card.destaque .plano-btn:hover{background:#0d2d52;}
+.plano-trial{text-align:center;margin-top:24px;font-size:13px;color:rgba(255,255,255,.45);}
+@media(max-width:900px){.plano-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.plano-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:400px){.plano-grid{grid-template-columns:1fr;}}
 
 /* DEPOIMENTOS / NRs */
 .nrs-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px;}
@@ -390,40 +393,82 @@ footer a{color:var(--verde);text-decoration:none;}
     <div class="fade-up" style="text-align:center;">
       <div class="section-tag" style="color:rgba(0,200,150,.8);">Planos e preços</div>
       <h2 class="section-titulo">Simples e transparente</h2>
-      <p class="section-desc" style="margin:0 auto;">30 dias grátis para testar. Sem cartão de crédito.</p>
+      <p class="section-desc" style="margin:0 auto;">Plano Free gratuito para sempre. Sem cartão de crédito.</p>
     </div>
     <div class="plano-grid">
-      <div class="plano-card essencial fade-up">
-        <div class="plano-nome">Essencial</div>
-        <div class="plano-preco">R$ 999</div>
-        <div class="plano-periodo">/mês · por conta</div>
+
+      <div class="plano-card fade-up">
+        <div class="plano-tag">Gratuito</div>
+        <div class="plano-nome">Free</div>
+        <div class="plano-preco">R$ 0</div>
+        <div class="plano-periodo">para sempre</div>
+        <div class="plano-limite">2 empresas · 25 funcionários · 1 usuário</div>
         <ul class="plano-features">
-          <li>Empresas ilimitadas</li>
-          <li>Até 1.000 funcionários</li>
-          <li>Até 20 usuários</li>
-          <li>Todos os módulos SST</li>
           <li>PGR, PCMSO, LTCAT</li>
-          <li>Suporte via WhatsApp</li>
-          <li>30 dias grátis</li>
+          <li>Todos os módulos SST</li>
+          <li class="lock">eSocial</li>
         </ul>
-        <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="plano-btn">Começar grátis →</a>
+        <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="plano-btn">Criar conta →</a>
       </div>
-      <div class="plano-card enterprise fade-up">
-        <div class="plano-nome">Enterprise</div>
-        <div class="plano-preco">Sob consulta</div>
-        <div class="plano-periodo">Para grandes operações</div>
+
+      <div class="plano-card fade-up">
+        <div class="plano-tag">Para técnicos</div>
+        <div class="plano-nome">Starter</div>
+        <div class="plano-preco">R$ 79</div>
+        <div class="plano-periodo">/mês</div>
+        <div class="plano-limite">8 empresas · 120 funcionários · 2 usuários</div>
         <ul class="plano-features">
-          <li>Funcionários ilimitados</li>
-          <li>Usuários ilimitados</li>
+          <li>PGR, PCMSO, LTCAT</li>
+          <li>Todos os módulos SST</li>
+          <li>eSocial S-2210/2220/2240</li>
+        </ul>
+        <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="plano-btn">Assinar →</a>
+      </div>
+
+      <div class="plano-card destaque fade-up">
+        <div class="plano-tag">Mais popular</div>
+        <div class="plano-nome">Pro</div>
+        <div class="plano-preco">R$ 279</div>
+        <div class="plano-periodo">/mês</div>
+        <div class="plano-limite">15 empresas · 300 funcionários · 3 usuários</div>
+        <ul class="plano-features">
+          <li>PGR, PCMSO, LTCAT</li>
+          <li>Todos os módulos SST</li>
+          <li>eSocial S-2210/2220/2240</li>
+        </ul>
+        <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="plano-btn">Assinar →</a>
+      </div>
+
+      <div class="plano-card fade-up">
+        <div class="plano-tag">Consultorias</div>
+        <div class="plano-nome">Business</div>
+        <div class="plano-preco">R$ 549</div>
+        <div class="plano-periodo">/mês</div>
+        <div class="plano-limite">60 empresas · 1.500 funcionários · ilimitado</div>
+        <ul class="plano-features">
+          <li>PGR, PCMSO, LTCAT</li>
+          <li>Todos os módulos SST</li>
+          <li>eSocial S-2210/2220/2240</li>
+        </ul>
+        <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="plano-btn">Assinar →</a>
+      </div>
+
+      <div class="plano-card fade-up">
+        <div class="plano-tag">Sob consulta</div>
+        <div class="plano-nome">Enterprise</div>
+        <div class="plano-preco" style="font-size:22px;padding-top:6px;">Personalizado</div>
+        <div class="plano-periodo">grandes operações</div>
+        <div class="plano-limite">Ilimitado em tudo</div>
+        <ul class="plano-features">
+          <li>Tudo do Business</li>
           <li>Suporte dedicado</li>
           <li>Implantação assistida</li>
-          <li>Treinamento da equipe</li>
-          <li>SLA garantido</li>
         </ul>
         <a href="https://wa.me/5594981564271?text=Olá!%20Tenho%20interesse%20no%20plano%20Enterprise%20do%20SGS." class="plano-btn">Falar com consultor →</a>
       </div>
+
     </div>
-    <div class="plano-trial fade-up">🔒 Pagamento seguro via Mercado Pago · Cancele quando quiser</div>
+    <div class="plano-trial fade-up">🔒 Pagamento seguro via Mercado Pago · Cancele quando quiser · Plano Free gratuito para sempre</div>
   </div>
 </section>
 
@@ -433,7 +478,7 @@ footer a{color:var(--verde);text-decoration:none;}
     <div class="cta-inner fade-up">
       <div class="section-tag">Comece agora</div>
       <h2 class="section-titulo">Sua SST organizada<br>em minutos</h2>
-      <p class="section-desc" style="margin:16px auto 0;text-align:center;">Crie sua conta gratuitamente e tenha 30 dias para testar todos os recursos sem compromisso.</p>
+      <p class="section-desc" style="margin:16px auto 0;text-align:center;">Crie sua conta gratuitamente com o plano Free e faça upgrade quando quiser, sem compromisso.</p>
       <div class="cta-btns">
         <a href="https://sgs-gestaosst.github.io/sgs/login.html" class="btn-cta-prim">🚀 Criar conta grátis</a>
         <a href="https://wa.me/5594981564271?text=Olá!%20Quero%20conhecer%20o%20SGS%20—%20Sistema%20de%20Gestão%20em%20SST" class="btn-cta-wpp">💬 WhatsApp</a>

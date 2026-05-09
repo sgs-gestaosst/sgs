@@ -47,23 +47,29 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .trial-texto strong{color:#e8eaf0;}
 
 /* ── PLANOS ── */
-.planos-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
-.plano-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:24px;cursor:pointer;transition:border-color .2s;position:relative;}
-.plano-card:hover{border-color:var(--border-focus);}
+.planos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+.planos-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:66.6%;margin:0 auto 24px;}
+.plano-card{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:border-color .2s,background .2s;position:relative;}
+.plano-card:hover:not(.plano-atual):not(.enterprise){border-color:var(--border-focus);}
 .plano-card.selecionado{border-color:var(--accent2);background:#0a1f18;}
-.plano-card.enterprise{cursor:default;opacity:.8;}
-.plano-badge{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:12px;}
+.plano-card.plano-atual{border-color:#4a7cdc;background:#0a1428;cursor:default;}
+.plano-card.enterprise{cursor:default;}
+.plano-badge{font-size:10px;font-family:var(--mono);padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:10px;}
 .badge-popular{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.badge-atual{background:#0a1428;color:#7aabf7;border:1px solid #2a4070;}
 .badge-consulta{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
-.plano-nome{font-size:18px;font-weight:600;margin-bottom:6px;}
-.plano-preco{font-size:28px;font-weight:700;color:var(--accent2);margin-bottom:4px;font-family:var(--mono);}
-.plano-preco span{font-size:13px;font-weight:400;color:var(--text2);}
-.plano-desc{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5;}
+.plano-nome{font-size:16px;font-weight:600;margin-bottom:4px;}
+.plano-preco{font-size:24px;font-weight:700;color:var(--accent2);margin-bottom:3px;font-family:var(--mono);}
+.plano-preco span{font-size:12px;font-weight:400;color:var(--text2);}
+.plano-desc{font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.5;}
 .plano-recursos{list-style:none;}
-.plano-recursos li{font-size:12px;color:var(--text2);padding:4px 0;display:flex;align-items:center;gap:6px;}
-.plano-recursos li::before{content:'✓';color:var(--success);font-weight:700;}
+.plano-recursos li{font-size:11px;color:var(--text2);padding:3px 0;display:flex;align-items:center;gap:6px;}
+.plano-recursos li::before{content:'✓';color:var(--success);font-weight:700;flex-shrink:0;}
 .plano-recursos li.enterprise-item::before{content:'★';color:#e0a855;}
-.plano-selecionado-badge{position:absolute;top:14px;right:14px;font-size:10px;background:var(--accent2);color:#0f1117;padding:2px 8px;border-radius:10px;font-weight:600;}
+.plano-recursos li.bloqueado{opacity:.45;}
+.plano-recursos li.bloqueado::before{content:'—';color:var(--text3);}
+.plano-selecionado-badge{position:absolute;top:12px;right:12px;font-size:10px;background:var(--accent2);color:#0f1117;padding:2px 8px;border-radius:10px;font-weight:600;}
+.plano-atual-badge{position:absolute;top:12px;right:12px;font-size:10px;background:#1a2540;color:#7aabf7;border:1px solid #2a4070;padding:2px 8px;border-radius:10px;font-weight:500;}
 
 /* ── CUPOM ── */
 .cupom-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;}
@@ -134,8 +140,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .seguro-badge{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;color:var(--text3);margin-top:12px;}
 
 /* ── RESPONSIVE ── */
-@media(max-width:600px){
-  .planos-grid{grid-template-columns:1fr;}
+@media(max-width:700px){
+  .planos-grid{grid-template-columns:1fr 1fr;}
+  .planos-grid-2{grid-template-columns:1fr 1fr;max-width:100%;}
+}
+@media(max-width:500px){
+  .planos-grid,.planos-grid-2{grid-template-columns:1fr;max-width:100%;}
   .form-row{grid-template-columns:1fr;}
   .header-title{display:none;}
   .user-email{display:none;}
@@ -168,34 +178,80 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <!-- Planos -->
   <div class="section-label">Escolha seu plano</div>
   <div class="planos-grid">
-    <div class="plano-card selecionado" id="card-essencial">
-      <span class="plano-selecionado-badge" id="badge-essencial">✓ Selecionado</span>
-      <div class="plano-badge badge-popular">Mais popular</div>
-      <div class="plano-nome">Essencial</div>
-      <div class="plano-preco">R$ 999<span>/mês</span></div>
-      <div class="plano-desc">Até 1.000 funcionários em quantas empresas quiser.</div>
+
+    <!-- Free -->
+    <div class="plano-card" id="card-Free" onclick="selecionarPlano('Free')">
+      <div class="plano-badge badge-atual">Gratuito</div>
+      <div class="plano-nome">Free</div>
+      <div class="plano-preco">R$ 0<span>/mês</span></div>
+      <div class="plano-desc">2 empresas · 25 funcionários</div>
       <ul class="plano-recursos">
-        <li>Todos os módulos SGS</li>
-        <li>Até 1.000 funcionários</li>
-        <li>Empresas ilimitadas</li>
-        <li>Até 20 usuários</li>
         <li>PGR, PCMSO, LTCAT</li>
-        <li>Suporte via WhatsApp</li>
-        <li>30 dias grátis</li>
+        <li>Todos os módulos SST</li>
+        <li>1 usuário</li>
+        <li class="bloqueado">eSocial</li>
       </ul>
     </div>
-    <div class="plano-card enterprise">
+
+    <!-- Starter -->
+    <div class="plano-card" id="card-Starter" onclick="selecionarPlano('Starter')">
+      <div class="plano-badge badge-popular">Para técnicos</div>
+      <div class="plano-nome">Starter</div>
+      <div class="plano-preco">R$ 79<span>/mês</span></div>
+      <div class="plano-desc">8 empresas · 120 funcionários</div>
+      <ul class="plano-recursos">
+        <li>PGR, PCMSO, LTCAT</li>
+        <li>Todos os módulos SST</li>
+        <li>2 usuários</li>
+        <li>eSocial S-2210/2220/2240</li>
+      </ul>
+    </div>
+
+    <!-- Pro -->
+    <div class="plano-card" id="card-Pro" onclick="selecionarPlano('Pro')">
+      <div class="plano-badge badge-popular">Mais popular</div>
+      <div class="plano-nome">Pro</div>
+      <div class="plano-preco">R$ 279<span>/mês</span></div>
+      <div class="plano-desc">15 empresas · 300 funcionários</div>
+      <ul class="plano-recursos">
+        <li>PGR, PCMSO, LTCAT</li>
+        <li>Todos os módulos SST</li>
+        <li>3 usuários</li>
+        <li>eSocial S-2210/2220/2240</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="planos-grid-2">
+
+    <!-- Business -->
+    <div class="plano-card" id="card-Business" onclick="selecionarPlano('Business')">
+      <div class="plano-badge badge-popular">Para consultorias</div>
+      <div class="plano-nome">Business</div>
+      <div class="plano-preco">R$ 549<span>/mês</span></div>
+      <div class="plano-desc">60 empresas · 1.500 funcionários</div>
+      <ul class="plano-recursos">
+        <li>PGR, PCMSO, LTCAT</li>
+        <li>Todos os módulos SST</li>
+        <li>Usuários ilimitados</li>
+        <li>eSocial S-2210/2220/2240</li>
+      </ul>
+    </div>
+
+    <!-- Enterprise -->
+    <div class="plano-card enterprise" id="card-Enterprise">
       <div class="plano-badge badge-consulta">Sob consulta</div>
       <div class="plano-nome">Enterprise</div>
-      <div class="plano-preco" style="font-size:20px;color:var(--text2);">Personalizado</div>
-      <div class="plano-desc">Para empresas com mais de 1.000 funcionários.</div>
+      <div class="plano-preco" style="font-size:18px;color:var(--text2);">Personalizado</div>
+      <div class="plano-desc">Empresas e funcionários ilimitados</div>
       <ul class="plano-recursos">
-        <li class="enterprise-item">Funcionários ilimitados</li>
         <li class="enterprise-item">Usuários ilimitados</li>
+        <li class="enterprise-item">eSocial completo</li>
         <li class="enterprise-item">Suporte dedicado</li>
         <li class="enterprise-item">Implantação assistida</li>
       </ul>
     </div>
+
   </div>
 
   <!-- Cupom -->
@@ -212,8 +268,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <div class="section-label">Resumo</div>
   <div class="resumo-card">
     <div class="resumo-linha">
-      <span class="resumo-label">Plano Essencial</span>
-      <span class="resumo-valor">R$ 999,00/mês</span>
+      <span class="resumo-label" id="label-plano-resumo">—</span>
+      <span class="resumo-valor" id="preco-base-resumo">—</span>
     </div>
     <div class="resumo-linha" id="linha-desconto" style="display:none;">
       <span class="resumo-label" id="label-desconto">Desconto</span>
@@ -221,7 +277,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     </div>
     <div class="resumo-linha">
       <span class="resumo-label" style="font-weight:500;">Total/mês</span>
-      <span class="resumo-total" id="valor-total">R$ 999,00</span>
+      <span class="resumo-total" id="valor-total">—</span>
     </div>
     <div class="resumo-extra">Cobrança mensal · Cancele quando quiser</div>
   </div>
@@ -321,15 +377,17 @@ const userRaw = localStorage.getItem('sgs_user');
 if (!token) { window.location.href = 'login.html'; }
 
 const user = userRaw ? JSON.parse(userRaw) : {};
-
-// Exibe e-mail no header
 document.getElementById('user-email').textContent = user.email || '';
 
-const BASE = 999.00;
-let cupomAtivo = null;
-let valorFinal = BASE;
-let planoEssencialId = null;
+// Preços dos planos (espelho do banco — para não precisar de fetch extra no summary)
+const PRECOS_PLANOS = { Free: 0, Starter: 79, Pro: 279, Business: 549, Enterprise: 949 };
+
+let cupomAtivo      = null;
+let valorFinal      = 0;
+let planoSelecionado = null; // { id, nome, valor_mensal }
 let assinaturaAtual = null;
+let planoAtualNome  = null; // nome do plano atual do usuário
+let todosPlanos     = [];
 let mp = null;
 let tabAtual = 'cartao';
 
@@ -360,65 +418,109 @@ async function inicializar() {
   try {
     const headers = { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` };
     const [resPlanos, resAssin] = await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/planos?ativo=eq.true&select=*`, { headers }),
-      fetch(`${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=*&order=criado_em.desc&limit=1`, { headers })
+      fetch(`${SUPA_URL}/rest/v1/planos?ativo=eq.true&select=*&order=valor_mensal.asc`, { headers }),
+      fetch(`${SUPA_URL}/rest/v1/assinaturas?user_id=eq.${user.id}&ativo=eq.true&select=*,planos(nome)&order=criado_em.desc&limit=1`, { headers })
     ]);
-    const planos = await resPlanos.json();
+    todosPlanos     = await resPlanos.json();
     const assinaturas = await resAssin.json();
-    planoEssencialId = planos.find(p => p.nome === 'Essencial')?.id;
-    assinaturaAtual = assinaturas[0] || null;
-    renderTrialBox();
+    assinaturaAtual   = assinaturas[0] || null;
+    planoAtualNome    = assinaturaAtual?.planos?.nome || 'Free';
+
+    renderStatusBox();
+    destacarPlanoAtual();
+
+    // Pré-seleciona o plano acima do atual para sugerir upgrade
+    const escala = ['Free','Starter','Pro','Business','Enterprise'];
+    const idxAtual = escala.indexOf(planoAtualNome);
+    const sugestao = idxAtual >= 0 && idxAtual < escala.length - 1 ? escala[idxAtual + 1] : null;
+    if (sugestao && sugestao !== 'Enterprise') selecionarPlano(sugestao);
+
   } catch(e) {
     console.error('Erro inicializar:', e);
   }
 }
 
-// ── Render Trial Box ─────────────────────────────────
-function renderTrialBox() {
+// ── Status da conta ─────────────────────────────────
+function renderStatusBox() {
   const box   = document.getElementById('trial-box');
   const texto = document.getElementById('trial-texto');
-
   if (!assinaturaAtual) {
-    texto.innerHTML = 'Nenhuma assinatura ativa. Assine agora e ganhe <strong>30 dias grátis</strong>!';
+    texto.innerHTML = 'Crie sua conta e comece gratuitamente com o plano <strong>Free</strong>.';
     return;
   }
-
   const status = assinaturaAtual.status;
-
-  if (status === 'Ativo') {
-    // Usa data_proximo_vencimento se disponível; fallback para data_fim_trial
-    const dataVenc = assinaturaAtual.data_proximo_vencimento || assinaturaAtual.data_fim_trial;
-    const dataFmt  = dataVenc
-      ? new Date(dataVenc + 'T00:00:00').toLocaleDateString('pt-BR')
-      : '—';
-
-    box.style.background   = '#0e2820';
-    box.style.borderColor  = '#1a4a38';
-    texto.style.color      = '#2dd4a0';
-    texto.innerHTML        = `✅ Assinatura <strong>ativa</strong> — próximo vencimento: ${dataFmt}.`;
-
+  if (status === 'Ativo' || status === 'Enterprise') {
+    box.style.background  = '#0e2820';
+    box.style.borderColor = '#1a4a38';
+    texto.style.color     = '#2dd4a0';
+    texto.innerHTML = `✅ Plano <strong>${planoAtualNome}</strong> ativo.`;
     document.getElementById('area-pagamento').innerHTML = `
       <div style="background:#0e2820;border:1px solid #1a4a38;border-radius:10px;padding:20px;text-align:center;color:#2dd4a0;font-size:14px;">
-        ✅ Sua assinatura está ativa. Obrigado por assinar o SGS!
+        ✅ Plano ${planoAtualNome} ativo. Para fazer upgrade, selecione um plano acima e pague.
       </div>`;
     return;
   }
-
+  if (status === 'Free') {
+    texto.innerHTML = `Você está no plano <strong>Free</strong>. Faça upgrade para desbloquear o eSocial e ampliar seus limites.`;
+    return;
+  }
+  if (status === 'Suspenso' || status === 'Cancelado') {
+    box.className = 'trial-box vencido';
+    texto.innerHTML = `🔴 Assinatura <strong>${status.toLowerCase()}</strong>. Selecione um plano abaixo para reativar.`;
+    return;
+  }
+  // Trial legado
   if (status === 'Trial') {
-    const fim  = new Date(assinaturaAtual.data_fim_trial + 'T00:00:00');
-    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-    const dias = Math.ceil((fim - hoje) / (1000 * 60 * 60 * 24));
-
-    if (dias > 7) {
-      texto.innerHTML = `🎯 Período de teste ativo. <strong>${dias} dias restantes</strong> até ${fim.toLocaleDateString('pt-BR')}.`;
-    } else if (dias > 0) {
-      box.className = 'trial-box vencendo';
-      texto.innerHTML = `⚠️ Trial vence em <strong>${dias} dia(s)</strong>! Assine agora para não perder o acesso.`;
+    const fim  = new Date((assinaturaAtual.data_fim_trial || '') + 'T00:00:00');
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const dias = isNaN(fim) ? 0 : Math.ceil((fim - hoje) / 86400000);
+    if (dias > 0) {
+      box.className = dias <= 7 ? 'trial-box vencendo' : 'trial-box';
+      texto.innerHTML = dias > 7
+        ? `🎯 Trial ativo — <strong>${dias} dias restantes</strong>.`
+        : `⚠️ Trial vence em <strong>${dias} dia(s)</strong>. Assine para não perder o acesso.`;
     } else {
       box.className = 'trial-box vencido';
-      texto.innerHTML = `🔴 Período de teste <strong>encerrado</strong>. Assine para continuar usando o SGS.`;
+      texto.innerHTML = `🔴 Trial <strong>encerrado</strong>. Assine para continuar usando o SGS.`;
     }
   }
+}
+
+// ── Destaca plano atual na grade ─────────────────────
+function destacarPlanoAtual() {
+  const card = document.getElementById('card-' + planoAtualNome);
+  if (!card) return;
+  card.classList.add('plano-atual');
+  const badge = document.createElement('span');
+  badge.className = 'plano-atual-badge';
+  badge.textContent = '✓ Plano atual';
+  card.appendChild(badge);
+}
+
+// ── Selecionar plano ─────────────────────────────────
+function selecionarPlano(nome) {
+  if (nome === 'Enterprise' || nome === 'Free') return;
+
+  const plano = todosPlanos.find(p => p.nome === nome);
+  if (!plano) return;
+
+  // Remove seleção anterior
+  document.querySelectorAll('.plano-card.selecionado').forEach(c => {
+    c.classList.remove('selecionado');
+    c.querySelector('.plano-selecionado-badge')?.remove();
+  });
+
+  const card = document.getElementById('card-' + nome);
+  if (card) {
+    card.classList.add('selecionado');
+    const b = document.createElement('span');
+    b.className = 'plano-selecionado-badge';
+    b.textContent = '✓ Selecionado';
+    card.appendChild(b);
+  }
+
+  planoSelecionado = plano;
+  atualizarResumo();
 }
 
 // ── Tabs ─────────────────────────────────────────────
@@ -432,18 +534,23 @@ function mudarTab(tab) {
 
 // ── Resumo ───────────────────────────────────────────
 function atualizarResumo() {
-  const desconto = cupomAtivo ? BASE * (cupomAtivo.valor_desconto / 100) : 0;
-  valorFinal = Math.max(0, BASE - desconto);
+  if (!planoSelecionado) return;
 
-  document.getElementById('valor-total').textContent      = fmt(valorFinal);
-  document.getElementById('valor-btn-cartao').textContent = fmt(valorFinal);
-  document.getElementById('valor-btn-pix').textContent    = fmt(valorFinal);
+  const base     = parseFloat(planoSelecionado.valor_mensal) || 0;
+  const desconto = cupomAtivo ? base * (cupomAtivo.valor_desconto / 100) : 0;
+  valorFinal     = Math.max(0, base - desconto);
+
+  document.getElementById('label-plano-resumo').textContent  = `Plano ${planoSelecionado.nome}`;
+  document.getElementById('preco-base-resumo').textContent   = `${fmt(base)}/mês`;
+  document.getElementById('valor-total').textContent         = fmt(valorFinal);
+  document.getElementById('valor-btn-cartao').textContent    = fmt(valorFinal);
+  document.getElementById('valor-btn-pix').textContent       = fmt(valorFinal);
 
   const linhaDesc = document.getElementById('linha-desconto');
   if (cupomAtivo && desconto > 0) {
     linhaDesc.style.display = 'flex';
-    document.getElementById('valor-desconto').textContent  = `-${fmt(desconto)}`;
-    document.getElementById('label-desconto').textContent  = `Cupom ${cupomAtivo.codigo} (-${cupomAtivo.valor_desconto}%)`;
+    document.getElementById('valor-desconto').textContent = `-${fmt(desconto)}`;
+    document.getElementById('label-desconto').textContent = `Cupom ${cupomAtivo.codigo} (-${cupomAtivo.valor_desconto}%)`;
   } else {
     linhaDesc.style.display = 'none';
   }
@@ -595,7 +702,7 @@ async function pagarCartao() {
 
   if (!cvv || cvv.length < 3)         { setStatus('error', 'CVV inválido.'); return; }
   if (!cpf  || cpf.length < 11)       { setStatus('error', 'CPF inválido.'); return; }
-  if (!planoEssencialId)              { setStatus('error', 'Erro ao carregar plano. Recarregue a página.'); return; }
+  if (!planoSelecionado)              { setStatus('error', 'Selecione um plano acima.'); return; }
   if (!mp)                            { setStatus('error', 'SDK de pagamento não inicializado.'); return; }
 
   document.getElementById('btn-cartao').disabled = true;
@@ -626,7 +733,7 @@ async function pagarCartao() {
         'apikey': SUPA_KEY
       },
       body: JSON.stringify({
-        plano_id:      planoEssencialId,
+        plano_id:      planoSelecionado.id,
         cupom_codigo:  cupomAtivo ? cupomAtivo.codigo : null,
         tipo:          'recorrente',
         card_token_id: cardToken.id,
@@ -650,7 +757,7 @@ async function pagarCartao() {
 
 // ── Pagamento PIX ────────────────────────────────────
 async function pagarPix() {
-  if (!planoEssencialId) { setStatus('error', 'Erro ao carregar plano. Recarregue a página.'); return; }
+  if (!planoSelecionado) { setStatus('error', 'Selecione um plano acima.'); return; }
 
   document.getElementById('btn-pix').disabled = true;
   document.getElementById('spinner-pix').className = 'spinner show';
@@ -666,7 +773,7 @@ async function pagarPix() {
         'apikey': SUPA_KEY
       },
       body: JSON.stringify({
-        plano_id:     planoEssencialId,
+        plano_id:     planoSelecionado.id,
         cupom_codigo: cupomAtivo ? cupomAtivo.codigo : null,
         tipo:         'avulso'
       })
