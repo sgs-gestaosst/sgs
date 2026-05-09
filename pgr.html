@@ -475,10 +475,15 @@ async function carregar(){
       fetch(`${SUPA_URL}/rest/v1/pgr_participacao?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/pgr_versoes?empresa_id=eq.${empresaId}&select=*&order=criado_em.asc`,{headers:headers()}),
     ]);
-    window.contratadas   = await resContrat.json();
-    const particArr      = await resPartic.json();
-    window.pgrParticipacao = particArr[0]||null;
-    window.pgrVersoes    = await resVersoes.json();
+    const rawContrat = await resContrat.json();
+    window.contratadas = Array.isArray(rawContrat) ? rawContrat : [];
+
+    const rawPartic = await resPartic.json();
+    const particArr = Array.isArray(rawPartic) ? rawPartic : [];
+    window.pgrParticipacao = particArr[0] || null;
+
+    const rawVersoes = await resVersoes.json();
+    window.pgrVersoes = Array.isArray(rawVersoes) ? rawVersoes : [];
 
     renderDocumento();
   }catch(e){
