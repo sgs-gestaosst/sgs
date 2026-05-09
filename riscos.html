@@ -1632,7 +1632,7 @@ function _epiStatusBadge(situacao){
   if(!situacao)return'';
   const s=situacao.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
   if(s==='VALIDO')return`<span class="badge-ativo">🟢 Válido</span>`;
-  if(s==='VENCIDO'||s==='CANCELADO')return`<span class="badge-vencido">🔴 Vencido</span>`;
+  if(s==='VENCIDO'||s==='CANCELADO'||s==='SUSPENSO')return`<span class="badge-vencido">🔴 Vencido</span>`;
   return`<span class="badge-nao-encontrado">${h(situacao)}</span>`;
 }
 
@@ -1707,7 +1707,7 @@ async function buscarEPIPorNome(srId,termo){
   if(!termo||termo.length<2){if(dd)dd.classList.remove('show');return;}
   _epiDebounce=setTimeout(async()=>{
     try{
-      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?nome_equipamento=ilike.*${encodeURIComponent(termo)}*&situacao=eq.VÁLIDO&select=numero_ca,nome_equipamento,data_validade,situacao&order=nome_equipamento.asc&limit=20`,{headers:h2()});
+      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?nome_equipamento=ilike.*${encodeURIComponent(termo)}*&situacao=eq.V%C3%81LIDO&select=numero_ca,nome_equipamento,data_validade,situacao&order=nome_equipamento.asc&limit=20`,{headers:h2()});
       const data=await res.json();
       if(!dd)return;
       if(!data.length){

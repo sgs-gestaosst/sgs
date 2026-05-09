@@ -124,6 +124,10 @@ def extrair_e_parsear(conteudo):
         if not mapeado.get('numero_ca'):
             continue
 
+        # Normaliza situacao: trim + upper
+        if 'situacao' in mapeado and mapeado['situacao']:
+            mapeado['situacao'] = mapeado['situacao'].strip().upper()
+
         registros.append(mapeado)
 
     print(f"Registros válidos: {len(registros)}")
