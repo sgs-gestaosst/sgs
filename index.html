@@ -207,46 +207,13 @@
     </div>
   </div>
 
-  <!-- Bloco assinatura -->
+  <!-- Bloco notificação (Pendente / Suspenso / Cancelado) -->
   <div class="bloco-assinatura" id="bloco-assinatura">
     <div class="assin-info">
-      <div class="assin-plan-tag" id="assin-plan-tag">Plano Free</div>
-      <div class="assin-titulo" id="assin-titulo">Você está no plano gratuito</div>
-      <div class="assin-sub" id="assin-sub">Faça upgrade para ampliar seus limites e desbloquear o eSocial.</div>
-      <div class="assin-limites" id="assin-limites">
-        <span class="assin-limite-item">2 empresas</span>
-        <span class="assin-limite-item">25 funcionários</span>
-        <span class="assin-limite-item">1 usuário</span>
-        <span class="assin-limite-item locked">eSocial bloqueado</span>
-      </div>
+      <div class="assin-titulo" id="assin-titulo"></div>
+      <div class="assin-sub" id="assin-sub"></div>
     </div>
     <a href="assinar.html" class="assin-btn" id="assin-btn">Ver planos →</a>
-  </div>
-
-  <!-- Recursos bloqueados (visível apenas no Free) -->
-  <div class="locked-section" id="locked-section" style="display:none;">
-    <div class="section-title">🔒 Disponível nos planos pagos</div>
-    <div class="locked-grid">
-      <div class="locked-card">
-        <div class="locked-icon">📋</div>
-        <div class="locked-title">eSocial SST</div>
-        <div class="locked-desc">Envio de S-2210 (CAT), S-2220 (ASO) e S-2240 (PPP) diretamente pelo SGS.</div>
-        <span class="locked-badge">A partir do Starter</span>
-      </div>
-      <div class="locked-card">
-        <div class="locked-icon">🏢</div>
-        <div class="locked-title">Mais empresas e funcionários</div>
-        <div class="locked-desc">Gerencie até 60 empresas e 1.500 funcionários com ficha individual completa.</div>
-        <span class="locked-badge">A partir do Starter</span>
-      </div>
-      <div class="locked-card">
-        <div class="locked-icon">👥</div>
-        <div class="locked-title">Múltiplos usuários</div>
-        <div class="locked-desc">Convide sua equipe técnica com controle de permissões por módulo e empresa.</div>
-        <span class="locked-badge">A partir do Starter</span>
-      </div>
-    </div>
-    <a href="assinar.html" class="locked-upgrade-btn">🚀 Ver todos os planos e fazer upgrade</a>
   </div>
 
   <div class="section-title">Menu principal</div>
@@ -420,9 +387,7 @@ async function verificarAssinatura() {
           ativo: true,
         })
       });
-      bloco.style.display = 'flex';
-      document.getElementById('locked-section').style.display = 'block';
-      document.getElementById('upgrade-card').style.display   = 'flex';
+      document.getElementById('upgrade-card').style.display = 'flex';
       mostrarFaixaFree();
       return;
     }
@@ -433,11 +398,9 @@ async function verificarAssinatura() {
       return;
     }
 
-    // Plano Free: exibe todos os CTAs de upgrade
+    // Plano Free: faixa + card no menu
     if (assin.status === 'Free') {
-      bloco.style.display = 'flex';
-      document.getElementById('locked-section').style.display = 'block';
-      document.getElementById('upgrade-card').style.display   = 'flex';
+      document.getElementById('upgrade-card').style.display = 'flex';
       mostrarFaixaFree();
       return;
     }
