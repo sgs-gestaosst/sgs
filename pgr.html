@@ -442,6 +442,10 @@ async function carregar(){
       }else{window.resultadosPsi=[];window.resultadosNr01=[];}
     }else{window.campanhaFuncoesPsi=[];window.resultadosPsi=[];window.resultadosNr01=[];}
 
+    // Nomes de GHE salvos pelo técnico
+    const resGhe=await fetch(`${SUPA_URL}/rest/v1/ghe_nomes?empresa_id=eq.${empresaId}&select=*`,{headers:headers()});
+    window.gheNomes=await resGhe.json();
+
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro ao carregar: ${e.message}</div>`;
@@ -459,6 +463,7 @@ function renderDocumento(){
   const pgsCaract=renderCaracterizacao();
   const pgSesmt=renderSESMT();
   const pgsInv=renderInventarioRiscos();
+  const pgsGHE=renderSecaoGHE();
   const pgEpi=renderMatrizEPI();
   const pgsPsi=[];
   const pgsPlano=renderPlanoAcao();
@@ -469,6 +474,7 @@ function renderDocumento(){
   pgsCaract.forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(pgSesmt);
   pgsInv.forEach(pg=>wrap.appendChild(pg));
+  pgsGHE.forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(pgEpi);
   if(window.campanhasPsi&&window.campanhasPsi.length){
     renderAvaliacaoPsicossocial().forEach(pg=>{pgsPsi.push(pg);wrap.appendChild(pg);});
@@ -575,6 +581,7 @@ function renderSumario(){
         ['2','Caracterização do Estabelecimento','sumario-2'],
         ['3','Dimensionamento do SESMT — NR-4','sumario-3'],
         ['4','Inventário de Riscos Ocupacionais por Função','sumario-4'],
+        ['5','Grupos Homogêneos de Exposição (GHE)','sumario-5'],
         ['4.1','Identificação de Perigos e Riscos','sumario-41'],
         ['4.2','Avaliação e Nível de Risco','sumario-42'],
         ['4.3','Danos à Saúde Potenciais','sumario-43'],
@@ -815,6 +822,93 @@ function renderSESMT(){
   return pg;
 }
 
+// ── GHE — GRUPOS HOMOGÊNEOS DE EXPOSIÇÃO ──────────────────────
+function calcularGHEs(){
+  const funcoesComRiscos=funcoes.filter(f=>funcao_riscos.some(fr=>fr.funcao_id===f.id));
+  const grupos={};
+  funcoesComRiscos.forEach(f=>{
+    const frs=funcao_riscos.filter(fr=>fr.funcao_id===f.id);
+    // Assinatura: conjunto ordenado de risco_id:nivel_risco
+    const sig=frs.map(fr=>`${fr.risco_id}:${fr.nivel_risco||''}`).sort().join('|');
+    if(!grupos[sig])grupos[sig]={funcoes:[],frs:frs,sig};
+    grupos[sig].funcoes.push(f);
+  });
+  let n=1;
+  return Object.values(grupos).map(g=>{
+    const codigo=`GHE-${String(n++).padStart(2,'0')}`;
+    const nomesSalvo=window.gheNomes?.find(x=>x.ghe_codigo===codigo)?.ghe_nome||null;
+    return{codigo,nome:nomesSalvo,funcoes:g.funcoes,frs:g.frs};
+  });
+}
+
+async function salvarNomeGHE(codigo,nome){
+  try{
+    const headers={'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};
+    await fetch(`${SUPA_URL}/rest/v1/ghe_nomes`,{
+      method:'POST',headers,
+      body:JSON.stringify({empresa_id:parseInt(empresaId),ghe_codigo:codigo,ghe_nome:nome||null,atualizado_em:new Date().toISOString()})
+    });
+    if(!window.gheNomes)window.gheNomes=[];
+    const idx=window.gheNomes.findIndex(x=>x.ghe_codigo===codigo);
+    if(idx>=0)window.gheNomes[idx].ghe_nome=nome;
+    else window.gheNomes.push({empresa_id:parseInt(empresaId),ghe_codigo:codigo,ghe_nome:nome});
+  }catch(e){console.error('Erro salvarNomeGHE:',e);}
+}
+
+function renderSecaoGHE(){
+  const paginas=[];
+  const ghes=calcularGHEs();
+  if(!ghes.length)return paginas;
+
+  const NIVEL_COR={
+    'MUITO-ALTO':'#ef4444','ALTO':'#f97316','MEDIO':'#eab308','BAIXO':'#22c55e'
+  };
+
+  let pg=criarPagina();
+  let html=`${phHeader()}
+  <div class="doc-section" style="margin-top:0;"><span class="num-secao">5</span>Grupos Homogêneos de Exposição (GHE)</div>
+  <p class="doc-text" style="margin-bottom:12pt;">Os grupos a seguir reúnem funções com exposição idêntica aos mesmos agentes de risco e níveis equivalentes, conforme critério da AIHA/NR-01. O agrupamento por GHE facilita a gestão preventiva e orienta as ações de monitoramento coletivo.</p>`;
+
+  ghes.forEach((ghe,idx)=>{
+    const riscosUnicos=[...new Map(ghe.frs.map(fr=>[fr.risco_id,fr])).values()];
+    const funcoesNomes=ghe.funcoes.map(f=>h(f.nome_funcao)).join(' · ');
+    const nomeDisplay=ghe.nome?`${h(ghe.codigo)} — ${h(ghe.nome)}`:h(ghe.codigo);
+
+    const blocoHtml=`
+    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8pt;padding:10pt;margin-bottom:10pt;break-inside:avoid;">
+      <div style="display:flex;align-items:center;gap:8pt;margin-bottom:6pt;flex-wrap:wrap;">
+        <span style="font-family:monospace;font-size:9pt;font-weight:700;background:#1e40af;color:#fff;padding:2pt 8pt;border-radius:4pt;">${nomeDisplay}</span>
+        <span style="font-size:8pt;color:#6b7280;">
+          <input type="text" value="${ghe.nome||''}" placeholder="Clique para nomear este GHE..."
+            style="border:1px dashed #d1d5db;border-radius:3pt;padding:2pt 6pt;font-size:8pt;color:#374151;background:transparent;outline:none;min-width:180pt;"
+            onblur="salvarNomeGHE('${ghe.codigo}',this.value)"
+            title="Editar nome do GHE">
+        </span>
+      </div>
+      <div style="font-size:8.5pt;color:#374151;margin-bottom:6pt;"><strong>Funções:</strong> ${funcoesNomes}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5pt;">
+        ${riscosUnicos.map(fr=>{
+          const risco=getRisco(fr.risco_id);if(!risco)return'';
+          const cor=getCatCor(risco.categoria_risco_id);
+          const nivel=fr.nivel_risco;
+          const nivelCor=NIVEL_COR[nivel]||'#6b7280';
+          return`<div style="background:#fff;border:1px solid #e5e7eb;border-radius:5pt;padding:5pt 8pt;min-width:120pt;">
+            <div style="font-size:7.5pt;font-weight:600;color:${cor.color};margin-bottom:2pt;">${h(getCatNome(risco.categoria_risco_id))}</div>
+            <div style="font-size:8.5pt;color:#111827;">${h(risco.nome_risco)}</div>
+            ${nivel?`<div style="margin-top:3pt;"><span style="background:${nivelCor}20;color:${nivelCor};border:1px solid ${nivelCor}40;border-radius:3pt;padding:1pt 5pt;font-size:7pt;font-weight:700;">${nivelLabel(nivel)}</span></div>`:''}
+            ${fr.tempo_exposicao_horas_dia?`<div style="font-size:7pt;color:#6b7280;margin-top:2pt;">⏱ ${fr.tempo_exposicao_horas_dia}h/dia${fr.frequencia_dias_semana?' · '+fr.frequencia_dias_semana+'x/sem':''}</div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+    html+=blocoHtml;
+  });
+
+  pg.innerHTML=html+pfFooter();
+  paginas.push(pg);
+  return paginas;
+}
+
 // ── INVENTÁRIO DE RISCOS POR FUNÇÃO ───────────────────────────
 function renderInventarioRiscos(){
   const paginas=[];
@@ -899,6 +993,26 @@ function renderInventarioRiscos(){
         <div class="medida-desc">${desc?h(desc):'<span style="color:#9ca3af;font-style:italic;">Medida indicada — descrição não preenchida</span>'}</div>
       </div>`;
     }).filter(Boolean).join('');
+    // Fonte geradora: específica tem prioridade sobre catálogo
+    const fonteGeradora=fr.fonte_geradora_especifica||risco.fonte_geradora||null;
+    // Dados de exposição
+    const temExposicao=catNome!=='Acidente';
+    const exposicaoItens=[];
+    if(temExposicao){
+      if(fr.tipo_avaliacao)exposicaoItens.push({l:'Tipo de avaliação',v:fr.tipo_avaliacao});
+      if(fr.tempo_exposicao_horas_dia)exposicaoItens.push({l:'Tempo de exposição',v:`${fr.tempo_exposicao_horas_dia}h/dia`});
+      if(fr.frequencia_dias_semana)exposicaoItens.push({l:'Frequência',v:`${fr.frequencia_dias_semana} dias/semana`});
+      if(fr.tipo_avaliacao==='Quantitativa'){
+        if(fr.valor_medido!=null)exposicaoItens.push({l:'Valor medido',v:`${fr.valor_medido}${fr.unidade_medida?' '+fr.unidade_medida:''}`});
+        if(fr.limite_tolerancia_nr)exposicaoItens.push({l:'Limite tolerância',v:fr.limite_tolerancia_nr});
+        if(fr.data_medicao)exposicaoItens.push({l:'Data medição',v:fmtData(fr.data_medicao)});
+        if(fr.responsavel_medicao)exposicaoItens.push({l:'Resp. medição',v:fr.responsavel_medicao});
+      }
+    }
+    const exposicaoHtml=exposicaoItens.length?`
+      <div class="risco-funcao-grid" style="grid-template-columns:repeat(${Math.min(exposicaoItens.length,4)},1fr);margin-top:4pt;">
+        ${exposicaoItens.map(e=>`<div class="rf-field"><div class="lbl">${h(e.l)}</div><div class="val">${h(e.v)}</div></div>`).join('')}
+      </div>`:'';
     return`<div class="risco-funcao">
       <div class="risco-funcao-header">
         <span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
@@ -911,6 +1025,8 @@ function renderInventarioRiscos(){
         <div class="rf-field"><div class="lbl">Severidade</div><div class="val">${fr.severidade?h(SEV_LABEL[fr.severidade]||'—'):'—'}</div></div>
         <div class="rf-field"><div class="lbl">Nº de expostos</div><div class="val">${fr.num_expostos||'—'}</div></div>
       </div>
+      ${fonteGeradora?`<div class="danos-box"><div class="danos-label">🏭 Fonte geradora</div><div class="danos-text">${h(fonteGeradora)}</div></div>`:''}
+      ${exposicaoHtml}
       ${risco.danos_saude?`<div class="danos-box"><div class="danos-label">🩺 Danos à saúde potenciais</div><div class="danos-text">${h(risco.danos_saude)}</div></div>`:''}
       ${medidasItens?`<div class="medidas-box"><div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>${medidasItens}</div>`:''}
     </div>`;
@@ -934,7 +1050,7 @@ function renderInventarioRiscos(){
   // Intro
   const introHtml=`${phHeader()}
   <div class="doc-section" style="margin-top:0;"><span class="num-secao">4</span>Inventário de Riscos Ocupacionais por Função</div>
-  <p class="doc-text" style="margin-bottom:12pt;">O inventário a seguir apresenta os perigos identificados e os riscos associados, organizados por função, conforme levantamento realizado nos setores de trabalho. Para cada risco são indicados o nível de risco (Probabilidade × Severidade), os danos à saúde potenciais e as medidas de controle previstas na hierarquia da NR-1.</p>`;
+  <p class="doc-text" style="margin-bottom:12pt;">O inventário a seguir apresenta os perigos identificados e os riscos associados, organizados por função, conforme levantamento realizado nos setores de trabalho. Para cada risco são indicados o nível de risco (Probabilidade × Severidade), fonte geradora, caracterização da exposição, danos à saúde potenciais e as medidas de controle previstas na hierarquia da NR-1. Os riscos psicossociais identificados por avaliação psicossocial são detalhados em seção específica deste documento, conforme exigência da NR-01 (Portaria MTE nº 1.419/2024).</p>`;
   htmlAtual=introHtml;
   alturaUsada=medir(introHtml);
 

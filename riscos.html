@@ -174,6 +174,24 @@
   .aval-field select,.aval-field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
   .aval-field select:focus,.aval-field input:focus{border-color:var(--border-focus);}
 
+  /* Exposição / campos técnicos */
+  .exposicao-section{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;}
+  .exposicao-titulo{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+  .exposicao-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;}
+  .exposicao-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  .campo-tecnico{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-size:12px;}
+  .campo-tecnico-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+  .campo-tecnico-valor{color:var(--text2);}
+  .radio-group{display:flex;gap:12px;align-items:center;margin-bottom:10px;}
+  .radio-group label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;}
+  .radio-group input[type=radio]{accent-color:var(--accent);cursor:pointer;}
+  .quant-section{background:#0e2820;border:1px solid #1a4a38;border-radius:8px;padding:12px;margin-top:8px;}
+  .quant-section-titulo{font-size:10px;font-weight:600;color:#2dd4a0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+  .resp-prazo-row{display:grid;grid-template-columns:1fr 140px;gap:8px;margin-top:6px;}
+  .resp-prazo-row input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:6px 8px;outline:none;}
+  .resp-prazo-row input:focus{border-color:var(--border-focus);}
+  .hint-opcional{font-size:10px;color:var(--text3);margin-top:3px;}
+
   /* Hierarquia */
   .hierarquia{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;}
   .hier-titulo{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
@@ -516,7 +534,7 @@ async function inicializar(){
       fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:h2()}),
-      fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,codigo_risco,categoria_risco_id,danos_saude,epi_indicado,epc_indicado,nr_relacionada&order=nome_risco.asc`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,codigo_risco,categoria_risco_id,danos_saude,epi_indicado,epc_indicado,nr_relacionada,fonte_geradora,via_absorcao,limite_tolerancia,metodologia_avaliacao&order=nome_risco.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/catalogo_epis?ativo=eq.true&select=id,nome,categoria&order=categoria.asc,nome.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome,cor_identificacao`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/perigos?ativo=eq.true&select=id,nome,descricao,exemplos,categoria_risco_id&order=nome.asc`,{headers:h2()}),
@@ -679,7 +697,23 @@ function renderRiscoCard(sr){
 
   const danosTrunc=risco.danos_saude?risco.danos_saude.slice(0,120)+(risco.danos_saude.length>120?'…':''):'';
 
-  return`<div class="risco-card" id="risco-card-${sr.id}">
+  // Categoria determina se mostra campos de exposição (Acidente não tem)
+  const catNomeStr=getCatNome(risco.categoria_risco_id);
+  const temExposicao=catNomeStr!=='Acidente';
+  const isQuantitativa=sr.tipo_avaliacao==='Quantitativa';
+
+  // Campos técnicos do catálogo (read-only)
+  const camposTecnicos=[];
+  if(risco.fonte_geradora)camposTecnicos.push({l:'Fonte geradora',v:risco.fonte_geradora});
+  if(risco.via_absorcao)camposTecnicos.push({l:'Via de absorção',v:risco.via_absorcao});
+  if(risco.limite_tolerancia)camposTecnicos.push({l:'Limite de tolerância',v:risco.limite_tolerancia});
+  if(risco.metodologia_avaliacao)camposTecnicos.push({l:'Metodologia',v:risco.metodologia_avaliacao});
+  const camposTecnicosHtml=camposTecnicos.length?`
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+      ${camposTecnicos.map(c=>`<div class="campo-tecnico"><div class="campo-tecnico-label">${h(c.l)}</div><div class="campo-tecnico-valor">${h(c.v)}</div></div>`).join('')}
+    </div>`:'';
+
+  const html=`<div class="risco-card" id="risco-card-${sr.id}">
     <div class="risco-card-header">
       <span class="risco-cat-badge" style="background:${estilo.bg};color:${estilo.color};border:1px solid ${estilo.border};">${catNome}</span>
       <div class="risco-info">
@@ -687,6 +721,7 @@ function renderRiscoCard(sr){
         <div class="risco-nome">${h(risco.nome_risco)}</div>
         <div class="risco-codigo">${risco.codigo_risco||''} ${risco.nr_relacionada?'· '+risco.nr_relacionada:''}</div>
         ${danosTrunc?`<div class="risco-danos">🩺 ${h(danosTrunc)}</div>`:''}
+        ${camposTecnicosHtml}
       </div>
       <div class="risco-actions">
         ${propagBadge}
@@ -716,12 +751,94 @@ function renderRiscoCard(sr){
       </div>
     </div>
 
+    ${temExposicao?`
+    <div class="exposicao-section">
+      <div class="exposicao-titulo">Caracterização da exposição</div>
+
+      <div class="aval-field" style="margin-bottom:10px;">
+        <label>Fonte geradora específica (opcional)</label>
+        <input type="text" placeholder="Ex: Torno CNC Romi, linha 3"
+          value="${h(sr.fonte_geradora_especifica||'')}"
+          onblur="salvarCampoExposicao(${sr.id},'fonte_geradora_especifica',this.value)"
+          id="fge-${sr.id}">
+      </div>
+
+      <div class="exposicao-grid">
+        <div class="aval-field">
+          <label>Tipo de avaliação</label>
+          <select onchange="salvarCampoExposicao(${sr.id},'tipo_avaliacao',this.value);toggleQuantitativo(${sr.id},this.value)" id="tav-${sr.id}">
+            <option value="">— Selecionar —</option>
+            <option value="Qualitativa" ${sr.tipo_avaliacao==='Qualitativa'?'selected':''}>Qualitativa</option>
+            <option value="Quantitativa" ${sr.tipo_avaliacao==='Quantitativa'?'selected':''}>Quantitativa</option>
+          </select>
+        </div>
+        <div class="aval-field">
+          <label>Tempo de exposição (h/dia)</label>
+          <input type="number" min="0" max="24" step="0.5" placeholder="Ex: 8"
+            value="${sr.tempo_exposicao_horas_dia||''}"
+            onblur="salvarCampoExposicao(${sr.id},'tempo_exposicao_horas_dia',this.value)"
+            id="texp-${sr.id}">
+        </div>
+        <div class="aval-field">
+          <label>Frequência (dias/semana)</label>
+          <input type="number" min="1" max="7" placeholder="Ex: 5"
+            value="${sr.frequencia_dias_semana||''}"
+            onblur="salvarCampoExposicao(${sr.id},'frequencia_dias_semana',this.value)"
+            id="freq-${sr.id}">
+        </div>
+      </div>
+
+      <div class="quant-section" id="quant-${sr.id}" style="${isQuantitativa?'':'display:none;'}">
+        <div class="quant-section-titulo">📊 Dados da avaliação quantitativa</div>
+        <div class="exposicao-grid">
+          <div class="aval-field">
+            <label>Valor medido</label>
+            <input type="number" step="0.0001" placeholder="Ex: 87.5"
+              value="${sr.valor_medido||''}"
+              onblur="salvarCampoExposicao(${sr.id},'valor_medido',this.value)"
+              id="vmed-${sr.id}">
+          </div>
+          <div class="aval-field">
+            <label>Unidade</label>
+            <select onchange="salvarCampoExposicao(${sr.id},'unidade_medida',this.value)" id="unid-${sr.id}">
+              <option value="">—</option>
+              ${['dB(A)','mg/m³','ppm','f/cm³','°C','lux','W/m²','m/s²','%','mSv/ano'].map(u=>`<option value="${u}" ${sr.unidade_medida===u?'selected':''}>${u}</option>`).join('')}
+              <option value="outro" ${sr.unidade_medida&&!['dB(A)','mg/m³','ppm','f/cm³','°C','lux','W/m²','m/s²','%','mSv/ano'].includes(sr.unidade_medida)?'selected':''}>Outro</option>
+            </select>
+          </div>
+          <div class="aval-field">
+            <label>Limite tolerância (NR/ACGIH)</label>
+            <input type="text" placeholder="Ex: 85 dB(A)"
+              value="${h(sr.limite_tolerancia_nr||'')}"
+              onblur="salvarCampoExposicao(${sr.id},'limite_tolerancia_nr',this.value)"
+              id="ltnr-${sr.id}">
+          </div>
+        </div>
+        <div class="exposicao-row">
+          <div class="aval-field">
+            <label>Data da medição</label>
+            <input type="date"
+              value="${sr.data_medicao||''}"
+              onblur="salvarCampoExposicao(${sr.id},'data_medicao',this.value||null)"
+              id="dmed-${sr.id}">
+          </div>
+          <div class="aval-field">
+            <label>Responsável pela medição</label>
+            <input type="text" placeholder="Empresa ou técnico"
+              value="${h(sr.responsavel_medicao||'')}"
+              onblur="salvarCampoExposicao(${sr.id},'responsavel_medicao',this.value)"
+              id="rmed-${sr.id}">
+          </div>
+        </div>
+      </div>
+    </div>`:''}
+
     <div class="hierarquia">
       <div class="hier-titulo">Hierarquia de controle — NR-1</div>
       ${renderHierarquia(sr)}
     </div>
   </div>`;
-  
+
   renderedRiscosCache[sr.id]=html;
   return html;
 }
@@ -779,6 +896,8 @@ function renderHierarquia(sr){
         </div>
       </div>`;
     }
+    const respVal=h(sr[`medida_${n.key}_responsavel`]||'');
+    const prazoVal=sr[`medida_${n.key}_prazo`]||'';
     return`<div class="hier-nivel">
       <div class="hier-num" style="background:${n.cor}20;color:${n.cor};border:1px solid ${n.cor}40;">${n.label.split('.')[0]}</div>
       <div class="hier-label" style="color:${n.cor};font-size:11px;font-weight:500;">${n.label.split('. ')[1]}</div>
@@ -789,6 +908,17 @@ function renderHierarquia(sr){
         </div>
         <div class="hier-detalhe ${show}" id="det-${sr.id}-${n.key}">
           <textarea placeholder="Descreva a medida de controle..." onblur="salvarMedida(${sr.id},'${n.key}',this.value)">${h(sr[`medida_${n.key}_desc`]||'')}</textarea>
+          <div class="resp-prazo-row" style="margin-top:6px;">
+            <input type="text" placeholder="Responsável (opcional)"
+              value="${respVal}"
+              onblur="salvarMedidaRespPrazo(${sr.id},'${n.key}','responsavel',this.value)"
+              id="resp-${sr.id}-${n.key}">
+            <input type="date"
+              value="${prazoVal}"
+              onblur="salvarMedidaRespPrazo(${sr.id},'${n.key}','prazo',this.value||null)"
+              id="prazo-${sr.id}-${n.key}">
+          </div>
+          <div class="hint-opcional">💡 Responsável e prazo opcionais — podem ser definidos na Central de Ações</div>
         </div>
       </div>
     </div>`;
@@ -1258,6 +1388,43 @@ async function propagarRiscoParaFuncoes(setorRisco){
 }
 
 // ── AVALIAÇÃO ──────────────────────────────────────────────────
+// ── CAMPOS DE EXPOSIÇÃO ────────────────────────────────────────
+async function salvarCampoExposicao(srId,campo,valor){
+  const tabela=contexto==='setor'?'setor_riscos':'funcao_riscos';
+  const val=(valor===''||valor===null)?null:
+    ['tempo_exposicao_horas_dia','frequencia_dias_semana','valor_medido'].includes(campo)
+      ?(parseFloat(valor)||null)
+      :valor;
+  const updates={[campo]:val,atualizado_em:new Date().toISOString()};
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:h2(),body:JSON.stringify(updates)});
+    const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+    const sr=lista.find(x=>x.id===srId);
+    if(sr)sr[campo]=val;
+    if(contexto==='setor') await propagarAvaliacaoParaFuncoes(srId,updates);
+  }catch(e){console.error('Erro salvarCampoExposicao:',e);}
+}
+
+function toggleQuantitativo(srId,tipo){
+  const el=document.getElementById(`quant-${srId}`);
+  if(el)el.style.display=tipo==='Quantitativa'?'':'none';
+}
+
+// ── RESPONSÁVEL E PRAZO DAS MEDIDAS ───────────────────────────
+async function salvarMedidaRespPrazo(srId,nivel,tipo,valor){
+  const tabela=contexto==='setor'?'setor_riscos':'funcao_riscos';
+  const campo=`medida_${nivel}_${tipo}`;
+  const val=(valor===''||valor===null)?null:valor;
+  const updates={[campo]:val,atualizado_em:new Date().toISOString()};
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:h2(),body:JSON.stringify(updates)});
+    const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+    const sr=lista.find(x=>x.id===srId);
+    if(sr)sr[campo]=val;
+    if(contexto==='setor') await propagarAvaliacaoParaFuncoes(srId,updates);
+  }catch(e){console.error('Erro salvarMedidaRespPrazo:',e);}
+}
+
 async function atualizarAvaliacao(srId,el,campo){
   const tabela=contexto==='setor'?'setor_riscos':'funcao_riscos';
   const val=el.value?parseInt(el.value):null;
