@@ -1170,8 +1170,7 @@ function renderMatrizEPI(){
     return pg;
   }
 
-  const blocos=ghesComEpi.map(ghe=>{
-    // Consolida EPIs únicos de todas as funções do GHE
+  const linhasTabela=ghesComEpi.map(ghe=>{
     const episGhe=[];
     ghe.funcoes.forEach(f=>{
       (episPorFuncao[f.id]||[]).forEach(e=>{
@@ -1181,41 +1180,37 @@ function renderMatrizEPI(){
     if(!episGhe.length)return'';
 
     const funcoesNomes=ghe.funcoes.map(f=>h(f.nome_funcao)).join(' · ');
-    const linhas=episGhe.map(e=>{
+    const pillsHtml=episGhe.map(e=>{
       const epiDados=epis.find(x=>x.id===e.epi_id);
-      return`<tr>
-        <td style="font-weight:500;">🛡 ${h(epiDados?.nome||'EPI')}</td>
-        <td style="text-align:center;color:#374151;">${e.ca?h(e.ca):'—'}</td>
-        <td style="text-align:center;color:#374151;">${e.validade_ca?fmtData(e.validade_ca):'—'}</td>
-      </tr>`;
-    }).join('');
+      const nome=h(epiDados?.nome||'EPI');
+      const ca=e.ca?`<span class="ca-pill">CA:${h(e.ca)}</span>`:'';
+      return`<span class="epi-pill">🛡 ${nome}</span>${ca}`;
+    }).join(' ');
 
-    return`<div style="margin-bottom:14pt;break-inside:avoid;">
-      <div style="background:#f0f5ff;border:1.5pt solid #c7d7f9;border-radius:6pt 6pt 0 0;padding:7pt 12pt;display:flex;align-items:center;justify-content:space-between;">
-        <div>
-          <span class="ghe-codigo-badge" style="font-size:8pt;">${h(ghe.codigo)}</span>
-          <span style="font-size:8pt;color:#374151;margin-left:8pt;">👷 ${funcoesNomes}</span>
-        </div>
-        <span style="font-size:7.5pt;color:#6b7280;">${episGhe.length} EPI(s)</span>
-      </div>
-      <table class="epi-matrix-table" style="margin:0;border-radius:0 0 6pt 6pt;overflow:hidden;">
-        <thead>
-          <tr>
-            <th>EPI</th>
-            <th style="width:80pt;text-align:center;">Nº CA</th>
-            <th style="width:80pt;text-align:center;">Validade CA</th>
-          </tr>
-        </thead>
-        <tbody>${linhas}</tbody>
-      </table>
-    </div>`;
+    return`<tr>
+      <td>
+        <span class="ghe-codigo-badge" style="font-size:7.5pt;">${h(ghe.codigo)}</span>
+        <div style="font-size:7.5pt;color:#374151;margin-top:4pt;">${funcoesNomes}</div>
+      </td>
+      <td style="text-align:center;font-weight:600;color:#0d2040;vertical-align:top;">${episGhe.length}</td>
+      <td style="vertical-align:top;">${pillsHtml}</td>
+    </tr>`;
   }).join('');
 
   pg.innerHTML=`
   ${phHeader()}
   <div class="doc-section"><span class="num-secao">5</span>Matriz de EPI por GHE</div>
   <p class="doc-text" style="margin-bottom:12pt;">A matriz a seguir consolida os Equipamentos de Proteção Individual (EPIs) obrigatórios por Grupo Homogêneo de Exposição, com base nos riscos identificados no inventário e nas medidas de controle conforme hierarquia da NR-1. Em conformidade com a NR-6, o empregador é responsável pelo fornecimento gratuito, orientação de uso, manutenção e substituição dos EPIs, bem como por exigir e fiscalizar seu uso correto.</p>
-  ${blocos}
+  <table class="epi-matrix-table">
+    <thead>
+      <tr>
+        <th style="width:28%;">GHE / Funções</th>
+        <th style="width:8%;text-align:center;">Qtd. EPIs</th>
+        <th>EPIs obrigatórios (com Nº CA)</th>
+      </tr>
+    </thead>
+    <tbody>${linhasTabela}</tbody>
+  </table>
   <p class="doc-text" style="margin-top:8pt;font-size:8pt;">* EPIs com CA vencido ou sem CA não devem ser fornecidos. O empregador deve capacitar o trabalhador quanto ao uso adequado, guarda e conservação de cada EPI, conforme NR-6.</p>
   ${pfFooter()}`;
   return pg;
