@@ -1618,17 +1618,11 @@ function toggleEpiBusca(srId,modo){
 }
 
 function _epiStatusBadge(situacao, dataValidade){
-  if(!dataValidade)return'';
-  const valISO=(()=>{
-    const p=dataValidade.split('/');
-    return p.length===3?`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`:dataValidade;
-  })();
-  const hoje=new Date(); hoje.setHours(0,0,0,0);
-  const val=new Date(valISO+'T00:00:00');
-  if(isNaN(val))return'';
-  return val>=hoje
-    ? `<span class="badge-ativo">✅ Válido</span>`
-    : `<span class="badge-vencido">🔴 Vencido</span>`;
+  if(!situacao)return'';
+  const s=situacao.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  if(s==='VALIDO')return`<span class="badge-ativo">🟢 Válido</span>`;
+  if(s==='VENCIDO'||s==='CANCELADO')return`<span class="badge-vencido">🔴 Vencido</span>`;
+  return`<span class="badge-nao-encontrado">${h(situacao)}</span>`;
 }
 
 function _parseDateCAEPI(s){
@@ -1640,16 +1634,25 @@ function _parseDateCAEPI(s){
 }
 
 function _mostrarPreviewEPI(srId,dado){
-  _epiSelecionado[srId]=dado;
+  _epiSelecionado[srId]={...dado, validade_confirmada:''};
   const prev=document.getElementById(`epi-preview-${srId}`);
   if(!prev)return;
-  const val=dado.data_validade?_parseDateCAEPI(dado.data_validade).toLocaleDateString('pt-BR'):'';
+  const linkCA=dado.numero_ca?`<a href="https://consultaca.com/${dado.numero_ca}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);text-decoration:none;white-space:nowrap;">🔗 Verificar no ConsultaCA</a>`:'';
   prev.className='epi-preview show';
+  prev.style.flexDirection='column';
+  prev.style.gap='8px';
   prev.innerHTML=`
-    <span class="epi-preview-nome">🛡 ${h(dado.nome_equipamento||dado.epi_nome||'EPI')}</span>
-    ${dado.numero_ca?`<span class="epi-preview-ca">CA: ${h(dado.numero_ca)}</span>`:''}
-    ${val?`<span class="epi-preview-val">Val: ${val}</span>`:''}
-    ${_epiStatusBadge(dado.situacao, dado.data_validade)}`;
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span class="epi-preview-nome">🛡 ${h(dado.nome_equipamento||dado.epi_nome||'EPI')}</span>
+      ${dado.numero_ca?`<span class="epi-preview-ca">CA: ${h(dado.numero_ca)}</span>`:''}
+      ${_epiStatusBadge(dado.situacao)}
+      ${linkCA}
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <label style="font-size:11px;color:var(--text2);white-space:nowrap;">Validade (confirmar no ConsultaCA):</label>
+      <input type="date" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;"
+        onchange="_epiSelecionado[${srId}].validade_confirmada=this.value">
+    </div>`;
 }
 
 async function buscarEPIPorCA(srId,ca){
@@ -1670,8 +1673,17 @@ async function buscarEPIPorCA(srId,ca){
         delete _epiSelecionado[srId];
         if(prev){
           prev.className='epi-preview show';
-          prev.innerHTML=`<span class="badge-nao-encontrado">⚠ CA não encontrado — preencha manualmente</span>
-            <input type="text" class="epi-busca-input" id="epi-nome-manual-${srId}" placeholder="Nome do EPI" style="margin-top:6px;" oninput="_epiSelecionado[${srId}]={epi_nome:this.value,numero_ca:'${ca}',data_validade:null,situacao:null}">`;
+          prev.style.flexDirection='column';
+          prev.style.gap='8px';
+          prev.innerHTML=`
+            <span class="badge-nao-encontrado">⚠ CA não encontrado na base — preencha manualmente</span>
+            <input type="text" class="epi-busca-input" placeholder="Nome do EPI"
+              oninput="_epiSelecionado[${srId}]={..._epiSelecionado[${srId}]||{},epi_nome:this.value,numero_ca:'${ca}'}">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <label style="font-size:11px;color:var(--text2);white-space:nowrap;">Validade:</label>
+              <input type="date" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;"
+                onchange="_epiSelecionado[${srId}]={..._epiSelecionado[${srId}]||{},validade_confirmada:this.value}">
+            </div>`;
         }
       }
     }catch(e){console.error(e);}
@@ -1714,14 +1726,10 @@ async function adicionarEPI(srId){
   const dado=_epiSelecionado[srId];
   if(!dado){alert('Selecione um EPI antes de adicionar.');return;}
 
-  const nome     = dado.nome_equipamento||dado.epi_nome||'';
-  const ca       = dado.numero_ca||'';
-  const validadeRaw = dado.data_validade||'';
-  // Converte DD/MM/AAAA → YYYY-MM-DD para o banco
-  const validadeISO = validadeRaw ? (()=>{
-    const p=validadeRaw.split('/');
-    return p.length===3?`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`:validadeRaw;
-  })() : '';
+  const nome        = dado.nome_equipamento||dado.epi_nome||'';
+  const ca          = dado.numero_ca||'';
+  // Usa validade confirmada pelo técnico (formato YYYY-MM-DD do input date)
+  const validadeISO = dado.validade_confirmada||'';
   const validadeDisplay = validadeISO ? new Date(validadeISO+'T00:00:00').toLocaleDateString('pt-BR') : '';
   if(!nome){alert('Nenhum EPI selecionado.');return;}
 
