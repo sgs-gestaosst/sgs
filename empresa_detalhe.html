@@ -178,6 +178,7 @@
             <a id="btn-aet"          href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🪑 AET — Ergonomia</a>
             <a id="btn-checklists"   href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🔍 Checklists</a>
             <a id="btn-acoes"        href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">⚡ Ações</a>
+            <a id="btn-contratadas"  href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🏗️ Empresas Contratadas</a>
           </div>
         </div>
         <button class="btn btn-danger" onclick="abrirModal()">Excluir</button>
@@ -586,6 +587,7 @@ async function carregarEmpresa(){
       {id:'btn-aet',          href:`aet.html?empresa_id=${empresaId}`},
       {id:'btn-checklists',   href:`checklists.html?empresa_id=${empresaId}`},
       {id:'btn-acoes',        href:`acoes.html?empresa_id=${empresaId}`},
+      {id:'btn-contratadas',  href:`empresa_contratadas.html?empresa_id=${empresaId}`},
     ];
     modulos.forEach(m=>{const el=document.getElementById(m.id);if(el){el.href=m.href;el.style.display='flex';}});
     document.getElementById('btn-modulos').style.display='inline-flex';

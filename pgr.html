@@ -469,6 +469,17 @@ async function carregar(){
     }else{window.campanhaFuncoesPsi=[];window.resultadosPsi=[];window.resultadosNr01=[];}
 
 
+    // Contratadas, Participação e Versões
+    const [resContrat, resPartic, resVersoes] = await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/empresa_contratadas?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=razao_social.asc`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/pgr_participacao?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/pgr_versoes?empresa_id=eq.${empresaId}&select=*&order=criado_em.asc`,{headers:headers()}),
+    ]);
+    window.contratadas   = await resContrat.json();
+    const particArr      = await resPartic.json();
+    window.pgrParticipacao = particArr[0]||null;
+    window.pgrVersoes    = await resVersoes.json();
+
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro ao carregar: ${e.message}</div>`;
@@ -489,6 +500,9 @@ function renderDocumento(){
   const pgEpi=renderMatrizEPI();
   const pgsPsi=[];
   const pgsPlano=renderPlanoAcao();
+  const pgContrat=renderSecaoContratadas();
+  const pgPartic=renderSecaoParticipacao();
+  const pgVersoes=renderSecaoVersoes();
 
   wrap.appendChild(pgCapa);
   wrap.appendChild(pgSumario);
@@ -501,6 +515,9 @@ function renderDocumento(){
     renderAvaliacaoPsicossocial().forEach(pg=>{pgsPsi.push(pg);wrap.appendChild(pg);});
   }
   pgsPlano.forEach(pg=>wrap.appendChild(pg));
+  if(pgContrat)wrap.appendChild(pgContrat);
+  if(pgPartic)wrap.appendChild(pgPartic);
+  if(pgVersoes)wrap.appendChild(pgVersoes);
 
   // Numeração de páginas
   const paginas=Array.from(document.querySelectorAll('#pages-wrap .page'));
@@ -524,6 +541,9 @@ function renderDocumento(){
   setPg('sumario-7',pgsPlano.length?nrPag(pgsPlano[0]):'—');
   // Monitoramento está na última página do plano
   setPg('sumario-8',pgsPlano.length?nrPag(pgsPlano[pgsPlano.length-1]):'—');
+  if(pgContrat)setPg('sumario-9',nrPag(pgContrat));
+  if(pgPartic)setPg('sumario-10',nrPag(pgPartic));
+  if(pgVersoes)setPg('sumario-11',nrPag(pgVersoes));
 }
 
 // ── CAPA ──────────────────────────────────────────────────────
@@ -566,7 +586,7 @@ function renderCapa(){
     <div class="capa-titulo-wrap">
       <div class="capa-pre">Programa de Gerenciamento de Riscos</div>
       <div class="capa-titulo">PGR</div>
-      <div class="capa-titulo-sub">Conforme NR-1 — Portaria MTE nº 672/2021</div>
+      <div class="capa-titulo-sub">Conforme NR-1 — Portaria MTE nº 1.419/2024</div>
       <div class="capa-empresa-box">
         <div class="capa-empresa-nome">${h(empresa.razao_social||empresa.nome_fantasia||'—')}</div>
         ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#4b5563;margin-bottom:4pt;">${h(empresa.nome_fantasia)}</div>`:''}
@@ -583,7 +603,7 @@ function renderCapa(){
     <div class="capa-footer">
       <div><div class="capa-footer-label">Versão</div><div class="capa-footer-value">1.0 — ${fmtAno()}</div></div>
       <div style="text-align:center;"><div class="capa-footer-label">Elaboração</div><div class="capa-footer-value" id="doc-elab-footer">—</div></div>
-      <div style="text-align:right;"><div class="capa-footer-label">Revisão periódica</div><div class="capa-footer-value">Anual</div></div>
+      <div style="text-align:right;"><div class="capa-footer-label">Revisão periódica</div><div class="capa-footer-value">A cada 2 anos</div></div>
     </div>
   </div>`;
   return pg;
@@ -610,6 +630,9 @@ function renderSumario(){
         ['6','Avaliação Psicossocial','sumario-6'],
         ['7','Plano de Ação','sumario-7'],
         ['8','Monitoramento e Revisão','sumario-8'],
+        ['9','Empresas Contratadas / Terceirizadas','sumario-9'],
+        ['10','Participação e Consulta dos Trabalhadores','sumario-10'],
+        ['11','Histórico de Revisões','sumario-11'],
       ].map(([n,t,id])=>`<tr>
         <td style="width:30pt;"><span class="num-secao">${n}</span></td>
         <td style="color:#1a1a2e;">${t}</td>
@@ -1576,6 +1599,119 @@ function renderAvaliacaoPsicossocial(){
 
 let acoesSelecionadasIds=null;
 
+// ── SEÇÃO: EMPRESAS CONTRATADAS ───────────────────────────────
+function renderSecaoContratadas(){
+  const lista=window.contratadas||[];
+  if(!lista.length)return null;
+  const pg=criarPagina();
+  const linhas=lista.map(c=>`<tr>
+    <td style="font-weight:500;">${h(c.razao_social)}${c.cnpj?`<br><span style="font-size:7pt;color:#9ca3af;">${h(c.cnpj)}</span>`:''}</td>
+    <td>${h(c.servico_prestado)}</td>
+    <td style="text-align:center;">${h(c.frequencia||'—')}</td>
+    <td>${h(c.riscos_categorias||'—')}</td>
+    <td>${h(c.setores_atuacao||'—')}</td>
+    <td>${h(c.medidas_acordadas||'—')}</td>
+  </tr>`).join('');
+  pg.innerHTML=`
+  ${phHeader()}
+  <div class="doc-section" style="margin-top:0;"><span class="num-secao">9</span>Empresas Contratadas / Terceirizadas</div>
+  <p class="doc-text" style="margin-bottom:10pt;">As empresas contratadas listadas abaixo executam serviços nas instalações desta organização e foram informadas dos riscos ocupacionais presentes no ambiente, bem como das medidas de prevenção aplicáveis, em conformidade com a NR-01 subitem 1.5.2.</p>
+  <table class="epi-matrix-table">
+    <thead><tr>
+      <th style="width:18%;">Empresa</th>
+      <th style="width:20%;">Serviço</th>
+      <th style="width:10%;text-align:center;">Frequência</th>
+      <th style="width:17%;">Riscos no local</th>
+      <th style="width:15%;">Setores</th>
+      <th>Medidas acordadas</th>
+    </tr></thead>
+    <tbody>${linhas}</tbody>
+  </table>
+  ${pfFooter()}`;
+  return pg;
+}
+
+// ── SEÇÃO: PARTICIPAÇÃO DOS TRABALHADORES ─────────────────────
+function renderSecaoParticipacao(){
+  const p=window.pgrParticipacao;
+  const pg=criarPagina();
+  const campo=(label,valor,id,placeholder)=>`
+    <div style="margin-bottom:10pt;">
+      <div style="font-size:8pt;font-weight:600;color:#374151;margin-bottom:3pt;">${label}</div>
+      <div contenteditable="true"
+        style="border:1pt solid #e5e7eb;border-radius:4pt;padding:6pt 8pt;font-size:9pt;color:#374151;min-height:20pt;background:#fafafa;"
+        data-field="${id}"
+        onblur="salvarParticipacao(${empresaId},this.dataset.field,this.innerText)"
+        >${h(valor||'')}</div>
+    </div>`;
+  pg.innerHTML=`
+  ${phHeader()}
+  <div class="doc-section" style="margin-top:0;"><span class="num-secao">10</span>Participação e Consulta dos Trabalhadores</div>
+  <p class="doc-text" style="margin-bottom:12pt;">Conforme NR-01 (subitens 1.1 e 1.5.3), a organização deve promover a participação dos trabalhadores no processo de Gerenciamento de Riscos Ocupacionais, garantindo sua consulta, informação e comunicação.</p>
+  ${campo('Data de divulgação do PGR aos trabalhadores',p?.data_divulgacao?new Date(p.data_divulgacao+'T00:00:00').toLocaleDateString('pt-BR'):'','data_divulgacao','Ex: 09/05/2026')}
+  ${campo('Forma de divulgação',p?.forma_divulgacao,'forma_divulgacao','Ex: Reunião com equipe, afixação em mural, e-mail')}
+  ${campo('Responsável pela comunicação',p?.responsavel_comunicacao,'responsavel_comunicacao','Nome e função do responsável')}
+  ${campo('Mecanismo de consulta utilizado',p?.mecanismo_consulta,'mecanismo_consulta','Ex: CIPA, reunião direta, questionário de percepção de riscos')}
+  ${campo('Canal permanente de comunicação de riscos',p?.canal_comunicacao,'canal_comunicacao','Ex: CIPA, Segurança do Trabalho, e-mail segurança@empresa.com')}
+  ${pfFooter()}`;
+  return pg;
+}
+
+async function salvarParticipacao(empresaId,campo,valor){
+  try{
+    const h2={'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};
+    await fetch(`${SUPA_URL}/rest/v1/pgr_participacao`,{
+      method:'POST',headers:h2,
+      body:JSON.stringify({empresa_id:parseInt(empresaId),[campo]:valor||null,atualizado_em:new Date().toISOString()})
+    });
+  }catch(e){console.error('Erro salvarParticipacao:',e);}
+}
+
+// ── SEÇÃO: CONTROLE DE VERSÕES ────────────────────────────────
+function renderSecaoVersoes(){
+  const versoes=window.pgrVersoes||[];
+  const pg=criarPagina();
+  const linhas=versoes.map(v=>`<tr>
+    <td style="text-align:center;font-family:'IBM Plex Mono',monospace;">${h(v.versao)}</td>
+    <td style="text-align:center;">${v.data_revisao?new Date(v.data_revisao+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</td>
+    <td>${h(v.autor||'—')}</td>
+    <td>${h(v.descricao_alteracao||'—')}</td>
+  </tr>`).join('');
+  pg.innerHTML=`
+  ${phHeader()}
+  <div class="doc-section" style="margin-top:0;"><span class="num-secao">11</span>Histórico de Revisões</div>
+  <p class="doc-text" style="margin-bottom:10pt;">Conforme NR-01 subitem 1.5.4, o inventário de riscos e o plano de ação devem ter seu histórico de atualizações mantido por no mínimo 20 anos.</p>
+  <table class="epi-matrix-table">
+    <thead><tr>
+      <th style="width:12%;text-align:center;">Versão</th>
+      <th style="width:15%;text-align:center;">Data</th>
+      <th style="width:25%;">Autor</th>
+      <th>Descrição da Alteração</th>
+    </tr></thead>
+    <tbody>${linhas||`<tr><td colspan="4" style="text-align:center;color:#9ca3af;font-style:italic;">Nenhuma revisão registrada.</td></tr>`}</tbody>
+  </table>
+  <div style="margin-top:12pt;text-align:right;">
+    <button onclick="adicionarVersao(${empresaId})" style="background:#f0f5ff;border:1pt solid #c7d7f9;border-radius:4pt;padding:6pt 12pt;font-size:8pt;color:#1e3a5f;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">+ Registrar nova revisão</button>
+  </div>
+  ${pfFooter()}`;
+  return pg;
+}
+
+async function adicionarVersao(empresaId){
+  const versao=prompt('Número da versão (ex: 1.1):');
+  if(!versao)return;
+  const autor=prompt('Autor:');
+  const descricao=prompt('Descrição da alteração:');
+  try{
+    const h2={'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'};
+    await fetch(`${SUPA_URL}/rest/v1/pgr_versoes`,{
+      method:'POST',headers:h2,
+      body:JSON.stringify({empresa_id:parseInt(empresaId),versao,data_revisao:new Date().toISOString().split('T')[0],autor:autor||null,descricao_alteracao:descricao||null})
+    });
+    renderDocumento();
+  }catch(e){console.error('Erro adicionarVersao:',e);}
+}
+
 function renderPlanoAcao(){
   const todasAcoes=window.acoesData||[];
   const idsAtivos=acoesSelecionadasIds||todasAcoes.map(a=>a.id);
@@ -1609,13 +1745,18 @@ function renderPlanoAcao(){
     }
   });
 
-  const theadHtml=`<thead><tr><th style="width:35%;">Ação</th><th style="width:12%;">Origem</th><th style="width:10%;text-align:center;">Prioridade</th><th style="width:15%;">Responsável</th><th style="width:13%;text-align:center;">Prazo</th><th style="width:15%;text-align:center;">Status</th></tr></thead>`;
+  const theadHtml=`<thead><tr><th style="width:42%;">Ação / Origem</th><th style="width:12%;text-align:center;">Prioridade</th><th style="width:18%;">Responsável</th><th style="width:13%;text-align:center;">Prazo</th><th style="width:15%;text-align:center;">Status</th></tr></thead>`;
   const rowHtml=a=>{
     const prior=a.prioridade||'Média';
     const prazo=a.prazo?fmtData(a.prazo):'—';
-    return`<tr>
-      <td><div style="font-weight:500;font-size:9pt;">${h(a.titulo)}</div>${a.vinculos.length?`<div style="font-size:7pt;color:#9ca3af;margin-top:2pt;">${a.vinculos.map(v=>h(v)).join(' · ')}</div>`:''}</td>
-      <td style="font-size:8pt;">${h(a.origem||'Manual')}</td>
+    const isCritica=prior==='Crítica';
+    const badgeEmergencial=isCritica?`<span style="background:#fee2e2;color:#991b1b;border:1pt solid #fca5a5;border-radius:3pt;font-size:6.5pt;font-weight:700;padding:1pt 5pt;margin-left:4pt;">⚠ IMEDIATA</span>`:'';
+    return`<tr${isCritica?' style="background:#fff5f5;"':''}>
+      <td>
+        <div style="font-weight:500;font-size:9pt;">${h(a.titulo)}${badgeEmergencial}</div>
+        ${a.vinculos.length?`<div style="font-size:7pt;color:#9ca3af;margin-top:2pt;">${a.vinculos.map(v=>h(v)).join(' · ')}</div>`:''}
+        ${a.origem&&a.origem!=='Manual'?`<div style="font-size:7pt;color:#6b7280;margin-top:1pt;">Origem: ${h(a.origem)}</div>`:''}
+      </td>
       <td style="text-align:center;"><span style="background:${PRIOR_BG[prior]||'#f3f4f6'};color:${PRIOR_COR[prior]||'#374151'};padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${h(prior)}</span></td>
       <td style="font-size:8pt;">${h(a.responsavel||'—')}</td>
       <td style="text-align:center;font-size:8pt;font-family:'IBM Plex Mono',monospace;">${prazo}</td>
@@ -1628,11 +1769,12 @@ function renderPlanoAcao(){
   <p class="doc-text">Este PGR deverá ser revisado:</p>
   <ul style="margin:8pt 0 0 0;padding:0;list-style:none;">
     ${[
-      ['anualmente','revisão periódica obrigatória'],
-      ['após mudanças nos processos','que alterem os riscos'],
-      ['após acidente grave, fatal','ou diagnóstico de doença ocupacional'],
-      ['quando houver novos agentes de risco',''],
+      ['a cada 2 anos','revisão periódica obrigatória — NR-01 subitem 1.5.4'],
+      ['após mudanças nos processos','que alterem os riscos ocupacionais'],
+      ['após acidente grave, fatal','ou diagnóstico de doença ocupacional confirmada'],
+      ['quando houver novos agentes de risco','identificados no ambiente de trabalho'],
       ['quando solicitado por Auditor Fiscal do Trabalho',''],
+      ['quando solicitado pela CIPA ou CIPATR',''],
     ].map(([forte,resto])=>`<li style="display:flex;gap:8pt;padding:4pt 0;border-bottom:1pt solid #f3f4f6;align-items:baseline;">
       <span style="color:#2a5298;font-size:9pt;flex-shrink:0;">▸</span>
       <span class="doc-text"><strong>${forte}</strong>${resto?` — ${resto}`:''}</span>

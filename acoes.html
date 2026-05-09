@@ -261,6 +261,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <label>Prazo</label>
         <input type="date" id="acao-prazo">
       </div>
+      <div class="modal-field full">
+        <label>Indicador / Meta</label>
+        <input type="text" id="acao-indicador" placeholder="Ex: Reduzir nível de ruído para abaixo de 85 dB, 100% dos EPIs entregues">
+      </div>
       <div class="modal-field" id="campo-status" style="display:none;">
         <label>Status</label>
         <select id="acao-status">
@@ -517,6 +521,7 @@ function abrirModalNova(){
   document.getElementById('acao-funcao').value='';
   document.getElementById('acao-responsavel').value='';
   document.getElementById('acao-prazo').value='';
+  document.getElementById('acao-indicador').value='';
   document.getElementById('campo-status').style.display='none';
   document.getElementById('campo-conclusao').style.display='none';
   document.getElementById('campo-evidencia').style.display='none';
@@ -540,6 +545,7 @@ async function abrirModalEditar(acaoId){
   document.getElementById('acao-prioridade').value=a.prioridade||'Média';
   document.getElementById('acao-responsavel').value=a.responsavel||'';
   document.getElementById('acao-prazo').value=a.prazo||'';
+  document.getElementById('acao-indicador').value=a.indicador||'';
   document.getElementById('campo-status').style.display='block';
   document.getElementById('acao-status').value=a.status||'Pendente';
   document.getElementById('campo-conclusao').style.display='block';
@@ -588,6 +594,7 @@ async function salvarAcao(){
     funcao_id:parseInt(document.getElementById('acao-funcao').value)||null,
     responsavel:document.getElementById('acao-responsavel').value.trim()||null,
     prazo:document.getElementById('acao-prazo').value||null,
+    indicador:document.getElementById('acao-indicador').value.trim()||null,
     ativo:true,
   };
 
