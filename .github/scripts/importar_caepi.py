@@ -136,8 +136,15 @@ COLUNAS_DB = [
 ]
 
 def normalizar(registros):
-    """Garante que todos os registros tenham exatamente as mesmas chaves."""
-    return [{col: r.get(col) for col in COLUNAS_DB} for r in registros]
+    """Garante chaves uniformes e remove duplicatas de numero_ca."""
+    vistos = {}
+    for r in registros:
+        ca = r.get('numero_ca')
+        if ca:
+            vistos[ca] = {col: r.get(col) for col in COLUNAS_DB}
+    dedup = list(vistos.values())
+    print(f"Após deduplicação: {len(dedup)} registros únicos (eram {len(registros)})")
+    return dedup
 
 def upsert_supabase(registros):
     registros = normalizar(registros)
