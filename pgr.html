@@ -995,7 +995,7 @@ function renderInventarioRiscos(){
         return`<div class="medida-item">
           <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">5</div>
           <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
-          <div class="medida-desc">${episFr.map(e=>{const epiDados=epis.find(x=>x.id===e.epi_id);return`${h(epiDados?.nome||'EPI')}${e.ca?' (CA:'+h(e.ca)+')':''}${e.validade_ca?' Val:'+fmtData(e.validade_ca):''}`;}).join(' · ')}</div>
+          <div class="medida-desc">${episFr.map(e=>{const epiDados=epis.find(x=>x.id===e.epi_id);return`${h(e.epi_nome||epiDados?.nome||'EPI')}${e.ca?' (CA:'+h(e.ca)+')':''}${e.validade_ca?' Val:'+fmtData(e.validade_ca):''}`;}).join(' · ')}</div>
         </div>`;
       }
       const marcada=fr[`medida_${mc.key}`];const desc=fr[`medida_${mc.key}_desc`];
@@ -1149,8 +1149,8 @@ function renderMatrizEPI(){
     if(!mds.length)return;
     if(!episPorFuncao[fr.funcao_id])episPorFuncao[fr.funcao_id]=[];
     mds.forEach(m=>{
-      if(!episPorFuncao[fr.funcao_id].find(x=>x.epi_id===m.epi_id))
-        episPorFuncao[fr.funcao_id].push({epi_id:m.epi_id,ca:m.ca,validade_ca:m.validade_ca});
+      if(!episPorFuncao[fr.funcao_id].find(x=>x.epi_id===m.epi_id&&x.epi_nome===m.epi_nome))
+        episPorFuncao[fr.funcao_id].push({epi_id:m.epi_id,epi_nome:m.epi_nome,ca:m.ca,validade_ca:m.validade_ca});
     });
   });
 
@@ -1182,7 +1182,7 @@ function renderMatrizEPI(){
     const funcoesNomes=ghe.funcoes.map(f=>h(f.nome_funcao)).join(' · ');
     const pillsHtml=episGhe.map(e=>{
       const epiDados=epis.find(x=>x.id===e.epi_id);
-      const nome=h(epiDados?.nome||'EPI');
+      const nome=h(e.epi_nome||epiDados?.nome||'EPI');
       const ca=e.ca?`<span class="ca-pill">CA:${h(e.ca)}</span>`:'';
       return`<span class="epi-pill">🛡 ${nome}</span>${ca}`;
     }).join(' ');
