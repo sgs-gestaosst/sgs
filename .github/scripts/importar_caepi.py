@@ -11,8 +11,19 @@ import requests
 
 SUPA_URL     = os.environ['SUPA_URL']
 SUPA_KEY     = os.environ['SUPA_SERVICE_KEY']
-CAEPI_URL    = 'https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/equipamentos-de-protecao-individual-epi/tgg_export_caepi.zip'
 BATCH_SIZE   = 500
+
+# URLs tentadas em ordem — gov.br pode mudar formato entre versões
+CAEPI_URLS = [
+    'https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/equipamentos-de-protecao-individual-epi/tgg_export_caepi.zip/@@download/tgg_export_caepi.zip',
+    'https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/equipamentos-de-protecao-individual-epi/tgg_export_caepi.zip',
+    'https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/seguranca-e-saude-no-trabalho/equipamentos-de-protecao-individual-epi/tgg_export_caepi.txt',
+]
+
+HEADERS_HTTP = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/zip,application/octet-stream,text/plain,*/*',
+}
 
 # Mapeamento flexível: nome no arquivo MTE → coluna no Supabase
 # O arquivo pode ter variações entre versões — incluímos aliases
@@ -42,23 +53,42 @@ COL_MAP = {
 }
 
 def baixar_arquivo():
-    print(f"Baixando arquivo de: {CAEPI_URL}")
-    resp = requests.get(CAEPI_URL, timeout=180, allow_redirects=True)
-    resp.raise_for_status()
-    print(f"Arquivo baixado: {len(resp.content)/1024/1024:.1f} MB")
-    return resp.content
+    ultimo_erro = None
+    for url in CAEPI_URLS:
+        print(f"Tentando: {url}")
+        try:
+            resp = requests.get(url, headers=HEADERS_HTTP, timeout=180, allow_redirects=True)
+            resp.raise_for_status()
+            conteudo = resp.content
+            print(f"Baixado: {len(conteudo)/1024/1024:.1f} MB — Content-Type: {resp.headers.get('Content-Type','?')}")
+            print(f"Primeiros bytes: {conteudo[:8]}")
+            # Verifica se é ZIP (magic bytes PK) ou texto
+            if conteudo[:2] == b'PK' or b'|' in conteudo[:2000]:
+                return conteudo
+            print(f"  → Conteúdo não reconhecido, tentando próxima URL...")
+            print(f"  → Início do conteúdo: {conteudo[:300]}")
+        except Exception as e:
+            ultimo_erro = e
+            print(f"  → Erro: {e}")
+    raise RuntimeError(f"Todas as URLs falharam. Último erro: {ultimo_erro}")
 
-def extrair_e_parsear(zip_bytes):
-    z = zipfile.ZipFile(io.BytesIO(zip_bytes))
-    nomes = z.namelist()
-    print(f"Arquivos no ZIP: {nomes}")
+def extrair_e_parsear(conteudo):
+    # Tenta como ZIP primeiro
+    if conteudo[:2] == b'PK':
+        print("Formato: ZIP")
+        z = zipfile.ZipFile(io.BytesIO(conteudo))
+        nomes = z.namelist()
+        print(f"Arquivos no ZIP: {nomes}")
+        txt = next((n for n in nomes if n.lower().endswith('.txt')), None)
+        if not txt:
+            raise ValueError(f"Nenhum .txt no ZIP. Arquivos: {nomes}")
+        texto = z.read(txt).decode('latin-1', errors='replace')
+    else:
+        # Assume texto direto
+        print("Formato: TXT direto")
+        texto = conteudo.decode('latin-1', errors='replace')
 
-    txt = next((n for n in nomes if n.lower().endswith('.txt')), None)
-    if not txt:
-        raise ValueError(f"Nenhum .txt encontrado no ZIP. Arquivos: {nomes}")
-
-    conteudo = z.read(txt).decode('latin-1', errors='replace')
-    linhas = [l for l in conteudo.splitlines() if l.strip()]
+    linhas = [l for l in texto.splitlines() if l.strip()]
     print(f"Total de linhas: {len(linhas)}")
 
     # Primeira linha: cabeçalho
@@ -124,7 +154,7 @@ def registrar_log(total, sucesso, erro=None):
 if __name__ == '__main__':
     try:
         zip_bytes  = baixar_arquivo()
-        registros  = extrair_e_parsear(zip_bytes)
+        registros  = extrair_e_parsear(zip_bytes)  # aceita ZIP ou TXT
         total      = upsert_supabase(registros)
         registrar_log(total, True)
         print(f"\n✅ Importação concluída: {total} registros")
