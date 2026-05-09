@@ -104,7 +104,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .ficha-value{font-size:9.5pt;color:#1a1a2e;font-weight:500;}
 .ficha-full{grid-column:1/-1;border-right:none!important;}
 
-/* ── INVENTÁRIO DE RISCOS — OPÇÃO C ── */
+/* ── INVENTÁRIO DE RISCOS — GHE ── */
 .funcao-bloco{
   border:1.5pt solid #c7d7f9;
   border-radius:6pt;
@@ -113,33 +113,66 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   page-break-inside:avoid;
   box-shadow:0 1pt 4pt rgba(42,82,152,.08);
 }
+/* Header GHE — fundo claro */
 .funcao-bloco-header{
-  background:linear-gradient(90deg,#0d2040 0%,#1a3a6e 100%);
+  background:#f0f5ff;
   padding:9pt 12pt;
-  border-bottom:2pt solid #2a5298;
-  display:flex;align-items:center;justify-content:space-between;gap:8pt;
+  border-bottom:1.5pt solid #c7d7f9;
+  display:flex;align-items:center;justify-content:space-between;gap:8pt;flex-wrap:wrap;
 }
+.ghe-codigo-badge{
+  font-family:'IBM Plex Mono',monospace;font-size:9pt;font-weight:700;
+  background:#1e3a5f;color:#fff;padding:2pt 10pt;border-radius:4pt;
+  white-space:nowrap;flex-shrink:0;
+}
+.ghe-nome-input{
+  border:1pt dashed #93c5fd;border-radius:3pt;padding:2pt 8pt;
+  font-size:8.5pt;color:#1e3a5f;background:#fff;outline:none;
+  min-width:140pt;font-family:'IBM Plex Sans',sans-serif;
+}
+.ghe-nome-input:focus{border-color:#2a5298;border-style:solid;}
+.ghe-nome-texto{font-size:9pt;font-weight:600;color:#1e3a5f;}
+.ghe-funcoes{font-size:8pt;color:#374151;margin-top:4pt;}
+.ghe-funcoes strong{color:#0d2040;}
+.ghe-count{font-size:7.5pt;color:#6b7280;white-space:nowrap;flex-shrink:0;}
 .funcao-bloco-nome{font-size:11pt;font-weight:700;color:#ffffff;}
 .funcao-bloco-cbo{font-size:8pt;color:#93c5fd;font-family:'IBM Plex Mono',monospace;}
 .funcao-bloco-setores{font-size:8pt;color:#bfdbfe;background:rgba(255,255,255,.12);padding:2pt 8pt;border-radius:10pt;border:1pt solid rgba(255,255,255,.2);}
 
-/* Risco dentro da função */
-.risco-funcao{border-bottom:1pt solid #f3f4f6;padding:8pt 10pt;}
+/* Card de risco — nova hierarquia visual */
+.risco-funcao{border-bottom:1pt solid #f3f4f6;padding:9pt 12pt;}
 .risco-funcao:last-child{border-bottom:none;}
-.risco-funcao-header{display:flex;align-items:flex-start;gap:8pt;margin-bottom:5pt;}
-.risco-cat-pill{font-size:7pt;padding:2pt 7pt;border-radius:3pt;font-weight:700;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;flex-shrink:0;}
-.risco-perigo-pill{font-size:7pt;padding:2pt 7pt;border-radius:3pt;background:#f3f4f6;color:#6b7280;border:1pt solid #e5e7eb;white-space:nowrap;flex-shrink:0;}
-.risco-funcao-nome{font-size:9.5pt;font-weight:600;color:#0d2040;flex:1;}
-.nivel-pill{font-size:7.5pt;padding:2pt 8pt;border-radius:3pt;font-weight:700;white-space:nowrap;flex-shrink:0;}
+
+/* Linha 1: contexto (categoria + perigo) */
+.risco-ctx{display:flex;align-items:center;gap:6pt;margin-bottom:4pt;flex-wrap:wrap;}
+.risco-cat-pill{font-size:6.5pt;padding:2pt 7pt;border-radius:3pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.risco-perigo-pill{font-size:7pt;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260pt;}
+
+/* Linha 2: protagonista (nome + nível) */
+.risco-principal{display:flex;align-items:flex-start;justify-content:space-between;gap:8pt;margin-bottom:5pt;}
+.risco-funcao-nome{font-size:10.5pt;font-weight:700;color:#0d2040;flex:1;line-height:1.3;}
+.nivel-pill{font-size:7.5pt;padding:3pt 10pt;border-radius:4pt;font-weight:700;white-space:nowrap;flex-shrink:0;margin-top:1pt;}
 .nivel-MUITO-ALTO{background:#fee2e2;color:#991b1b;}
 .nivel-ALTO{background:#ffedd5;color:#9a3412;}
 .nivel-MEDIO{background:#fef9c3;color:#854d0e;}
 .nivel-BAIXO{background:#dcfce7;color:#166534;}
 
+/* Linha 3: métricas compactas */
+.risco-metricas{font-size:8pt;color:#6b7280;margin-bottom:5pt;}
+.risco-metricas strong{color:#374151;}
+
+/* Linha 4: informações técnicas discretas */
+.risco-tecnico{font-size:7.5pt;color:#6b7280;line-height:1.6;margin-bottom:4pt;border-left:2pt solid #e5e7eb;padding-left:6pt;}
+.risco-tecnico b{color:#374151;font-weight:600;}
+
+/* Linha 5: danos à saúde */
+.risco-danos-texto{font-size:8pt;color:#374151;line-height:1.5;margin-bottom:5pt;padding:4pt 8pt;background:#fff7ed;border-left:2.5pt solid #fb923c;border-radius:0 3pt 3pt 0;}
+.risco-danos-label{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:2pt;}
+
+/* Linha 6: medidas */
 .risco-funcao-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6pt;margin-bottom:6pt;}
 .rf-field .lbl{font-size:6.5pt;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2pt;}
 .rf-field .val{font-size:8.5pt;color:#374151;font-weight:500;}
-
 .danos-box{background:#fff7ed;border-left:3pt solid #fb923c;padding:5pt 8pt;margin-bottom:5pt;border-radius:0 3pt 3pt 0;}
 .danos-label{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:2pt;}
 .danos-text{font-size:8pt;color:#374151;line-height:1.5;}
@@ -1013,24 +1046,44 @@ function renderInventarioRiscos(){
       <div class="risco-funcao-grid" style="grid-template-columns:repeat(${Math.min(exposicaoItens.length,4)},1fr);margin-top:4pt;">
         ${exposicaoItens.map(e=>`<div class="rf-field"><div class="lbl">${h(e.l)}</div><div class="val">${h(e.v)}</div></div>`).join('')}
       </div>`:'';
+    // Linha 3 — métricas compactas (só campos preenchidos)
+    const metricasPartes=[];
+    if(fr.probabilidade)metricasPartes.push(`<strong>Prob:</strong> ${h(PROB_LABEL[fr.probabilidade]||'')}`);
+    if(fr.severidade)metricasPartes.push(`<strong>Sev:</strong> ${h(SEV_LABEL[fr.severidade]||'')}`);
+    if(fr.num_expostos)metricasPartes.push(`<strong>Expostos:</strong> ${fr.num_expostos}`);
+    const metricasHtml=metricasPartes.length?`<div class="risco-metricas">${metricasPartes.join(' &nbsp;·&nbsp; ')}</div>`:'';
+
+    // Linha 4 — informações técnicas discretas (só campos preenchidos)
+    const tecnicoPartes=[];
+    if(fonteGeradora)tecnicoPartes.push(`<b>Fonte:</b> ${h(fonteGeradora)}`);
+    if(viaAbsorcao)tecnicoPartes.push(`<b>Via:</b> ${h(viaAbsorcao)}`);
+    if(limiteTol)tecnicoPartes.push(`<b>Limite:</b> ${h(limiteTol)}`);
+    if(metodologia)tecnicoPartes.push(`<b>Metodologia:</b> ${h(metodologia)}`);
+    // Dados quantitativos inline
+    if(fr.tipo_avaliacao)tecnicoPartes.push(`<b>Avaliação:</b> ${h(fr.tipo_avaliacao)}`);
+    if(fr.tempo_exposicao_horas_dia)tecnicoPartes.push(`<b>Exposição:</b> ${fr.tempo_exposicao_horas_dia}h/dia${fr.frequencia_dias_semana?' · '+fr.frequencia_dias_semana+'x/sem':''}`);
+    if(fr.tipo_avaliacao==='Quantitativa'&&fr.valor_medido!=null)
+      tecnicoPartes.push(`<b>Medido:</b> ${fr.valor_medido}${fr.unidade_medida?' '+fr.unidade_medida:''}${fr.limite_tolerancia_nr?' (limite: '+fr.limite_tolerancia_nr+')':''}`);
+    const tecnicoHtml=tecnicoPartes.length?`<div class="risco-tecnico">${tecnicoPartes.join(' &nbsp;·&nbsp; ')}</div>`:'';
+
     return`<div class="risco-funcao">
-      <div class="risco-funcao-header">
+      <!-- Linha 1: contexto -->
+      <div class="risco-ctx">
         <span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
         ${perigo?`<span class="risco-perigo-pill">⚠ Perigo: ${h(perigo.nome)}</span>`:''}
+      </div>
+      <!-- Linha 2: protagonista -->
+      <div class="risco-principal">
         <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
         ${fr.nivel_risco?`<span class="nivel-pill nivel-${fr.nivel_risco}">${nivelLabel(fr.nivel_risco)}</span>`:''}
       </div>
-      <div class="risco-funcao-grid" style="grid-template-columns:${[fr.probabilidade,fr.severidade,fr.num_expostos].filter(Boolean).length===1?'1fr':fr.num_expostos?'1fr 1fr 1fr':'1fr 1fr'};">
-        ${fr.probabilidade?`<div class="rf-field"><div class="lbl">Probabilidade</div><div class="val">${h(PROB_LABEL[fr.probabilidade]||'')}</div></div>`:''}
-        ${fr.severidade?`<div class="rf-field"><div class="lbl">Severidade</div><div class="val">${h(SEV_LABEL[fr.severidade]||'')}</div></div>`:''}
-        ${fr.num_expostos?`<div class="rf-field"><div class="lbl">Nº de expostos</div><div class="val">${fr.num_expostos}</div></div>`:''}
-      </div>
-      ${fonteGeradora?`<div class="danos-box"><div class="danos-label">🏭 Fonte geradora</div><div class="danos-text">${h(fonteGeradora)}</div></div>`:''}
-      ${viaAbsorcao?`<div class="danos-box"><div class="danos-label">🫁 Via de absorção</div><div class="danos-text">${h(viaAbsorcao)}</div></div>`:''}
-      ${limiteTol?`<div class="danos-box"><div class="danos-label">📏 Limite de tolerância</div><div class="danos-text">${h(limiteTol)}</div></div>`:''}
-      ${metodologia?`<div class="danos-box"><div class="danos-label">🔬 Metodologia</div><div class="danos-text">${h(metodologia)}</div></div>`:''}
-      ${exposicaoHtml}
-      ${risco.danos_saude?`<div class="danos-box"><div class="danos-label">🩺 Danos à saúde potenciais</div><div class="danos-text">${h(risco.danos_saude)}</div></div>`:''}
+      <!-- Linha 3: métricas -->
+      ${metricasHtml}
+      <!-- Linha 4: técnico discreto -->
+      ${tecnicoHtml}
+      <!-- Linha 5: danos -->
+      ${risco.danos_saude?`<div class="risco-danos-texto"><div class="risco-danos-label">🩺 Danos à saúde potenciais</div>${h(risco.danos_saude)}</div>`:''}
+      <!-- Linha 6: medidas -->
       ${medidasItens?`<div class="medidas-box"><div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>${medidasItens}</div>`:''}
     </div>`;
   }
@@ -1042,19 +1095,22 @@ function renderInventarioRiscos(){
   function novaPagina(){paginaAtual=criarPagina();htmlAtual=phHeader();alturaUsada=60;}
 
   function gerarGHEHeaderInner(ghe,cont){
-    const nomeDisplay=ghe.nome?`${h(ghe.codigo)} — ${h(ghe.nome)}`:h(ghe.codigo);
     const funcoesNomes=ghe.funcoes.map(f=>h(f.nome_funcao)).join(' · ');
+    // Input de nome só na primeira vez; continuações mostram texto fixo
+    const nomeEditor=cont
+      ? (ghe.nome?`<span class="ghe-nome-texto">${h(ghe.nome)}</span>`:'')
+      : `<input type="text" class="ghe-nome-input" value="${h(ghe.nome||'')}"
+           placeholder="Nomear este GHE..."
+           onblur="salvarNomeGHE('${ghe.codigo}',this.value)"
+           title="Editar nome do GHE">`;
     return`<div style="flex:1;">
       <div style="display:flex;align-items:center;gap:8pt;flex-wrap:wrap;">
-        <span style="font-family:monospace;font-size:9pt;font-weight:700;background:#1e3a5f;color:#fff;padding:2pt 8pt;border-radius:4pt;">${nomeDisplay}${cont?' <span style="font-size:7pt;font-weight:400;opacity:.7;">(continuação)</span>':''}</span>
-        <input type="text" value="${ghe.nome||''}" placeholder="Clique para nomear este GHE..."
-          style="border:1px dashed #9ca3af;border-radius:3pt;padding:2pt 6pt;font-size:8pt;color:#374151;background:transparent;outline:none;min-width:160pt;"
-          onblur="salvarNomeGHE('${ghe.codigo}',this.value)"
-          title="Editar nome do GHE">
+        <span class="ghe-codigo-badge">${h(ghe.codigo)}${cont?' <span style="font-size:7pt;font-weight:400;opacity:.8;">(cont.)</span>':''}</span>
+        ${nomeEditor}
       </div>
-      <div style="font-size:8pt;color:#6b7280;margin-top:4pt;">👷 Funções: <strong style="color:#374151;">${funcoesNomes}</strong></div>
+      <div class="ghe-funcoes">👷 Funções: <strong>${funcoesNomes}</strong></div>
     </div>
-    <div style="font-size:7.5pt;color:#9ca3af;">${ghe.frs.length} risco(s)</div>`;
+    <span class="ghe-count">${ghe.frs.length} risco(s)</span>`;
   }
 
   function abrirBlocoGHE(ghe,cont){
