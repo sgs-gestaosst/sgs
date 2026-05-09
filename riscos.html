@@ -1707,11 +1707,11 @@ async function buscarEPIPorNome(srId,termo){
   if(!termo||termo.length<2){if(dd)dd.classList.remove('show');return;}
   _epiDebounce=setTimeout(async()=>{
     try{
-      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?nome_equipamento=ilike.*${encodeURIComponent(termo)}*&select=numero_ca,nome_equipamento,data_validade,situacao&order=nome_equipamento.asc&limit=12`,{headers:h2()});
+      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?nome_equipamento=ilike.*${encodeURIComponent(termo)}*&situacao=eq.VÁLIDO&select=numero_ca,nome_equipamento,data_validade,situacao&order=nome_equipamento.asc&limit=20`,{headers:h2()});
       const data=await res.json();
       if(!dd)return;
       if(!data.length){
-        dd.innerHTML=`<div class="epi-busca-option" style="color:var(--text3);cursor:default;">Nenhum resultado</div>`;
+        dd.innerHTML=`<div class="epi-busca-option" style="color:var(--text3);cursor:default;">Nenhum resultado encontrado</div>`;
         dd.classList.add('show');
         return;
       }
@@ -1720,6 +1720,9 @@ async function buscarEPIPorNome(srId,termo){
           <span class="epi-busca-option-nome">${h(d.nome_equipamento)}</span>
           <span class="epi-busca-option-ca">CA:${h(d.numero_ca)}</span>
         </div>`).join('');
+      if(data.length===20){
+        dd.innerHTML+=`<div class="epi-busca-option" style="color:var(--text3);cursor:default;font-style:italic;">Refine a busca para ver mais resultados...</div>`;
+      }
       dd.classList.add('show');
     }catch(e){console.error(e);}
   },300);
