@@ -53,12 +53,28 @@
   .stat-value{font-size:22px;font-weight:500;font-family:var(--mono);}
 
   /* ── ASSINATURA BLOCO ── */
-  .bloco-assinatura{display:none;background:#1a2540;border:1px solid #2a4070;border-radius:10px;padding:16px 20px;margin-bottom:32px;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-  .assin-info{}
-  .assin-titulo{font-size:14px;font-weight:500;color:#e8eaf0;margin-bottom:4px;}
-  .assin-sub{font-size:12px;color:#7aabf7;}
-  .assin-btn{background:#4a7cdc;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;transition:background .15s;}
-  .assin-btn:hover{background:#5d8fe8;}
+  .bloco-assinatura{display:none;background:linear-gradient(135deg,#0d1f3c 0%,#0a1628 100%);border:1px solid #2a4070;border-radius:12px;padding:20px 24px;margin-bottom:32px;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .assin-info{flex:1;min-width:200px;}
+  .assin-plan-tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#7aabf7;background:#1a2540;border:1px solid #2a4070;border-radius:4px;padding:2px 8px;margin-bottom:10px;}
+  .assin-titulo{font-size:15px;font-weight:600;color:#e8eaf0;margin-bottom:6px;}
+  .assin-sub{font-size:12px;color:#7aabf7;margin-bottom:12px;line-height:1.5;}
+  .assin-limites{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:0;}
+  .assin-limite-item{font-size:11px;color:#8892a4;background:#181c27;border:1px solid #2a3044;border-radius:4px;padding:3px 8px;}
+  .assin-limite-item.locked{color:#e05555;border-color:#4a2020;background:#2a1515;}
+  .assin-btn{background:#4a7cdc;color:#fff;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:13px;font-weight:600;white-space:nowrap;flex-shrink:0;transition:background .15s, transform .15s;align-self:center;}
+  .assin-btn:hover{background:#5d8fe8;transform:translateY(-1px);}
+
+  /* ── RECURSOS BLOQUEADOS ── */
+  .locked-section{margin-bottom:40px;}
+  .locked-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px;}
+  .locked-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;opacity:.65;position:relative;overflow:hidden;}
+  .locked-card::after{content:'🔒';position:absolute;top:10px;right:12px;font-size:13px;}
+  .locked-icon{font-size:20px;margin-bottom:8px;}
+  .locked-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
+  .locked-desc{font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:10px;}
+  .locked-badge{font-size:10px;font-weight:600;color:#2dd4a0;background:#0e2820;border:1px solid #1a4a38;border-radius:4px;padding:2px 7px;display:inline-block;}
+  .locked-upgrade-btn{display:block;text-align:center;margin-top:16px;background:#4a7cdc;color:#fff;text-decoration:none;padding:10px;border-radius:6px;font-size:12px;font-weight:600;transition:background .15s;}
+  .locked-upgrade-btn:hover{background:#5d8fe8;}
 
   /* ── MENU CARDS ── */
   .menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px;}
@@ -86,9 +102,12 @@
     .header-title{display:none;}
     .user-email{display:none;}
     .menu-grid{grid-template-columns:1fr;}
+    .locked-grid{grid-template-columns:1fr;}
     .stats-grid{grid-template-columns:1fr 1fr;}
     .header{padding:12px 16px;}
     .container{padding:24px 12px;}
+    .bloco-assinatura{flex-direction:column;}
+    .assin-btn{width:100%;text-align:center;}
   }
 </style>
 <script src="trial_check.js"></script>
@@ -142,13 +161,46 @@
     </div>
   </div>
 
-  <!-- Bloco assinatura/trial -->
+  <!-- Bloco assinatura -->
   <div class="bloco-assinatura" id="bloco-assinatura">
     <div class="assin-info">
-      <div class="assin-titulo" id="assin-titulo">Você está no plano Free</div>
-      <div class="assin-sub" id="assin-sub">Faça upgrade para desbloquear o eSocial e ampliar seus limites.</div>
+      <div class="assin-plan-tag" id="assin-plan-tag">Plano Free</div>
+      <div class="assin-titulo" id="assin-titulo">Você está no plano gratuito</div>
+      <div class="assin-sub" id="assin-sub">Faça upgrade para ampliar seus limites e desbloquear o eSocial.</div>
+      <div class="assin-limites" id="assin-limites">
+        <span class="assin-limite-item">2 empresas</span>
+        <span class="assin-limite-item">25 funcionários</span>
+        <span class="assin-limite-item">1 usuário</span>
+        <span class="assin-limite-item locked">eSocial bloqueado</span>
+      </div>
     </div>
-    <a href="assinar.html" class="assin-btn" id="assin-btn">Assinar plano</a>
+    <a href="assinar.html" class="assin-btn" id="assin-btn">Ver planos →</a>
+  </div>
+
+  <!-- Recursos bloqueados (visível apenas no Free) -->
+  <div class="locked-section" id="locked-section" style="display:none;">
+    <div class="section-title">🔒 Disponível nos planos pagos</div>
+    <div class="locked-grid">
+      <div class="locked-card">
+        <div class="locked-icon">📋</div>
+        <div class="locked-title">eSocial SST</div>
+        <div class="locked-desc">Envio de S-2210 (CAT), S-2220 (ASO) e S-2240 (PPP) diretamente pelo SGS.</div>
+        <span class="locked-badge">A partir do Starter</span>
+      </div>
+      <div class="locked-card">
+        <div class="locked-icon">🏢</div>
+        <div class="locked-title">Mais empresas e funcionários</div>
+        <div class="locked-desc">Gerencie até 60 empresas e 1.500 funcionários com ficha individual completa.</div>
+        <span class="locked-badge">A partir do Starter</span>
+      </div>
+      <div class="locked-card">
+        <div class="locked-icon">👥</div>
+        <div class="locked-title">Múltiplos usuários</div>
+        <div class="locked-desc">Convide sua equipe técnica com controle de permissões por módulo e empresa.</div>
+        <span class="locked-badge">A partir do Starter</span>
+      </div>
+    </div>
+    <a href="assinar.html" class="locked-upgrade-btn">🚀 Ver todos os planos e fazer upgrade</a>
   </div>
 
   <div class="section-title">Menu principal</div>
@@ -287,8 +339,7 @@ async function verificarAssinatura() {
         })
       });
       bloco.style.display = 'flex';
-      titulo.textContent  = 'Plano Free';
-      sub.textContent     = 'Faça upgrade para desbloquear o eSocial e ampliar seus limites.';
+      document.getElementById('locked-section').style.display = 'block';
       return;
     }
 
@@ -298,11 +349,10 @@ async function verificarAssinatura() {
       return;
     }
 
-    // Plano Free: exibe banner suave de upgrade
+    // Plano Free: exibe banner + seção de recursos bloqueados
     if (assin.status === 'Free') {
       bloco.style.display = 'flex';
-      titulo.textContent  = 'Plano Free — ' + (assin.planos?.nome || 'Free');
-      sub.textContent     = 'Faça upgrade para desbloquear o eSocial e ampliar seus limites.';
+      document.getElementById('locked-section').style.display = 'block';
       return;
     }
 
