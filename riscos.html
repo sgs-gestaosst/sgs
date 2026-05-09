@@ -1616,17 +1616,25 @@ function toggleEpiBusca(srId,modo){
 
 function _epiStatusBadge(situacao){
   if(!situacao)return'';
-  const s=situacao.toUpperCase();
-  if(s.includes('ATIVO')||s==='A')return`<span class="badge-ativo">Ativo</span>`;
-  if(s.includes('VENCIDO')||s.includes('CANCELADO'))return`<span class="badge-vencido">${h(situacao)}</span>`;
+  const s=situacao.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  if(s==='VALIDO'||s==='ATIVO'||s==='A')return`<span class="badge-ativo">${h(situacao)}</span>`;
+  if(s.includes('VENCIDO')||s.includes('CANCELADO')||s.includes('SUSPENSO'))return`<span class="badge-vencido">${h(situacao)}</span>`;
   return`<span class="badge-nao-encontrado">${h(situacao)}</span>`;
+}
+
+function _parseDateCAEPI(s){
+  if(!s)return null;
+  // Formato MTE: DD/MM/AAAA
+  const p=s.split('/');
+  if(p.length===3)return new Date(`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}T00:00:00`);
+  return new Date(s+'T00:00:00');
 }
 
 function _mostrarPreviewEPI(srId,dado){
   _epiSelecionado[srId]=dado;
   const prev=document.getElementById(`epi-preview-${srId}`);
   if(!prev)return;
-  const val=dado.data_validade?new Date(dado.data_validade+'T00:00:00').toLocaleDateString('pt-BR'):'';
+  const val=dado.data_validade?_parseDateCAEPI(dado.data_validade).toLocaleDateString('pt-BR'):'';
   prev.className='epi-preview show';
   prev.innerHTML=`
     <span class="epi-preview-nome">🛡 ${h(dado.nome_equipamento||dado.epi_nome||'EPI')}</span>
