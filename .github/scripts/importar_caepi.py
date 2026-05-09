@@ -129,7 +129,18 @@ def extrair_e_parsear(conteudo):
     print(f"Registros válidos: {len(registros)}")
     return registros
 
+COLUNAS_DB = [
+    'numero_ca', 'nome_equipamento', 'descricao_equipamento',
+    'marca', 'referencia', 'data_validade', 'situacao',
+    'norma', 'cnpj_fabricante', 'razao_social_fabricante',
+]
+
+def normalizar(registros):
+    """Garante que todos os registros tenham exatamente as mesmas chaves."""
+    return [{col: r.get(col) for col in COLUNAS_DB} for r in registros]
+
 def upsert_supabase(registros):
+    registros = normalizar(registros)
     headers = {
         'apikey':        SUPA_KEY,
         'Authorization': f'Bearer {SUPA_KEY}',
