@@ -905,25 +905,13 @@ function renderHierarquia(sr){
             <label for="check-${sr.id}-${n.key}">${n.hint}</label>
           </div>
           <div class="hier-detalhe ${show}" id="det-${sr.id}-${n.key}">
-            <!-- Tabs de busca -->
-            <div class="epi-busca-tabs">
-              <button class="epi-busca-tab active" id="tab-ca-${sr.id}" onclick="toggleEpiBusca(${sr.id},'ca')">Por Nº CA</button>
-              <button class="epi-busca-tab" id="tab-nome-${sr.id}" onclick="toggleEpiBusca(${sr.id},'nome')">Por nome</button>
-            </div>
-            <!-- Busca por CA -->
-            <div id="busca-ca-${sr.id}" class="epi-busca-wrap">
-              <input type="text" class="epi-busca-input" id="epi-ca-input-${sr.id}"
-                placeholder="Digite o Nº CA..."
-                oninput="buscarEPIPorCA(${sr.id},this.value)"
+            <!-- Busca unificada CA ou Nome -->
+            <div class="epi-busca-wrap">
+              <input type="text" class="epi-busca-input" id="epi-busca-${sr.id}"
+                placeholder="Digite o Nº CA ou nome do EPI..."
+                oninput="buscarEPIUnificado(${sr.id},this.value)"
                 autocomplete="off">
-            </div>
-            <!-- Busca por Nome -->
-            <div id="busca-nome-${sr.id}" class="epi-busca-wrap" style="display:none;">
-              <input type="text" class="epi-busca-input" id="epi-nome-input-${sr.id}"
-                placeholder="Digite o nome do EPI..."
-                oninput="buscarEPIPorNome(${sr.id},this.value)"
-                autocomplete="off">
-              <div class="epi-busca-dropdown" id="epi-nome-dd-${sr.id}"></div>
+              <div class="epi-busca-dropdown" id="epi-dd-${sr.id}"></div>
             </div>
             <!-- Preview do EPI selecionado -->
             <div class="epi-preview" id="epi-preview-${sr.id}"></div>
@@ -1607,16 +1595,6 @@ async function criarAcaoFromMedida(srId,nivel,descricao){
 const _epiSelecionado={};
 let _epiDebounce=null;
 
-function toggleEpiBusca(srId,modo){
-  document.getElementById(`busca-ca-${srId}`).style.display   = modo==='ca'   ? 'block' : 'none';
-  document.getElementById(`busca-nome-${srId}`).style.display = modo==='nome' ? 'block' : 'none';
-  document.getElementById(`tab-ca-${srId}`).classList.toggle('active',   modo==='ca');
-  document.getElementById(`tab-nome-${srId}`).classList.toggle('active', modo==='nome');
-  delete _epiSelecionado[srId];
-  const prev=document.getElementById(`epi-preview-${srId}`);
-  if(prev){prev.className='epi-preview';prev.innerHTML='';}
-}
-
 function _atualizarBadgeValidade(srId,dataISO){
   const badge=document.getElementById(`epi-badge-${srId}`);
   if(!badge)return;
@@ -1656,65 +1634,64 @@ function _mostrarPreviewEPI(srId,dado){
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
       <span class="epi-preview-nome">🛡 ${h(dado.nome_equipamento||dado.epi_nome||'EPI')}</span>
       ${dado.numero_ca?`<span class="epi-preview-ca">CA: ${h(dado.numero_ca)}</span>`:''}
-      <span id="epi-badge-${srId}">${_epiStatusBadge(dado.situacao)}</span>
       ${linkCA}
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <label style="font-size:11px;color:var(--text2);white-space:nowrap;">Validade (confirmar no ConsultaCA):</label>
+      <label style="font-size:11px;color:var(--text2);white-space:nowrap;">Validade:</label>
       <input type="date" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;"
         onchange="_epiSelecionado[${srId}].validade_confirmada=this.value;_atualizarBadgeValidade(${srId},this.value)" id="epi-val-input-${srId}">
+      <span id="epi-badge-${srId}"></span>
     </div>`;
 }
 
-async function buscarEPIPorCA(srId,ca){
+async function buscarEPIUnificado(srId,termo){
   clearTimeout(_epiDebounce);
+  const dd=document.getElementById(`epi-dd-${srId}`);
   const prev=document.getElementById(`epi-preview-${srId}`);
-  if(!ca||ca.length<3){
+  if(!termo||termo.length<2){
+    if(dd)dd.classList.remove('show');
     if(prev){prev.className='epi-preview';prev.innerHTML='';}
     delete _epiSelecionado[srId];
     return;
   }
   _epiDebounce=setTimeout(async()=>{
     try{
-      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?numero_ca=eq.${encodeURIComponent(ca.trim())}&select=numero_ca,nome_equipamento,data_validade,situacao&limit=1`,{headers:h2()});
-      const data=await res.json();
-      if(data.length){
-        _mostrarPreviewEPI(srId,data[0]);
+      const eSoNumeros=/^\d+$/.test(termo.trim());
+      let data=[];
+      if(eSoNumeros){
+        // Busca por CA exato — mostra todos os status
+        const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?numero_ca=eq.${encodeURIComponent(termo.trim())}&select=numero_ca,nome_equipamento,data_validade,situacao&limit=1`,{headers:h2()});
+        data=await res.json();
       } else {
-        delete _epiSelecionado[srId];
-        if(prev){
-          prev.className='epi-preview show';
-          prev.style.flexDirection='column';
-          prev.style.gap='8px';
-          prev.innerHTML=`
-            <span class="badge-nao-encontrado">⚠ CA não encontrado na base — preencha manualmente</span>
-            <input type="text" class="epi-busca-input" placeholder="Nome do EPI"
-              oninput="_epiSelecionado[${srId}]={..._epiSelecionado[${srId}]||{},epi_nome:this.value,numero_ca:'${ca}'}">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <label style="font-size:11px;color:var(--text2);white-space:nowrap;">Validade:</label>
-              <input type="date" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;"
-                onchange="_epiSelecionado[${srId}]={..._epiSelecionado[${srId}]||{},validade_confirmada:this.value}">
-            </div>`;
-        }
+        // Busca por nome — só VÁLIDOS
+        const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?nome_equipamento=ilike.*${encodeURIComponent(termo)}*&situacao=eq.V%C3%81LIDO&select=numero_ca,nome_equipamento,data_validade,situacao&order=nome_equipamento.asc&limit=20`,{headers:h2()});
+        data=await res.json();
       }
-    }catch(e){console.error(e);}
-  },400);
-}
-
-async function buscarEPIPorNome(srId,termo){
-  clearTimeout(_epiDebounce);
-  const dd=document.getElementById(`epi-nome-dd-${srId}`);
-  if(!termo||termo.length<2){if(dd)dd.classList.remove('show');return;}
-  _epiDebounce=setTimeout(async()=>{
-    try{
-      const res=await fetch(`${SUPA_URL}/rest/v1/ca_epi?nome_equipamento=ilike.*${encodeURIComponent(termo)}*&situacao=eq.V%C3%81LIDO&select=numero_ca,nome_equipamento,data_validade,situacao&order=nome_equipamento.asc&limit=20`,{headers:h2()});
-      const data=await res.json();
       if(!dd)return;
       if(!data.length){
-        dd.innerHTML=`<div class="epi-busca-option" style="color:var(--text3);cursor:default;">Nenhum resultado encontrado</div>`;
-        dd.classList.add('show');
+        // CA não encontrado — permite cadastro manual
+        if(eSoNumeros){
+          if(prev){
+            prev.className='epi-preview show';
+            prev.style.flexDirection='column';
+            prev.style.gap='8px';
+            prev.innerHTML=`
+              <span class="badge-nao-encontrado">⚠ CA ${h(termo)} não encontrado — preencha manualmente</span>
+              <input type="text" class="epi-busca-input" placeholder="Nome do EPI"
+                oninput="_epiSelecionado[${srId}]={..._epiSelecionado[${srId}]||{},epi_nome:this.value,numero_ca:'${termo}'}">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <label style="font-size:11px;color:var(--text2);white-space:nowrap;">Validade:</label>
+                <input type="date" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;"
+                  onchange="_epiSelecionado[${srId}]={..._epiSelecionado[${srId}]||{},validade_confirmada:this.value}">
+              </div>`;
+          }
+        } else {
+          dd.innerHTML=`<div class="epi-busca-option" style="color:var(--text3);cursor:default;">Nenhum resultado encontrado</div>`;
+          dd.classList.add('show');
+        }
         return;
       }
+      // Monta dropdown com resultados
       dd.innerHTML=data.map(d=>`
         <div class="epi-busca-option" onclick="selecionarEpiDaLista(${srId},${JSON.stringify(d).replace(/"/g,'&quot;')})">
           <span class="epi-busca-option-nome">${h(d.nome_equipamento)}</span>
@@ -1725,14 +1702,14 @@ async function buscarEPIPorNome(srId,termo){
       }
       dd.classList.add('show');
     }catch(e){console.error(e);}
-  },300);
+  },350);
 }
 
 function selecionarEpiDaLista(srId,dado){
   _mostrarPreviewEPI(srId,dado);
-  const inp=document.getElementById(`epi-nome-input-${srId}`);
+  const inp=document.getElementById(`epi-busca-${srId}`);
   if(inp)inp.value=dado.nome_equipamento||'';
-  const dd=document.getElementById(`epi-nome-dd-${srId}`);
+  const dd=document.getElementById(`epi-dd-${srId}`);
   if(dd)dd.classList.remove('show');
 }
 
