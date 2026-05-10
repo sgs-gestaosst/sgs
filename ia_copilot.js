@@ -23,21 +23,23 @@
   document.head.appendChild(style);
 })();
 
-const _GEMINI_KEY='AIzaSyCGxzEupDbRr3qE5-FDFPoeDERpsxVtCzk';
-const _GEMINI_URL=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${_GEMINI_KEY}`;
+const _GROQ_KEY='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';
+const _GROQ_URL='https://api.groq.com/openai/v1/chat/completions';
 
 async function _chamarGemini(prompt){
-  const res=await fetch(_GEMINI_URL,{
+  const res=await fetch(_GROQ_URL,{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+_GROQ_KEY},
     body:JSON.stringify({
-      contents:[{parts:[{text:prompt}]}],
-      generationConfig:{temperature:0.2,maxOutputTokens:512}
+      model:'llama-3.1-8b-instant',
+      messages:[{role:'user',content:prompt}],
+      temperature:0.2,
+      max_tokens:512
     })
   });
   if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||'Erro HTTP '+res.status);}
   const data=await res.json();
-  let text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  let text=data.choices?.[0]?.message?.content||'';
   return text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
 }
 
