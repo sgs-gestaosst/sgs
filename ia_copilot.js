@@ -23,7 +23,7 @@
   document.head.appendChild(style);
 })();
 
-const _GEMINI_KEY='AIzaSyA_N7BlfN0qhaT5T8NSHOE_ZrOOV3I7DFU';
+const _GEMINI_KEY='AIzaSyCGxzEupDbRr3qE5-FDFPoeDERpsxVtCzk';
 const _GEMINI_URL=`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${_GEMINI_KEY}`;
 
 async function _chamarGemini(prompt){
