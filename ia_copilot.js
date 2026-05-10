@@ -76,6 +76,23 @@ Critérios para true: altura=trabalho habitual acima de 2m/NR-35; confinado=espa
   return JSON.parse(text);
 }
 
+async function ia_sugerirRiscos(nomeContexto,tipoContexto,catalogoRiscos){
+  const lista=catalogoRiscos.map(r=>`${r.id}: ${r.nome_risco} (${r.categoria})`).join('\n');
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
+Para o ${tipoContexto} "${nomeContexto}", selecione do catálogo abaixo os riscos ocupacionais mais prováveis.
+
+CATÁLOGO DE RISCOS DISPONÍVEIS:
+${lista}
+
+Responda SOMENTE com JSON válido, sem markdown:
+{"ids": [lista de IDs inteiros dos riscos mais relevantes]}
+
+Selecione entre 3 e 8 riscos. Use apenas IDs existentes no catálogo acima.`;
+  const text=await _chamarGemini(prompt);
+  const parsed=JSON.parse(text);
+  return Array.isArray(parsed.ids)?parsed.ids.map(Number):[];
+}
+
 async function ia_sugerirMedida(nomeRisco,catRisco,tipoMedida){
   const descTipo={
     elim:'Eliminação — remover completamente a fonte do risco',

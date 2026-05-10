@@ -474,6 +474,29 @@
 </div>
 
 <!-- ── MODAL CONFIRMAR EXCLUSÃO ── -->
+<!-- MODAL IA RISCOS -->
+<div class="modal-overlay" id="modal-ia-riscos">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-titulo">
+      <span>✨ Riscos sugeridos pela IA</span>
+      <button class="modal-close" onclick="fecharModalIARiscos()">×</button>
+    </div>
+    <div class="modal-sub" id="ia-riscos-sub">Analisando o contexto...</div>
+    <div id="ia-riscos-lista" style="max-height:400px;overflow-y:auto;"></div>
+    <div class="status-bar" id="status-ia-riscos"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+      <span id="ia-riscos-count" style="font-size:12px;color:var(--text2);"></span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="fecharModalIARiscos()">Cancelar</button>
+        <button class="btn btn-success" id="btn-confirmar-ia-riscos" onclick="confirmarRiscosIASelecionados()" disabled>
+          <span class="spinner" id="spinner-ia-riscos"></span>
+          <span id="label-ia-riscos">Adicionar selecionados</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-excluir">
   <div class="modal modal-sm">
     <div class="modal-titulo">
@@ -666,7 +689,8 @@ function renderPainel(){
   document.getElementById('painel-sub').textContent=`${riscosAtivos.length} risco(s) identificado(s)${contexto==='funcao'&&funcaoAtiva?' — incluindo riscos herdados do setor':''}`;
 
   document.getElementById('painel-actions').innerHTML=
-    `<button class="btn btn-primary btn-sm" onclick="abrirModalAdicionar()">+ Identificar perigo / risco</button>`;
+    `<button class="btn btn-primary btn-sm" onclick="abrirModalAdicionar()">+ Identificar perigo / risco</button>
+     <button class="btn-ia" style="font-size:12px;padding:5px 12px;" onclick="abrirModalIARiscos()">✨ Sugerir com IA</button>`;
 
   const tabs=`<div class="ctx-tabs">
     <div class="ctx-tab ${contexto==='setor'?'active':''}" onclick="mudarContexto('setor')">🗂️ ${h(setorAtivo.nome_setor)}</div>
@@ -1893,6 +1917,116 @@ document.addEventListener('click',e=>{
 
 inicializar();
 
+// ── IA — SUGESTÃO DE RISCOS ────────────────────────────────────
+let riscosIASugeridos=[];
+
+async function abrirModalIARiscos(){
+  if(!setorAtivo)return;
+  const nomeCtx=contexto==='setor'?setorAtivo.nome_setor:funcaoAtiva?.nome_funcao||'';
+  const tipoCtx=contexto==='setor'?'setor':'função';
+  document.getElementById('modal-ia-riscos').classList.add('show');
+  document.getElementById('ia-riscos-sub').textContent=`Analisando "${nomeCtx}"...`;
+  document.getElementById('ia-riscos-lista').innerHTML='<div style="text-align:center;padding:30px;color:var(--text2);">⏳ Consultando IA...</div>';
+  document.getElementById('btn-confirmar-ia-riscos').disabled=true;
+  document.getElementById('ia-riscos-count').textContent='';
+  try{
+    const jaAdicionados=(contexto==='setor'?riscosSetor:riscosFuncao).map(r=>r.risco_id);
+    const catalogo=todosRiscos
+      .filter(r=>!jaAdicionados.includes(r.id))
+      .map(r=>({id:r.id,nome_risco:r.nome_risco,categoria:getCatNome(r.categoria_risco_id)}));
+    if(!catalogo.length){
+      document.getElementById('ia-riscos-lista').innerHTML='<div style="text-align:center;padding:30px;color:var(--text2);">Todos os riscos do catálogo já foram adicionados.</div>';
+      return;
+    }
+    const ids=await ia_sugerirRiscos(nomeCtx,tipoCtx,catalogo);
+    riscosIASugeridos=todosRiscos.filter(r=>ids.includes(r.id));
+    renderListaIARiscos(nomeCtx);
+  }catch(e){
+    document.getElementById('ia-riscos-lista').innerHTML=`<div style="color:var(--danger);padding:16px;">Erro: ${e.message}</div>`;
+  }
+}
+
+function renderListaIARiscos(nomeCtx){
+  const lista=document.getElementById('ia-riscos-lista');
+  if(!riscosIASugeridos.length){
+    lista.innerHTML='<div style="text-align:center;padding:30px;color:var(--text2);">Nenhum risco sugerido para este contexto.</div>';
+    return;
+  }
+  document.getElementById('ia-riscos-sub').textContent=`${riscosIASugeridos.length} riscos sugeridos para "${nomeCtx}". Selecione os que se aplicam:`;
+  lista.innerHTML=riscosIASugeridos.map((r,i)=>{
+    const est=getCatEstilo(r.categoria_risco_id);
+    const catNome=getCatNome(r.categoria_risco_id);
+    const danos=r.danos_saude?`<div style="font-size:11px;color:var(--text3);margin-top:3px;">🩺 ${h(r.danos_saude.slice(0,100))}${r.danos_saude.length>100?'…':''}</div>`:'';
+    return`<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <input type="checkbox" id="ia-r-${i}" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin-top:2px;flex-shrink:0;">
+      <label for="ia-r-${i}" style="flex:1;cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="font-size:13px;font-weight:500;color:var(--text);">${h(r.nome_risco)}</span>
+          <span style="font-size:10px;padding:2px 7px;border-radius:3px;background:${est.bg};color:${est.color};">${catNome}</span>
+        </div>${danos}
+      </label>
+    </div>`;
+  }).join('');
+  atualizarCountIARiscos();
+  riscosIASugeridos.forEach((_,i)=>document.getElementById(`ia-r-${i}`)?.addEventListener('change',atualizarCountIARiscos));
+}
+
+function atualizarCountIARiscos(){
+  const sel=riscosIASugeridos.filter((_,i)=>document.getElementById(`ia-r-${i}`)?.checked).length;
+  document.getElementById('ia-riscos-count').textContent=`${sel} de ${riscosIASugeridos.length} selecionado(s)`;
+  document.getElementById('btn-confirmar-ia-riscos').disabled=sel===0;
+}
+
+function fecharModalIARiscos(){
+  document.getElementById('modal-ia-riscos').classList.remove('show');
+  riscosIASugeridos=[];
+}
+
+async function confirmarRiscosIASelecionados(){
+  const selecionados=riscosIASugeridos.filter((_,i)=>document.getElementById(`ia-r-${i}`)?.checked);
+  if(!selecionados.length||!setorAtivo)return;
+  document.getElementById('btn-confirmar-ia-riscos').disabled=true;
+  document.getElementById('spinner-ia-riscos').classList.add('show');
+  document.getElementById('label-ia-riscos').textContent='Adicionando...';
+  const ehSetor=contexto==='setor';
+  try{
+    for(const r of selecionados){
+      if(ehSetor){
+        const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos`,{
+          method:'POST',headers:{...h2(),'Prefer':'return=representation'},
+          body:JSON.stringify({setor_id:setorAtivo.id,risco_id:r.id,ativo:true})
+        });
+        if(!res.ok)throw new Error('Erro ao adicionar risco ao setor');
+        const data=await res.json();
+        const novoSR={...data[0],epis:[]};
+        riscosSetor.push(novoSR);
+        await propagarRiscoParaFuncoes(novoSR);
+      }else{
+        const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
+          method:'POST',headers:{...h2(),'Prefer':'return=representation'},
+          body:JSON.stringify({funcao_id:funcaoAtiva.id,risco_id:r.id,propagado_do_setor:false,ativo:true})
+        });
+        if(!res.ok)throw new Error('Erro ao adicionar risco à função');
+        const data=await res.json();
+        riscosFuncao.push({...data[0],epis:[]});
+      }
+    }
+    fecharModalIARiscos();
+    renderPainel();
+    renderNavSetores();
+    toast(ehSetor
+      ?`${selecionados.length} risco(s) adicionado(s) e propagado(s) para ${funcoesSetor.length} função(ões)`
+      :`${selecionados.length} risco(s) adicionado(s) à função ${funcaoAtiva?.nome_funcao||''}`
+    );
+  }catch(e){
+    setStatus('status-ia-riscos','error',e.message);
+    document.getElementById('btn-confirmar-ia-riscos').disabled=false;
+  }finally{
+    document.getElementById('spinner-ia-riscos').classList.remove('show');
+    document.getElementById('label-ia-riscos').textContent='Adicionar selecionados';
+  }
+}
+
 async function sugerirMedidaIA(btn){
   const srId=btn.dataset.sr;
   const nivel=btn.dataset.nivel;
@@ -1916,6 +2050,6 @@ async function sugerirMedidaIA(btn){
   }
 }
 </script>
-<script src="ia_copilot.js?v=5"></script>
+<script src="ia_copilot.js?v=6"></script>
 </body>
 </html>
