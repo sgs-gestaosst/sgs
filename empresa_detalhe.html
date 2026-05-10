@@ -270,6 +270,10 @@
     </div>
     <div class="modal-grid-2">
       <div class="modal-field" style="grid-column:1/-1;"><label>Nome do setor *</label><input type="text" id="s-nome" placeholder="Ex: Produção, Administrativo..."></div>
+      <div style="grid-column:1/-1;margin-bottom:4px;">
+        <button type="button" class="btn-ia" id="btn-ia-setor" onclick="sugerirIA_Setor()">✨ Sugerir com IA</button>
+        <div id="ia-setor-status" class="ia-status" style="display:none;"></div>
+      </div>
       <div class="modal-field"><label>Responsável</label><input type="text" id="s-responsavel" placeholder="Nome do responsável"></div>
       <div class="modal-field"><label>Andar / Localização</label><input type="text" id="s-andar" placeholder="Ex: Térreo, 1º Andar, Galpão A"></div>
       <div class="modal-field"><label>Área (m²)</label><input type="number" id="s-area" placeholder="0" min="0" step="0.01"></div>
@@ -285,10 +289,6 @@
           <label><input type="checkbox" id="s-agente-acidente"> Acidente</label>
           <label><input type="checkbox" id="s-agente-psicossocial"> Psicossocial</label>
         </div>
-      </div>
-      <div style="grid-column:1/-1;margin-top:4px;">
-        <button type="button" class="btn-ia" id="btn-ia-setor" onclick="sugerirIA_Setor()">✨ Sugerir com IA</button>
-        <div id="ia-setor-status" class="ia-status" style="display:none;"></div>
       </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
@@ -307,6 +307,10 @@
     </div>
     <div class="modal-grid-2">
       <div class="modal-field"><label>Nome da função *</label><input type="text" id="f-nome" placeholder="Ex: Operador de Máquina..."></div>
+      <div style="grid-column:1/-1;margin-bottom:4px;">
+        <button type="button" class="btn-ia" id="btn-ia-funcao" onclick="sugerirIA_Funcao()">✨ Sugerir com IA</button>
+        <div id="ia-funcao-status" class="ia-status" style="display:none;"></div>
+      </div>
       <div class="modal-field">
         <label>Turno</label>
         <select id="f-turno"><option value="">— Selecione —</option><option>Diurno</option><option>Noturno</option><option>Misto</option><option>12x36</option><option>6x1</option><option>5x2</option></select>
@@ -341,10 +345,6 @@
           <label><input type="checkbox" id="f-insalubre"> Insalubre</label>
           <label><input type="checkbox" id="f-periculoso"> Periculoso</label>
         </div>
-      </div>
-      <div style="grid-column:1/-1;margin-top:4px;">
-        <button type="button" class="btn-ia" id="btn-ia-funcao" onclick="sugerirIA_Funcao()">✨ Sugerir com IA</button>
-        <div id="ia-funcao-status" class="ia-status" style="display:none;"></div>
       </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
