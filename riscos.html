@@ -525,7 +525,7 @@ const empresaId=params.get('empresa_id');
 if(!empresaId)window.location.href='empresas.html';
 
 // ── STATE ──────────────────────────────────────────────────────
-let empresa=null,setores=[],funcoes=[],todosRiscos=[],todosEpis=[],categoriasRisco=[],todosPerigos=[];
+let empresa=null,setores=[],funcoes=[],todosRiscos=[],todosEpis=[],categoriasRisco=[],todosPerigos=[],perigoRiscosMap={};
 let setorAtivo=null,contexto='setor',funcaoAtiva=null;
 let riscosSetor=[],riscosFuncao=[],funcoesSetor=[];
 // Modal state
@@ -576,7 +576,7 @@ async function inicializar(){
   document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
   document.getElementById('btn-pgr').href=`pgr.html?empresa_id=${empresaId}`;
   try{
-    const [resEmp,resSets,resFuncs,resRiscos,resEpis,resCats,resPerigos]=await Promise.all([
+    const [resEmp,resSets,resFuncs,resRiscos,resEpis,resCats,resPerigos,resPerRiscos]=await Promise.all([
       fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:h2()}),
@@ -584,9 +584,11 @@ async function inicializar(){
       fetch(`${SUPA_URL}/rest/v1/catalogo_epis?ativo=eq.true&select=id,nome,categoria&order=categoria.asc,nome.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome,cor_identificacao`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/perigos?ativo=eq.true&select=id,nome,descricao,exemplos,categoria_risco_id&order=nome.asc`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/perigo_riscos?select=risco_id,perigo_id`,{headers:h2()}),
     ]);
-    const dados=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resRiscos.json(),resEpis.json(),resCats.json(),resPerigos.json()]);
-    [empresa,setores,funcoes,todosRiscos,todosEpis,categoriasRisco,todosPerigos]=dados.map((d,i)=>i===0?d[0]:d);
+    const dados=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resRiscos.json(),resEpis.json(),resCats.json(),resPerigos.json(),resPerRiscos.json()]);
+    [empresa,setores,funcoes,todosRiscos,todosEpis,categoriasRisco,todosPerigos]=dados.slice(0,7).map((d,i)=>i===0?d[0]:d);
+    dados[7].forEach(pr=>{if(!perigoRiscosMap[pr.risco_id])perigoRiscosMap[pr.risco_id]=pr.perigo_id;});
     const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
     document.getElementById('hero-nome').textContent=`Gestão de Riscos — ${nome}`;
     document.getElementById('header-nome').textContent=nome;
@@ -1994,7 +1996,7 @@ async function confirmarRiscosIASelecionados(){
       if(ehSetor){
         const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos`,{
           method:'POST',headers:{...h2(),'Prefer':'return=representation'},
-          body:JSON.stringify({setor_id:setorAtivo.id,risco_id:r.id,ativo:true})
+          body:JSON.stringify({setor_id:setorAtivo.id,risco_id:r.id,perigo_id:perigoRiscosMap[r.id]||null,ativo:true})
         });
         if(!res.ok)throw new Error('Erro ao adicionar risco ao setor');
         const data=await res.json();
@@ -2004,7 +2006,7 @@ async function confirmarRiscosIASelecionados(){
       }else{
         const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{
           method:'POST',headers:{...h2(),'Prefer':'return=representation'},
-          body:JSON.stringify({funcao_id:funcaoAtiva.id,risco_id:r.id,propagado_do_setor:false,ativo:true})
+          body:JSON.stringify({funcao_id:funcaoAtiva.id,risco_id:r.id,perigo_id:perigoRiscosMap[r.id]||null,propagado_do_setor:false,ativo:true})
         });
         if(!res.ok)throw new Error('Erro ao adicionar risco à função');
         const data=await res.json();
@@ -2050,6 +2052,6 @@ async function sugerirMedidaIA(btn){
   }
 }
 </script>
-<script src="ia_copilot.js?v=6"></script>
+<script src="ia_copilot.js?v=7"></script>
 </body>
 </html>
