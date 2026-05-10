@@ -876,7 +876,7 @@ function renderRiscoCard(sr){
 
     <div class="hierarquia">
       <div class="hier-titulo">Hierarquia de controle — NR-1</div>
-      ${renderHierarquia(sr)}
+      ${renderHierarquia(sr,risco.nome_risco,catNome)}
     </div>
   </div>`;
 
@@ -884,7 +884,7 @@ function renderRiscoCard(sr){
   return html;
 }
 
-function renderHierarquia(sr){
+function renderHierarquia(sr,riscoNome,catNome){
   const niveis=[
     {key:'elim',label:'1. Eliminação',cor:'#e05555',hint:'Eliminar a fonte do risco'},
     {key:'subs',label:'2. Substituição',cor:'#e0a855',hint:'Substituir por algo menos perigoso'},
@@ -944,7 +944,10 @@ function renderHierarquia(sr){
           <label for="check-${sr.id}-${n.key}">${n.hint}</label>
         </div>
         <div class="hier-detalhe ${show}" id="det-${sr.id}-${n.key}">
-          <textarea placeholder="Descreva a medida de controle..." onblur="salvarMedida(${sr.id},'${n.key}',this.value)">${h(sr[`medida_${n.key}_desc`]||'')}</textarea>
+          <div style="position:relative;">
+            <textarea id="textarea-med-${sr.id}-${n.key}" placeholder="Descreva a medida de controle..." onblur="salvarMedida(${sr.id},'${n.key}',this.value)">${h(sr[`medida_${n.key}_desc`]||'')}</textarea>
+            <button type="button" class="btn-ia-medida" data-sr="${sr.id}" data-nivel="${n.key}" data-risco="${(riscoNome||'').replace(/"/g,'&quot;')}" data-cat="${(catNome||'').replace(/"/g,'&quot;')}" onclick="sugerirMedidaIA(this)" title="Sugerir com IA">✨</button>
+          </div>
           <div class="resp-prazo-row" style="margin-top:6px;">
             <input type="text" placeholder="Responsável (opcional)"
               value="${respVal}"
@@ -1889,6 +1892,30 @@ document.addEventListener('click',e=>{
 });
 
 inicializar();
+
+async function sugerirMedidaIA(btn){
+  const srId=btn.dataset.sr;
+  const nivel=btn.dataset.nivel;
+  const riscoNome=btn.dataset.risco;
+  const catNome=btn.dataset.cat;
+  const textarea=document.getElementById(`textarea-med-${srId}-${nivel}`);
+  if(!textarea)return;
+  btn.disabled=true;btn.textContent='⏳';
+  try{
+    const sugestao=await ia_sugerirMedida(riscoNome,catNome,nivel);
+    if(!textarea.value.trim()){
+      textarea.value=sugestao;
+    }else if(confirm('Substituir o texto atual pela sugestão da IA?')){
+      textarea.value=sugestao;
+    }
+    textarea.dispatchEvent(new Event('blur'));
+  }catch(e){
+    alert('Erro ao consultar IA: '+e.message);
+  }finally{
+    btn.disabled=false;btn.textContent='✨';
+  }
+}
 </script>
+<script src="ia_copilot.js"></script>
 </body>
 </html>

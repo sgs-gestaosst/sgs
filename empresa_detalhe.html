@@ -275,6 +275,21 @@
       <div class="modal-field"><label>Área (m²)</label><input type="number" id="s-area" placeholder="0" min="0" step="0.01"></div>
       <div class="modal-field"><label>Nº de funcionários</label><input type="number" id="s-num-funcionarios" placeholder="0" min="0"></div>
       <div class="modal-field" style="grid-column:1/-1;"><label>Descrição</label><textarea id="s-descricao" placeholder="Descrição das atividades do setor..."></textarea></div>
+      <div class="modal-field" style="grid-column:1/-1;">
+        <label>Agentes de risco presentes</label>
+        <div class="agentes-check-grid">
+          <label><input type="checkbox" id="s-agente-fisico"> Físico</label>
+          <label><input type="checkbox" id="s-agente-quimico"> Químico</label>
+          <label><input type="checkbox" id="s-agente-biologico"> Biológico</label>
+          <label><input type="checkbox" id="s-agente-ergonomico"> Ergonômico</label>
+          <label><input type="checkbox" id="s-agente-acidente"> Acidente</label>
+          <label><input type="checkbox" id="s-agente-psicossocial"> Psicossocial</label>
+        </div>
+      </div>
+      <div style="grid-column:1/-1;margin-top:4px;">
+        <button type="button" class="btn-ia" id="btn-ia-setor" onclick="sugerirIA_Setor()">✨ Sugerir com IA</button>
+        <div id="ia-setor-status" class="ia-status" style="display:none;"></div>
+      </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-cancel" onclick="fecharModalSetor()">Cancelar</button>
@@ -316,6 +331,20 @@
       <div class="modal-field" style="grid-column:1/-1;">
         <label>Descrição da função</label>
         <textarea id="f-descricao" placeholder="Ao selecionar um CBO, este campo será preenchido automaticamente com a descrição oficial. Edite conforme necessário." style="min-height:100px;"></textarea>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1;">
+        <label>Condições especiais</label>
+        <div class="agentes-check-grid">
+          <label><input type="checkbox" id="f-trabalho-altura"> Trabalho em altura</label>
+          <label><input type="checkbox" id="f-trabalho-confinado"> Espaço confinado</label>
+          <label><input type="checkbox" id="f-trabalho-eletrico"> Elétrico (NR-10)</label>
+          <label><input type="checkbox" id="f-insalubre"> Insalubre</label>
+          <label><input type="checkbox" id="f-periculoso"> Periculoso</label>
+        </div>
+      </div>
+      <div style="grid-column:1/-1;margin-top:4px;">
+        <button type="button" class="btn-ia" id="btn-ia-funcao" onclick="sugerirIA_Funcao()">✨ Sugerir com IA</button>
+        <div id="ia-funcao-status" class="ia-status" style="display:none;"></div>
       </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
@@ -641,18 +670,18 @@ function popularCheckboxSetores(selecionados=[]){
 function toggleSetorQtd(id,checked){const w=document.getElementById(`qtd-setor-${id}`);if(w)w.style.display=checked?'flex':'none';if(!checked){const i=document.getElementById(`num-setor-${id}`);if(i)i.value='';}}
 function getSetoresSelecionados(){const lista=document.getElementById('f-setores-lista');if(!lista)return[];return[...lista.querySelectorAll('input[type=checkbox]:checked')].map(el=>{const id=parseInt(el.value);const qtdEl=document.getElementById(`num-setor-${id}`);return{setor_id:id,num_funcionarios_previsto:qtdEl&&qtdEl.value?parseInt(qtdEl.value):0};});}
 
-function limparFormSetor(){['s-nome','s-responsavel','s-andar','s-descricao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});['s-area','s-num-funcionarios'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});}
+function limparFormSetor(){['s-nome','s-responsavel','s-andar','s-descricao'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});['s-area','s-num-funcionarios'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});['s-agente-fisico','s-agente-quimico','s-agente-biologico','s-agente-ergonomico','s-agente-acidente','s-agente-psicossocial'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});const st=document.getElementById('ia-setor-status');if(st){st.style.display='none';st.textContent='';}}
 function abrirModalSetor(){setorEditandoId=null;limparFormSetor();document.getElementById('modal-setor-titulo').textContent='Novo setor';document.getElementById('label-salvar-setor').textContent='Salvar setor';document.getElementById('modal-setor').classList.add('show');}
 function fecharModalSetor(){document.getElementById('modal-setor').classList.remove('show');setorEditandoId=null;}
 function editarSetor(id){
   const s=setores.find(x=>x.id===id);if(!s)return;setorEditandoId=id;limparFormSetor();
-  document.getElementById('s-nome').value=s.nome_setor||'';document.getElementById('s-responsavel').value=s.responsavel_setor||'';document.getElementById('s-andar').value=s.andar||'';document.getElementById('s-area').value=s.area_m2||'';document.getElementById('s-num-funcionarios').value=s.num_funcionarios_previsto||'';document.getElementById('s-descricao').value=s.descricao||'';
+  document.getElementById('s-nome').value=s.nome_setor||'';document.getElementById('s-responsavel').value=s.responsavel_setor||'';document.getElementById('s-andar').value=s.andar||'';document.getElementById('s-area').value=s.area_m2||'';document.getElementById('s-num-funcionarios').value=s.num_funcionarios_previsto||'';document.getElementById('s-descricao').value=s.descricao||'';document.getElementById('s-agente-fisico').checked=!!s.tem_agente_fisico;document.getElementById('s-agente-quimico').checked=!!s.tem_agente_quimico;document.getElementById('s-agente-biologico').checked=!!s.tem_agente_biologico;document.getElementById('s-agente-ergonomico').checked=!!s.tem_agente_ergonomico;document.getElementById('s-agente-acidente').checked=!!s.tem_agente_acidente;document.getElementById('s-agente-psicossocial').checked=!!s.tem_agente_psicossocial;
   document.getElementById('modal-setor-titulo').textContent='Editar setor';document.getElementById('label-salvar-setor').textContent='Salvar alterações';document.getElementById('modal-setor').classList.add('show');
 }
 async function salvarSetor(){
   const nome=document.getElementById('s-nome').value.trim();if(!nome){alert('Informe o nome do setor.');return;}
   document.getElementById('btn-salvar-setor').disabled=true;document.getElementById('spinner-setor').className='spinner show';document.getElementById('label-salvar-setor').textContent='Salvando...';
-  const payload={empresa_id:parseInt(empresaId),nome_setor:nome,responsavel_setor:document.getElementById('s-responsavel').value||null,andar:document.getElementById('s-andar').value||null,area_m2:document.getElementById('s-area').value?parseFloat(document.getElementById('s-area').value):null,num_funcionarios_previsto:document.getElementById('s-num-funcionarios').value?parseInt(document.getElementById('s-num-funcionarios').value):null,num_funcionarios_previsto_base:document.getElementById('s-num-funcionarios').value?parseInt(document.getElementById('s-num-funcionarios').value):null,descricao:document.getElementById('s-descricao').value||null,ativo:true,atualizado_em:new Date().toISOString()};
+  const payload={empresa_id:parseInt(empresaId),nome_setor:nome,responsavel_setor:document.getElementById('s-responsavel').value||null,andar:document.getElementById('s-andar').value||null,area_m2:document.getElementById('s-area').value?parseFloat(document.getElementById('s-area').value):null,num_funcionarios_previsto:document.getElementById('s-num-funcionarios').value?parseInt(document.getElementById('s-num-funcionarios').value):null,num_funcionarios_previsto_base:document.getElementById('s-num-funcionarios').value?parseInt(document.getElementById('s-num-funcionarios').value):null,descricao:document.getElementById('s-descricao').value||null,tem_agente_fisico:document.getElementById('s-agente-fisico').checked,tem_agente_quimico:document.getElementById('s-agente-quimico').checked,tem_agente_biologico:document.getElementById('s-agente-biologico').checked,tem_agente_ergonomico:document.getElementById('s-agente-ergonomico').checked,tem_agente_acidente:document.getElementById('s-agente-acidente').checked,tem_agente_psicossocial:document.getElementById('s-agente-psicossocial').checked,ativo:true,atualizado_em:new Date().toISOString()};
   try{
     let res;
     if(setorEditandoId)res=await fetch(`${SUPA_URL}/rest/v1/setores?id=eq.${setorEditandoId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(payload)});
@@ -691,6 +720,8 @@ function limparFormFuncao(){
   document.getElementById('f-turno').value='';document.getElementById('f-escolaridade').value='';
   document.getElementById('cbo-dropdown').classList.remove('show');document.getElementById('f-setores-erro').style.display='none';
   document.getElementById('cbo-dica').classList.remove('show');cboAutoPreenchido=false;
+  ['f-trabalho-altura','f-trabalho-confinado','f-trabalho-eletrico','f-insalubre','f-periculoso'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});
+  const stf=document.getElementById('ia-funcao-status');if(stf){stf.style.display='none';stf.textContent='';}
   popularCheckboxSetores([]);
 }
 
@@ -699,7 +730,7 @@ function fecharModalFuncao(){document.getElementById('modal-funcao').classList.r
 
 async function editarFuncao(id){
   const f=funcoes.find(x=>x.id===id);if(!f)return;funcaoEditandoId=id;limparFormFuncao();
-  document.getElementById('f-nome').value=f.nome_funcao||'';document.getElementById('f-turno').value=f.turno||'';document.getElementById('f-escolaridade').value=f.escolaridade_minima||'';document.getElementById('f-descricao').value=f.descricao||'';
+  document.getElementById('f-nome').value=f.nome_funcao||'';document.getElementById('f-turno').value=f.turno||'';document.getElementById('f-escolaridade').value=f.escolaridade_minima||'';document.getElementById('f-descricao').value=f.descricao||'';document.getElementById('f-trabalho-altura').checked=!!f.trabalho_altura;document.getElementById('f-trabalho-confinado').checked=!!f.trabalho_confinado;document.getElementById('f-trabalho-eletrico').checked=!!f.trabalho_eletrico;document.getElementById('f-insalubre').checked=!!f.insalubre;document.getElementById('f-periculoso').checked=!!f.periculoso;
   if(f.cbo)document.getElementById('f-cbo').value=f.cbo;
   try{const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?funcao_id=eq.${id}&ativo=eq.true&select=setor_id,num_funcionarios_previsto`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});popularCheckboxSetores(await res.json());}catch(e){popularCheckboxSetores([]);}
   document.getElementById('modal-funcao-titulo').textContent='Editar função';document.getElementById('label-salvar-funcao').textContent='Salvar alterações';clearStatus('status-funcao-modal');document.getElementById('modal-funcao').classList.add('show');
@@ -712,7 +743,7 @@ async function salvarFuncao(){
   document.getElementById('btn-salvar-funcao').disabled=true;document.getElementById('spinner-funcao').className='spinner show';document.getElementById('label-salvar-funcao').textContent='Salvando...';
   const cboRaw=document.getElementById('f-cbo').value.trim();
   const cboVal=cboRaw?cboRaw.split('—')[0].trim().replace(/\D/g,'').slice(0,6)||null:null;
-  const payload={empresa_id:parseInt(empresaId),nome_funcao:nome,cbo:cboVal,turno:document.getElementById('f-turno').value||null,escolaridade_minima:document.getElementById('f-escolaridade').value||null,descricao:document.getElementById('f-descricao').value||null,ativo:true,atualizado_em:new Date().toISOString()};
+  const payload={empresa_id:parseInt(empresaId),nome_funcao:nome,cbo:cboVal,turno:document.getElementById('f-turno').value||null,escolaridade_minima:document.getElementById('f-escolaridade').value||null,descricao:document.getElementById('f-descricao').value||null,trabalho_altura:document.getElementById('f-trabalho-altura').checked,trabalho_confinado:document.getElementById('f-trabalho-confinado').checked,trabalho_eletrico:document.getElementById('f-trabalho-eletrico').checked,insalubre:document.getElementById('f-insalubre').checked,periculoso:document.getElementById('f-periculoso').checked,ativo:true,atualizado_em:new Date().toISOString()};
   try{
     let funcaoId;
     if(funcaoEditandoId){
@@ -854,6 +885,58 @@ document.addEventListener('click',e=>{
 ['modal-setor','modal-funcao'].forEach(id=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this){if(id==='modal-setor')fecharModalSetor();else fecharModalFuncao();}});});
 
 carregarEmpresa();
+
+async function sugerirIA_Setor(){
+  const nome=document.getElementById('s-nome').value.trim();
+  if(!nome){alert('Informe o nome do setor antes de usar a IA.');return;}
+  const btn=document.getElementById('btn-ia-setor');
+  const status=document.getElementById('ia-setor-status');
+  btn.disabled=true;btn.textContent='⏳ Gerando...';
+  status.style.display='block';status.style.color='var(--text2)';status.textContent='Consultando IA...';
+  try{
+    const s=await ia_sugerirSetor(nome);
+    const desc=document.getElementById('s-descricao');
+    if(!desc.value.trim())desc.value=s.descricao||'';
+    else if(confirm('Substituir a descrição atual pela sugestão da IA?'))desc.value=s.descricao||'';
+    document.getElementById('s-agente-fisico').checked=!!s.tem_agente_fisico;
+    document.getElementById('s-agente-quimico').checked=!!s.tem_agente_quimico;
+    document.getElementById('s-agente-biologico').checked=!!s.tem_agente_biologico;
+    document.getElementById('s-agente-ergonomico').checked=!!s.tem_agente_ergonomico;
+    document.getElementById('s-agente-acidente').checked=!!s.tem_agente_acidente;
+    document.getElementById('s-agente-psicossocial').checked=!!s.tem_agente_psicossocial;
+    status.style.color='var(--success)';status.textContent='✓ Sugestão aplicada — revise e ajuste conforme necessário.';
+  }catch(e){
+    status.style.color='var(--danger)';status.textContent='✕ Erro: '+e.message;
+  }finally{
+    btn.disabled=false;btn.textContent='✨ Sugerir com IA';
+  }
+}
+
+async function sugerirIA_Funcao(){
+  const nome=document.getElementById('f-nome').value.trim();
+  if(!nome){alert('Informe o nome da função antes de usar a IA.');return;}
+  const btn=document.getElementById('btn-ia-funcao');
+  const status=document.getElementById('ia-funcao-status');
+  btn.disabled=true;btn.textContent='⏳ Gerando...';
+  status.style.display='block';status.style.color='var(--text2)';status.textContent='Consultando IA...';
+  try{
+    const s=await ia_sugerirFuncao(nome);
+    const desc=document.getElementById('f-descricao');
+    if(!desc.value.trim())desc.value=s.descricao||'';
+    else if(confirm('Substituir a descrição atual pela sugestão da IA?'))desc.value=s.descricao||'';
+    document.getElementById('f-trabalho-altura').checked=!!s.trabalho_altura;
+    document.getElementById('f-trabalho-confinado').checked=!!s.trabalho_confinado;
+    document.getElementById('f-trabalho-eletrico').checked=!!s.trabalho_eletrico;
+    document.getElementById('f-insalubre').checked=!!s.insalubre;
+    document.getElementById('f-periculoso').checked=!!s.periculoso;
+    status.style.color='var(--success)';status.textContent='✓ Sugestão aplicada — revise e ajuste conforme necessário.';
+  }catch(e){
+    status.style.color='var(--danger)';status.textContent='✕ Erro: '+e.message;
+  }finally{
+    btn.disabled=false;btn.textContent='✨ Sugerir com IA';
+  }
+}
 </script>
+<script src="ia_copilot.js"></script>
 </body>
 </html>
