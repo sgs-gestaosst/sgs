@@ -560,6 +560,22 @@ function renderDocumento(){
   wrap.appendChild(pgEpi);
   if(window.campanhasPsi&&window.campanhasPsi.length){
     renderAvaliacaoPsicossocial().forEach(pg=>{pgsPsi.push(pg);wrap.appendChild(pg);});
+  } else {
+    const pgPend=document.createElement('div');
+    pgPend.className='pagina';
+    pgPend.innerHTML=`<div class="secao-titulo">6. Avaliação de Riscos Psicossociais</div>
+      <div style="border:2px solid #e0a855;border-radius:8px;padding:20px;background:#1a1500;margin-top:16px;">
+        <div style="color:#e0a855;font-weight:600;font-size:14px;margin-bottom:8px;">⚠️ Avaliação Psicossocial Pendente</div>
+        <p style="font-size:12px;color:#8892a4;line-height:1.7;">
+          A NR-01 (2025), subitem 1.5.4.4.3.2, exige a avaliação de riscos psicossociais como parte
+          obrigatória do inventário de riscos do PGR. Nenhuma campanha psicossocial foi encerrada
+          para esta empresa.<br><br>
+          <strong style="color:#e8eaf0;">Ação necessária:</strong> Realize e encerre uma campanha de avaliação
+          psicossocial (COPSOQ-III ou Checklist NR-01) no módulo Psicossocial para que os resultados
+          sejam integrados automaticamente a este documento.
+        </p>
+      </div>`;
+    pgsPsi.push(pgPend);wrap.appendChild(pgPend);
   }
   pgsPlano.forEach(pg=>wrap.appendChild(pg));
   if(pgContrat)wrap.appendChild(pgContrat);

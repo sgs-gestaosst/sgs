@@ -57,7 +57,11 @@ Analise o setor "${nomeSetor}" de uma empresa e responda SOMENTE com JSON válid
 }
 Critérios para true: fisico=ruído/vibração/calor/frio/radiação; quimico=poeiras/fumos/gases/solventes; biologico=vírus/bactérias/fungos; ergonomico=postura forçada/repetição/levantamento de peso; acidente=quedas/cortes/esmagamentos/choques elétricos; psicossocial=pressão por metas/jornada excessiva/assédio.`;
   const text=await _chamarGemini(prompt);
-  return JSON.parse(text);
+  try{
+    const parsed=JSON.parse(text);
+    if(typeof parsed.descricao!=='string')throw new Error('Campo descricao ausente');
+    return parsed;
+  }catch(e){throw new Error('IA retornou resposta inválida para setor. Tente novamente.');}
 }
 
 async function ia_sugerirFuncao(nomeFuncao){
@@ -73,7 +77,11 @@ Analise a função "${nomeFuncao}" e responda SOMENTE com JSON válido, sem mark
 }
 Critérios para true: altura=trabalho habitual acima de 2m/NR-35; confinado=espaços confinados/NR-33; eletrico=instalações elétricas energizadas/NR-10; insalubre=exposição a agentes físicos/químicos/biológicos acima dos limites/NR-15; periculoso=inflamáveis/explosivos/alta tensão/radiações ionizantes/NR-16.`;
   const text=await _chamarGemini(prompt);
-  return JSON.parse(text);
+  try{
+    const parsed=JSON.parse(text);
+    if(typeof parsed.descricao!=='string')throw new Error('Campo descricao ausente');
+    return parsed;
+  }catch(e){throw new Error('IA retornou resposta inválida para função. Tente novamente.');}
 }
 
 async function ia_sugerirRiscos(nomeContexto,tipoContexto,catalogoRiscos){
@@ -89,8 +97,10 @@ Responda SOMENTE com JSON válido, sem markdown:
 
 Selecione entre 3 e 8 riscos. Use apenas IDs existentes no catálogo acima.`;
   const text=await _chamarGemini(prompt);
-  const parsed=JSON.parse(text);
-  return Array.isArray(parsed.ids)?parsed.ids.map(Number):[];
+  try{
+    const parsed=JSON.parse(text);
+    return Array.isArray(parsed.ids)?parsed.ids.map(Number):[];
+  }catch(e){throw new Error('IA retornou resposta inválida para riscos. Tente novamente.');}
 }
 
 async function ia_sugerirMedida(nomeRisco,catRisco,tipoMedida){

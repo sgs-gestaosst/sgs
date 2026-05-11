@@ -667,10 +667,12 @@ async function excluirAcao(id){
 // ── HISTÓRICO ─────────────────────────────────────────
 async function registrarHistorico(acaoId,statusAnterior,statusNovo,comentario){
   try{
+    const userRaw=localStorage.getItem('sgs_user');
+    const user=userRaw?JSON.parse(userRaw):null;
     await fetch(`${SUPA_URL}/rest/v1/acoes_historico`,{
       method:'POST',
       headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
-      body:JSON.stringify({acao_id:acaoId,empresa_id:parseInt(empresaId),status_anterior:statusAnterior,status_novo:statusNovo,comentario})
+      body:JSON.stringify({acao_id:acaoId,empresa_id:parseInt(empresaId),status_anterior:statusAnterior,status_novo:statusNovo,comentario,usuario_id:user?.id||null,usuario_email:user?.email||null})
     });
   }catch(e){console.error(e);}
 }
