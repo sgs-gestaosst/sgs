@@ -61,8 +61,15 @@
 
 ### PGR
 **Arquivo:** `pgr.html`
-**Seções:** Capa → Sumário → Identificação → Inventário por GHE → Matriz EPI → Psicossocial → Plano de Ação
-**Status:** funcional, usado em produção
+**Seções:** Capa → Sumário → Identificação → Caracterização → SESMT → **Metodologia P×S (nova)** → Inventário por GHE → Matriz EPI → Psicossocial → Plano de Ação → Monitoramento
+**Status:** funcional, Fase 1 de melhorias concluída (2026-05-10)
+**Melhorias Fase 1 implementadas:**
+- Matriz de Risco P×S visual (seção 4) com tabela 5×5, escalas e hierarquia de controles NR-01
+- Data digital de elaboração no painel + capa
+- Indicador/Meta no plano de ação (campo acoes.indicador)
+- CSS de impressão: rodapé, badges P&B, capa, tabelas
+**Fase 2 pendente:** critérios de avaliação por categoria, análise de lacunas, GHE com nome customizável, eficácia das medidas
+**Fase 3 pendente:** histórico de acidentes/doenças, prova digital de participação
 
 ### eSocial
 **Arquivos:** `esocial_s2220.html` (ASO), `esocial_s2240.html` (exposição)
