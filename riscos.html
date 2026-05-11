@@ -824,6 +824,13 @@ function renderRiscoCard(sr){
         <label>Nº de expostos</label>
         <input type="number" min="0" value="${sr.num_expostos||''}" placeholder="0" onchange="atualizarAvaliacao(${sr.id},this,'num_expostos')" id="exp-${sr.id}">
       </div>
+      <div class="aval-field">
+        <label title="Nível de risco após aplicação das medidas de controle">Nível residual</label>
+        <select onchange="salvarNivelResidual(${sr.id},this.value)" id="resid-${sr.id}" style="border-color:${sr.nivel_risco_residual?'var(--accent2)':'var(--border)'};">
+          <option value="">— Não avaliado —</option>
+          ${['BAIXO','MEDIO','ALTO','MUITO-ALTO'].map(n=>`<option value="${n}" ${sr.nivel_risco_residual===n?'selected':''}>${nivelLabel(n)}</option>`).join('')}
+        </select>
+      </div>
     </div>
 
     ${temExposicao?`
@@ -983,6 +990,16 @@ function renderHierarquia(sr,riscoNome,catNome){
               value="${prazoVal}"
               onblur="salvarMedidaRespPrazo(${sr.id},'${n.key}','prazo',this.value||null)"
               id="prazo-${sr.id}-${n.key}">
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
+            <span style="font-size:11px;color:var(--text2);flex-shrink:0;">Eficácia:</span>
+            <select onchange="salvarEficacia(${sr.id},'${n.key}',this.value)" id="efic-${sr.id}-${n.key}"
+              style="background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:3px 8px;flex:1;">
+              <option value="Não avaliada" ${(sr[`medida_${n.key}_eficacia`]||'Não avaliada')==='Não avaliada'?'selected':''}>— Não avaliada</option>
+              <option value="Eficaz" ${sr[`medida_${n.key}_eficacia`]==='Eficaz'?'selected':''}>✓ Eficaz</option>
+              <option value="Parcial" ${sr[`medida_${n.key}_eficacia`]==='Parcial'?'selected':''}>⚠ Parcialmente eficaz</option>
+              <option value="Ineficaz" ${sr[`medida_${n.key}_eficacia`]==='Ineficaz'?'selected':''}>✕ Ineficaz</option>
+            </select>
           </div>
           <div class="hint-opcional">💡 Responsável e prazo opcionais — podem ser definidos na Central de Ações</div>
         </div>
@@ -1552,6 +1569,31 @@ async function toggleHier(srId,nivel,checked){
         {method:'PATCH',headers:h2(),body:JSON.stringify(updates)}
       );
     }
+  }catch(e){console.error(e);}
+}
+
+async function salvarEficacia(srId,nivel,valor){
+  const tabela=contexto==='setor'?'setor_riscos':'funcao_riscos';
+  const campo=`medida_${nivel}_eficacia`;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:h2(),body:JSON.stringify({[campo]:valor,atualizado_em:new Date().toISOString()})});
+    const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+    const sr=lista.find(x=>x.id===srId);
+    if(sr)sr[campo]=valor;
+    renderedRiscosCache[srId]=null;
+  }catch(e){console.error(e);}
+}
+
+async function salvarNivelResidual(srId,valor){
+  const tabela=contexto==='setor'?'setor_riscos':'funcao_riscos';
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${srId}`,{method:'PATCH',headers:h2(),body:JSON.stringify({nivel_risco_residual:valor||null,atualizado_em:new Date().toISOString()})});
+    const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+    const sr=lista.find(x=>x.id===srId);
+    if(sr)sr.nivel_risco_residual=valor||null;
+    renderedRiscosCache[srId]=null;
+    const el=document.getElementById(`resid-${srId}`);
+    if(el)el.style.borderColor=valor?'var(--accent2)':'var(--border)';
   }catch(e){console.error(e);}
 }
 

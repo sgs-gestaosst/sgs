@@ -537,10 +537,11 @@ async function carregar(){
 
 
     // Contratadas, Participação e Versões
-    const [resContrat, resPartic, resVersoes] = await Promise.all([
+    const [resContrat, resPartic, resVersoes, resGheNomes] = await Promise.all([
       fetch(`${SUPA_URL}/rest/v1/empresa_contratadas?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=razao_social.asc`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/pgr_participacao?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/pgr_versoes?empresa_id=eq.${empresaId}&select=*&order=criado_em.asc`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/ghe_nomes?empresa_id=eq.${empresaId}&select=codigo,nome`,{headers:headers()}),
     ]);
     const rawContrat = await resContrat.json();
     window.contratadas = Array.isArray(rawContrat) ? rawContrat : [];
@@ -551,6 +552,9 @@ async function carregar(){
 
     const rawVersoes = await resVersoes.json();
     window.pgrVersoes = Array.isArray(rawVersoes) ? rawVersoes : [];
+    const rawGheNomes = await resGheNomes.json().catch(()=>[]);
+    window.gheNomes={};
+    (Array.isArray(rawGheNomes)?rawGheNomes:[]).forEach(g=>{window.gheNomes[g.codigo]=g.nome||'';});
 
     renderDocumento();
   }catch(e){
@@ -978,7 +982,7 @@ function calcularGHEs(){
   let n=1;
   return Object.values(grupos).map(g=>{
     const codigo=`GHE-${String(n++).padStart(2,'0')}`;
-    return{codigo,funcoes:g.funcoes,frs:g.frs};
+    return{codigo,funcoes:g.funcoes,frs:g.frs,nome:(window.gheNomes||{})[codigo]||''};
   });
 }
 
@@ -1115,10 +1119,14 @@ function renderInventarioRiscos(){
       }
       const marcada=fr[`medida_${mc.key}`];const desc=fr[`medida_${mc.key}_desc`];
       if(!marcada&&!desc)return'';
+      const efic=fr[`medida_${mc.key}_eficacia`]||'Não avaliada';
+      const eficCor={Eficaz:{bg:'#dcfce7',c:'#166534'},Parcial:{bg:'#fef9c3',c:'#854d0e'},Ineficaz:{bg:'#fee2e2',c:'#991b1b'},'Não avaliada':{bg:'#f3f4f6',c:'#9ca3af'}}[efic]||{bg:'#f3f4f6',c:'#9ca3af'};
       return`<div class="medida-item">
         <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">${{elim:1,subs:2,eng:3,adm:4}[mc.key]}</div>
         <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
-        <div class="medida-desc">${desc?h(desc):'<span style="color:#9ca3af;font-style:italic;">Medida indicada — descrição não preenchida</span>'}</div>
+        <div class="medida-desc" style="flex:1;">${desc?h(desc):'<span style="color:#9ca3af;font-style:italic;">Medida indicada — descrição não preenchida</span>'}
+          <span style="display:inline-block;margin-left:6pt;background:${eficCor.bg};color:${eficCor.c};font-size:6.5pt;font-weight:600;padding:1pt 5pt;border-radius:3pt;">${efic}</span>
+        </div>
       </div>`;
     }).filter(Boolean).join('');
     // Fonte geradora: custom (editado pelo técnico) > catálogo
@@ -1174,6 +1182,7 @@ function renderInventarioRiscos(){
       <div class="risco-principal">
         <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
         ${fr.nivel_risco?`<span class="nivel-pill nivel-${fr.nivel_risco}">${nivelLabel(fr.nivel_risco)}</span>`:''}
+        ${fr.nivel_risco_residual?`<span style="font-size:7pt;color:#6b7280;margin-left:4pt;">→ Residual:</span><span class="nivel-pill nivel-${fr.nivel_risco_residual}" style="font-size:7pt;padding:1pt 6pt;">${nivelLabel(fr.nivel_risco_residual)}</span>`:''}
       </div>
       <!-- Linha 3: métricas -->
       ${metricasHtml}
@@ -1196,7 +1205,7 @@ function renderInventarioRiscos(){
     const funcoesNomes=ghe.funcoes.map(f=>h(f.nome_funcao)).join(' · ');
     return`<div style="flex:1;">
       <div style="display:flex;align-items:center;gap:8pt;flex-wrap:wrap;">
-        <span class="ghe-codigo-badge">${h(ghe.codigo)}${cont?' <span style="font-size:7pt;font-weight:400;opacity:.8;">(cont.)</span>':''}</span>
+        <span class="ghe-codigo-badge">${h(ghe.codigo)}${ghe.nome?' — '+h(ghe.nome):''}${cont?' <span style="font-size:7pt;font-weight:400;opacity:.8;">(cont.)</span>':''}</span>
       </div>
       <div class="ghe-funcoes">👷 Funções: <strong>${funcoesNomes}</strong></div>
     </div>
@@ -1789,6 +1798,26 @@ function renderSecaoVersoes(){
   return pg;
 }
 
+async function salvarNomeGHE(codigo,nome){
+  try{
+    window.gheNomes=window.gheNomes||{};
+    window.gheNomes[codigo]=nome||'';
+    const resCheck=await fetch(`${SUPA_URL}/rest/v1/ghe_nomes?empresa_id=eq.${empresaId}&codigo=eq.${encodeURIComponent(codigo)}&select=id`,{headers:headers()});
+    const existing=await resCheck.json();
+    if(existing.length){
+      await fetch(`${SUPA_URL}/rest/v1/ghe_nomes?id=eq.${existing[0].id}`,{method:'PATCH',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify({nome:nome||null})});
+    }else{
+      await fetch(`${SUPA_URL}/rest/v1/ghe_nomes`,{method:'POST',headers:{...headers(),'Content-Type':'application/json'},body:JSON.stringify({empresa_id:parseInt(empresaId),codigo,nome:nome||null})});
+    }
+    // Atualiza badge exibido
+    document.querySelectorAll('.ghe-codigo-badge').forEach(el=>{
+      if(el.textContent.startsWith(codigo)){
+        el.textContent=codigo+(nome?' — '+nome:'');
+      }
+    });
+  }catch(e){console.error('Erro ao salvar nome GHE:',e);}
+}
+
 async function adicionarVersao(empresaId){
   const versao=prompt('Número da versão (ex: 1.1):');
   if(!versao)return;
@@ -1846,12 +1875,36 @@ function renderMatrizRisco(){
         <span style="color:#374151;">${n.d}</span>
       </div>`).join('')}
     </div>
-    <div style="background:#f0f4ff;border-left:3pt solid #2563eb;padding:8pt 12pt;border-radius:0 4pt 4pt 0;margin-top:8pt;">
+    <div style="background:#f0f4ff;border-left:3pt solid #2563eb;padding:8pt 12pt;border-radius:0 4pt 4pt 0;margin-top:8pt;margin-bottom:14pt;">
       <div style="font-size:8pt;font-weight:600;color:#1e3a8a;margin-bottom:4pt;">Hierarquia de Controles — NR-01 subitem 1.5.4.4.4</div>
       <div style="display:flex;gap:6pt;flex-wrap:wrap;">
         ${[['1','Eliminação','#dc2626'],['2','Substituição','#d97706'],['3','Engenharia','#2563eb'],['4','Administrativo','#059669'],['5','EPI','#7c3aed']].map(([n,l,c])=>`<span style="background:#fff;border:1pt solid ${c};color:${c};font-size:7.5pt;font-weight:600;padding:2pt 8pt;border-radius:3pt;">${n}. ${l}</span>`).join('<span style="color:#9ca3af;align-self:center;">→</span>')}
       </div>
     </div>
+    <div style="font-size:9pt;font-weight:600;color:#374151;margin-bottom:8pt;text-transform:uppercase;letter-spacing:.04em;">Critérios de Avaliação por Categoria de Risco</div>
+    <table style="border-collapse:collapse;width:100%;font-size:8pt;">
+      <thead><tr>
+        <th style="background:#0d2040;color:#fff;padding:5pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:18%;">Categoria</th>
+        <th style="background:#0d2040;color:#fff;padding:5pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:28%;">Probabilidade</th>
+        <th style="background:#0d2040;color:#fff;padding:5pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:28%;">Severidade</th>
+        <th style="background:#0d2040;color:#fff;padding:5pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:26%;">Referência normativa</th>
+      </tr></thead>
+      <tbody>
+        ${[
+          ['Físico','Frequência e duração da exposição ao agente (ex: horas/dia acima do limite)','Dano auditivo, térmico ou vibração — intensidade e reversibilidade','NR-09, NR-15, NHO-01 FUNDACENTRO'],
+          ['Químico','Concentração estimada x limite de tolerância; frequência de contato','Toxicidade, via de absorção e órgão-alvo afetado','NR-09, NR-15, ACGIH TLV'],
+          ['Biológico','Probabilidade de contato com agente infeccioso (frequência de exposição)','Gravidade da doença potencial e disponibilidade de tratamento','NR-09, NR-32'],
+          ['Ergonômico','Frequência de movimentos, carga e postura forçada por jornada','Risco de LER/DORT, intensidade da sobrecarga musculoesquelética','NR-17, ISO 11228'],
+          ['Acidente','Probabilidade de ocorrência do evento indesejado (frequência histórica)','Consequência potencial do acidente — lesão, morte, dano patrimonial','NR-01, FMEA'],
+          ['Psicossocial','Prevalência de fatores de risco avaliados por instrumento validado','Impacto na saúde mental e desempenho organizacional','NR-01 (2025), COPSOQ-III'],
+        ].map(([cat,prob,sev,ref],i)=>`<tr style="background:${i%2?'#f8fafc':'#fff'};">
+          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;font-weight:600;color:#0d2040;">${cat}</td>
+          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#374151;">${prob}</td>
+          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#374151;">${sev}</td>
+          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#6b7280;font-size:7.5pt;">${ref}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
     ${phHeader('4. Metodologia de Avaliação de Risco')}${pfFooter()}`;
   return pg;
 }
