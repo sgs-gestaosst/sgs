@@ -223,7 +223,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   /* Rodapé fixo no fundo de cada página */
   .page-footer{
     position:absolute!important;
-    bottom:8mm!important;
+    bottom:10mm!important;
     left:20mm!important;
     right:14mm!important;
     margin-top:0!important;
@@ -232,7 +232,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     display:flex!important;
     justify-content:space-between!important;
     background:#fff!important;
+    height:10mm!important;
+    overflow:hidden!important;
   }
+  /* Garantir espaço suficiente para rodapé */
+  .page{padding-bottom:26mm!important;}
 
   /* Numeração de página — exibe exatamente o texto definido pelo JS */
   .pf-page{
@@ -247,6 +251,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .danos-box{page-break-inside:avoid;break-inside:avoid;}
   .medidas-box{page-break-inside:avoid;break-inside:avoid;}
   .ficha-grid{page-break-inside:avoid;break-inside:avoid;}
+
+  /* Badges legíveis em impressão P&B */
+  .nivel-MUITO-ALTO{background:#fff!important;color:#991b1b!important;border:1.5pt solid #991b1b!important;font-weight:700!important;}
+  .nivel-ALTO{background:#fff!important;color:#9a3412!important;border:1.5pt solid #9a3412!important;font-weight:700!important;}
+  .nivel-MEDIO{background:#fff!important;color:#854d0e!important;border:1.5pt solid #854d0e!important;font-weight:700!important;}
+  .nivel-BAIXO{background:#fff!important;color:#166534!important;border:1.5pt solid #166534!important;font-weight:700!important;}
+
+  /* Capa limitada a 1 página */
+  .capa{max-height:257mm!important;overflow:hidden!important;}
+
+  /* Tabelas sem overflow */
+  .doc-table td{word-break:break-word;overflow-wrap:break-word;}
+  .doc-table{font-size:9pt!important;}
+
+  /* Ocultar containers de medição */
+  [style*="left:-9999px"]{display:none!important;}
   .ficha-item{page-break-inside:avoid;break-inside:avoid;}
   .setor-detalhe{page-break-inside:avoid;break-inside:avoid;}
   .doc-table{page-break-inside:auto;}
@@ -355,6 +375,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <div>
         <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Responsável técnico</label>
         <input type="text" id="elab-responsavel" placeholder="Nome do Técnico / Engenheiro" oninput="atualizarElaboradora()"
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Data de elaboração</label>
+        <input type="date" id="elab-data" oninput="atualizarElaboradora()"
           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
       </div>
     </div>
@@ -543,6 +568,7 @@ function renderDocumento(){
   const pgsIdent=renderIdentificacao();
   const pgsCaract=renderCaracterizacao();
   const pgSesmt=renderSESMT();
+  const pgMatriz=renderMatrizRisco();
   const pgsInv=renderInventarioRiscos();
   const pgEpi=renderMatrizEPI();
   const pgsPsi=[];
@@ -556,6 +582,7 @@ function renderDocumento(){
   pgsIdent.forEach(pg=>wrap.appendChild(pg));
   pgsCaract.forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(pgSesmt);
+  wrap.appendChild(pgMatriz);
   pgsInv.forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(pgEpi);
   if(window.campanhasPsi&&window.campanhasPsi.length){
@@ -597,6 +624,7 @@ function renderDocumento(){
   setPg('sumario-1',pgsIdent.length?nrPag(pgsIdent[0]):'—');
   setPg('sumario-2',pgsCaract.length?nrPag(pgsCaract[0]):'—');
   setPg('sumario-3',nrPag(pgSesmt));
+  setPg('sumario-3b',nrPag(pgMatriz));
   const nrInv=pgsInv.length?nrPag(pgsInv[0]):'—';
   setPg('sumario-4',nrInv);setPg('sumario-41',nrInv);setPg('sumario-42',nrInv);setPg('sumario-43',nrInv);setPg('sumario-44',nrInv);
   setPg('sumario-5',nrPag(pgEpi));
@@ -627,7 +655,7 @@ function renderCapa(){
         </div>
         <div>
           <div style="font-size:10pt;font-weight:700;color:#0d2040;">${h(nomeEmpresa)}</div>
-          <div style="font-size:8pt;color:#6b7280;">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
+          <div style="font-size:8pt;color:#6b7280;">Elaborado em <strong>${elaboradora.dataElaboracao?fmtData(elaboradora.dataElaboracao):fmtDataAtual()}</strong></div>
         </div>
       </div>
       <!-- DIREITA: Logo da empresa elaboradora (opcional) -->
@@ -684,15 +712,16 @@ function renderSumario(){
         ['1','Identificação da Empresa','sumario-1'],
         ['2','Caracterização do Estabelecimento','sumario-2'],
         ['3','Dimensionamento do SESMT — NR-4','sumario-3'],
-        ['4','Inventário de Riscos Ocupacionais por GHE','sumario-4'],
-        ['4.1','Identificação de Perigos e Riscos','sumario-41'],
-        ['4.2','Avaliação e Nível de Risco','sumario-42'],
-        ['4.3','Danos à Saúde Potenciais','sumario-43'],
-        ['4.4','Medidas de Prevenção e Controle','sumario-44'],
-        ['5','Matriz de EPI por GHE','sumario-5'],
-        ['6','Avaliação Psicossocial','sumario-6'],
-        ['7','Plano de Ação','sumario-7'],
-        ['8','Monitoramento e Revisão','sumario-8'],
+        ['4','Metodologia de Avaliação de Risco','sumario-3b'],
+        ['5','Inventário de Riscos Ocupacionais por GHE','sumario-4'],
+        ['5.1','Identificação de Perigos e Riscos','sumario-41'],
+        ['5.2','Avaliação e Nível de Risco','sumario-42'],
+        ['5.3','Danos à Saúde Potenciais','sumario-43'],
+        ['5.4','Medidas de Prevenção e Controle','sumario-44'],
+        ['6','Matriz de EPI por GHE','sumario-5'],
+        ['7','Avaliação Psicossocial','sumario-6'],
+        ['8','Plano de Ação','sumario-7'],
+        ['9','Monitoramento e Revisão','sumario-8'],
         ['9','Empresas Contratadas / Terceirizadas','sumario-9'],
         ['10','Participação e Consulta dos Trabalhadores','sumario-10'],
         ['11','Histórico de Revisões','sumario-11'],
@@ -1775,6 +1804,58 @@ async function adicionarVersao(empresaId){
   }catch(e){console.error('Erro adicionarVersao:',e);}
 }
 
+function renderMatrizRisco(){
+  const pg=criarPagina();
+  const nivelCor=(p,s)=>{const v=p*s;if(v>=15)return{bg:'#fee2e2',color:'#991b1b',label:'MUITO ALTO'};if(v>=8)return{bg:'#ffedd5',color:'#9a3412',label:'ALTO'};if(v>=4)return{bg:'#fef9c3',color:'#854d0e',label:'MÉDIO'};return{bg:'#dcfce7',color:'#166534',label:'BAIXO'};};
+  const probLabels=['','Muito baixa\n(improvável)','Baixa\n(raramente)','Média\n(possível)','Alta\n(provável)','Muito alta\n(quase certo)'];
+  const sevLabels=['','Insignificante','Leve','Moderada','Grave','Catastrófica'];
+  let cellsHtml='';
+  for(let p=5;p>=1;p--){
+    cellsHtml+=`<tr><td style="font-size:7pt;font-weight:600;color:#374151;padding:6pt 8pt;background:#f8fafc;border:1pt solid #e5e7eb;width:60pt;line-height:1.3;"><strong>P${p}</strong><br><span style="font-weight:400;font-size:6pt;">${probLabels[p]}</span></td>`;
+    for(let s=1;s<=5;s++){
+      const n=nivelCor(p,s);const v=p*s;
+      cellsHtml+=`<td style="background:${n.bg};color:${n.color};border:1pt solid #e5e7eb;text-align:center;padding:8pt 4pt;font-size:8pt;font-weight:700;min-width:36pt;">${v}<br><span style="font-size:6pt;font-weight:500;">${n.label}</span></td>`;
+    }
+    cellsHtml+='</tr>';
+  }
+  pg.innerHTML=`
+    <div class="doc-section"><span class="num-secao">4</span>Metodologia de Avaliação de Risco</div>
+    <p class="doc-text" style="margin-bottom:10pt;">Os riscos são classificados conforme a <strong>Matriz de Risco</strong> (Probabilidade × Severidade), em conformidade com a NR-01 subitem 1.5.4.4.3.2. O nível de risco determina a prioridade das medidas de controle.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16pt;margin-bottom:16pt;">
+      <div>
+        <div style="font-size:9pt;font-weight:600;color:#374151;margin-bottom:8pt;text-transform:uppercase;letter-spacing:.04em;">Escala de Probabilidade</div>
+        ${[1,2,3,4,5].map(v=>`<div style="display:flex;align-items:center;gap:8pt;margin-bottom:5pt;"><span style="background:#0d2040;color:#fff;font-size:7.5pt;font-weight:700;padding:2pt 7pt;border-radius:3pt;font-family:'IBM Plex Mono',monospace;">P${v}</span><span style="font-size:8pt;color:#374151;">${probLabels[v]}</span></div>`).join('')}
+      </div>
+      <div>
+        <div style="font-size:9pt;font-weight:600;color:#374151;margin-bottom:8pt;text-transform:uppercase;letter-spacing:.04em;">Escala de Severidade</div>
+        ${[1,2,3,4,5].map(v=>`<div style="display:flex;align-items:center;gap:8pt;margin-bottom:5pt;"><span style="background:#0d2040;color:#fff;font-size:7.5pt;font-weight:700;padding:2pt 7pt;border-radius:3pt;font-family:'IBM Plex Mono',monospace;">S${v}</span><span style="font-size:8pt;color:#374151;">${sevLabels[v]}</span></div>`).join('')}
+      </div>
+    </div>
+    <div style="font-size:9pt;font-weight:600;color:#374151;margin-bottom:8pt;text-transform:uppercase;letter-spacing:.04em;">Matriz de Risco (P × S)</div>
+    <table style="border-collapse:collapse;width:100%;margin-bottom:14pt;">
+      <thead><tr>
+        <th style="background:#0d2040;color:#fff;font-size:8pt;padding:6pt 8pt;border:1pt solid #1e3a5f;text-align:left;">Prob / Sev</th>
+        ${[1,2,3,4,5].map(s=>`<th style="background:#0d2040;color:#fff;font-size:8pt;padding:6pt;border:1pt solid #1e3a5f;text-align:center;"><strong>S${s}</strong><br><span style="font-size:6pt;font-weight:400;">${sevLabels[s]}</span></th>`).join('')}
+      </tr></thead>
+      <tbody>${cellsHtml}</tbody>
+    </table>
+    <div style="display:flex;gap:10pt;flex-wrap:wrap;margin-bottom:14pt;">
+      ${[{l:'MUITO ALTO',bg:'#fee2e2',c:'#991b1b',d:'P×S ≥ 15 — Ação imediata obrigatória'},{l:'ALTO',bg:'#ffedd5',c:'#9a3412',d:'P×S 8–14 — Ação urgente em curto prazo'},{l:'MÉDIO',bg:'#fef9c3',c:'#854d0e',d:'P×S 4–7 — Ação planejada em médio prazo'},{l:'BAIXO',bg:'#dcfce7',c:'#166534',d:'P×S 1–3 — Monitoramento periódico'}].map(n=>`
+      <div style="display:flex;align-items:center;gap:6pt;font-size:8pt;">
+        <span style="background:${n.bg};color:${n.c};border:1pt solid ${n.c};padding:2pt 8pt;border-radius:3pt;font-weight:700;font-size:7.5pt;">${n.l}</span>
+        <span style="color:#374151;">${n.d}</span>
+      </div>`).join('')}
+    </div>
+    <div style="background:#f0f4ff;border-left:3pt solid #2563eb;padding:8pt 12pt;border-radius:0 4pt 4pt 0;margin-top:8pt;">
+      <div style="font-size:8pt;font-weight:600;color:#1e3a8a;margin-bottom:4pt;">Hierarquia de Controles — NR-01 subitem 1.5.4.4.4</div>
+      <div style="display:flex;gap:6pt;flex-wrap:wrap;">
+        ${[['1','Eliminação','#dc2626'],['2','Substituição','#d97706'],['3','Engenharia','#2563eb'],['4','Administrativo','#059669'],['5','EPI','#7c3aed']].map(([n,l,c])=>`<span style="background:#fff;border:1pt solid ${c};color:${c};font-size:7.5pt;font-weight:600;padding:2pt 8pt;border-radius:3pt;">${n}. ${l}</span>`).join('<span style="color:#9ca3af;align-self:center;">→</span>')}
+      </div>
+    </div>
+    ${phHeader('4. Metodologia de Avaliação de Risco')}${pfFooter()}`;
+  return pg;
+}
+
 function renderPlanoAcao(){
   const todasAcoes=window.acoesData||[];
   const idsAtivos=acoesSelecionadasIds||todasAcoes.map(a=>a.id);
@@ -1804,11 +1885,11 @@ function renderPlanoAcao(){
       const vinculos=[];
       if(setor)vinculos.push('📁 '+setor);
       if(funcao)vinculos.push('👷 '+funcao);
-      acoesAgrupadas.push({titulo,origem:a.origem,prioridade:a.prioridade,responsavel:a.responsavel,prazo:a.prazo,status:a.status,vinculos});
+      acoesAgrupadas.push({titulo,origem:a.origem,prioridade:a.prioridade,responsavel:a.responsavel,prazo:a.prazo,status:a.status,indicador:a.indicador||null,vinculos});
     }
   });
 
-  const theadHtml=`<thead><tr><th style="width:42%;">Ação / Origem</th><th style="width:12%;text-align:center;">Prioridade</th><th style="width:18%;">Responsável</th><th style="width:13%;text-align:center;">Prazo</th><th style="width:15%;text-align:center;">Status</th></tr></thead>`;
+  const theadHtml=`<thead><tr><th style="width:34%;">Ação / Origem</th><th style="width:10%;text-align:center;">Prioridade</th><th style="width:14%;">Responsável</th><th style="width:11%;text-align:center;">Prazo</th><th style="width:10%;text-align:center;">Status</th><th style="width:21%;">Indicador / Meta</th></tr></thead>`;
   const rowHtml=a=>{
     const prior=a.prioridade||'Média';
     const prazo=a.prazo?fmtData(a.prazo):'—';
@@ -1824,6 +1905,7 @@ function renderPlanoAcao(){
       <td style="font-size:8pt;">${h(a.responsavel||'—')}</td>
       <td style="text-align:center;font-size:8pt;font-family:'IBM Plex Mono',monospace;">${prazo}</td>
       <td style="text-align:center;font-size:7.5pt;font-weight:500;">${h(a.status||'Pendente')}</td>
+      <td style="font-size:7.5pt;color:#374151;">${a.indicador?h(a.indicador):'<span style="color:#9ca3af;">—</span>'}</td>
     </tr>`;
   };
 
@@ -1920,6 +2002,7 @@ function atualizarElaboradora(){
   elaboradora.nome=document.getElementById('elab-nome').value.trim();
   elaboradora.cnpj=document.getElementById('elab-cnpj').value.trim();
   elaboradora.responsavel=document.getElementById('elab-responsavel').value.trim();
+  elaboradora.dataElaboracao=document.getElementById('elab-data').value||'';
 
   const temElaboradora=!!(elaboradora.nome||elaboradora.logoUrl);
   const elabWrap=document.getElementById('capa-elab-wrap');
