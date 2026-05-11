@@ -497,6 +497,63 @@
   </div>
 </div>
 
+<!-- MODAL OCORRÊNCIAS (acidentes/doenças por risco) -->
+<div class="modal-overlay" id="modal-ocorrencias">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-titulo">
+      <span id="modal-ocorr-titulo">📋 Ocorrências do Risco</span>
+      <button class="modal-close" onclick="fecharModalOcorrencias()">×</button>
+    </div>
+    <div class="modal-sub" id="modal-ocorr-sub">Registre acidentes ou doenças ocupacionais relacionados a este risco (NR-01 subitem 1.5.4.4.3.2 item 9)</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Nova ocorrência</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="modal-field">
+          <label>Tipo</label>
+          <select id="ocorr-tipo" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+            <option value="Acidente">Acidente de Trabalho</option>
+            <option value="Doença Ocupacional">Doença Ocupacional</option>
+            <option value="Incidente">Incidente (quase acidente)</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Data da ocorrência *</label>
+          <input type="date" id="ocorr-data" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+        </div>
+        <div class="modal-field">
+          <label>Consequência</label>
+          <select id="ocorr-consequencia" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+            <option value="Sem afastamento">Sem afastamento</option>
+            <option value="Com afastamento">Com afastamento</option>
+            <option value="Incapacidade permanente">Incapacidade permanente</option>
+            <option value="Óbito">Óbito</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Dias de afastamento</label>
+          <input type="number" id="ocorr-dias" min="0" placeholder="0" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+        </div>
+        <div class="modal-field" style="grid-column:1/-1;">
+          <label>Descrição da ocorrência</label>
+          <textarea id="ocorr-descricao" placeholder="Descreva o que aconteceu..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;resize:vertical;min-height:60px;"></textarea>
+        </div>
+        <div class="modal-field" style="grid-column:1/-1;">
+          <label>Medidas tomadas após a ocorrência</label>
+          <textarea id="ocorr-medidas" placeholder="Quais ações foram adotadas para evitar reincidência?" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;resize:vertical;min-height:52px;"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+        <button class="btn btn-save btn-sm" onclick="salvarOcorrencia()">
+          <span class="spinner" id="spinner-ocorr"></span>
+          <span id="label-ocorr">+ Registrar</span>
+        </button>
+      </div>
+      <div class="status-bar" id="status-ocorr"></div>
+    </div>
+    <div id="lista-ocorrencias" style="max-height:280px;overflow-y:auto;"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-excluir">
   <div class="modal modal-sm">
     <div class="modal-titulo">
@@ -526,6 +583,7 @@ if(!empresaId)window.location.href='empresas.html';
 
 // ── STATE ──────────────────────────────────────────────────────
 let empresa=null,setores=[],funcoes=[],todosRiscos=[],todosEpis=[],categoriasRisco=[],todosPerigos=[],perigoRiscosMap={};
+let ocorrencias=[],ocorrSrIdAtual=null,ocorrRiscoIdAtual=null;
 let setorAtivo=null,contexto='setor',funcaoAtiva=null;
 let riscosSetor=[],riscosFuncao=[],funcoesSetor=[];
 // Modal state
@@ -576,7 +634,7 @@ async function inicializar(){
   document.getElementById('link-voltar').href=`empresa_detalhe.html?id=${empresaId}`;
   document.getElementById('btn-pgr').href=`pgr.html?empresa_id=${empresaId}`;
   try{
-    const [resEmp,resSets,resFuncs,resRiscos,resEpis,resCats,resPerigos,resPerRiscos]=await Promise.all([
+    const [resEmp,resSets,resFuncs,resRiscos,resEpis,resCats,resPerigos,resPerRiscos,resOcorr]=await Promise.all([
       fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:h2()}),
@@ -585,10 +643,12 @@ async function inicializar(){
       fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome,cor_identificacao`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/perigos?ativo=eq.true&select=id,nome,descricao,exemplos,categoria_risco_id&order=nome.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/perigo_riscos?select=risco_id,perigo_id`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/empresa_historico_acidentes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=data_ocorrencia.desc`,{headers:h2()}),
     ]);
     const dados=await Promise.all([resEmp.json(),resSets.json(),resFuncs.json(),resRiscos.json(),resEpis.json(),resCats.json(),resPerigos.json(),resPerRiscos.json()]);
     [empresa,setores,funcoes,todosRiscos,todosEpis,categoriasRisco,todosPerigos]=dados.slice(0,7).map((d,i)=>i===0?d[0]:d);
     dados[7].forEach(pr=>{if(!perigoRiscosMap[pr.risco_id])perigoRiscosMap[pr.risco_id]=pr.perigo_id;});
+    ocorrencias=await resOcorr.json().catch(()=>[]);
     const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
     document.getElementById('hero-nome').textContent=`Gestão de Riscos — ${nome}`;
     document.getElementById('header-nome').textContent=nome;
@@ -801,6 +861,7 @@ function renderRiscoCard(sr){
       <div class="risco-actions">
         ${propagBadge}
         ${nivelHtml}
+        <button class="btn btn-ghost btn-sm" onclick="abrirModalOcorrencias(${sr.id},${risco.id},'${h(risco.nome_risco).replace(/'/g,"\\'")}')" title="Registrar ocorrência / histórico" style="font-size:11px;">📋</button>
         ${contexto==='setor'||!sr.propagado_do_setor?`<button class="btn btn-danger btn-sm" onclick="confirmarRemoverRisco(${sr.id},'${h(risco.nome_risco)}')">✕</button>`:''}
       </div>
     </div>
@@ -1960,6 +2021,78 @@ document.addEventListener('click',e=>{
 });
 
 inicializar();
+
+// ── OCORRÊNCIAS (acidentes/doenças por risco) ─────────────────
+function abrirModalOcorrencias(srId,riscoId,nomeRisco){
+  ocorrSrIdAtual=srId;ocorrRiscoIdAtual=riscoId;
+  document.getElementById('modal-ocorr-titulo').textContent=`📋 Ocorrências — ${nomeRisco}`;
+  document.getElementById('modal-ocorr-sub').textContent=`Registre acidentes ou doenças ocupacionais relacionados a este risco (NR-01 subitem 1.5.4.4.3.2 item 9)`;
+  document.getElementById('ocorr-tipo').value='Acidente';
+  document.getElementById('ocorr-data').value='';
+  document.getElementById('ocorr-consequencia').value='Sem afastamento';
+  document.getElementById('ocorr-dias').value='';
+  document.getElementById('ocorr-descricao').value='';
+  document.getElementById('ocorr-medidas').value='';
+  const st=document.getElementById('status-ocorr');if(st)st.className='status-bar';
+  renderListaOcorrencias(riscoId);
+  document.getElementById('modal-ocorrencias').classList.add('show');
+}
+
+function fecharModalOcorrencias(){
+  document.getElementById('modal-ocorrencias').classList.remove('show');
+  ocorrSrIdAtual=null;ocorrRiscoIdAtual=null;
+}
+
+function renderListaOcorrencias(riscoId){
+  const lista=document.getElementById('lista-ocorrencias');
+  const items=(ocorrencias||[]).filter(o=>o.risco_id===riscoId);
+  if(!items.length){lista.innerHTML=`<div style="text-align:center;padding:20px;font-size:12px;color:var(--text3);">Nenhuma ocorrência registrada para este risco.</div>`;return;}
+  const COR={'Sem afastamento':'var(--success)','Com afastamento':'var(--warning)','Incapacidade permanente':'var(--danger)','Óbito':'var(--danger)'};
+  lista.innerHTML=items.map(o=>`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+        <span style="font-size:11px;font-weight:600;color:var(--text);">${o.tipo}</span>
+        <span style="font-size:10px;font-family:var(--mono);color:var(--text2);">${o.data_ocorrencia?new Date(o.data_ocorrencia+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</span>
+        <span style="font-size:10px;color:${COR[o.consequencia]||'var(--text2)'};">● ${o.consequencia||'—'}${o.dias_afastamento?' ('+o.dias_afastamento+' dias)':''}</span>
+        <button onclick="removerOcorrencia(${o.id})" style="margin-left:auto;background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;">✕</button>
+      </div>
+      ${o.descricao?`<div style="font-size:12px;color:var(--text2);margin-bottom:4px;">${h(o.descricao)}</div>`:''}
+      ${o.medidas_tomadas?`<div style="font-size:11px;color:var(--text3);">Medidas: ${h(o.medidas_tomadas)}</div>`:''}
+    </div>`).join('');
+}
+
+async function salvarOcorrencia(){
+  const data=document.getElementById('ocorr-data').value;
+  if(!data){alert('Informe a data da ocorrência.');return;}
+  const btn=document.querySelector('#modal-ocorrencias .btn-save');
+  document.getElementById('spinner-ocorr').className='spinner show';
+  document.getElementById('label-ocorr').textContent='Salvando...';
+  try{
+    const payload={empresa_id:parseInt(empresaId),risco_id:ocorrRiscoIdAtual,tipo:document.getElementById('ocorr-tipo').value,data_ocorrencia:data,consequencia:document.getElementById('ocorr-consequencia').value,dias_afastamento:parseInt(document.getElementById('ocorr-dias').value)||0,descricao:document.getElementById('ocorr-descricao').value.trim()||null,medidas_tomadas:document.getElementById('ocorr-medidas').value.trim()||null,ativo:true};
+    const res=await fetch(`${SUPA_URL}/rest/v1/empresa_historico_acidentes`,{method:'POST',headers:{...h2(),'Prefer':'return=representation'},body:JSON.stringify(payload)});
+    if(!res.ok)throw new Error('Erro ao salvar');
+    const data2=await res.json();
+    ocorrencias.push(data2[0]);
+    renderListaOcorrencias(ocorrRiscoIdAtual);
+    document.getElementById('ocorr-data').value='';
+    document.getElementById('ocorr-descricao').value='';
+    document.getElementById('ocorr-medidas').value='';
+    setStatus('status-ocorr','success','Ocorrência registrada!');
+    setTimeout(()=>{const s=document.getElementById('status-ocorr');if(s)s.className='status-bar';},3000);
+  }catch(e){setStatus('status-ocorr','error',e.message);}
+  finally{document.getElementById('spinner-ocorr').className='spinner';document.getElementById('label-ocorr').textContent='+ Registrar';}
+}
+
+async function removerOcorrencia(id){
+  if(!confirm('Remover esta ocorrência?'))return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/empresa_historico_acidentes?id=eq.${id}`,{method:'PATCH',headers:h2(),body:JSON.stringify({ativo:false})});
+    ocorrencias=ocorrencias.filter(o=>o.id!==id);
+    renderListaOcorrencias(ocorrRiscoIdAtual);
+  }catch(e){alert('Erro ao remover: '+e.message);}
+}
+
+document.getElementById('modal-ocorrencias').addEventListener('click',function(e){if(e.target===this)fecharModalOcorrencias();});
 
 // ── IA — SUGESTÃO DE RISCOS ────────────────────────────────────
 let riscosIASugeridos=[];

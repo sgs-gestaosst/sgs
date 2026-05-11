@@ -537,11 +537,12 @@ async function carregar(){
 
 
     // Contratadas, Participação e Versões
-    const [resContrat, resPartic, resVersoes, resGheNomes] = await Promise.all([
+    const [resContrat, resPartic, resVersoes, resGheNomes, resAcidentes] = await Promise.all([
       fetch(`${SUPA_URL}/rest/v1/empresa_contratadas?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=razao_social.asc`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/pgr_participacao?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/pgr_versoes?empresa_id=eq.${empresaId}&select=*&order=criado_em.asc`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/ghe_nomes?empresa_id=eq.${empresaId}&select=codigo,nome`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/empresa_historico_acidentes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=data_ocorrencia.desc`,{headers:headers()}),
     ]);
     const rawContrat = await resContrat.json();
     window.contratadas = Array.isArray(rawContrat) ? rawContrat : [];
@@ -555,6 +556,7 @@ async function carregar(){
     const rawGheNomes = await resGheNomes.json().catch(()=>[]);
     window.gheNomes={};
     (Array.isArray(rawGheNomes)?rawGheNomes:[]).forEach(g=>{window.gheNomes[g.codigo]=g.nome||'';});
+    window.historicoAcidentes=await resAcidentes.json().catch(()=>[]);
 
     renderDocumento();
   }catch(e){
@@ -1192,6 +1194,8 @@ function renderInventarioRiscos(){
       ${risco.danos_saude?`<div class="risco-danos-texto"><div class="risco-danos-label">🩺 Danos à saúde potenciais</div>${h(risco.danos_saude)}</div>`:''}
       <!-- Linha 6: medidas -->
       ${medidasItens?`<div class="medidas-box"><div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>${medidasItens}</div>`:''}
+      <!-- Linha 7: histórico de ocorrências -->
+      ${(()=>{const ac=(window.historicoAcidentes||[]).filter(a=>a.risco_id===risco.id);if(!ac.length)return'';const COR={'Sem afastamento':'#166534','Com afastamento':'#854d0e','Incapacidade permanente':'#991b1b','Óbito':'#991b1b'};return`<div style="margin-top:6pt;padding:6pt 8pt;background:#fff8f0;border:1pt solid #fed7aa;border-radius:4pt;"><div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:4pt;">📋 Histórico de Ocorrências (${ac.length} registro${ac.length>1?'s':''})</div>${ac.map(a=>`<div style="font-size:7.5pt;color:#374151;margin-bottom:2pt;"><strong>${a.tipo}</strong> em ${a.data_ocorrencia?new Date(a.data_ocorrencia+'T00:00:00').toLocaleDateString('pt-BR'):'—'} — <span style="color:${COR[a.consequencia]||'#6b7280'};">${a.consequencia||'—'}${a.dias_afastamento?' ('+a.dias_afastamento+' dias)':''}</span>${a.descricao?' — '+h(a.descricao.slice(0,80))+(a.descricao.length>80?'…':''):''}</div>`).join('')}</div>`;})()}
     </div>`;
   }
 
@@ -1754,8 +1758,44 @@ function renderSecaoParticipacao(){
   ${campo('Responsável pela comunicação',p?.responsavel_comunicacao,'responsavel_comunicacao','Nome e função do responsável')}
   ${campo('Mecanismo de consulta utilizado',p?.mecanismo_consulta,'mecanismo_consulta','Ex: CIPA, reunião direta, questionário de percepção de riscos')}
   ${campo('Canal permanente de comunicação de riscos',p?.canal_comunicacao,'canal_comunicacao','Ex: CIPA, Segurança do Trabalho, e-mail segurança@empresa.com')}
+  <div style="margin-top:16pt;padding:12pt;border-radius:6pt;${p?.confirmado_em?'background:#0e2820;border:1pt solid #1a4a38;':'background:#1a1500;border:1pt solid #4a3a10;'}">
+    ${p?.confirmado_em?
+      `<div style="display:flex;align-items:center;gap:8pt;">
+        <span style="font-size:18pt;">✅</span>
+        <div>
+          <div style="font-size:9pt;font-weight:600;color:#2dd4a0;">Participação documentada e confirmada</div>
+          <div style="font-size:8pt;color:#8892a4;margin-top:2pt;">Confirmado por <strong style="color:#e8eaf0;">${h(p.confirmado_por||'—')}</strong> em ${new Date(p.confirmado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+        <button onclick="confirmarParticipacao(true)" style="margin-left:auto;background:none;border:1pt solid #2dd4a0;color:#2dd4a0;border-radius:4pt;padding:4pt 10pt;font-size:8pt;cursor:pointer;">Reeditar confirmação</button>
+      </div>` :
+      `<div style="display:flex;align-items:center;gap:8pt;">
+        <span style="font-size:18pt;">⚠️</span>
+        <div>
+          <div style="font-size:9pt;font-weight:600;color:#e0a855;">Participação ainda não confirmada</div>
+          <div style="font-size:8pt;color:#8892a4;margin-top:2pt;">Preencha os campos acima e confirme quando a participação dos trabalhadores tiver sido realizada e documentada.</div>
+        </div>
+        <button onclick="confirmarParticipacao()" style="margin-left:auto;background:#e0a855;border:none;color:#0f1117;border-radius:4pt;padding:6pt 14pt;font-size:9pt;font-weight:600;cursor:pointer;">✓ Confirmar participação</button>
+      </div>`}
+  </div>
   ${pfFooter()}`;
   return pg;
+}
+
+async function confirmarParticipacao(reeditar=false){
+  if(reeditar&&!confirm('Remover a confirmação e permitir edição?'))return;
+  const userRaw=localStorage.getItem('sgs_user');
+  const user=userRaw?JSON.parse(userRaw):null;
+  const h2={'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/pgr_participacao`,{
+      method:'POST',headers:h2,
+      body:JSON.stringify({empresa_id:parseInt(empresaId),confirmado_em:reeditar?null:new Date().toISOString(),confirmado_por:reeditar?null:(user?.email||'—'),atualizado_em:new Date().toISOString()})
+    });
+    window.pgrParticipacao=window.pgrParticipacao||{};
+    window.pgrParticipacao.confirmado_em=reeditar?null:new Date().toISOString();
+    window.pgrParticipacao.confirmado_por=reeditar?null:(user?.email||'—');
+    renderDocumento();
+  }catch(e){alert('Erro ao confirmar: '+e.message);}
 }
 
 async function salvarParticipacao(empresaId,campo,valor){
