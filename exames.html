@@ -191,25 +191,27 @@
 
 <!-- MODAL GERAR ASO -->
 <div class="modal-overlay" id="modal-gerar-aso">
-  <div class="modal" style="max-width:760px;max-height:90vh;overflow-y:auto;">
+  <div class="modal" style="max-width:800px;max-height:92vh;overflow-y:auto;">
     <div class="modal-titulo">
       <span>📋 Gerar ASO — Atestado de Saúde Ocupacional</span>
       <button onclick="document.getElementById('modal-gerar-aso').classList.remove('show')" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
     </div>
-    <!-- 1. Funcionário -->
-    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">1 — Funcionário</div>
-    <div class="modal-field" style="margin-bottom:14px;">
+
+    <!-- PASSO 1: Selecionar funcionário -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">1 — Selecionar Funcionário</div>
+    <div class="modal-field" style="margin-bottom:12px;">
       <label>Funcionário *</label>
       <div style="position:relative;">
         <input type="text" id="aso-busca-func" placeholder="Digite o nome ou CPF..." oninput="filtrarFuncionariosASO()" autocomplete="off"
           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
         <div id="aso-dropdown-func" class="busca-dropdown"></div>
       </div>
-      <div id="aso-func-info" style="display:none;margin-top:8px;padding:10px;background:var(--bg);border:1px solid var(--border-focus);border-radius:var(--radius);font-size:12px;"></div>
+      <div id="aso-func-info" style="display:none;margin-top:8px;padding:12px;background:var(--bg);border:1px solid var(--border-focus);border-radius:var(--radius);"></div>
     </div>
-    <!-- 2. Tipo e datas -->
-    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">2 — Tipo e Datas</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+
+    <!-- PASSO 2: Tipo e data -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">2 — Tipo de ASO e Data</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;">
       <div class="modal-field">
         <label>Tipo de ASO *</label>
         <select id="aso-tipo" onchange="calcularProximoASO()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
@@ -226,38 +228,45 @@
         <input type="date" id="aso-data-exame" onchange="calcularProximoASO()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
       </div>
     </div>
-    <!-- 3. Riscos -->
-    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">3 — Riscos Ocupacionais (PGR)</div>
-    <div id="aso-riscos-list" style="min-height:60px;max-height:140px;overflow-y:auto;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--text2);margin-bottom:14px;">Selecione um funcionário...</div>
-    <!-- 4. Exames realizados -->
-    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">4 — Exames Realizados *</div>
-    <div id="aso-exames-list" style="min-height:80px;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:10px;background:var(--bg);margin-bottom:14px;font-size:12px;color:var(--text2);">Selecione um funcionário...</div>
-    <!-- 5. Resultado -->
-    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">5 — Resultado</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+
+    <!-- PASSO 3: Riscos do PGR (informativo) -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">3 — Riscos Ocupacionais da Função (PGR)</div>
+    <div id="aso-riscos-list" style="min-height:56px;max-height:130px;overflow-y:auto;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--text2);margin-bottom:12px;">Selecione um funcionário...</div>
+
+    <!-- PASSO 4: Exames recebidos da clínica -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">4 — Exames Recebidos da Clínica</div>
+    <div id="aso-exames-clinica" style="min-height:70px;max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:10px;background:var(--bg);margin-bottom:12px;font-size:12px;color:var(--text2);">Selecione um funcionário...</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">
+      💡 Exames enviados pela clínica via demanda. Clique em <strong>📎 Laudo</strong> para visualizar cada arquivo antes de avaliar.
+    </div>
+
+    <!-- PASSO 5: Avaliação do médico -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">5 — Avaliação Médica</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;">
       <div class="modal-field">
         <label>Resultado *</label>
         <select id="aso-resultado" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
-          <option value="">— Selecione —</option>
+          <option value="">— Selecione após avaliar os exames —</option>
           <option value="Apto">✅ Apto</option>
           <option value="Inapto">❌ Inapto</option>
         </select>
       </div>
       <div class="modal-field">
-        <label>Próximo ASO (calculado)</label>
-        <input type="date" id="aso-data-prox" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+        <label>Próximo ASO</label>
+        <input type="date" id="aso-data-prox" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
       </div>
     </div>
-    <div class="modal-field" style="margin-bottom:14px;">
-      <label>Restrições / Recomendações (opcional)</label>
-      <textarea id="aso-restricoes" placeholder="Ex: Afastado de trabalho em altura. Revisão em 6 meses..." style="width:100%;height:70px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;resize:vertical;"></textarea>
+    <div class="modal-field" style="margin-bottom:12px;">
+      <label>Observações / Restrições (opcional)</label>
+      <textarea id="aso-restricoes" placeholder="Ex: Afastado de trabalho em altura. Revisão em 6 meses. Uso de protetor auricular obrigatório..." style="width:100%;height:72px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;resize:vertical;"></textarea>
     </div>
-    <!-- 6. Médico -->
-    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">6 — Médico Examinador</div>
+
+    <!-- PASSO 6: Identificação do médico -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">6 — Médico Examinador</div>
     <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:14px;">
       <div class="modal-field">
-        <label>Nome *</label>
-        <input type="text" id="aso-medico-nome" placeholder="Dr. João Silva" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+        <label>Nome completo *</label>
+        <input type="text" id="aso-medico-nome" placeholder="Dr. João da Silva" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
       </div>
       <div class="modal-field">
         <label>CRM *</label>
@@ -267,13 +276,22 @@
         <label>UF *</label>
         <select id="aso-medico-uf" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
           <option value="">—</option>
-          ${['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'].map(u=>`<option value="${u}">${u}</option>`).join('')}
+          <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+          <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+          <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+          <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+          <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+          <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+          <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+          <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+          <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
         </select>
       </div>
     </div>
+
     <div class="status-bar" id="status-gerar-aso"></div>
     <div style="display:flex;gap:10px;justify-content:space-between;margin-top:16px;">
-      <button class="btn btn-edit" onclick="abrirPreviewASO()">👁 Preview e Imprimir</button>
+      <button class="btn btn-edit" id="btn-preview-aso" onclick="abrirPreviewASO()" disabled>👁 Preview e Imprimir</button>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-cancel" onclick="document.getElementById('modal-gerar-aso').classList.remove('show')">Cancelar</button>
         <button class="btn btn-save" id="btn-salvar-aso" onclick="salvarASO()">
@@ -1287,7 +1305,7 @@ async function selecionarFuncionarioASO(funcId){
     info.innerHTML=`<div style="font-weight:600;color:var(--text);margin-bottom:4px;">${escHtml(f.nome_completo)}</div>
       <div style="color:var(--text2);font-size:11px;">CPF: ${escHtml(f.cpf||'—')} &nbsp;·&nbsp; RG: ${escHtml(f.rg||'—')}</div>
       <div style="color:var(--text2);font-size:11px;margin-top:2px;">Função: ${escHtml(f.funcoes?.nome_funcao||'—')} &nbsp;·&nbsp; Setor: ${escHtml(f.setores?.nome_setor||'—')}</div>`;
-    await Promise.all([carregarRiscosASO(f.funcao_id),carregarExamesASO(f.funcao_id)]);
+    await Promise.all([carregarRiscosASO(f.funcao_id),carregarExamesClínicaASO(f.id)]);
   }catch(e){setStatus('status-gerar-aso','error','Erro ao carregar funcionário: '+e.message);}
 }
 
@@ -1295,38 +1313,93 @@ async function carregarRiscosASO(funcaoId){
   const el=document.getElementById('aso-riscos-list');
   if(!funcaoId){el.innerHTML='<span style="color:var(--text3);">Sem função vinculada.</span>';riscosFuncaoASO=[];return;}
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&ativo=eq.true&select=risco_id,riscos(nome_risco,categorias_risco(nome))`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-    riscosFuncaoASO=await res.json();
-    if(!riscosFuncaoASO.length){el.innerHTML='<span style="color:var(--text3);">Nenhum risco mapeado para esta função no PGR.</span>';return;}
-    el.innerHTML=riscosFuncaoASO.map(r=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;">
+    // Busca simples sem join embutido para evitar erros
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&ativo=eq.true&select=risco_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const frs=await res.json();
+    if(!frs.length){el.innerHTML='<span style="color:var(--text3);">Nenhum risco mapeado para esta função no PGR.</span>';riscosFuncaoASO=[];return;}
+    const ids=frs.map(r=>r.risco_id).join(',');
+    const res2=await fetch(`${SUPA_URL}/rest/v1/riscos?id=in.(${ids})&select=id,nome_risco,categoria_risco_id,categorias_risco(nome)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const riscos=await res2.json();
+    riscosFuncaoASO=riscos;
+    el.innerHTML=riscos.map(r=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;">
       <span style="color:var(--warning);">⚠</span>
-      <span style="font-size:12px;"><strong>${escHtml(r.riscos?.nome_risco||'—')}</strong> <span style="color:var(--text3);font-size:11px;">(${escHtml(r.riscos?.categorias_risco?.nome||'')})</span></span>
+      <span style="font-size:12px;"><strong>${escHtml(r.nome_risco||'—')}</strong><span style="color:var(--text3);font-size:11px;margin-left:6px;">${escHtml(r.categorias_risco?.nome||'')}</span></span>
     </div>`).join('');
-  }catch(e){el.innerHTML='<span style="color:var(--danger);">Erro ao carregar riscos.</span>';}
+  }catch(e){el.innerHTML='<span style="color:var(--danger);">Erro ao carregar riscos.</span>';console.error(e);}
 }
 
-async function carregarExamesASO(funcaoId){
-  const el=document.getElementById('aso-exames-list');
-  if(!funcaoId){el.innerHTML='<span style="color:var(--text3);">Sem função vinculada.</span>';examesFuncaoASO=[];return;}
+async function carregarExamesClínicaASO(funcId){
+  const el=document.getElementById('aso-exames-clinica');
+  examesFuncaoASO=[];
+  el.innerHTML='<span style="color:var(--text2);">↻ Buscando exames enviados pela clínica...</span>';
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_exames?funcao_id=eq.${funcaoId}&ativo=eq.true&select=*,catalogo_exames(id,nome,categoria,codigo_tabela27_esocial)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-    examesFuncaoASO=await res.json();
-    if(!examesFuncaoASO.length){el.innerHTML='<span style="color:var(--text3);">Nenhum exame vinculado a esta função.</span>';return;}
-    el.innerHTML=examesFuncaoASO.map((fe,i)=>`
-      <div style="display:grid;grid-template-columns:20px 1fr 150px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
-        <input type="checkbox" id="aso-ex-${i}" data-idx="${i}" checked style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;">
-        <label for="aso-ex-${i}" style="font-size:12px;cursor:pointer;">
-          ${escHtml(fe.catalogo_exames?.nome||'—')}
-          ${fe.obrigatorio?'<span style="font-size:10px;color:var(--warning);margin-left:4px;">obrigatório</span>':''}
-        </label>
-        <select id="aso-res-${i}" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:5px 6px;outline:none;">
+    // Busca demandas que têm este funcionário com uploads
+    const res=await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?funcionario_id=eq.${funcId}&empresa_id=eq.${empresaId}&select=id,demanda_id,exames_pendentes,exames_completos,clinica_demandas(titulo,data_expiracao)&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const rows=await res.json();
+    const comUploads=rows.filter(r=>(r.exames_completos||[]).some(e=>e.arquivo_path));
+    if(!comUploads.length){
+      el.innerHTML=`<div style="color:var(--text3);padding:8px;">Nenhum laudo enviado pela clínica para este funcionário.<br>
+        <span style="font-size:11px;">Você pode adicionar exames manualmente abaixo.</span></div>
+        <div id="aso-exames-manuais" style="margin-top:10px;"></div>`;
+      await carregarExamesManuaisASO(funcionarioASO?.funcao_id);
+      return;
+    }
+    // Monta lista de exames com links para download
+    let html='';
+    comUploads.forEach(row=>{
+      const uploads=(row.exames_completos||[]).filter(e=>e.arquivo_path);
+      if(!uploads.length)return;
+      html+=`<div style="margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:6px;">📋 ${escHtml(row.clinica_demandas?.titulo||'Demanda')}</div>
+        ${uploads.map((u,i)=>`
+        <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px;background:var(--surface2);border-radius:6px;margin-bottom:6px;">
+          <div>
+            <div style="font-size:12px;font-weight:500;">${escHtml(u.nome||u.exame_nome||'Exame')}</div>
+            <div style="font-size:10px;color:var(--text3);">${u.data_upload?new Date(u.data_upload).toLocaleDateString('pt-BR'):''}</div>
+          </div>
+          <a href="${SUPA_URL}/storage/v1/object/public/documentos-funcionarios/${escHtml(u.arquivo_path||'')}" target="_blank" class="btn btn-edit btn-sm">📎 Laudo</a>
+          <select id="aso-res-clinica-${row.id}-${i}" style="background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:5px 8px;outline:none;">
+            <option value="">Avaliação...</option>
+            <option value="Normal">Normal</option>
+            <option value="Alterado">Alterado</option>
+            <option value="Inconclusivo">Inconclusivo</option>
+          </select>
+        </div>`).join('')}
+      </div>`;
+      // Adiciona aos exames para salvar
+      uploads.forEach((u,i)=>examesFuncaoASO.push({nome_exame:u.nome||u.exame_nome||'Exame',exame_id:u.exame_id||null,selectId:`aso-res-clinica-${row.id}-${i}`,arquivo_path:u.arquivo_path}));
+    });
+    el.innerHTML=html;
+    // Habilita preview
+    document.getElementById('btn-preview-aso').disabled=false;
+  }catch(e){el.innerHTML=`<span style="color:var(--danger);">Erro: ${e.message}</span>`;console.error(e);}
+}
+
+async function carregarExamesManuaisASO(funcaoId){
+  const el=document.getElementById('aso-exames-manuais');
+  if(!el||!funcaoId)return;
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_exames?funcao_id=eq.${funcaoId}&ativo=eq.true&select=exame_id,obrigatorio,catalogo_exames(nome,categoria)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const exames=await res.json();
+    if(!exames.length){el.innerHTML='<span style="color:var(--text3);font-size:11px;">Sem exames cadastrados para esta função.</span>';return;}
+    el.innerHTML='<div style="font-size:11px;color:var(--text2);margin-bottom:8px;">Marque os exames realizados e informe o resultado:</div>'+
+      exames.map((fe,i)=>`
+      <div style="display:grid;grid-template-columns:20px 1fr 130px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="aso-man-${i}" data-nome="${escHtml(fe.catalogo_exames?.nome||'')}" data-exame-id="${fe.exame_id}" checked style="width:14px;height:14px;accent-color:var(--accent);">
+        <label for="aso-man-${i}" style="font-size:12px;cursor:pointer;">${escHtml(fe.catalogo_exames?.nome||'—')}${fe.obrigatorio?'<span style="color:var(--warning);font-size:10px;margin-left:4px;">obrigatório</span>':''}</label>
+        <select id="aso-man-res-${i}" style="background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:5px 6px;outline:none;">
           <option value="">Resultado...</option>
           <option value="Normal">Normal</option>
           <option value="Alterado">Alterado</option>
           <option value="Inconclusivo">Inconclusivo</option>
         </select>
       </div>`).join('');
-  }catch(e){el.innerHTML='<span style="color:var(--danger);">Erro ao carregar exames.</span>';}
+    // Adiciona à lista de exames
+    exames.forEach((_,i)=>{
+      examesFuncaoASO.push({nome_exame:exames[i].catalogo_exames?.nome||'Exame',exame_id:exames[i].exame_id,selectId:`aso-man-res-${i}`,checkId:`aso-man-${i}`});
+    });
+    document.getElementById('btn-preview-aso').disabled=false;
+  }catch(e){console.error(e);}
 }
 
 function calcularProximoASO(){
@@ -1345,8 +1418,7 @@ function validarASO(){
   if(!funcionarioASO){setStatus('status-gerar-aso','error','Selecione um funcionário.');return false;}
   if(!document.getElementById('aso-tipo').value){setStatus('status-gerar-aso','error','Selecione o tipo de ASO.');return false;}
   if(!document.getElementById('aso-data-exame').value){setStatus('status-gerar-aso','error','Informe a data do exame.');return false;}
-  if(!document.querySelectorAll('[id^="aso-ex-"]:checked').length){setStatus('status-gerar-aso','error','Selecione ao menos um exame realizado.');return false;}
-  if(!document.getElementById('aso-resultado').value){setStatus('status-gerar-aso','error','Selecione o resultado.');return false;}
+  if(!document.getElementById('aso-resultado').value){setStatus('status-gerar-aso','error','Informe o resultado (Apto/Inapto) após revisar os exames.');return false;}
   if(!document.getElementById('aso-medico-nome').value.trim()){setStatus('status-gerar-aso','error','Informe o nome do médico.');return false;}
   if(!document.getElementById('aso-medico-crm').value.trim()){setStatus('status-gerar-aso','error','Informe o CRM.');return false;}
   if(!document.getElementById('aso-medico-uf').value){setStatus('status-gerar-aso','error','Selecione a UF do CRM.');return false;}
@@ -1354,10 +1426,13 @@ function validarASO(){
 }
 
 function prepararDadosASO(){
-  const exsSel=[...document.querySelectorAll('[id^="aso-ex-"]:checked')].map(cb=>{
-    const i=parseInt(cb.dataset.idx);
-    return{exame_id:examesFuncaoASO[i]?.exame_id,nome_exame:examesFuncaoASO[i]?.catalogo_exames?.nome,codigo_tabela27:examesFuncaoASO[i]?.catalogo_exames?.codigo_tabela27_esocial,resultado_exame:document.getElementById(`aso-res-${i}`)?.value||'',obrigatorio:examesFuncaoASO[i]?.obrigatorio};
-  });
+  // Coleta exames com resultado (tanto da clínica quanto manuais)
+  const exsSel=examesFuncaoASO.map(ex=>{
+    // Se tem checkId, verifica se está marcado
+    if(ex.checkId&&!document.getElementById(ex.checkId)?.checked)return null;
+    const resultado=document.getElementById(ex.selectId)?.value||'';
+    return{exame_id:ex.exame_id||null,nome_exame:ex.nome_exame,resultado_exame:resultado};
+  }).filter(Boolean);
   return{
     funcionario:funcionarioASO,
     tipo_aso:document.getElementById('aso-tipo').value,
@@ -1368,7 +1443,7 @@ function prepararDadosASO(){
     medico_nome:document.getElementById('aso-medico-nome').value.trim(),
     medico_crm:document.getElementById('aso-medico-crm').value.trim(),
     medico_uf:document.getElementById('aso-medico-uf').value,
-    riscos:riscosFuncaoASO.map(r=>r.riscos?.nome_risco).filter(Boolean),
+    riscos:riscosFuncaoASO.map(r=>r.nome_risco||r.riscos?.nome_risco).filter(Boolean),
     exames:exsSel,
     empresa_nome:empresa?.nome_fantasia||empresa?.razao_social||''
   };
@@ -1378,7 +1453,9 @@ function abrirPreviewASO(){
   if(!validarASO())return;
   const dados=prepararDadosASO();
   sessionStorage.setItem('sgs_aso_preview',JSON.stringify(dados));
-  window.open('aso_preview.html','_blank');
+  // Abre em nova aba (pode ser bloqueado por popup blocker — informa o usuário)
+  const w=window.open('aso_preview.html','_blank');
+  if(!w)setStatus('status-gerar-aso','info','Popup bloqueado. Permita popups para este site e tente novamente.');
 }
 
 async function salvarASO(){
