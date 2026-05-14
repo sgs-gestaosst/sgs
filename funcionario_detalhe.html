@@ -890,7 +890,7 @@ async function carregarASOs(){
   const btnGerar=document.getElementById('btn-gerar-aso-func');
   if(btnGerar&&empresaId)btnGerar.href=`exames.html?empresa_id=${empresaId}`;
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?funcionario_id=eq.${funcionarioId}&select=*&order=data_exame.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const res=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?funcionario_id=eq.${funcId}&select=*&order=data_exame.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const asos=await res.json();
     const ativos=asos.filter(a=>a.status_esocial!=='Cancelado');
     const cancelados=asos.filter(a=>a.status_esocial==='Cancelado');
@@ -944,7 +944,7 @@ async function confirmarUploadASOAssinado(){
   document.getElementById('label-upload-aso').textContent='Salvando...';
   try{
     const ext=file.name.split('.').pop();
-    const path=`${funcionario?.empresa_id}/asos/${funcionarioId}_aso_assinado_${asoEditandoId}_${Date.now()}.${ext}`;
+    const path=`${funcionario?.empresa_id}/asos/${funcId}_aso_assinado_${asoEditandoId}_${Date.now()}.${ext}`;
     const resUp=await fetch(`${SUPA_URL}/storage/v1/object/documentos-funcionarios/${path}`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'x-upsert':'true','Content-Type':file.type},body:file});
     if(!resUp.ok)throw new Error('Erro no upload');
     // Salva URL no ASO
