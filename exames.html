@@ -202,7 +202,7 @@
     <div class="modal-field" style="margin-bottom:12px;">
       <label>Funcionário *</label>
       <div style="position:relative;">
-        <input type="text" id="aso-busca-func" placeholder="Digite o nome ou CPF..." oninput="filtrarFuncionariosASO()" autocomplete="off"
+        <input type="text" id="aso-busca-func" placeholder="Clique para ver todos ou digite para filtrar..." oninput="filtrarFuncionariosASO()" onfocus="mostrarTodosFuncionariosASO()" autocomplete="off"
           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
         <div id="aso-dropdown-func" class="busca-dropdown"></div>
       </div>
@@ -1277,6 +1277,22 @@ function abrirModalGerarASO(){
   document.getElementById('modal-gerar-aso').classList.add('show');
 }
 document.getElementById('modal-gerar-aso').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+
+async function mostrarTodosFuncionariosASO(){
+  if(document.getElementById('aso-busca-func').value.trim())return;
+  const dd=document.getElementById('aso-dropdown-func');
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,cpf,funcao_id,funcoes(nome_funcao)&order=nome_completo.asc&limit=30`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const lista=await res.json();
+    if(!Array.isArray(lista)||!lista.length){dd.innerHTML=`<div class="busca-option" style="color:var(--text3);cursor:default;">Nenhum funcionário cadastrado</div>`;dd.classList.add('show');return;}
+    dd.innerHTML=`<div style="padding:5px 12px;font-size:11px;color:var(--text3);border-bottom:1px solid var(--border);">${lista.length} funcionário(s) — digite para filtrar</div>`+
+      lista.map(f=>`<div class="busca-option" onclick="selecionarFuncionarioASO(${f.id})">
+        <div class="busca-option-nome">${escHtml(f.nome_completo)}</div>
+        <div class="busca-option-meta"><span>${escHtml(f.funcoes?.nome_funcao||'—')}</span><span>${escHtml(f.cpf||'')}</span></div>
+      </div>`).join('');
+    dd.classList.add('show');
+  }catch(e){console.error(e);}
+}
 
 async function filtrarFuncionariosASO(){
   const termo=document.getElementById('aso-busca-func').value.trim().toLowerCase();
