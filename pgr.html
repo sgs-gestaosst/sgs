@@ -40,30 +40,27 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
 /* ── TIPOGRAFIA ── */
 .doc-title{font-size:22pt;font-weight:700;color:#0d2040;line-height:1.2;margin-bottom:4pt;}
-.doc-section{font-size:11pt;font-weight:700;color:#0d2040;text-transform:uppercase;letter-spacing:.06em;border-bottom:2pt solid #1a3a6e;padding-bottom:4pt;margin:16pt 0 10pt;}
-.doc-subsection{font-size:10pt;font-weight:600;color:#2a5298;margin:10pt 0 6pt;}
-.doc-text{font-size:9.5pt;color:#374151;line-height:1.6;text-align:justify;}
+.doc-section{font-size:11pt;font-weight:700;color:#0d2040;text-transform:uppercase;letter-spacing:.06em;border-bottom:2pt solid #1a3a6e;padding-bottom:5pt;margin:18pt 0 11pt;}
+.doc-subsection{font-size:10pt;font-weight:600;color:#1e3a5f;margin:12pt 0 7pt;padding-bottom:3pt;border-bottom:1pt solid #e5e7eb;}
+.doc-text{font-size:10pt;color:#1f2937;line-height:1.65;text-align:justify;}
 .num-secao{color:#4a7cdc;font-family:'IBM Plex Mono',monospace;font-size:9pt;margin-right:6pt;}
 
 /* ── CAPA ── */
-.capa{display:flex;flex-direction:column;height:100%;min-height:257mm;}
-.capa-logos-wrap{display:flex;align-items:center;justify-content:space-between;margin-bottom:40pt;}
-.capa-logo-esq{display:flex;align-items:center;gap:12pt;}
-.capa-logo-dir{display:flex;align-items:center;gap:10pt;opacity:.85;}
-.capa-logo-dir-label{font-size:7pt;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin-bottom:2pt;}
-.capa-logo-dir-nome{font-size:9pt;font-weight:600;color:#374151;}
-.capa-logo-box{width:50pt;height:50pt;background:#0d2040;display:flex;align-items:center;justify-content:center;border-radius:6pt;flex-shrink:0;}
-.capa-logo-box-sm{width:38pt;height:38pt;background:#f3f4f6;border:1pt solid #e5e7eb;display:flex;align-items:center;justify-content:center;border-radius:5pt;flex-shrink:0;}
-.capa-logo-text{font-family:'IBM Plex Mono',monospace;font-size:16pt;font-weight:700;color:#fff;}
-.capa-logo-text-sm{font-family:'IBM Plex Mono',monospace;font-size:11pt;font-weight:700;color:#374151;}
-.capa-divider{height:3pt;background:linear-gradient(90deg,#1a3a6e,#2a5298,#4a7cdc);margin:20pt 0;border-radius:2pt;}
+.capa{display:flex;flex-direction:column;height:100%;max-height:257mm;overflow:hidden;}
+.capa-topo{display:flex;align-items:center;gap:14pt;margin-bottom:4pt;}
+.capa-topo-info{flex:1;min-width:0;}
+.capa-topo-nome{font-size:13pt;font-weight:700;color:#0d2040;line-height:1.2;}
+.capa-topo-meta{font-size:8.5pt;color:#4b5563;margin-top:3pt;}
+.capa-logo-box{width:60pt;height:60pt;background:#0d2040;display:flex;align-items:center;justify-content:center;border-radius:6pt;flex-shrink:0;overflow:hidden;}
+.capa-logo-text{font-family:'IBM Plex Mono',monospace;font-size:18pt;font-weight:700;color:#fff;}
+.capa-divider{height:3pt;background:linear-gradient(90deg,#1a3a6e,#2a5298,#4a7cdc);margin:16pt 0 18pt;border-radius:2pt;}
 .capa-titulo-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;}
 .capa-pre{font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#2a5298;margin-bottom:8pt;}
-.capa-titulo{font-size:28pt;font-weight:700;color:#0d2040;line-height:1.15;margin-bottom:6pt;}
-.capa-titulo-sub{font-size:13pt;color:#4a7cdc;font-weight:400;margin-bottom:24pt;}
-.capa-empresa-box{background:#f0f4ff;border-left:4pt solid #2a5298;padding:12pt 16pt;margin-bottom:20pt;border-radius:0 4pt 4pt 0;}
+.capa-titulo{font-size:30pt;font-weight:700;color:#0d2040;line-height:1.15;margin-bottom:6pt;letter-spacing:-.01em;}
+.capa-titulo-sub{font-size:13pt;color:#2a5298;font-weight:500;margin-bottom:24pt;}
+.capa-empresa-box{background:#f0f4ff;border-left:4pt solid #2a5298;padding:14pt 18pt;margin-bottom:18pt;border-radius:0 6pt 6pt 0;}
 .capa-empresa-nome{font-size:15pt;font-weight:700;color:#0d2040;margin-bottom:3pt;}
-.capa-empresa-cnpj{font-size:9pt;color:#6b7280;font-family:'IBM Plex Mono',monospace;}
+.capa-empresa-cnpj{font-size:9pt;color:#4b5563;font-family:'IBM Plex Mono',monospace;}
 .capa-badges{display:flex;gap:8pt;flex-wrap:wrap;margin-top:10pt;}
 .capa-badge{padding:3pt 10pt;border-radius:20pt;font-size:8pt;font-weight:600;border:1pt solid;}
 .badge-gr1{background:#e6fff9;color:#047857;border-color:#6ee7b7;}
@@ -71,25 +68,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .badge-gr3{background:#fffbeb;color:#92400e;border-color:#fcd34d;}
 .badge-gr4{background:#fff1f2;color:#9f1239;border-color:#fca5a5;}
 .badge-info{background:#f3f4f6;color:#374151;border-color:#d1d5db;}
-.capa-footer{border-top:1pt solid #e5e7eb;padding-top:10pt;display:flex;justify-content:space-between;align-items:center;}
-.capa-footer-label{font-size:8pt;color:#9ca3af;}
-.capa-footer-value{font-size:9pt;color:#374151;font-weight:500;}
+.capa-rodape-bloco{margin-top:auto;}
+.capa-footer{border-top:1pt solid #d1d5db;padding-top:10pt;display:flex;justify-content:space-between;align-items:center;}
+.capa-footer-label{font-size:7.5pt;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+.capa-footer-value{font-size:9.5pt;color:#1f2937;font-weight:600;margin-top:2pt;}
+/* Faixa discreta da empresa elaboradora */
+.capa-elab-strip{margin-top:12pt;padding:10pt 12pt;border:1pt solid #e5e7eb;border-radius:6pt;background:#fafbfc;display:flex;align-items:center;gap:14pt;}
+.capa-elab-strip-label{font-size:7.5pt;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.1em;flex-shrink:0;}
+.capa-elab-strip-content{display:flex;align-items:center;gap:10pt;flex:1;min-width:0;}
+.capa-elab-strip-logo{width:32pt;height:32pt;background:#f3f4f6;border:1pt solid #d1d5db;border-radius:5pt;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.capa-elab-strip-sigla{font-family:'IBM Plex Mono',monospace;font-size:10pt;font-weight:700;color:#4b5563;}
+.capa-elab-strip-nome{font-size:9.5pt;font-weight:600;color:#1f2937;line-height:1.3;}
+.capa-elab-strip-cnpj{font-size:8pt;color:#4b5563;font-family:'IBM Plex Mono',monospace;margin-top:1pt;}
 
 /* ── HEADER/FOOTER PÁGINAS ── */
-.page-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1pt solid #e5e7eb;padding-bottom:8pt;margin-bottom:14pt;}
-.ph-empresa{font-size:8pt;font-weight:600;color:#374151;}
-.ph-doc{font-size:8pt;color:#9ca3af;font-family:'IBM Plex Mono',monospace;}
-.page-footer{position:absolute;bottom:12mm;left:25mm;right:20mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #e5e7eb;padding-top:6pt;}
-.pf-label{font-size:7.5pt;color:#9ca3af;}
-.pf-page{font-family:'IBM Plex Mono',monospace;font-size:8pt;color:#6b7280;}
+.page-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5pt solid #e5e7eb;padding-bottom:8pt;margin-bottom:16pt;}
+.ph-empresa{font-size:8.5pt;font-weight:700;color:#1f2937;}
+.ph-doc{font-size:8pt;color:#6b7280;font-family:'IBM Plex Mono',monospace;}
+.page-footer{position:absolute;bottom:12mm;left:25mm;right:14mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #e5e7eb;padding-top:6pt;}
+.pf-label{font-size:7.5pt;color:#6b7280;font-weight:500;}
+.pf-page{font-family:'IBM Plex Mono',monospace;font-size:8pt;color:#4b5563;font-weight:600;}
 /* Garante espaço para o rodapé absoluto na tela */
 .page{padding-bottom:28mm;}
-.page-footer{position:absolute;bottom:12mm;left:25mm;right:14mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #e5e7eb;padding-top:6pt;}
 
 /* ── TABELAS ── */
-.doc-table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:8.5pt;}
-.doc-table th{background:#0d2040;color:#fff;padding:5pt 7pt;text-align:left;font-size:7.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
-.doc-table td{padding:5pt 7pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;}
+.doc-table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9pt;}
+.doc-table th{background:#0d2040;color:#fff;padding:6pt 8pt;text-align:left;font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.doc-table td{padding:6pt 8pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;color:#1f2937;}
 .doc-table tr:nth-child(even) td{background:#f9fafb;}
 .doc-table tr:last-child td{border-bottom:none;}
 
@@ -100,96 +105,96 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .ficha-item:nth-child(2n){border-right:none;}
 .ficha-grid-3 .ficha-item:nth-child(3n){border-right:none;}
 .ficha-item:last-child,.ficha-item:nth-last-child(2){border-bottom:none;}
-.ficha-label{font-size:7pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:2pt;}
-.ficha-value{font-size:9.5pt;color:#1a1a2e;font-weight:500;}
+.ficha-label{font-size:7.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-bottom:3pt;}
+.ficha-value{font-size:10pt;color:#0d2040;font-weight:500;}
 .ficha-full{grid-column:1/-1;border-right:none!important;}
 
 /* ── INVENTÁRIO DE RISCOS — GHE ── */
 .funcao-bloco{
-  border:1.5pt solid #c7d7f9;
-  border-radius:6pt;
-  margin:14pt 0;
+  border:1.5pt solid #bfdbfe;
+  border-radius:8pt;
+  margin:16pt 0;
   overflow:hidden;
   page-break-inside:avoid;
-  box-shadow:0 1pt 4pt rgba(42,82,152,.08);
+  box-shadow:0 1pt 6pt rgba(30,58,95,.07);
 }
 /* Header GHE — fundo claro */
 .funcao-bloco-header{
-  background:#f0f5ff;
-  padding:9pt 12pt;
-  border-bottom:1.5pt solid #c7d7f9;
+  background:linear-gradient(135deg,#eff6ff,#f0f5ff);
+  padding:10pt 14pt;
+  border-bottom:1.5pt solid #bfdbfe;
   display:flex;align-items:center;justify-content:space-between;gap:8pt;flex-wrap:wrap;
 }
 .ghe-codigo-badge{
-  font-family:'IBM Plex Mono',monospace;font-size:9pt;font-weight:700;
-  background:#1e3a5f;color:#fff;padding:2pt 10pt;border-radius:4pt;
-  white-space:nowrap;flex-shrink:0;
+  font-family:'IBM Plex Mono',monospace;font-size:9.5pt;font-weight:700;
+  background:#1e3a5f;color:#fff;padding:3pt 12pt;border-radius:5pt;
+  white-space:nowrap;flex-shrink:0;letter-spacing:.02em;
 }
-.ghe-funcoes{font-size:8pt;color:#374151;margin-top:4pt;}
-.ghe-funcoes strong{color:#0d2040;}
-.ghe-count{font-size:7.5pt;color:#6b7280;white-space:nowrap;flex-shrink:0;}
+.ghe-funcoes{font-size:8.5pt;color:#374151;margin-top:4pt;line-height:1.4;}
+.ghe-funcoes strong{color:#0d2040;font-weight:700;}
+.ghe-count{font-size:8pt;color:#4b5563;white-space:nowrap;flex-shrink:0;font-weight:600;}
 .funcao-bloco-nome{font-size:11pt;font-weight:700;color:#ffffff;}
 .funcao-bloco-cbo{font-size:8pt;color:#93c5fd;font-family:'IBM Plex Mono',monospace;}
 .funcao-bloco-setores{font-size:8pt;color:#bfdbfe;background:rgba(255,255,255,.12);padding:2pt 8pt;border-radius:10pt;border:1pt solid rgba(255,255,255,.2);}
 
 /* Card de risco — nova hierarquia visual */
-.risco-funcao{border-bottom:1pt solid #f3f4f6;padding:9pt 12pt;}
+.risco-funcao{border-bottom:1pt solid #f1f5f9;padding:11pt 14pt;}
 .risco-funcao:last-child{border-bottom:none;}
 
 /* Linha 1: contexto (categoria + perigo) */
 .risco-ctx{display:flex;align-items:center;gap:6pt;margin-bottom:4pt;flex-wrap:wrap;}
-.risco-cat-pill{font-size:6.5pt;padding:2pt 7pt;border-radius:3pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
-.risco-perigo-pill{font-size:7pt;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260pt;}
+.risco-cat-pill{font-size:7pt;padding:2pt 8pt;border-radius:4pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.risco-perigo-pill{font-size:7.5pt;color:#4b5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280pt;font-weight:500;}
 
 /* Linha 2: protagonista (nome + nível) */
 .risco-principal{display:flex;align-items:flex-start;justify-content:space-between;gap:8pt;margin-bottom:5pt;}
-.risco-funcao-nome{font-size:10.5pt;font-weight:700;color:#0d2040;flex:1;line-height:1.3;}
-.nivel-pill{font-size:7.5pt;padding:3pt 10pt;border-radius:4pt;font-weight:700;white-space:nowrap;flex-shrink:0;margin-top:1pt;}
+.risco-funcao-nome{font-size:11pt;font-weight:700;color:#0d2040;flex:1;line-height:1.3;}
+.nivel-pill{font-size:7.5pt;padding:3pt 11pt;border-radius:5pt;font-weight:700;white-space:nowrap;flex-shrink:0;margin-top:1pt;letter-spacing:.02em;}
 .nivel-MUITO-ALTO{background:#fee2e2;color:#991b1b;}
 .nivel-ALTO{background:#ffedd5;color:#9a3412;}
 .nivel-MEDIO{background:#fef9c3;color:#854d0e;}
 .nivel-BAIXO{background:#dcfce7;color:#166534;}
 
 /* Linha 3: métricas compactas */
-.risco-metricas{font-size:8pt;color:#6b7280;margin-bottom:5pt;}
+.risco-metricas{font-size:8pt;color:#4b5563;margin-bottom:5pt;}
 .risco-metricas strong{color:#374151;}
 
 /* Linha 4: informações técnicas discretas */
-.risco-tecnico{font-size:7.5pt;color:#6b7280;line-height:1.6;margin-bottom:4pt;border-left:2pt solid #e5e7eb;padding-left:6pt;}
+.risco-tecnico{font-size:8pt;color:#4b5563;line-height:1.6;margin-bottom:4pt;border-left:2pt solid #c7d7f9;padding-left:7pt;}
 .risco-tecnico b{color:#374151;font-weight:600;}
 
 /* Linha 5: danos à saúde */
-.risco-danos-texto{font-size:8pt;color:#374151;line-height:1.5;margin-bottom:5pt;padding:4pt 8pt;background:#fff7ed;border-left:2.5pt solid #fb923c;border-radius:0 3pt 3pt 0;}
-.risco-danos-label{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:2pt;}
+.risco-danos-texto{font-size:8.5pt;color:#1f2937;line-height:1.5;margin-bottom:6pt;padding:5pt 10pt;background:#fff7ed;border-left:3pt solid #fb923c;border-radius:0 4pt 4pt 0;}
+.risco-danos-label{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:3pt;}
 
 /* Linha 6: medidas */
 .risco-funcao-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6pt;margin-bottom:6pt;}
-.rf-field .lbl{font-size:6.5pt;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2pt;}
-.rf-field .val{font-size:8.5pt;color:#374151;font-weight:500;}
+.rf-field .lbl{font-size:7pt;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3pt;}
+.rf-field .val{font-size:9pt;color:#1f2937;font-weight:500;}
 .danos-box{background:#fff7ed;border-left:3pt solid #fb923c;padding:5pt 8pt;margin-bottom:5pt;border-radius:0 3pt 3pt 0;}
-.danos-label{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:2pt;}
-.danos-text{font-size:8pt;color:#374151;line-height:1.5;}
+.danos-label{font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:3pt;}
+.danos-text{font-size:8.5pt;color:#1f2937;line-height:1.5;}
 
-.medidas-box{margin-top:5pt;}
-.medidas-label{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:4pt;}
-.medida-item{display:flex;gap:6pt;align-items:flex-start;margin-bottom:3pt;}
-.medida-num{width:14pt;height:14pt;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7pt;font-weight:700;flex-shrink:0;}
-.medida-label{font-size:7.5pt;font-weight:600;width:65pt;flex-shrink:0;padding-top:1pt;}
-.medida-desc{font-size:8pt;color:#374151;flex:1;line-height:1.4;}
-.medida-vazio{font-size:7.5pt;color:#9ca3af;font-style:italic;}
+.medidas-box{margin-top:6pt;padding-top:6pt;border-top:1pt solid #f3f4f6;}
+.medidas-label{font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#4b5563;margin-bottom:5pt;}
+.medida-item{display:flex;gap:7pt;align-items:flex-start;margin-bottom:4pt;}
+.medida-num{width:15pt;height:15pt;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7.5pt;font-weight:700;flex-shrink:0;}
+.medida-label{font-size:8pt;font-weight:700;width:68pt;flex-shrink:0;padding-top:0pt;}
+.medida-desc{font-size:8.5pt;color:#1f2937;flex:1;line-height:1.45;}
+.medida-vazio{font-size:8pt;color:#6b7280;font-style:italic;}
 
 /* ── MATRIZ EPI ── */
-.epi-matrix-table{width:100%;border-collapse:collapse;font-size:8pt;margin:8pt 0;}
-.epi-matrix-table th{background:#0d2040;color:#fff;padding:5pt 7pt;font-size:7.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.03em;text-align:left;}
-.epi-matrix-table td{padding:5pt 7pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;}
+.epi-matrix-table{width:100%;border-collapse:collapse;font-size:9pt;margin:8pt 0;}
+.epi-matrix-table th{background:#0d2040;color:#fff;padding:6pt 8pt;font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:.03em;text-align:left;}
+.epi-matrix-table td{padding:6pt 8pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;color:#1f2937;}
 .epi-matrix-table tr:nth-child(even) td{background:#f9fafb;}
-.epi-pill{display:inline-block;background:#ede9fe;color:#5b21b6;border:1pt solid #c4b5fd;border-radius:3pt;padding:1pt 6pt;font-size:7pt;font-weight:600;margin:1pt 2pt 1pt 0;}
-.ca-pill{display:inline-block;background:#f3f4f6;color:#374151;border:1pt solid #e5e7eb;border-radius:3pt;padding:1pt 5pt;font-size:6.5pt;font-family:'IBM Plex Mono',monospace;}
+.epi-pill{display:inline-block;background:#ede9fe;color:#4c1d95;border:1pt solid #c4b5fd;border-radius:4pt;padding:2pt 7pt;font-size:7.5pt;font-weight:600;margin:1pt 2pt 1pt 0;}
+.ca-pill{display:inline-block;background:#f3f4f6;color:#1f2937;border:1pt solid #d1d5db;border-radius:4pt;padding:1pt 6pt;font-size:7pt;font-family:'IBM Plex Mono',monospace;font-weight:500;}
 
 /* ── SEÇÕES EM BREVE ── */
 .em-breve{background:#f9fafb;border:1pt dashed #d1d5db;border-radius:4pt;padding:16pt;text-align:center;margin:10pt 0;}
 .em-breve-icon{font-size:20pt;margin-bottom:6pt;}
-.em-breve-label{font-size:9pt;color:#9ca3af;font-style:italic;}
+.em-breve-label{font-size:9pt;color:#6b7280;font-style:italic;}
 
 /* ── PRINT ── */
 @media print{
@@ -210,33 +215,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     min-height:unset!important;
     max-height:unset!important;
     overflow:hidden!important;
-    padding:12mm 14mm 22mm 20mm!important;
+    padding:14mm 16mm 28mm 22mm!important;
     border-left:8mm solid #0d2040!important;
     page-break-after:always!important;
     break-after:page!important;
     page-break-before:auto!important;
     position:relative!important;
+    box-sizing:border-box!important;
   }
   .page::before{display:none!important;}
   .page:last-child{page-break-after:auto!important;break-after:auto!important;}
 
-  /* Rodapé fixo no fundo de cada página */
+  /* Rodapé fixo no fundo de cada página — 12mm de base */
   .page-footer{
     position:absolute!important;
     bottom:10mm!important;
-    left:20mm!important;
-    right:14mm!important;
+    left:22mm!important;
+    right:16mm!important;
     margin-top:0!important;
-    border-top:1pt solid #e5e7eb!important;
-    padding-top:4pt!important;
+    border-top:1pt solid #d1d5db!important;
+    padding-top:5pt!important;
     display:flex!important;
     justify-content:space-between!important;
+    align-items:center!important;
     background:#fff!important;
-    height:10mm!important;
+    height:12mm!important;
     overflow:hidden!important;
   }
-  /* Garantir espaço suficiente para rodapé */
-  .page{padding-bottom:26mm!important;}
 
   /* Numeração de página — exibe exatamente o texto definido pelo JS */
   .pf-page{
@@ -251,6 +256,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   .danos-box{page-break-inside:avoid;break-inside:avoid;}
   .medidas-box{page-break-inside:avoid;break-inside:avoid;}
   .ficha-grid{page-break-inside:avoid;break-inside:avoid;}
+  .capa-rodape-bloco{page-break-inside:avoid;break-inside:avoid;}
+  .capa-elab-strip{page-break-inside:avoid;break-inside:avoid;}
+  .risco-danos-texto{page-break-inside:avoid;break-inside:avoid;}
+  .epi-matrix-table tr{page-break-inside:avoid;break-inside:avoid;}
+
+  /* Títulos de seção nunca ficam sozinhos no fim da página */
+  .doc-section{page-break-after:avoid;break-after:avoid;}
+  .doc-subsection{page-break-after:avoid;break-after:avoid;}
+  .funcao-bloco-header{page-break-after:avoid;break-after:avoid;}
+  .page-header{page-break-after:avoid;break-after:avoid;}
+
+  /* Tabelas — evitar linhas isoladas */
+  .doc-table tr{page-break-inside:avoid;break-inside:avoid;}
+  .epi-matrix-table{page-break-inside:auto;}
+
+  /* Grid responsivo para impressão */
+  .risco-funcao-grid{grid-template-columns:repeat(2,1fr)!important;}
+
+  /* Sumário não quebra */
+  .doc-table.sumario{page-break-inside:avoid;break-inside:avoid;}
+
+  /* Agentes badge sempre legíveis */
+  .agente-badge{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;}
+  .risco-cat-pill{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;}
+  .capa-badge{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;}
+  .funcao-bloco-header{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;}
+  .capa-divider{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;}
 
   /* Badges legíveis em impressão P&B */
   .nivel-MUITO-ALTO{background:#fff!important;color:#991b1b!important;border:1.5pt solid #991b1b!important;font-weight:700!important;}
@@ -267,6 +299,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   /* Ocultar containers de medição */
   [style*="left:-9999px"]{display:none!important;}
+
+  /* Contraste reforçado para impressão */
+  .pf-label,.pf-page,.ph-doc,.ph-empresa{color:#4b5563!important;}
+  .risco-perigo-pill,.ghe-count{color:#4b5563!important;}
+  .risco-tecnico{color:#374151!important;}
+  .risco-metricas{color:#374151!important;}
+  .ficha-label,.medidas-label,.rf-field .lbl{color:#4b5563!important;}
+  .capa-footer-label{color:#4b5563!important;}
+  .capa-footer-value{color:#0d2040!important;}
+  .capa-elab-strip-label{color:#4b5563!important;}
+  .capa-elab-strip-cnpj{color:#374151!important;}
+  .em-breve-label{color:#4b5563!important;}
+  .doc-text{color:#1f2937!important;}
   .ficha-item{page-break-inside:avoid;break-inside:avoid;}
   .setor-detalhe{page-break-inside:avoid;break-inside:avoid;}
   .doc-table{page-break-inside:auto;}
@@ -653,40 +698,25 @@ function renderCapa(){
   const siglaEmpresa=nomeEmpresa.replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'EMP';
   pg.innerHTML=`
   <div class="capa">
-    <div class="capa-logos-wrap">
-      <!-- ESQUERDA: Logo da empresa cliente -->
-      <div class="capa-logo-esq">
-        <div id="doc-empresa-logo" class="capa-logo-box" style="background:#1a3a6e;">
-          <span class="capa-logo-text">${siglaEmpresa}</span>
-        </div>
-        <div>
-          <div style="font-size:10pt;font-weight:700;color:#0d2040;">${h(nomeEmpresa)}</div>
-          <div style="font-size:8pt;color:#6b7280;">Elaborado em <strong>${elaboradora.dataElaboracao?fmtData(elaboradora.dataElaboracao):fmtDataAtual()}</strong></div>
-        </div>
+    <!-- TOPO: Empresa dona em destaque -->
+    <div class="capa-topo">
+      <div id="doc-empresa-logo" class="capa-logo-box" style="background:#1a3a6e;">
+        <span class="capa-logo-text">${siglaEmpresa}</span>
       </div>
-      <!-- DIREITA: Logo da empresa elaboradora (opcional) -->
-      <div class="capa-logo-dir" id="capa-elab-wrap" style="display:none;">
-        <div style="text-align:right;">
-          <div class="capa-logo-dir-label">Elaborado por</div>
-          <div class="capa-logo-dir-nome" id="doc-elab-nome-dir">—</div>
-        </div>
-        <div id="doc-elab-logo" class="capa-logo-box-sm">
-          <span class="capa-logo-text-sm">SST</span>
-        </div>
-      </div>
-      <!-- Fallback quando não há elaboradora -->
-      <div id="capa-elab-fallback">
-        <div id="doc-elab-logo" class="capa-logo-box"><span class="capa-logo-text">SST</span></div>
+      <div class="capa-topo-info">
+        <div class="capa-topo-nome">${h(nomeEmpresa)}</div>
+        <div class="capa-topo-meta">Elaborado em <strong>${elaboradora.dataElaboracao?fmtData(elaboradora.dataElaboracao):fmtDataAtual()}</strong></div>
       </div>
     </div>
     <div class="capa-divider"></div>
+    <!-- MEIO: Título + Box empresa + Badges -->
     <div class="capa-titulo-wrap">
       <div class="capa-pre">Programa de Gerenciamento de Riscos</div>
       <div class="capa-titulo">PGR</div>
       <div class="capa-titulo-sub">Conforme NR-1 — Portaria MTE nº 1.419/2024</div>
       <div class="capa-empresa-box">
         <div class="capa-empresa-nome">${h(empresa.razao_social||empresa.nome_fantasia||'—')}</div>
-        ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#4b5563;margin-bottom:4pt;">${h(empresa.nome_fantasia)}</div>`:''}
+        ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#374151;margin-bottom:4pt;">${h(empresa.nome_fantasia)}</div>`:''}
         <div class="capa-empresa-cnpj">CNPJ: ${h(cnpj)}</div>
       </div>
       <div class="capa-badges">
@@ -697,10 +727,24 @@ function renderCapa(){
         <span class="capa-badge badge-info">${empresa.total_funcionarios_previsto||0} trabalhadores cobertos</span>
       </div>
     </div>
-    <div class="capa-footer">
-      <div><div class="capa-footer-label">Versão</div><div class="capa-footer-value">1.0 — ${fmtAno()}</div></div>
-      <div style="text-align:center;"><div class="capa-footer-label">Elaboração</div><div class="capa-footer-value" id="doc-elab-footer">—</div></div>
-      <div style="text-align:right;"><div class="capa-footer-label">Revisão periódica</div><div class="capa-footer-value">A cada 2 anos</div></div>
+    <!-- RODAPÉ DA CAPA: Versão / Elaboração / Revisão + faixa discreta da elaboradora -->
+    <div class="capa-rodape-bloco">
+      <div class="capa-footer">
+        <div><div class="capa-footer-label">Versão</div><div class="capa-footer-value">1.0 — ${fmtAno()}</div></div>
+        <div style="text-align:center;"><div class="capa-footer-label">Elaboração</div><div class="capa-footer-value" id="doc-elab-footer">—</div></div>
+        <div style="text-align:right;"><div class="capa-footer-label">Revisão periódica</div><div class="capa-footer-value">A cada 2 anos</div></div>
+      </div>
+      <!-- Faixa da elaboradora — só aparece quando diferente da empresa -->
+      <div class="capa-elab-strip" id="capa-elab-strip" style="display:none;">
+        <span class="capa-elab-strip-label">Elaborado por</span>
+        <div class="capa-elab-strip-content">
+          <div id="doc-elab-logo" class="capa-elab-strip-logo"><span class="capa-elab-strip-sigla">SST</span></div>
+          <div style="flex:1;min-width:0;">
+            <div class="capa-elab-strip-nome" id="capa-elab-strip-nome">—</div>
+            <div class="capa-elab-strip-cnpj" id="capa-elab-strip-cnpj"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>`;
   return pg;
@@ -870,7 +914,7 @@ function renderCaracterizacao(){
         </div>
       </div>
       ${f.descricao?`<div style="padding:8pt 10pt;border-top:1pt solid #e5e7eb;">
-        <div style="font-size:6.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-bottom:3pt;">Descrição da função</div>
+        <div style="font-size:6.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:3pt;">Descrição da função</div>
         <div style="font-size:8.5pt;color:#374151;line-height:1.5;">${h(f.descricao)}</div>
       </div>`:''}
     </div>`;
@@ -1099,7 +1143,7 @@ function renderInventarioRiscos(){
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4pt;">
         ${setoresNomes.length?`<span class="funcao-bloco-setores">📁 Setor(es): ${h(setoresNomes.join(' · '))}</span>`:''}
-        <span style="font-size:7.5pt;color:#9ca3af;">${frs.length} risco(s)</span>
+        <span style="font-size:7.5pt;color:#6b7280;">${frs.length} risco(s)</span>
       </div>`;
   }
 
@@ -1122,12 +1166,12 @@ function renderInventarioRiscos(){
       const marcada=fr[`medida_${mc.key}`];const desc=fr[`medida_${mc.key}_desc`];
       if(!marcada&&!desc)return'';
       const efic=fr[`medida_${mc.key}_eficacia`]||'Não avaliada';
-      const eficCor={Eficaz:{bg:'#dcfce7',c:'#166534'},Parcial:{bg:'#fef9c3',c:'#854d0e'},Ineficaz:{bg:'#fee2e2',c:'#991b1b'},'Não avaliada':{bg:'#f3f4f6',c:'#9ca3af'}}[efic]||{bg:'#f3f4f6',c:'#9ca3af'};
+      const eficCor={Eficaz:{bg:'#dcfce7',c:'#166534'},Parcial:{bg:'#fef9c3',c:'#854d0e'},Ineficaz:{bg:'#fee2e2',c:'#991b1b'},'Não avaliada':{bg:'#f3f4f6',c:'#6b7280'}}[efic]||{bg:'#f3f4f6',c:'#6b7280'};
       return`<div class="medida-item">
         <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">${{elim:1,subs:2,eng:3,adm:4}[mc.key]}</div>
         <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
-        <div class="medida-desc" style="flex:1;">${desc?h(desc):'<span style="color:#9ca3af;font-style:italic;">Medida indicada — descrição não preenchida</span>'}
-          <span style="display:inline-block;margin-left:6pt;background:${eficCor.bg};color:${eficCor.c};font-size:6.5pt;font-weight:600;padding:1pt 5pt;border-radius:3pt;">${efic}</span>
+        <div class="medida-desc" style="flex:1;">${desc?h(desc):'<span style="color:#6b7280;font-style:italic;">Medida indicada — descrição não preenchida</span>'}
+          <span style="display:inline-block;margin-left:6pt;background:${eficCor.bg};color:${eficCor.c};font-size:7pt;font-weight:700;padding:1pt 6pt;border-radius:3pt;border:1pt solid ${eficCor.c};">${efic}</span>
         </div>
       </div>`;
     }).filter(Boolean).join('');
@@ -1710,7 +1754,7 @@ function renderSecaoContratadas(){
   if(!lista.length)return null;
   const pg=criarPagina();
   const linhas=lista.map(c=>`<tr>
-    <td style="font-weight:500;">${h(c.razao_social)}${c.cnpj?`<br><span style="font-size:7pt;color:#9ca3af;">${h(c.cnpj)}</span>`:''}</td>
+    <td style="font-weight:500;">${h(c.razao_social)}${c.cnpj?`<br><span style="font-size:7pt;color:#6b7280;">${h(c.cnpj)}</span>`:''}</td>
     <td>${h(c.servico_prestado)}</td>
     <td style="text-align:center;">${h(c.frequencia||'—')}</td>
     <td>${h(c.riscos_categorias||'—')}</td>
@@ -1829,7 +1873,7 @@ function renderSecaoVersoes(){
       <th style="width:25%;">Autor</th>
       <th>Descrição da Alteração</th>
     </tr></thead>
-    <tbody>${linhas||`<tr><td colspan="4" style="text-align:center;color:#9ca3af;font-style:italic;">Nenhuma revisão registrada.</td></tr>`}</tbody>
+    <tbody>${linhas||`<tr><td colspan="4" style="text-align:center;color:#6b7280;font-style:italic;">Nenhuma revisão registrada.</td></tr>`}</tbody>
   </table>
   <div style="margin-top:12pt;text-align:right;">
     <button onclick="adicionarVersao(${empresaId})" style="background:#f0f5ff;border:1pt solid #c7d7f9;border-radius:4pt;padding:6pt 12pt;font-size:8pt;color:#1e3a5f;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">+ Registrar nova revisão</button>
@@ -1880,10 +1924,10 @@ function renderMatrizRisco(){
   const sevLabels=['','Insignificante','Leve','Moderada','Grave','Catastrófica'];
   let cellsHtml='';
   for(let p=5;p>=1;p--){
-    cellsHtml+=`<tr><td style="font-size:7pt;font-weight:600;color:#374151;padding:6pt 8pt;background:#f8fafc;border:1pt solid #e5e7eb;width:60pt;line-height:1.3;"><strong>P${p}</strong><br><span style="font-weight:400;font-size:6pt;">${probLabels[p]}</span></td>`;
+    cellsHtml+=`<tr><td style="font-size:7.5pt;font-weight:600;color:#1f2937;padding:6pt 8pt;background:#f8fafc;border:1pt solid #e5e7eb;width:60pt;line-height:1.3;"><strong style="font-size:8.5pt;">P${p}</strong><br><span style="font-weight:400;font-size:6.5pt;color:#4b5563;">${probLabels[p]}</span></td>`;
     for(let s=1;s<=5;s++){
       const n=nivelCor(p,s);const v=p*s;
-      cellsHtml+=`<td style="background:${n.bg};color:${n.color};border:1pt solid #e5e7eb;text-align:center;padding:8pt 4pt;font-size:8pt;font-weight:700;min-width:36pt;">${v}<br><span style="font-size:6pt;font-weight:500;">${n.label}</span></td>`;
+      cellsHtml+=`<td style="background:${n.bg};color:${n.color};border:1pt solid #e5e7eb;text-align:center;padding:8pt 4pt;font-size:9pt;font-weight:700;min-width:36pt;">${v}<br><span style="font-size:6.5pt;font-weight:600;">${n.label}</span></td>`;
     }
     cellsHtml+='</tr>';
   }
@@ -1904,7 +1948,7 @@ function renderMatrizRisco(){
     <table style="border-collapse:collapse;width:100%;margin-bottom:14pt;">
       <thead><tr>
         <th style="background:#0d2040;color:#fff;font-size:8pt;padding:6pt 8pt;border:1pt solid #1e3a5f;text-align:left;">Prob / Sev</th>
-        ${[1,2,3,4,5].map(s=>`<th style="background:#0d2040;color:#fff;font-size:8pt;padding:6pt;border:1pt solid #1e3a5f;text-align:center;"><strong>S${s}</strong><br><span style="font-size:6pt;font-weight:400;">${sevLabels[s]}</span></th>`).join('')}
+        ${[1,2,3,4,5].map(s=>`<th style="background:#0d2040;color:#fff;font-size:8.5pt;padding:6pt;border:1pt solid #1e3a5f;text-align:center;"><strong>S${s}</strong><br><span style="font-size:6.5pt;font-weight:500;">${sevLabels[s]}</span></th>`).join('')}
       </tr></thead>
       <tbody>${cellsHtml}</tbody>
     </table>
@@ -1918,7 +1962,7 @@ function renderMatrizRisco(){
     <div style="background:#f0f4ff;border-left:3pt solid #2563eb;padding:8pt 12pt;border-radius:0 4pt 4pt 0;margin-top:8pt;margin-bottom:14pt;">
       <div style="font-size:8pt;font-weight:600;color:#1e3a8a;margin-bottom:4pt;">Hierarquia de Controles — NR-01 subitem 1.5.4.4.4</div>
       <div style="display:flex;gap:6pt;flex-wrap:wrap;">
-        ${[['1','Eliminação','#dc2626'],['2','Substituição','#d97706'],['3','Engenharia','#2563eb'],['4','Administrativo','#059669'],['5','EPI','#7c3aed']].map(([n,l,c])=>`<span style="background:#fff;border:1pt solid ${c};color:${c};font-size:7.5pt;font-weight:600;padding:2pt 8pt;border-radius:3pt;">${n}. ${l}</span>`).join('<span style="color:#9ca3af;align-self:center;">→</span>')}
+        ${[['1','Eliminação','#dc2626'],['2','Substituição','#d97706'],['3','Engenharia','#2563eb'],['4','Administrativo','#059669'],['5','EPI','#7c3aed']].map(([n,l,c])=>`<span style="background:#fff;border:1pt solid ${c};color:${c};font-size:7.5pt;font-weight:600;padding:2pt 8pt;border-radius:3pt;">${n}. ${l}</span>`).join('<span style="color:#6b7280;align-self:center;">→</span>')}
       </div>
     </div>
     <div style="font-size:9pt;font-weight:600;color:#374151;margin-bottom:8pt;text-transform:uppercase;letter-spacing:.04em;">Critérios de Avaliação por Categoria de Risco</div>
@@ -1941,7 +1985,7 @@ function renderMatrizRisco(){
           <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;font-weight:600;color:#0d2040;">${cat}</td>
           <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#374151;">${prob}</td>
           <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#374151;">${sev}</td>
-          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#6b7280;font-size:7.5pt;">${ref}</td>
+          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#4b5563;font-size:8pt;">${ref}</td>
         </tr>`).join('')}
       </tbody>
     </table>
@@ -1987,18 +2031,18 @@ function renderPlanoAcao(){
     const prior=a.prioridade||'Média';
     const prazo=a.prazo?fmtData(a.prazo):'—';
     const isCritica=prior==='Crítica';
-    const badgeEmergencial=isCritica?`<span style="background:#fee2e2;color:#991b1b;border:1pt solid #fca5a5;border-radius:3pt;font-size:6.5pt;font-weight:700;padding:1pt 5pt;margin-left:4pt;">⚠ IMEDIATA</span>`:'';
+    const badgeEmergencial=isCritica?`<span style="background:#fee2e2;color:#991b1b;border:1pt solid #fca5a5;border-radius:3pt;font-size:7pt;font-weight:700;padding:1pt 6pt;margin-left:4pt;">⚠ IMEDIATA</span>`:'';
     return`<tr${isCritica?' style="background:#fff5f5;"':''}>
       <td>
         <div style="font-weight:500;font-size:9pt;">${h(a.titulo)}${badgeEmergencial}</div>
-        ${a.vinculos.length?`<div style="font-size:7pt;color:#9ca3af;margin-top:2pt;">${a.vinculos.map(v=>h(v)).join(' · ')}</div>`:''}
+        ${a.vinculos.length?`<div style="font-size:7pt;color:#6b7280;margin-top:2pt;">${a.vinculos.map(v=>h(v)).join(' · ')}</div>`:''}
         ${a.origem&&a.origem!=='Manual'?`<div style="font-size:7pt;color:#6b7280;margin-top:1pt;">Origem: ${h(a.origem)}</div>`:''}
       </td>
       <td style="text-align:center;"><span style="background:${PRIOR_BG[prior]||'#f3f4f6'};color:${PRIOR_COR[prior]||'#374151'};padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${h(prior)}</span></td>
       <td style="font-size:8pt;">${h(a.responsavel||'—')}</td>
       <td style="text-align:center;font-size:8pt;font-family:'IBM Plex Mono',monospace;">${prazo}</td>
       <td style="text-align:center;font-size:7.5pt;font-weight:500;">${h(a.status||'Pendente')}</td>
-      <td style="font-size:7.5pt;color:#374151;">${a.indicador?h(a.indicador):'<span style="color:#9ca3af;">—</span>'}</td>
+      <td style="font-size:7.5pt;color:#374151;">${a.indicador?h(a.indicador):'<span style="color:#6b7280;">—</span>'}</td>
     </tr>`;
   };
 
@@ -2022,7 +2066,7 @@ function renderPlanoAcao(){
     ${['Elaborado por','Revisado por','Aprovado por'].map(l=>`<div style="text-align:center;">
       <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:40pt;">
         <div style="font-size:8pt;color:#6b7280;">${l}</div>
-        <div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">Data: ___/___/______</div>
+        <div style="font-size:8pt;color:#6b7280;margin-top:2pt;">Data: ___/___/______</div>
       </div>
     </div>`).join('')}
   </div>`;
@@ -2097,33 +2141,39 @@ function atualizarElaboradora(){
   elaboradora.responsavel=document.getElementById('elab-responsavel').value.trim();
   elaboradora.dataElaboracao=document.getElementById('elab-data').value||'';
 
-  const temElaboradora=!!(elaboradora.nome||elaboradora.logoUrl);
-  const elabWrap=document.getElementById('capa-elab-wrap');
-  const elabFallback=document.getElementById('capa-elab-fallback');
+  // Lógica inteligente: a elaboradora só aparece se for DIFERENTE da empresa dona
+  const norm=s=>(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'').trim();
+  const empresaRS=empresa?.razao_social||'';
+  const empresaFan=empresa?.nome_fantasia||'';
+  const elabNormalizado=norm(elaboradora.nome);
+  const elabDiferente=!!elaboradora.nome && elabNormalizado!==norm(empresaRS) && elabNormalizado!==norm(empresaFan);
 
-  if(elabWrap)elabWrap.style.display=temElaboradora?'flex':'none';
-  if(elabFallback)elabFallback.style.display=temElaboradora?'none':'block';
+  // Faixa discreta da elaboradora no rodapé da capa
+  const stripEl=document.getElementById('capa-elab-strip');
+  if(stripEl)stripEl.style.display=elabDiferente?'flex':'none';
 
-  // Atualiza nome da elaboradora no lado direito da capa
-  const nomeDir=document.getElementById('doc-elab-nome-dir');
-  if(nomeDir)nomeDir.textContent=elaboradora.nome||'Empresa Elaboradora';
+  if(elabDiferente){
+    const nomeEl=document.getElementById('capa-elab-strip-nome');
+    if(nomeEl)nomeEl.textContent=elaboradora.nome;
+    const cnpjEl=document.getElementById('capa-elab-strip-cnpj');
+    if(cnpjEl)cnpjEl.textContent=elaboradora.cnpj?'CNPJ: '+elaboradora.cnpj:'';
 
-  // Atualiza logo da elaboradora
-  const logoEl=document.getElementById('doc-elab-logo');
-  if(logoEl){
-    if(elaboradora.logoUrl){
-      logoEl.innerHTML=`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`;
-      logoEl.style.cssText='background:#fff;padding:4pt;';
-    }else{
-      const sigla=(elaboradora.nome||'SST').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'SST';
-      logoEl.innerHTML=`<span class="capa-logo-text-sm">${sigla}</span>`;
-      logoEl.style.cssText='';
+    const logoEl=document.getElementById('doc-elab-logo');
+    if(logoEl){
+      if(elaboradora.logoUrl){
+        logoEl.innerHTML=`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;">`;
+        logoEl.style.cssText='background:#fff;';
+      }else{
+        const sigla=(elaboradora.nome||'SST').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'SST';
+        logoEl.innerHTML=`<span class="capa-elab-strip-sigla">${sigla}</span>`;
+        logoEl.style.cssText='';
+      }
     }
   }
 
-  // Atualiza rodapé de elaboração
+  // Atualiza rodapé de elaboração (Versão / Elaboração / Revisão)
   const footerEl=document.getElementById('doc-elab-footer');
-  if(footerEl)footerEl.textContent=elaboradora.responsavel||elaboradora.nome||'—';
+  if(footerEl)footerEl.textContent=elaboradora.responsavel||elaboradora.nome||(empresa?.nome_fantasia||empresa?.razao_social||'—');
 }
 
 // ── PLANO DE AÇÃO MODAL ───────────────────────────────────────
