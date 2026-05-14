@@ -779,7 +779,11 @@ async function verArquivosFuncionario(funcId,funcNome,demandaId){
   const content=document.getElementById('modal-arq-content');
   content.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);">↻ Carregando...</div>`;
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?funcionario_id=eq.${funcId}&demanda_id=eq.${demandaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    // Busca por funcionario_id + demanda_token (mais robusto que demanda_id que pode não existir)
+    const resDem=await fetch(`${SUPA_URL}/rest/v1/clinica_demandas?id=eq.${demandaId}&select=token`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const [dem]=await resDem.json();
+    const filtro=dem?.token?`demanda_token=eq.${dem.token}`:`funcionario_id=eq.${funcId}&tipo=eq.Exame`;
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?${filtro}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const docs=await res.json();
     if(!docs.length){content.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text3);">Nenhum arquivo encontrado para este funcionário nesta demanda.</div>`;return;}
     content.innerHTML=docs.map(d=>{

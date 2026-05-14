@@ -188,7 +188,7 @@ function renderCard(f){
       </div>
       <div class="upload-status ${jaEnviado?'ok':''}" id="st-${f.id}-${e.exame_id}">${jaEnviado?'✓ Enviado':'—'}</div>
       <div>
-        <input type="file" id="file-${f.id}-${e.exame_id}" accept=".pdf,image/*" onchange="uploadExame(${f.id},${e.exame_id},'${h(e.nome)}',this)">
+        <input type="file" id="file-${f.id}-${e.exame_id}" accept=".pdf,image/*" onchange="uploadExame(${f.id},${f.funcionario_id},${e.exame_id},'${h(e.nome)}',this)">
         <button class="btn-upload ${jaEnviado?'enviado':''}" id="btn-${f.id}-${e.exame_id}" onclick="document.getElementById('file-${f.id}-${e.exame_id}').click()">
           <span class="spinner" id="sp-${f.id}-${e.exame_id}"></span>
           ${jaEnviado?'✓ Enviado':'📎 Enviar'}
@@ -200,7 +200,7 @@ function renderCard(f){
       <div><div class="exame-nome">Laudo / ASO geral</div></div>
       <div class="upload-status" id="st-${f.id}-0">—</div>
       <div>
-        <input type="file" id="file-${f.id}-0" accept=".pdf,image/*" onchange="uploadExame(${f.id},0,'Laudo geral',this)">
+        <input type="file" id="file-${f.id}-0" accept=".pdf,image/*" onchange="uploadExame(${f.id},${f.funcionario_id},0,'Laudo geral',this)">
         <button class="btn-upload" id="btn-${f.id}-0" onclick="document.getElementById('file-${f.id}-0').click()">📎 Enviar</button>
       </div>
     </div>`;
@@ -221,7 +221,8 @@ function renderCard(f){
   </div>`;
 }
 
-async function uploadExame(funcId,exameId,exameNome,input){
+async function uploadExame(demFuncId,realFuncId,exameId,exameNome,input){
+  const funcId=demFuncId;// ID da tabela clinica_demanda_funcionarios (para atualizar status)
   const file=input.files[0];
   if(!file)return;
   const btnEl=document.getElementById(`btn-${funcId}-${exameId}`);
@@ -236,7 +237,7 @@ async function uploadExame(funcId,exameId,exameNome,input){
 
     // Registra em funcionario_documentos
     await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
-      body:JSON.stringify({funcionario_id:funcId,empresa_id:demanda.empresa_id,demanda_id:demanda.id,demanda_token:demToken,tipo:'Exame',subtipo:exameNome,arquivo_url:path,arquivo_nome:file.name,ativo:true})});
+      body:JSON.stringify({funcionario_id:realFuncId,empresa_id:demanda.empresa_id,demanda_id:demanda.id,demanda_token:demToken,tipo:'Exame',subtipo:exameNome,arquivo_url:path,arquivo_nome:file.name,ativo:true})});
 
     // Atualiza exames_completos na demanda_funcionario
     const f=funcionarios.find(x=>x.id===funcId);
