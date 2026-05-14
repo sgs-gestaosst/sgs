@@ -232,7 +232,7 @@ async function uploadExame(funcId,exameId,exameNome,input){
     // Upload para Storage
     const ext=file.name.split('.').pop();
     const path=`${demanda.empresa_id}/clinica_demandas/${demToken}/${funcId}_${exameId}_${Date.now()}.${ext}`;
-    const resUp=await fetch(`${SUPA_URL}/storage/v1/object/documentos/${path}`,{method:'POST',headers:{'Authorization':`Bearer ${SUPA_KEY}`,'x-upsert':'true','Content-Type':file.type},body:file});
+    const resUp=await fetch(`${SUPA_URL}/storage/v1/object/documentos-funcionarios/${path}`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'x-upsert':'true','Content-Type':file.type},body:file});
 
     // Registra em funcionario_documentos
     await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
