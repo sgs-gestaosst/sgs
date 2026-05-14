@@ -61,15 +61,28 @@
 
 ### PGR
 **Arquivo:** `pgr.html`
-**Seções:** Capa → Sumário → Identificação → Caracterização → SESMT → **Metodologia P×S (nova)** → Inventário por GHE → Matriz EPI → Psicossocial → Plano de Ação → Monitoramento
-**Status:** funcional, Fase 1 de melhorias concluída (2026-05-10)
-**Melhorias Fase 1 implementadas:**
-- Matriz de Risco P×S visual (seção 4) com tabela 5×5, escalas e hierarquia de controles NR-01
-- Data digital de elaboração no painel + capa
-- Indicador/Meta no plano de ação (campo acoes.indicador)
-- CSS de impressão: rodapé, badges P&B, capa, tabelas
-**Fase 2 pendente:** critérios de avaliação por categoria, análise de lacunas, GHE com nome customizável, eficácia das medidas
-**Fase 3 pendente:** histórico de acidentes/doenças, prova digital de participação
+**Seções:** Capa → Sumário → Identificação → Caracterização → SESMT → Metodologia P×S → Critérios por Categoria → Inventário por GHE → Matriz EPI → Psicossocial (se houver) → Plano de Ação → Monitoramento → Participação (se houver) → Contratadas → Versões
+**Status:** ✅ Revisão completa de design e paginação concluída (2026-05-14)
+
+**Revisão de design e paginação (2026-05-14):**
+- Agente 08 — Design e Paginação criado
+- Capa: empresa em destaque + elaboradora discreta no rodapé (lógica inteligente — só aparece se diferente)
+- Logo da empresa: clicável para upload diretamente na capa
+- Fontes: corpo 10pt, tabelas 9pt, todo #9ca3af→#6b7280 escurecido
+- @media print: contraste forçado para todos os elementos
+- Paginação: ALTURA_UTIL_PX 210mm→200mm (conservador), container 168mm→160mm
+- Plano de ação: substituído contagem fixa de linhas por medição real de altura
+- Seções vazias omitidas: psicossocial e participação não aparecem se sem dados
+- Critérios por categoria: separados em página 2 da Metodologia
+
+**Fases implementadas:**
+- Fase 1: Matriz P×S, data elaboração, indicador no plano, CSS impressão
+- Fase 2: Critérios por categoria, GHE nomeável, eficácia das medidas, nível residual
+- Fase 3: Histórico de acidentes/doenças por risco, confirmação digital de participação
+
+**Pendente:**
+- Visualização de respostas individuais do psicossocial (em andamento)
+- Revisão PCMSO, AET, LTCAT
 
 ### eSocial
 **Arquivos:** `esocial_s2220.html` (ASO), `esocial_s2240.html` (exposição)

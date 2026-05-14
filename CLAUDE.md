@@ -60,23 +60,48 @@ Ver detalhes em `.claude/knowledge/projeto/modulos.md`
 | EPI / CAEPI | epis.html | ✅ Completo |
 | Planos / Assinaturas | assinar.html + trial_check.js + plano_utils.js | ✅ Completo |
 | IA Copilot | ia_copilot.js | ✅ Ativo (setor, função, riscos, medidas) |
-| PGR | pgr.html | 🔄 Em uso, melhorias contínuas |
+| PGR | pgr.html | ✅ Revisão completa de design/paginação (2026-05-14) |
 | eSocial | esocial_s2220.html + esocial_s2240.html | 🔄 Parcial |
 | AET | aet.html | ⚠️ Revisar |
 | LTCAT | ltcat.html | ⚠️ Revisar |
 | PCMSO | pcmso.html | ⚠️ Revisar |
 
-## Agentes disponíveis
-Ao iniciar qualquer tarefa complexa, consultar `.claude/agents/` para decidir qual agente acionar.
+## ⚠️ WORKFLOW OBRIGATÓRIO — SEGUIR SEMPRE
 
-| Agente | Quando acionar |
-|---|---|
-| 01-arquiteto | Antes de implementar qualquer feature nova |
-| 02-desenvolvedor | Implementação de código |
-| 03-nr-compliance | Feature toca área regulada por NR |
-| 04-sst-especialista | Dúvida técnica de SST ou domínio |
-| 05-revisor | Antes de qualquer commit |
-| 06-pesquisador | Informação externa necessária |
+**Antes de qualquer implementação, declarar explicitamente qual agente está sendo usado.**
+
+### Fluxo obrigatório para tasks complexas:
+```
+1. Orquestrador analisa o pedido
+2. Arquiteto projeta (ANTES de qualquer código)
+3. NR Compliance valida (se toca norma)
+4. SST Especialista confirma domínio (se SST)
+5. Design/Paginação valida (se toca documento impresso)
+6. Desenvolvedor implementa
+7. Revisor aprova → commit
+```
+
+### Regras absolutas:
+- **NUNCA commitar sem o Revisor ter aprovado**
+- **NUNCA implementar feature complexa sem o Arquiteto ter projetado**
+- **NUNCA pular etapas mesmo que a task pareça simples**
+- **SEMPRE declarar "Atuando como Agente XX" antes de cada etapa**
+- **SEMPRE atualizar `.claude/knowledge/` após mudanças significativas**
+- **SEMPRE atualizar `memory/feedback.md` com decisões importantes**
+
+### Agentes disponíveis (ler perfil completo em `.claude/agents/`):
+
+| Agente | Arquivo | Quando acionar |
+|---|---|---|
+| 00 Orquestrador | 00-orquestrador.md | Sempre — coordena os demais |
+| 01 Arquiteto | 01-arquiteto.md | Antes de qualquer feature nova |
+| 02 Desenvolvedor | 02-desenvolvedor.md | Implementação de código |
+| 03 NR Compliance | 03-nr-compliance.md | Feature toca NR, exame, risco, EPI, laudo |
+| 04 SST Especialista | 04-sst-especialista.md | Dúvida técnica de SST ou domínio |
+| 05 Revisor | 05-revisor.md | Antes de qualquer commit |
+| 06 Pesquisador | 06-pesquisador.md | Informação externa necessária |
+| 07 Saúde Ocupacional | 07-saude-ocupacional.md | PCMSO, ASO, exames, e-Social saúde |
+| 08 Design e Paginação | 08-design-paginacao.md | Layout, impressão A4, fontes, paginação |
 
 ## Convenções de código
 - CSS: variáveis em `:root` — `--bg`, `--surface`, `--border`, `--accent`, `--text`, etc.
