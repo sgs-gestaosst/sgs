@@ -233,7 +233,8 @@ async function uploadExame(demFuncId,realFuncId,exameId,exameNome,input){
     // Upload para Storage
     const ext=file.name.split('.').pop();
     const path=`${demanda.empresa_id}/clinica_demandas/${demToken}/${funcId}_${exameId}_${Date.now()}.${ext}`;
-    const resUp=await fetch(`${SUPA_URL}/storage/v1/object/evidencias/${path}`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'x-upsert':'true','Content-Type':file.type},body:file});
+    const resUp=await fetch(`${SUPA_URL}/storage/v1/object/documentos-funcionarios/${path}`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'x-upsert':'true','Content-Type':file.type},body:file});
+    if(!resUp.ok){const err=await resUp.json().catch(()=>({}));throw new Error(`Erro no upload: ${err.message||err.error||resUp.status}`);}
 
     // Atualiza exames_completos com path do arquivo (anon pode escrever em clinica_demanda_funcionarios)
     const f=funcionarios.find(x=>x.id===funcId);
