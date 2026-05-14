@@ -153,6 +153,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <div class="screen-actions">
     <button class="btn btn-edit" onclick="toggleElaboradora()">✏️ Empresa elaboradora</button>
     <input type="file" id="empresa-logo-input-pcmso" accept="image/*" style="display:none;" onchange="carregarLogoEmpresaPCMSO(this)">
+    <button class="btn btn-edit" onclick="abrirModalCronograma()" style="border-color:#e0a855;color:#e0a855;">📅 Gerar cronograma</button>
     <a id="btn-voltar" href="#" class="btn btn-edit" style="text-decoration:none;">← Voltar</a>
     <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
   </div>
@@ -193,6 +194,30 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     </div>
     <div style="margin-top:8px;font-size:11px;color:var(--text3);">
       ℹ️ Estes dados aparecem na capa e rodapé. Não são salvos no banco — preencha antes de imprimir.
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GERAR CRONOGRAMA -->
+<div class="modal-overlay" id="modal-cronograma" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:740px;width:100%;margin:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div>
+        <div style="font-size:16px;font-weight:500;">📅 Gerar Cronograma PCMSO</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px;">Defina as datas para cada exame por função. As ações serão criadas automaticamente no Plano de Ação.</div>
+      </div>
+      <button onclick="fecharModalCronograma()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div id="lista-cronograma-modal" style="max-height:60vh;overflow-y:auto;margin-bottom:16px;"></div>
+    <div class="status-bar" id="status-cronograma"></div>
+    <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:16px;">
+      <div style="font-size:12px;color:var(--text2);"><span id="count-cronograma">0</span> exame(s) selecionado(s)</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="fecharModalCronograma()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:13px;">Cancelar</button>
+        <button onclick="gerarAcoesCronograma()" id="btn-gerar-cronograma" style="background:var(--accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:500;">
+          <span id="spinner-cronograma" style="display:none;">⏳ </span>Gerar ações no plano
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -251,6 +276,7 @@ async function carregar(){
       const visto=new Set();
       ultimosAsos=todosAsos.filter(a=>{if(visto.has(a.funcionario_id))return false;visto.add(a.funcionario_id);return true;});
     }
+    await carregarAcoesPCMSO();
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro: ${e.message}</div>`;
@@ -445,6 +471,44 @@ function renderCronograma(){
   const pg=document.createElement('div');pg.className='page';
   const fmtD=d=>d?new Date(d+'T00:00:00').toLocaleDateString('pt-BR'):'—';
   const hoje=new Date();hoje.setHours(0,0,0,0);
+  // Calendário das ações PCMSO agrupadas por mês e função
+  const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const anoAtual=new Date().getFullYear();
+  // Agrupa ações por mês (apenas do ano vigente e próximo)
+  const porMes={};
+  acoesPCMSO.forEach(a=>{
+    if(!a.prazo||a.status==='Cancelada'||a.status==='Arquivada')return;
+    const d=new Date(a.prazo+'T00:00:00');
+    const ano=d.getFullYear();
+    if(ano<anoAtual||ano>anoAtual+1)return;
+    const chave=`${ano}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    if(!porMes[chave])porMes[chave]=[];
+    const funcao=funcoes.find(f=>f.id===a.funcao_id);
+    porMes[chave].push({...a,funcaoNome:funcao?.nome_funcao||'Geral'});
+  });
+  const mesesOrdenados=Object.keys(porMes).sort();
+  const calendarioHtml=mesesOrdenados.length?`
+    <table class="doc-table" style="margin-bottom:16pt;">
+      <thead><tr><th style="width:14%;">Mês/Ano</th><th style="width:30%;">Função</th><th>Exame / Ação</th><th style="width:14%;text-align:center;">Status</th></tr></thead>
+      <tbody>
+        ${mesesOrdenados.map(k=>{
+          const [ano,mes]=k.split('-');
+          const label=`${MESES[parseInt(mes)-1]}/${ano}`;
+          const items=porMes[k];
+          return items.map((a,i)=>{
+            const stCor=a.status==='Concluída'?'#166534':a.status==='Em andamento'?'#1d4ed8':'#854d0e';
+            const stBg=a.status==='Concluída'?'#dcfce7':a.status==='Em andamento'?'#dbeafe':'#fef9c3';
+            return`<tr>
+              ${i===0?`<td rowspan="${items.length}" style="font-weight:700;color:#062018;vertical-align:middle;font-family:'IBM Plex Mono',monospace;">${label}</td>`:''}
+              <td style="font-size:8.5pt;color:#374151;">${escHtml(a.funcaoNome)}</td>
+              <td style="font-weight:500;">${escHtml(a.titulo||'—')}</td>
+              <td style="text-align:center;"><span style="background:${stBg};color:${stCor};padding:1pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${a.status||'Pendente'}</span></td>
+            </tr>`;
+          }).join('');
+        }).join('')}
+      </tbody>
+    </table>`:
+    `<div class="em-breve"><div class="em-breve-icon">📅</div><div class="em-breve-label">Nenhum cronograma gerado.<br>Clique em "📅 Gerar cronograma" para definir as datas dos exames por função.</div></div>`;
   // Cronograma por funcionário: próximo exame e status
   const linhasFuncionarios=funcionarios.map(f=>{
     const aso=ultimosAsos.find(a=>a.funcionario_id===f.id);
@@ -482,13 +546,8 @@ function renderCronograma(){
     <span class="ph-doc">PCMSO — ${fmtAno()}</span>
   </div>
   <div class="doc-section"><span class="num-secao">5</span>Cronograma Anual de Exames</div>
-  <p class="doc-text" style="margin-bottom:10pt;">Status atual dos exames ocupacionais por funcionário, com base nos ASOs registrados no sistema.</p>
-  ${!funcionarios.length?`
-    <div class="em-breve"><div class="em-breve-icon">👷</div><div class="em-breve-label">Nenhum funcionário cadastrado.</div></div>`
-  :`<table class="doc-table">
-    <thead><tr><th>Funcionário</th><th>Função</th><th>Último ASO</th><th>Próximo ASO</th><th style="text-align:center;">Status</th></tr></thead>
-    <tbody>${linhasFuncionarios}</tbody>
-  </table>`}
+  <p class="doc-text" style="margin-bottom:10pt;">Planejamento dos exames ocupacionais por função, gerado a partir do Plano de Ação e sincronizado com o PGR.</p>
+  ${calendarioHtml}
   ${listaExames.length?`
   <div class="doc-subsection" style="margin-top:16pt;">Exames obrigatórios do programa</div>
   <table class="doc-table">
@@ -607,6 +666,109 @@ function atualizarElaboradora(){
   document.querySelectorAll('.elab-responsavel').forEach(el=>{el.textContent=elaboradora.responsavel||'—';});
   document.querySelectorAll('.elab-nome-field').forEach(el=>{el.textContent=elaboradora.nome||'—';});
   document.querySelectorAll('.elab-cnpj-field').forEach(el=>{el.textContent=elaboradora.cnpj||'—';});
+}
+
+// ── CRONOGRAMA PCMSO ─────────────────────────────────────────
+let acoesPCMSO=[];
+
+async function carregarAcoesPCMSO(){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&origem=eq.PCMSO&ativo=eq.true&select=*&order=prazo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    acoesPCMSO=await res.json().catch(()=>[]);
+  }catch(e){acoesPCMSO=[];}
+}
+
+function calcularProxData(periodicidade){
+  const d=new Date();
+  const meses={Anual:12,Semestral:6,Trimestral:3,Bienal:24,Admissional:0}[periodicidade]||12;
+  if(!meses)return '';
+  d.setMonth(d.getMonth()+meses);
+  return d.toISOString().split('T')[0];
+}
+
+async function abrirModalCronograma(){
+  document.getElementById('modal-cronograma').style.display='flex';
+  const container=document.getElementById('lista-cronograma-modal');
+  container.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);">↻ Carregando exames por função...</div>`;
+  await carregarAcoesPCMSO();
+  // Agrupa funcao_exames por função
+  const porFuncao={};
+  funcao_exames.forEach(fe=>{
+    const f=funcoes.find(x=>x.id===fe.funcao_id);
+    const cat=catalogo.find(c=>c.id===fe.exame_id);
+    if(!f||!cat)return;
+    if(!porFuncao[fe.funcao_id])porFuncao[fe.funcao_id]={funcao:f,exames:[]};
+    // Verifica se já tem ação PCMSO para esta função+exame
+    const acaoExistente=acoesPCMSO.find(a=>a.funcao_id===fe.funcao_id&&a.titulo?.includes(cat.nome));
+    const dataSugerida=acaoExistente?.prazo||calcularProxData(fe.periodicidade||cat.periodicidade_padrao||'Anual');
+    porFuncao[fe.funcao_id].exames.push({...fe,cat,dataSugerida,acaoExistente});
+  });
+  const grupos=Object.values(porFuncao);
+  if(!grupos.length){container.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text3);">Nenhum exame vinculado às funções ainda.<br>Acesse o módulo de Exames para vincular exames às funções.</div>`;return;}
+  const sFmt=(d)=>d?new Date(d+'T00:00:00').toLocaleDateString('pt-BR',{month:'short',year:'numeric'}):'—';
+  container.innerHTML=grupos.map((g,gi)=>`
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;padding:8px 10px;background:var(--surface2);border-radius:6px;margin-bottom:8px;">
+        👷 ${escHtml(g.funcao.nome_funcao)}
+      </div>
+      ${g.exames.map((e,ei)=>`
+      <div style="display:grid;grid-template-columns:20px 1fr auto auto;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="cr-${gi}-${ei}" class="cb-cronograma" checked onchange="atualizarCountCronograma()"
+          data-funcao-id="${e.funcao_id}" data-funcao-nome="${escHtml(g.funcao.nome_funcao)}"
+          data-exame-nome="${escHtml(e.cat.nome)}" data-periodicidade="${escHtml(e.periodicidade||e.cat.periodicidade_padrao||'Anual')}"
+          style="width:15px;height:15px;accent-color:var(--accent);">
+        <div>
+          <div style="font-size:13px;">${escHtml(e.cat.nome)}</div>
+          <div style="font-size:11px;color:var(--text2);">${escHtml(e.periodicidade||e.cat.periodicidade_padrao||'Anual')}${e.acaoExistente?` · <span style="color:var(--accent2);">Ação existente: ${sFmt(e.acaoExistente.prazo)}</span>`:''}</div>
+        </div>
+        <span style="font-size:10px;color:var(--text3);">Data prevista:</span>
+        <input type="date" id="data-${gi}-${ei}" value="${e.dataSugerida}"
+          style="background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 8px;outline:none;">
+      </div>`).join('')}
+    </div>`).join('');
+  atualizarCountCronograma();
+}
+
+function fecharModalCronograma(){document.getElementById('modal-cronograma').style.display='none';}
+
+function atualizarCountCronograma(){
+  const sel=document.querySelectorAll('.cb-cronograma:checked').length;
+  document.getElementById('count-cronograma').textContent=sel;
+}
+
+async function gerarAcoesCronograma(){
+  const checks=[...document.querySelectorAll('.cb-cronograma:checked')];
+  if(!checks.length){alert('Selecione ao menos um exame.');return;}
+  const btn=document.getElementById('btn-gerar-cronograma');
+  const sp=document.getElementById('spinner-cronograma');
+  btn.disabled=true;sp.style.display='inline';
+  const setStatus=(tipo,msg)=>{const el=document.getElementById('status-cronograma');el.className='status-bar show '+tipo;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]}</span><span>${msg}</span>`;};
+  try{
+    let criadas=0,atualizadas=0;
+    for(const cb of checks){
+      const funcaoId=parseInt(cb.dataset.funcaoId);
+      const funcaoNome=cb.dataset.funcaoNome;
+      const exameNome=cb.dataset.exameNome;
+      const periodicidade=cb.dataset.periodicidade;
+      const idx=cb.id.replace('cr-','').split('-');
+      const prazo=document.getElementById(`data-${idx[0]}-${idx[1]}`)?.value||null;
+      const titulo=`${exameNome} — ${funcaoNome}`;
+      // Verifica se já existe ação PCMSO para esta função+exame
+      const existente=acoesPCMSO.find(a=>a.funcao_id===funcaoId&&a.titulo?.includes(exameNome));
+      if(existente){
+        await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${existente.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({prazo})});
+        atualizadas++;
+      }else{
+        await fetch(`${SUPA_URL}/rest/v1/acoes`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({empresa_id:parseInt(empresaId),titulo,descricao:`Exame ocupacional obrigatório — ${periodicidade} — NR-07`,origem:'PCMSO',prioridade:'Média',funcao_id:funcaoId,prazo,status:'Pendente',ativo:true})});
+        criadas++;
+      }
+    }
+    setStatus('success',`${criadas} ação(ões) criada(s) e ${atualizadas} atualizada(s) com sucesso!`);
+    await carregarAcoesPCMSO();
+    renderDocumento();
+    setTimeout(fecharModalCronograma,2000);
+  }catch(e){setStatus('error',e.message);}
+  finally{btn.disabled=false;sp.style.display='none';}
 }
 
 carregar();
