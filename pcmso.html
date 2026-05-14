@@ -39,11 +39,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .doc-text{font-size:9.5pt;color:#374151;line-height:1.6;text-align:justify;}
 .num-secao{color:#0d6e4f;font-family:'IBM Plex Mono',monospace;font-size:9pt;margin-right:6pt;}
 /* Capa */
-.capa{display:flex;flex-direction:column;height:100%;min-height:257mm;}
-.capa-logo-box{width:50pt;height:50pt;background:#062018;display:flex;align-items:center;justify-content:center;border-radius:6pt;}
-.capa-logo-text{font-family:'IBM Plex Mono',monospace;font-size:16pt;font-weight:700;color:#fff;letter-spacing:.05em;}
-.capa-divider{height:3pt;background:linear-gradient(90deg,#062018,#0d6e4f,#2dd4a0);margin:20pt 0;border-radius:2pt;}
-.capa-empresa-box{background:#f0fff8;border-left:4pt solid #0d6e4f;padding:12pt 16pt;margin-bottom:20pt;border-radius:0 4pt 4pt 0;}
+.capa{display:flex;flex-direction:column;height:100%;max-height:257mm;overflow:hidden;}
+.capa-topo{display:flex;align-items:center;gap:14pt;margin-bottom:4pt;}
+.capa-topo-nome{font-size:13pt;font-weight:700;color:#062018;line-height:1.2;}
+.capa-topo-meta{font-size:8.5pt;color:#4b5563;margin-top:3pt;}
+.capa-logo-box{width:60pt;height:60pt;background:#062018;display:flex;align-items:center;justify-content:center;border-radius:6pt;flex-shrink:0;overflow:hidden;cursor:pointer;position:relative;}
+.capa-logo-text{font-family:'IBM Plex Mono',monospace;font-size:18pt;font-weight:700;color:#fff;}
+.capa-divider{height:3pt;background:linear-gradient(90deg,#062018,#0d6e4f,#2dd4a0);margin:16pt 0 18pt;border-radius:2pt;}
+.capa-empresa-box{background:#f0fff8;border-left:4pt solid #0d6e4f;padding:14pt 18pt;margin-bottom:18pt;border-radius:0 6pt 6pt 0;}
+.capa-rodape-bloco{margin-top:auto;}
+.capa-elab-strip{margin-top:12pt;padding:10pt 12pt;border:1pt solid #e5e7eb;border-radius:6pt;background:#fafbfc;display:flex;align-items:center;gap:14pt;}
+.capa-elab-strip-label{font-size:7.5pt;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.1em;flex-shrink:0;}
+.capa-elab-strip-content{display:flex;align-items:center;gap:10pt;flex:1;min-width:0;}
+.capa-elab-strip-logo{width:32pt;height:32pt;background:#f3f4f6;border:1pt solid #d1d5db;border-radius:5pt;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.capa-elab-strip-sigla{font-family:'IBM Plex Mono',monospace;font-size:10pt;font-weight:700;color:#4b5563;}
+.capa-elab-strip-nome{font-size:9.5pt;font-weight:600;color:#1f2937;line-height:1.3;}
+.capa-elab-strip-cnpj{font-size:8pt;color:#4b5563;font-family:'IBM Plex Mono',monospace;margin-top:1pt;}
 .capa-badge{padding:3pt 10pt;border-radius:20pt;font-size:8pt;font-weight:600;border:1pt solid;}
 .badge-gr1{background:#e6fff9;color:#047857;border-color:#6ee7b7;}
 .badge-gr2{background:#eff6ff;color:#1d4ed8;border-color:#93c5fd;}
@@ -64,7 +75,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .ficha-item:nth-child(2n){border-right:none;}
 .ficha-grid-3 .ficha-item:nth-child(3n){border-right:none;}
 .ficha-item:last-child,.ficha-item:nth-last-child(2){border-bottom:none;}
-.ficha-label{font-size:7pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:2pt;}
+.ficha-label{font-size:7.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-bottom:2pt;}
 .ficha-value{font-size:9.5pt;color:#1a1a2e;font-weight:500;}
 .ficha-full{grid-column:1/-1;border-right:none!important;}
 /* Tabelas */
@@ -92,13 +103,42 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 /* Print */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  body{background:#fff!important;}
-  .screen-header{display:none!important;}
-  .screen-body{padding:0!important;}
-  .pages-wrap{gap:0!important;}
-  .page{box-shadow:none!important;margin:0!important;page-break-after:always;width:210mm!important;min-height:297mm!important;}
-  .page:last-child{page-break-after:avoid;}
+  body{background:#fff!important;margin:0!important;padding:0!important;}
+  .screen-header,.painel-elaboradora{display:none!important;}
+  .screen-body{padding:0!important;display:block!important;}
+  .pages-wrap{gap:0!important;display:block!important;align-items:unset!important;}
   @page{size:A4;margin:0;}
+  .page{
+    box-shadow:none!important;margin:0!important;
+    width:210mm!important;height:297mm!important;
+    min-height:unset!important;max-height:unset!important;
+    overflow:hidden!important;
+    padding:14mm 16mm 28mm 22mm!important;
+    border-left:8mm solid #062018!important;
+    page-break-after:always!important;break-after:page!important;
+    position:relative!important;box-sizing:border-box!important;
+  }
+  .page::before{display:none!important;}
+  .page:last-child{page-break-after:auto!important;break-after:auto!important;}
+  .page-footer{
+    position:absolute!important;bottom:10mm!important;
+    left:22mm!important;right:16mm!important;
+    margin-top:0!important;border-top:1pt solid #d1d5db!important;
+    padding-top:5pt!important;display:flex!important;
+    justify-content:space-between!important;background:#fff!important;
+    height:12mm!important;overflow:hidden!important;
+  }
+  .capa{max-height:257mm!important;overflow:hidden!important;}
+  .capa-rodape-bloco{page-break-inside:avoid;break-inside:avoid;}
+  .doc-section{page-break-after:avoid;break-after:avoid;}
+  .doc-table tr{page-break-inside:avoid;break-inside:avoid;}
+  .doc-table{page-break-inside:auto;}
+  /* Contraste para impressão */
+  .ficha-label,.ph-doc,.pf-label{color:#4b5563!important;}
+  .ficha-value{color:#0d2040!important;}
+  .doc-text{color:#1f2937!important;}
+  .pf-page{color:#374151!important;font-weight:600!important;}
+  [style*="color:#9ca3af"],[style*="color:#6b7280"]{color:#374151!important;}
 }
 @media(max-width:230mm){
   .page{width:100%;padding:15mm 12mm 15mm 18mm;}
@@ -112,6 +152,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <span style="font-size:13px;color:var(--text2);">Visualização do documento</span>
   <div class="screen-actions">
     <button class="btn btn-edit" onclick="toggleElaboradora()">✏️ Empresa elaboradora</button>
+    <input type="file" id="empresa-logo-input-pcmso" accept="image/*" style="display:none;" onchange="carregarLogoEmpresaPCMSO(this)">
     <a id="btn-voltar" href="#" class="btn btn-edit" style="text-decoration:none;">← Voltar</a>
     <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
   </div>
@@ -144,6 +185,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <input type="text" id="elab-responsavel" placeholder="Nome + CRM" oninput="atualizarElaboradora()"
           style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
       </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Data de elaboração</label>
+        <input type="date" id="elab-data-pcmso" oninput="atualizarElaboradora()"
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
     </div>
     <div style="margin-top:8px;font-size:11px;color:var(--text3);">
       ℹ️ Estes dados aparecem na capa e rodapé. Não são salvos no banco — preencha antes de imprimir.
@@ -167,7 +213,8 @@ const empresaId=params.get('empresa_id');
 if(!empresaId)window.location.href='empresas.html';
 document.getElementById('btn-voltar').href=`exames.html?empresa_id=${empresaId}`;
 
-let empresa,cnaes,setores,funcoes,setor_exames,funcao_exames,catalogo;
+let empresa,cnaes,setores,funcoes,setor_exames,funcao_exames,catalogo,funcionarios=[],ultimosAsos=[];
+let empresaLogoUrlPCMSO='';
 const grInfo={1:{label:'GR 1 — Baixo',cls:'badge-gr1'},2:{label:'GR 2 — Médio-Baixo',cls:'badge-gr2'},3:{label:'GR 3 — Médio-Alto',cls:'badge-gr3'},4:{label:'GR 4 — Alto',cls:'badge-gr4'}};
 function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtDataAtual(){return new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});}
@@ -191,6 +238,19 @@ async function carregar(){
       const resFuncSet=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=in.(${sIds})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
       window.funcaoSetoresData=await resFuncSet.json();
     }else{window.funcaoSetoresData=[];}
+    // Carregar funcionários e últimos ASOs para cronograma real
+    const [resFunc]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,funcao_id,setor_id,data_prox_aso,aso_ultima_data,aso_ultimo_resultado&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+    ]);
+    funcionarios=await resFunc.json().catch(()=>[]);
+    if(funcionarios.length){
+      const fIds=funcionarios.map(f=>f.id).join(',');
+      const resAso=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?funcionario_id=in.(${fIds})&status_esocial=neq.Cancelado&select=funcionario_id,data_exame,resultado&order=data_exame.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const todosAsos=await resAso.json().catch(()=>[]);
+      // Mantém só o mais recente por funcionário
+      const visto=new Set();
+      ultimosAsos=todosAsos.filter(a=>{if(visto.has(a.funcionario_id))return false;visto.add(a.funcionario_id);return true;});
+    }
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro: ${e.message}</div>`;
@@ -211,36 +271,61 @@ function renderCapa(){
   const gr=empresa.grau_risco;
   const cnpjF=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'—';
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
+  const nomeEmpresa=empresa.nome_fantasia||empresa.razao_social||'—';
+  const siglaEmpresa=nomeEmpresa.replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'EMP';
+  const norm=s=>(s||'').toLowerCase().replace(/[^a-z0-9]/g,'').trim();
+  const elabDiferente=!!elaboradora.nome&&norm(elaboradora.nome)!==norm(empresa.razao_social)&&norm(elaboradora.nome)!==norm(empresa.nome_fantasia);
+  const dataElab=elaboradora.dataElab?new Date(elaboradora.dataElab+'T00:00:00').toLocaleDateString('pt-BR'):fmtDataAtual();
   pg.innerHTML=`
   <div class="capa">
-    <div style="display:flex;align-items:center;gap:12pt;margin-bottom:40pt;">
-      <div id="doc-elab-logo" class="capa-logo-box"><span class="capa-logo-text">SST</span></div>
-      <div>
-        <div id="doc-elab-nome" style="font-size:10pt;font-weight:700;color:#062018;">Empresa Elaboradora</div>
-        <div style="font-size:9pt;color:#6b7280;">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
+    <!-- TOPO: empresa em destaque -->
+    <div class="capa-topo">
+      <div id="doc-empresa-logo-pcmso" class="capa-logo-box" style="background:#062018;" onclick="document.getElementById('empresa-logo-input-pcmso').click()" title="Clique para adicionar a logo">
+        ${empresaLogoUrlPCMSO?`<img src="${empresaLogoUrlPCMSO}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`:`<span class="capa-logo-text">${siglaEmpresa}</span>`}
+      </div>
+      <div class="capa-topo-info" style="flex:1;min-width:0;">
+        <div class="capa-topo-nome">${escHtml(nomeEmpresa)}</div>
+        <div class="capa-topo-meta">Elaborado em <strong>${dataElab}</strong></div>
       </div>
     </div>
     <div class="capa-divider"></div>
+    <!-- MEIO: título + empresa + badges -->
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
       <div style="font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#0d6e4f;margin-bottom:8pt;">Programa de Controle Médico de Saúde Ocupacional</div>
-      <div style="font-size:28pt;font-weight:700;color:#062018;line-height:1.15;margin-bottom:6pt;">PCMSO</div>
-      <div style="font-size:13pt;color:#0d6e4f;font-weight:400;margin-bottom:24pt;">Conforme NR-7 — Portaria MTE nº 1.031/2018</div>
+      <div style="font-size:30pt;font-weight:700;color:#062018;line-height:1.15;margin-bottom:6pt;letter-spacing:-.01em;">PCMSO</div>
+      <div style="font-size:13pt;color:#0d6e4f;font-weight:500;margin-bottom:24pt;">Conforme NR-7 — Portaria MTE nº 1.031/2018</div>
       <div class="capa-empresa-box">
         <div style="font-size:15pt;font-weight:700;color:#062018;margin-bottom:3pt;">${escHtml(empresa.razao_social||empresa.nome_fantasia||'—')}</div>
-        ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#4b5563;margin-bottom:4pt;">${escHtml(empresa.nome_fantasia)}</div>`:''}
-        <div style="font-size:9pt;color:#6b7280;font-family:'IBM Plex Mono',monospace;">CNPJ: ${escHtml(cnpjF)}</div>
+        ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#374151;margin-bottom:4pt;">${escHtml(empresa.nome_fantasia)}</div>`:''}
+        <div style="font-size:9pt;color:#4b5563;font-family:'IBM Plex Mono',monospace;">CNPJ: ${escHtml(cnpjF)}</div>
       </div>
       <div style="display:flex;gap:8pt;flex-wrap:wrap;margin-top:10pt;">
         ${gr?`<span class="capa-badge ${grInfo[gr]?.cls||'badge-info'}">${grInfo[gr]?.label||''}</span>`:''}
         ${cnpePrincipal?`<span class="capa-badge badge-info">CNAE: ${escHtml(cnpePrincipal.cnae)}</span>`:''}
-        <span class="capa-badge badge-info">${empresa.total_funcionarios_previsto||0} funcionários cobertos</span>
+        <span class="capa-badge badge-info">${funcionarios.length||empresa.total_funcionarios_previsto||0} funcionários</span>
         <span class="capa-badge badge-info">${setor_exames.length+funcao_exames.length} exames vinculados</span>
       </div>
     </div>
-    <div style="border-top:1pt solid #e5e7eb;padding-top:10pt;display:flex;justify-content:space-between;">
-      <div><div style="font-size:8pt;color:#9ca3af;">Versão</div><div style="font-size:9pt;font-weight:500;">1.0 — ${fmtAno()}</div></div>
-      <div style="text-align:center;"><div style="font-size:8pt;color:#9ca3af;">Elaboração</div><div id="doc-elab-footer" style="font-size:9pt;font-weight:500;">—</div></div>
-      <div style="text-align:right;"><div style="font-size:8pt;color:#9ca3af;">Revisão</div><div style="font-size:9pt;font-weight:500;">Anual</div></div>
+    <!-- RODAPÉ DA CAPA -->
+    <div class="capa-rodape-bloco">
+      <div style="border-top:1pt solid #d1d5db;padding-top:10pt;display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:7.5pt;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Versão</div><div style="font-size:9.5pt;font-weight:600;color:#062018;margin-top:2pt;">1.0 — ${fmtAno()}</div></div>
+        <div style="text-align:center;"><div style="font-size:7.5pt;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Médico Responsável</div><div id="doc-elab-footer" style="font-size:9.5pt;font-weight:600;color:#062018;margin-top:2pt;">—</div></div>
+        <div style="text-align:right;"><div style="font-size:7.5pt;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Revisão Periódica</div><div style="font-size:9.5pt;font-weight:600;color:#062018;margin-top:2pt;">Anual</div></div>
+      </div>
+      ${elabDiferente?`
+      <div class="capa-elab-strip" style="margin-top:12pt;">
+        <span class="capa-elab-strip-label">Elaborado por</span>
+        <div class="capa-elab-strip-content">
+          <div id="doc-elab-logo" class="capa-elab-strip-logo">
+            ${elaboradora.logoUrl?`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;">`:`<span class="capa-elab-strip-sigla">${(elaboradora.nome||'SST').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'SST'}</span>`}
+          </div>
+          <div>
+            <div class="capa-elab-strip-nome">${escHtml(elaboradora.nome)}</div>
+            ${elaboradora.cnpj?`<div class="capa-elab-strip-cnpj">CNPJ: ${escHtml(elaboradora.cnpj)}</div>`:''}
+          </div>
+        </div>
+      </div>`:''}
     </div>
   </div>`;
   return pg;
@@ -358,7 +443,28 @@ function renderProgramaExames(){
 
 function renderCronograma(){
   const pg=document.createElement('div');pg.className='page';
-  // Monta cronograma consolidado (todos os exames únicos)
+  const fmtD=d=>d?new Date(d+'T00:00:00').toLocaleDateString('pt-BR'):'—';
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  // Cronograma por funcionário: próximo exame e status
+  const linhasFuncionarios=funcionarios.map(f=>{
+    const aso=ultimosAsos.find(a=>a.funcionario_id===f.id);
+    const prox=f.data_prox_aso;
+    const proxD=prox?new Date(prox+'T00:00:00'):null;
+    const vencido=proxD&&proxD<hoje;
+    const statusCor=!prox?'#6b7280':vencido?'#991b1b':'#166534';
+    const statusBg=!prox?'#f3f4f6':vencido?'#fee2e2':'#dcfce7';
+    const statusLabel=!prox?'Não agendado':vencido?'Vencido':'Em dia';
+    const funcao=funcoes.find(fn=>fn.id===f.funcao_id);
+    const examesFuncao=funcao_exames.filter(fe=>fe.funcao_id===f.funcao_id).map(fe=>{const cat=catalogo.find(c=>c.id===fe.exame_id);return cat?.nome||'';}).filter(Boolean);
+    return`<tr>
+      <td style="font-weight:500;font-size:9pt;">${escHtml(f.nome_completo)}</td>
+      <td style="font-size:8.5pt;color:#374151;">${escHtml(funcao?.nome_funcao||'—')}</td>
+      <td style="font-size:8.5pt;color:#374151;">${fmtD(aso?.data_exame||f.aso_ultima_data)}</td>
+      <td style="font-size:8.5pt;font-weight:600;color:#374151;">${fmtD(prox)}</td>
+      <td style="text-align:center;"><span style="background:${statusBg};color:${statusCor};padding:2pt 7pt;border-radius:3pt;font-size:7.5pt;font-weight:700;">${statusLabel}</span></td>
+    </tr>`;
+  }).join('');
+  // Lista consolidada de exames únicos
   const examesUnicos=new Map();
   setor_exames.forEach(se=>{
     const cat=catalogo.find(c=>c.id===se.exame_id);
@@ -376,20 +482,27 @@ function renderCronograma(){
     <span class="ph-doc">PCMSO — ${fmtAno()}</span>
   </div>
   <div class="doc-section"><span class="num-secao">5</span>Cronograma Anual de Exames</div>
-  ${!listaExames.length?`
-    <div class="em-breve"><div class="em-breve-icon">📅</div><div class="em-breve-label">Vincule exames aos setores para gerar o cronograma automaticamente.</div></div>`
+  <p class="doc-text" style="margin-bottom:10pt;">Status atual dos exames ocupacionais por funcionário, com base nos ASOs registrados no sistema.</p>
+  ${!funcionarios.length?`
+    <div class="em-breve"><div class="em-breve-icon">👷</div><div class="em-breve-label">Nenhum funcionário cadastrado.</div></div>`
   :`<table class="doc-table">
+    <thead><tr><th>Funcionário</th><th>Função</th><th>Último ASO</th><th>Próximo ASO</th><th style="text-align:center;">Status</th></tr></thead>
+    <tbody>${linhasFuncionarios}</tbody>
+  </table>`}
+  ${listaExames.length?`
+  <div class="doc-subsection" style="margin-top:16pt;">Exames obrigatórios do programa</div>
+  <table class="doc-table">
     <thead><tr><th>Exame</th><th>Categoria</th><th style="text-align:center;">Periodicidade</th><th>NR Relacionada</th><th style="text-align:center;">eSocial</th></tr></thead>
     <tbody>
       ${listaExames.map(e=>`<tr>
         <td style="font-weight:500;">${escHtml(e.nome)}</td>
-        <td style="font-size:8.5pt;color:#6b7280;">${escHtml(e.categoria||'—')}</td>
+        <td style="font-size:8.5pt;color:#4b5563;">${escHtml(e.categoria||'—')}</td>
         <td style="text-align:center;"><span class="per-badge per-${e.periodicidade||'Anual'}">${e.periodicidade||'Anual'}</span></td>
         <td style="font-size:8.5pt;font-family:'IBM Plex Mono',monospace;">${escHtml(e.nr_relacionada||'—')}</td>
         <td style="text-align:center;">${e.obrigatorio_esocial?'<span class="obrig-badge obrig-esocial">Sim</span>':'—'}</td>
       </tr>`).join('')}
     </tbody>
-  </table>`}
+  </table>`:''}
 
   <div class="doc-section" style="margin-top:20pt;"><span class="num-secao">6</span>Disposições Finais</div>
   <p class="doc-text">Conforme a NR-7, este PCMSO deverá ser revisado:</p>
@@ -464,15 +577,33 @@ function atualizarLogoDocumento(){
   }
 }
 
+function carregarLogoEmpresaPCMSO(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    empresaLogoUrlPCMSO=e.target.result;
+    const el=document.getElementById('doc-empresa-logo-pcmso');
+    if(el){el.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`;el.style.background='#fff';}
+  };
+  reader.readAsDataURL(file);
+}
+
 function atualizarElaboradora(){
   elaboradora.nome=document.getElementById('elab-nome').value.trim();
   elaboradora.cnpj=document.getElementById('elab-cnpj').value.trim();
   elaboradora.responsavel=document.getElementById('elab-responsavel').value.trim();
-  const nomeEl=document.getElementById('doc-elab-nome');
+  elaboradora.dataElab=document.getElementById('elab-data-pcmso')?.value||'';
+  // Lógica inteligente: só mostra elaboradora se diferente da empresa
+  const norm=s=>(s||'').toLowerCase().replace(/[^a-z0-9]/g,'').trim();
+  const elabDiferente=!!elaboradora.nome&&norm(elaboradora.nome)!==norm(empresa?.razao_social)&&norm(elaboradora.nome)!==norm(empresa?.nome_fantasia);
+  // Atualiza footer do médico
   const footerEl=document.getElementById('doc-elab-footer');
-  if(nomeEl)nomeEl.textContent=elaboradora.nome||'Empresa Elaboradora';
-  if(footerEl)footerEl.textContent=elaboradora.nome||'—';
-  atualizarLogoDocumento();
+  if(footerEl)footerEl.textContent=elaboradora.responsavel||elaboradora.nome||(empresa?.nome_fantasia||empresa?.razao_social||'—');
+  // Atualiza data de elaboração na capa
+  const dataEl=document.querySelector('.capa-topo-meta strong');
+  if(dataEl&&elaboradora.dataElab){dataEl.textContent=new Date(elaboradora.dataElab+'T00:00:00').toLocaleDateString('pt-BR');}
+  // Recria capa para aplicar lógica de elaboradora
+  renderDocumento();
   document.querySelectorAll('.elab-responsavel').forEach(el=>{el.textContent=elaboradora.responsavel||'—';});
   document.querySelectorAll('.elab-nome-field').forEach(el=>{el.textContent=elaboradora.nome||'—';});
   document.querySelectorAll('.elab-cnpj-field').forEach(el=>{el.textContent=elaboradora.cnpj||'—';});
