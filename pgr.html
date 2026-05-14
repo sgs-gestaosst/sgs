@@ -300,18 +300,34 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   /* Ocultar containers de medição */
   [style*="left:-9999px"]{display:none!important;}
 
-  /* Contraste reforçado para impressão */
-  .pf-label,.pf-page,.ph-doc,.ph-empresa{color:#4b5563!important;}
-  .risco-perigo-pill,.ghe-count{color:#4b5563!important;}
-  .risco-tecnico{color:#374151!important;}
-  .risco-metricas{color:#374151!important;}
-  .ficha-label,.medidas-label,.rf-field .lbl{color:#4b5563!important;}
-  .capa-footer-label{color:#4b5563!important;}
+  /* Contraste reforçado para impressão — tudo legível em P&B */
+  .pf-label,.pf-page{color:#374151!important;}
+  .ph-doc{color:#4b5563!important;}
+  .ph-empresa{color:#0d2040!important;}
+  .risco-perigo-pill{color:#374151!important;}
+  .ghe-count{color:#374151!important;}
+  .ghe-funcoes{color:#1f2937!important;}
+  .risco-tecnico{color:#1f2937!important;}
+  .risco-metricas{color:#1f2937!important;}
+  .ficha-label{color:#4b5563!important;}
+  .ficha-value{color:#0d2040!important;}
+  .medidas-label,.rf-field .lbl{color:#374151!important;}
+  .medida-desc{color:#0d2040!important;}
+  .medida-label{color:#0d2040!important;}
+  .danos-text{color:#0d2040!important;}
+  .capa-footer-label{color:#374151!important;}
   .capa-footer-value{color:#0d2040!important;}
-  .capa-elab-strip-label{color:#4b5563!important;}
+  .capa-elab-strip-label{color:#374151!important;}
+  .capa-elab-strip-nome{color:#0d2040!important;}
   .capa-elab-strip-cnpj{color:#374151!important;}
   .em-breve-label{color:#4b5563!important;}
-  .doc-text{color:#1f2937!important;}
+  .doc-text{color:#0d2040!important;}
+  .setor-detalhe-nome{color:#0d2040!important;}
+  .epi-pill{color:#3b0764!important;background:#f3e8ff!important;}
+  .ca-pill{color:#0d2040!important;background:#f3f4f6!important;}
+  /* Todos os inline color:#6b7280 que são texto de conteúdo */
+  [style*="color:#6b7280"]{color:#374151!important;}
+  [style*="color: #6b7280"]{color:#374151!important;}
   .ficha-item{page-break-inside:avoid;break-inside:avoid;}
   .setor-detalhe{page-break-inside:avoid;break-inside:avoid;}
   .doc-table{page-break-inside:auto;}
@@ -393,6 +409,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     </div>
   </div>
 </div>
+
+<!-- Input oculto para logo da empresa -->
+<input type="file" id="empresa-logo-input" accept="image/*" style="display:none;" onchange="carregarLogoEmpresa(this)">
 
 <!-- Painel elaboradora -->
 <div id="painel-elaboradora" style="display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 32px;">
@@ -700,8 +719,8 @@ function renderCapa(){
   <div class="capa">
     <!-- TOPO: Empresa dona em destaque -->
     <div class="capa-topo">
-      <div id="doc-empresa-logo" class="capa-logo-box" style="background:#1a3a6e;">
-        <span class="capa-logo-text">${siglaEmpresa}</span>
+      <div id="doc-empresa-logo" class="capa-logo-box" style="background:#1a3a6e;cursor:pointer;position:relative;" onclick="document.getElementById('empresa-logo-input').click()" title="Clique para adicionar a logo da empresa">
+        ${empresaLogoUrl?`<img src="${empresaLogoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`:`<span class="capa-logo-text">${siglaEmpresa}</span><span style="position:absolute;bottom:2pt;right:2pt;font-size:6pt;opacity:.5;background:rgba(0,0,0,.4);border-radius:2pt;padding:1pt 3pt;color:#fff;">+logo</span>`}
       </div>
       <div class="capa-topo-info">
         <div class="capa-topo-nome">${h(nomeEmpresa)}</div>
@@ -884,10 +903,10 @@ function renderCaracterizacao(){
       <div class="setor-detalhe-header">
         <div>
           <div class="setor-detalhe-nome">${h(s.nome_setor)}</div>
-          ${fns.length?`<div style="font-size:8pt;color:#6b7280;margin-top:2pt;">Funções: ${h(fns.join(' · '))}</div>`:''}
+          ${fns.length?`<div style="font-size:8pt;color:#374151;margin-top:2pt;font-weight:500;">Funções: ${h(fns.join(' · '))}</div>`:''}
         </div>
         <div style="text-align:right;">
-          <div style="font-size:8pt;color:#6b7280;margin-bottom:4pt;">${s.num_funcionarios_previsto||0} trabalhador(es)</div>
+          <div style="font-size:8pt;color:#374151;margin-bottom:4pt;font-weight:500;">${s.num_funcionarios_previsto||0} trabalhador(es)</div>
           ${badges?`<div>${badges}</div>`:''}
         </div>
       </div>
@@ -903,19 +922,19 @@ function renderCaracterizacao(){
         <div>
           <div class="setor-detalhe-nome">${h(f.nome_funcao)}</div>
           <div style="display:flex;gap:8pt;margin-top:3pt;flex-wrap:wrap;">
-            ${f.cbo?`<span style="font-size:7pt;font-family:'IBM Plex Mono',monospace;background:#eff6ff;color:#1d4ed8;padding:1pt 6pt;border-radius:3pt;border:1pt solid #bfdbfe;">CBO ${h(f.cbo)}</span>`:''}
-            ${f.turno?`<span style="font-size:7pt;background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;border:1pt solid #e5e7eb;">Turno: ${h(f.turno)}</span>`:''}
-            ${f.escolaridade_minima?`<span style="font-size:7pt;background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;border:1pt solid #e5e7eb;">Escolaridade mínima: ${h(f.escolaridade_minima)}</span>`:''}
+            ${f.cbo?`<span style="font-size:7.5pt;font-family:'IBM Plex Mono',monospace;background:#eff6ff;color:#1e40af;padding:2pt 7pt;border-radius:4pt;border:1pt solid #bfdbfe;font-weight:600;">CBO ${h(f.cbo)}</span>`:''}
+            ${f.turno?`<span style="font-size:7.5pt;background:#f1f5f9;color:#1f2937;padding:2pt 7pt;border-radius:4pt;border:1pt solid #d1d5db;font-weight:500;">Turno: ${h(f.turno)}</span>`:''}
+            ${f.escolaridade_minima?`<span style="font-size:7.5pt;background:#f1f5f9;color:#1f2937;padding:2pt 7pt;border-radius:4pt;border:1pt solid #d1d5db;font-weight:500;">Escolaridade: ${h(f.escolaridade_minima)}</span>`:''}
           </div>
         </div>
         <div style="text-align:right;flex-shrink:0;">
-          ${setoresNomes.length?`<div style="font-size:8pt;color:#4a7cdc;margin-bottom:3pt;">Setor(es): ${h(setoresNomes.join(' · '))}</div>`:''}
-          <div style="font-size:8pt;color:#6b7280;">${numTrab} trabalhador(es)</div>
+          ${setoresNomes.length?`<div style="font-size:8.5pt;color:#1e40af;margin-bottom:3pt;font-weight:600;">Setor(es): ${h(setoresNomes.join(' · '))}</div>`:''}
+          <div style="font-size:8pt;color:#374151;font-weight:500;">${numTrab} trabalhador(es)</div>
         </div>
       </div>
-      ${f.descricao?`<div style="padding:8pt 10pt;border-top:1pt solid #e5e7eb;">
-        <div style="font-size:6.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:3pt;">Descrição da função</div>
-        <div style="font-size:8.5pt;color:#374151;line-height:1.5;">${h(f.descricao)}</div>
+      ${f.descricao?`<div style="padding:10pt 12pt;border-top:1pt solid #e5e7eb;background:#fafbfc;">
+        <div style="font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#4b5563;margin-bottom:4pt;">Descrição da função</div>
+        <div style="font-size:9pt;color:#1f2937;line-height:1.6;">${h(f.descricao)}</div>
       </div>`:''}
     </div>`;
   }
@@ -2117,8 +2136,33 @@ function phHeader(){return`<div class="page-header"><span class="ph-empresa">${h
 function pfFooter(){return`<div class="page-footer"><span class="pf-label">Programa de Gerenciamento de Riscos — ${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="pf-page"></span></div>`;}
 
 // ── ELABORADORA ───────────────────────────────────────────────
-let elaboradora={nome:'',cnpj:'',responsavel:'',logoUrl:''};
+let elaboradora={nome:'',cnpj:'',responsavel:'',logoUrl:'',dataElaboracao:''};
+let empresaLogoUrl='';
 function toggleElaboradora(){const p=document.getElementById('painel-elaboradora');p.style.display=p.style.display==='none'?'block':'none';}
+function carregarLogoEmpresa(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    empresaLogoUrl=e.target.result;
+    const logoEl=document.getElementById('doc-empresa-logo');
+    if(logoEl){
+      logoEl.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;"><span style="position:absolute;top:2pt;right:2pt;font-size:9pt;cursor:pointer;background:rgba(0,0,0,.5);border-radius:50%;width:14pt;height:14pt;display:flex;align-items:center;justify-content:center;color:#fff;" onclick="event.stopPropagation();removerLogoEmpresa()">×</span>`;
+      logoEl.style.background='#fff';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+function removerLogoEmpresa(){
+  empresaLogoUrl='';
+  document.getElementById('empresa-logo-input').value='';
+  const siglaEmpresa=(empresa?.nome_fantasia||empresa?.razao_social||'EMP').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'EMP';
+  const logoEl=document.getElementById('doc-empresa-logo');
+  if(logoEl){
+    logoEl.style.background='#1a3a6e';
+    logoEl.innerHTML=`<span class="capa-logo-text">${siglaEmpresa}</span><span style="position:absolute;bottom:2pt;right:2pt;font-size:6pt;opacity:.5;background:rgba(0,0,0,.4);border-radius:2pt;padding:1pt 3pt;color:#fff;">+logo</span>`;
+  }
+}
+
 function carregarLogo(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
