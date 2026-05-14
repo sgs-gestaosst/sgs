@@ -558,13 +558,18 @@ async function abrirSugestaoRisco(){
     const tabRiscos=contexto==='setor'?'setor_riscos':'funcao_riscos';
     const campoId=contexto==='setor'?`setor_id=eq.${setorAtivo.id}`:`funcao_id=eq.${funcaoAtiva?.id}`;
     const [resRiscos,resMapping]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/${tabRiscos}?${campoId}&ativo=eq.true&select=risco_id,riscos(categoria_risco_id)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/${tabRiscos}?${campoId}&ativo=eq.true&select=risco_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
       fetch(`${SUPA_URL}/rest/v1/risco_exame_mapping?ativo=eq.true&select=categoria_risco_id,exame_id,obrigatorio`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
     ]);
-    const riscos=await resRiscos.json();
+    const srList=await resRiscos.json();
     const mapping=await resMapping.json();
-
-    const catIds=[...new Set(riscos.map(r=>r.riscos?.categoria_risco_id).filter(Boolean))];
+    if(!Array.isArray(srList)||!srList.length){
+      document.getElementById('lista-sugestao-risco').innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);">Nenhum risco mapeado neste setor/função.<br>Adicione riscos no módulo de Riscos primeiro.</div>`;return;
+    }
+    const riscoIds=srList.map(r=>r.risco_id).filter(Boolean);
+    const resRiscosDetalhe=await fetch(`${SUPA_URL}/rest/v1/riscos?id=in.(${riscoIds.join(',')})&select=id,categoria_risco_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const riscosDetalhe=await resRiscosDetalhe.json();
+    const catIds=[...new Set(riscosDetalhe.map(r=>r.categoria_risco_id).filter(Boolean))];
     const jaAdicionados=(contexto==='setor'?examesSetor:examesFuncao).map(e=>e.exame_id);
     const exameIdsMap=mapping.filter(m=>catIds.includes(m.categoria_risco_id)&&!jaAdicionados.includes(m.exame_id));
     const exameIdsSugeridos=[...new Set(exameIdsMap.map(m=>m.exame_id))];
