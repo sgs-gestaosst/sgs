@@ -152,6 +152,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <button class="view-btn active" id="btn-kanban" onclick="setView('kanban')">⬛ Kanban</button>
         <button class="view-btn" id="btn-lista" onclick="setView('lista')">☰ Lista</button>
       </div>
+      <button class="btn btn-edit" onclick="sincronizarASOsVencidos()" style="border-color:#a78bfa;color:#a78bfa;" title="Criar ações para funcionários com ASO vencido">🩺 ASOs vencidos</button>
       <button class="btn btn-edit" onclick="abrirModalGerarAcoes()" style="border-color:#e0a855;color:#e0a855;">🤖 Gerar automáticas</button>
       <button class="btn btn-primary" onclick="abrirModalNova()">+ Nova ação</button>
     </div>
@@ -849,6 +850,28 @@ document.getElementById('modal-sugestoes').addEventListener('click',e=>{
 });
 
 inicializar();
+
+async function sincronizarASOsVencidos(){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&data_prox_aso=lt.${new Date().toISOString().split('T')[0]}&select=id,nome_completo,data_prox_aso,tipo_prox_aso,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const vencidos=await res.json();
+    if(!vencidos.length){alert('Nenhum ASO vencido encontrado para esta empresa.');return;}
+    if(!confirm(`Encontrados ${vencidos.length} ASO(s) vencido(s). Criar ações para todos?`))return;
+    let criados=0;
+    const hoje=new Date().toISOString().split('T')[0];
+    const em15=new Date();em15.setDate(em15.getDate()+15);
+    for(const f of vencidos){
+      const diasAtrasados=Math.floor((new Date()-new Date(f.data_prox_aso+'T00:00:00'))/(1000*60*60*24));
+      const prio=diasAtrasados>90?'Crítica':diasAtrasados>30?'Alta':'Média';
+      const res2=await fetch(`${SUPA_URL}/rest/v1/acoes`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify({empresa_id:parseInt(empresaId),titulo:`Renovar ASO — ${f.nome_completo}`,descricao:`ASO ${f.tipo_prox_aso||'Periódico'} vencido em ${new Date(f.data_prox_aso+'T00:00:00').toLocaleDateString('pt-BR')} (${diasAtrasados} dias atrás). Agendar novo exame médico ocupacional.`,origem:'PCMSO',prioridade:prio,setor_id:f.setor_id||null,prazo:em15.toISOString().split('T')[0],status:'Pendente',ativo:true})});
+      if(res2.ok){const d=await res2.json();acoes.unshift(d[0]);await registrarHistorico(d[0].id,null,'Pendente','Ação criada automaticamente — ASO vencido');criados++;}
+    }
+    acoesFiltradas=[...acoes];renderStats();renderView();atualizarHeroSub();
+    setStatus('status-acao','success',`${criados} ação(ões) criada(s) para ASOs vencidos!`);
+    setTimeout(()=>clearStatus('status-acao'),4000);
+  }catch(e){alert('Erro: '+e.message);}
+}
 </script>
 </body>
 </html>

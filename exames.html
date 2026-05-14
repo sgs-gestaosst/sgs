@@ -152,6 +152,90 @@
   </div>
 </div>
 
+<!-- MODAL SUGESTÃO POR RISCO -->
+<div class="modal-overlay" id="modal-sugestao-risco">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-titulo">
+      <span>💡 Exames sugeridos pelos riscos mapeados</span>
+      <button onclick="document.getElementById('modal-sugestao-risco').classList.remove('show')" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;" id="sugestao-risco-sub">Baseado nos riscos identificados no PGR para este setor/função, os exames abaixo são indicados pela NR-07.</div>
+    <div id="lista-sugestao-risco" style="max-height:380px;overflow-y:auto;margin-bottom:16px;"></div>
+    <div class="status-bar" id="status-sugestao"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+      <span id="count-sugestao" style="font-size:12px;color:var(--text2);"></span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="document.getElementById('modal-sugestao-risco').classList.remove('show')">Cancelar</button>
+        <button class="btn btn-save" id="btn-confirmar-sugestao" onclick="adicionarExamesSugeridos()">
+          <span class="spinner" id="spinner-sugestao"></span>
+          <span id="label-sugestao">Adicionar selecionados</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPORTAR ASO -->
+<div class="modal-overlay" id="modal-importar-aso">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-titulo">
+      <span>📥 Importar ASO Existente</span>
+      <button onclick="document.getElementById('modal-importar-aso').classList.remove('show')" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">Para empresas em andamento que já possuem ASOs válidos. Registre os dados essenciais e o sistema passará a controlar os vencimentos.</div>
+    <div class="modal-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="modal-field" style="grid-column:1/-1;">
+        <label>Funcionário *</label>
+        <select id="imp-funcionario" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+          <option value="">— Selecione o funcionário —</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Tipo de ASO *</label>
+        <select id="imp-tipo" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+          <option value="Admissional">Admissional</option>
+          <option value="Periodico" selected>Periódico</option>
+          <option value="Retorno">Retorno ao Trabalho</option>
+          <option value="Mudanca">Mudança de Função</option>
+          <option value="Demissional">Demissional</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Data do ASO *</label>
+        <input type="date" id="imp-data" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+      </div>
+      <div class="modal-field">
+        <label>Resultado *</label>
+        <select id="imp-resultado" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+          <option value="Apto">Apto</option>
+          <option value="Inapto">Inapto</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Próximo ASO (vencimento)</label>
+        <input type="date" id="imp-prox" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+      </div>
+      <div class="modal-field">
+        <label>Médico responsável (CRM)</label>
+        <input type="text" id="imp-medico" placeholder="Ex: Dr. João — CRM/SP 12345" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+      </div>
+      <div class="modal-field" style="grid-column:1/-1;">
+        <label>Upload do PDF do ASO (opcional)</label>
+        <input type="file" id="imp-pdf" accept=".pdf,image/*" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">O arquivo será salvo no histórico do funcionário.</div>
+      </div>
+    </div>
+    <div class="status-bar" id="status-importar-aso" style="margin-top:12px;"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="document.getElementById('modal-importar-aso').classList.remove('show')">Cancelar</button>
+      <button class="btn btn-save" id="btn-salvar-importacao" onclick="salvarImportacaoASO()">
+        <span class="spinner" id="spinner-importar"></span>
+        <span id="label-importar">Importar ASO</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CONFIRMAR EXCLUSÃO -->
 <div class="modal-overlay" id="modal-excluir">
   <div class="modal">
@@ -283,7 +367,10 @@ function renderPainel(){
   const ctxLabel=contexto==='setor'?setorAtivo.nome_setor:funcaoAtiva?.nome_funcao||'';
   document.getElementById('painel-titulo').textContent=ctxLabel;
   document.getElementById('painel-sub').textContent=`${examesAtivos.length} exame(s) vinculado(s)`;
-  document.getElementById('painel-actions').innerHTML=`<button class="btn btn-edit btn-sm" onclick="abrirBusca()">+ Adicionar exame</button>`;
+  document.getElementById('painel-actions').innerHTML=`
+    <button class="btn btn-edit btn-sm" onclick="abrirBusca()">+ Adicionar exame</button>
+    <button class="btn btn-edit btn-sm" onclick="abrirSugestaoRisco()" style="border-color:#e0a855;color:#e0a855;" title="Sugerir exames com base nos riscos mapeados">💡 Sugerir por risco</button>
+    <button class="btn btn-edit btn-sm" onclick="abrirModalImportarASO()" style="border-color:var(--accent2);color:var(--accent2);" title="Importar ASO já existente">📥 Importar ASO</button>`;
 
   const tabsHtml=`<div class="ctx-tabs">
     <div class="ctx-tab ${contexto==='setor'?'active':''}" onclick="mudarContextoSetor()">🗂️ ${escHtml(setorAtivo.nome_setor)}</div>
@@ -292,7 +379,7 @@ function renderPainel(){
 
   const buscaHtml=`
     <div class="busca-wrap" id="busca-wrap">
-      <input type="text" class="busca-input" id="busca-input" placeholder="Buscar exame para adicionar..." oninput="filtrarExame()" onkeydown="navBusca(event)" autocomplete="off" style="display:none;">
+      <input type="text" class="busca-input" id="busca-input" placeholder="Buscar exame ou clique para ver todos..." oninput="filtrarExame()" onfocus="mostrarTodosExames()" onkeydown="navBusca(event)" autocomplete="off" style="display:none;">
       <div class="busca-dropdown" id="busca-dropdown"></div>
     </div>
     <div class="status-bar" id="status-exames"></div>`;
@@ -335,12 +422,32 @@ function abrirBusca(){
   if(inp){inp.style.display='block';inp.focus();}
 }
 
+function mostrarTodosExames(){
+  const inp=document.getElementById('busca-input');
+  if(inp.value.trim().length>0)return;
+  const dd=document.getElementById('busca-dropdown');
+  const jaAdicionados=(contexto==='setor'?examesSetor:examesFuncao).map(e=>e.exame_id);
+  const disponiveis=todosExames.filter(e=>!jaAdicionados.includes(e.id)).slice(0,25);
+  if(!disponiveis.length){dd.innerHTML=`<div class="busca-option" style="color:var(--text3);cursor:default;">Todos os exames já foram adicionados</div>`;dd.classList.add('show');return;}
+  dd.innerHTML=`<div style="padding:6px 12px;font-size:11px;color:var(--text3);border-bottom:1px solid var(--border);">Mostrando ${disponiveis.length} de ${todosExames.length} exames — digite para filtrar</div>`+disponiveis.map(e=>`
+    <div class="busca-option" onclick="adicionarExame(${e.id})">
+      <div class="busca-option-nome">${escHtml(e.nome)}</div>
+      <div class="busca-option-meta">
+        <span>${escHtml(e.categoria||'')}</span>
+        ${e.nr_relacionada?`<span>${escHtml(e.nr_relacionada)}</span>`:''}
+        <span>${e.periodicidade_padrao||''}</span>
+        ${e.obrigatorio_esocial?`<span style="color:var(--accent2);">eSocial</span>`:''}
+      </div>
+    </div>`).join('');
+  dd.classList.add('show');
+}
+
 function filtrarExame(){
   const inp=document.getElementById('busca-input');
   const dd=document.getElementById('busca-dropdown');
   const termo=inp.value.trim().toLowerCase();
   buscaIdx=-1;
-  if(!termo||termo.length<2){dd.classList.remove('show');return;}
+  if(!termo){mostrarTodosExames();return;}
   const jaAdicionados=(contexto==='setor'?examesSetor:examesFuncao).map(e=>e.exame_id);
   const filtrados=todosExames.filter(e=>!jaAdicionados.includes(e.id)&&(e.nome.toLowerCase().includes(termo)||(e.categoria||'').toLowerCase().includes(termo)||(e.nr_relacionada||'').toLowerCase().includes(termo))).slice(0,20);
   if(!filtrados.length){dd.innerHTML=`<div class="busca-option" style="color:var(--text3);cursor:default;">Nenhum exame encontrado</div>`;dd.classList.add('show');return;}
@@ -436,6 +543,151 @@ function fecharModalExcluir(){document.getElementById('modal-excluir').classList
 
 document.addEventListener('click',e=>{
   if(!e.target.closest('.busca-wrap'))document.getElementById('busca-dropdown')?.classList.remove('show');
+});
+
+// ── SUGESTÃO DE EXAMES POR RISCO ─────────────────────────────
+let examesSugeridosAtual=[];
+
+async function abrirSugestaoRisco(){
+  if(!setorAtivo)return;
+  document.getElementById('modal-sugestao-risco').classList.add('show');
+  document.getElementById('lista-sugestao-risco').innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);">↻ Buscando riscos e sugestões...</div>`;
+  document.getElementById('count-sugestao').textContent='';
+  try{
+    // Busca riscos do contexto atual
+    const tabRiscos=contexto==='setor'?'setor_riscos':'funcao_riscos';
+    const campoId=contexto==='setor'?`setor_id=eq.${setorAtivo.id}`:`funcao_id=eq.${funcaoAtiva?.id}`;
+    const [resRiscos,resMapping]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/${tabRiscos}?${campoId}&ativo=eq.true&select=risco_id,riscos(categoria_risco_id)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/risco_exame_mapping?ativo=eq.true&select=categoria_risco_id,exame_id,obrigatorio`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+    ]);
+    const riscos=await resRiscos.json();
+    const mapping=await resMapping.json();
+
+    const catIds=[...new Set(riscos.map(r=>r.riscos?.categoria_risco_id).filter(Boolean))];
+    const jaAdicionados=(contexto==='setor'?examesSetor:examesFuncao).map(e=>e.exame_id);
+    const exameIdsMap=mapping.filter(m=>catIds.includes(m.categoria_risco_id)&&!jaAdicionados.includes(m.exame_id));
+    const exameIdsSugeridos=[...new Set(exameIdsMap.map(m=>m.exame_id))];
+    examesSugeridosAtual=todosExames.filter(e=>exameIdsSugeridos.includes(e.id));
+
+    if(!examesSugeridosAtual.length){
+      document.getElementById('lista-sugestao-risco').innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);">
+        <div style="font-size:24px;margin-bottom:8px;">✅</div>
+        <div>Todos os exames sugeridos pelos riscos já estão vinculados,<br>ou não há mapeamento de riscos para exames ainda.</div>
+      </div>`;
+      return;
+    }
+    document.getElementById('sugestao-risco-sub').textContent=`${examesSugeridosAtual.length} exame(s) sugerido(s) com base nos ${catIds.length} tipo(s) de risco identificado(s). Selecione os que deseja adicionar.`;
+    const obrigatoriosPorExame={};
+    exameIdsMap.forEach(m=>{if(m.obrigatorio)obrigatoriosPorExame[m.exame_id]=true;});
+
+    document.getElementById('lista-sugestao-risco').innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="sug-all" onchange="toggleSugestoes(this.checked)" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+        <label for="sug-all" style="font-size:12px;color:var(--text2);cursor:pointer;">Selecionar todos</label>
+      </div>
+      ${examesSugeridosAtual.map((e,i)=>`
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="sug-${i}" checked style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin-top:2px;flex-shrink:0;">
+        <label for="sug-${i}" style="flex:1;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:500;">${escHtml(e.nome)}</span>
+            ${obrigatoriosPorExame[e.id]?`<span style="font-size:10px;padding:1px 6px;border-radius:3px;background:#1a2540;color:#7aabf7;">NR-07 Obrigatório</span>`:''}
+            <span style="font-size:10px;padding:1px 6px;border-radius:3px;background:var(--surface2);color:var(--text2);">${escHtml(e.categoria||'')}</span>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${e.nr_relacionada||''} ${e.periodicidade_padrao?'· '+e.periodicidade_padrao:''}</div>
+        </label>
+      </div>`).join('')}`;
+    atualizarCountSugestao();
+    examesSugeridosAtual.forEach((_,i)=>document.getElementById(`sug-${i}`)?.addEventListener('change',atualizarCountSugestao));
+  }catch(e){document.getElementById('lista-sugestao-risco').innerHTML=`<div style="color:var(--danger);padding:16px;">Erro: ${e.message}</div>`;}
+}
+
+function toggleSugestoes(checked){examesSugeridosAtual.forEach((_,i)=>{const el=document.getElementById(`sug-${i}`);if(el)el.checked=checked;});atualizarCountSugestao();}
+function atualizarCountSugestao(){const sel=examesSugeridosAtual.filter((_,i)=>document.getElementById(`sug-${i}`)?.checked).length;document.getElementById('count-sugestao').textContent=`${sel} de ${examesSugeridosAtual.length} selecionado(s)`;document.getElementById('btn-confirmar-sugestao').disabled=sel===0;}
+
+async function adicionarExamesSugeridos(){
+  const selecionados=examesSugeridosAtual.filter((_,i)=>document.getElementById(`sug-${i}`)?.checked);
+  if(!selecionados.length)return;
+  document.getElementById('btn-confirmar-sugestao').disabled=true;
+  document.getElementById('spinner-sugestao').className='spinner show';
+  document.getElementById('label-sugestao').textContent='Adicionando...';
+  try{
+    for(const exame of selecionados){
+      const tabela=contexto==='setor'?'setor_exames':'funcao_exames';
+      const campo=contexto==='setor'?'setor_id':'funcao_id';
+      const ctxId=contexto==='setor'?setorAtivo.id:funcaoAtiva?.id;
+      const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify({[campo]:ctxId,exame_id:exame.id,periodicidade:exame.periodicidade_padrao||'Anual',obrigatorio:exame.obrigatorio_esocial||false,ativo:true})});
+      if(res.ok){const d=await res.json();if(contexto==='setor')examesSetor.push(d[0]);else examesFuncao.push(d[0]);}
+    }
+    document.getElementById('modal-sugestao-risco').classList.remove('show');
+    renderPainel();renderNavSetores();
+    setStatus('status-exames','success',`${selecionados.length} exame(s) adicionado(s)!`);
+    setTimeout(()=>clearStatus('status-exames'),3000);
+  }catch(e){setStatus('status-sugestao','error',e.message);}
+  finally{document.getElementById('spinner-sugestao').className='spinner';document.getElementById('label-sugestao').textContent='Adicionar selecionados';document.getElementById('btn-confirmar-sugestao').disabled=false;}
+}
+
+// ── IMPORTAÇÃO DE ASO ─────────────────────────────────────────
+async function abrirModalImportarASO(){
+  // Popula select de funcionários
+  const sel=document.getElementById('imp-funcionario');
+  sel.innerHTML='<option value="">— Selecione o funcionário —</option>';
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const funcs=await res.json();
+    funcs.forEach(f=>sel.innerHTML+=`<option value="${f.id}">${escHtml(f.nome_completo)}</option>`);
+  }catch(e){console.error(e);}
+  // Sugere vencimento automático (1 ano)
+  const hoje=new Date();hoje.setFullYear(hoje.getFullYear()+1);
+  document.getElementById('imp-prox').value=hoje.toISOString().split('T')[0];
+  document.getElementById('imp-data').value=new Date().toISOString().split('T')[0];
+  const st=document.getElementById('status-importar-aso');if(st)st.className='status-bar';
+  document.getElementById('modal-importar-aso').classList.add('show');
+}
+
+async function salvarImportacaoASO(){
+  const funcId=document.getElementById('imp-funcionario').value;
+  const dataASO=document.getElementById('imp-data').value;
+  if(!funcId||!dataASO){alert('Selecione o funcionário e a data do ASO.');return;}
+  document.getElementById('btn-salvar-importacao').disabled=true;
+  document.getElementById('spinner-importar').className='spinner show';
+  document.getElementById('label-importar').textContent='Salvando...';
+  try{
+    const proxData=document.getElementById('imp-prox').value||null;
+    const medicoRaw=document.getElementById('imp-medico').value.trim();
+    // Salva em esocial_s2220
+    const res=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({funcionario_id:parseInt(funcId),tipo_exame:document.getElementById('imp-tipo').value,data_exame:dataASO,resultado:document.getElementById('imp-resultado').value,data_validade_aso:proxData,nome_medico_coordenador:medicoRaw||null,importado:true,status_esocial:'Pendente'})});
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao salvar ASO');}
+    // Atualiza data_prox_aso no funcionário
+    if(proxData){
+      await fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+        body:JSON.stringify({data_prox_aso:proxData,tipo_prox_aso:'Periódico'})});
+    }
+    // Upload PDF se houver
+    const pdfFile=document.getElementById('imp-pdf').files[0];
+    if(pdfFile){
+      const formData=new FormData();formData.append('',pdfFile,pdfFile.name);
+      await fetch(`${SUPA_URL}/storage/v1/object/documentos/${empresaId}/asos/${funcId}_${Date.now()}.pdf`,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'x-upsert':'true'},body:formData}).catch(()=>{});
+    }
+    document.getElementById('modal-importar-aso').classList.remove('show');
+    setStatus('status-exames','success','ASO importado com sucesso! Vencimento registrado no sistema.');
+    setTimeout(()=>clearStatus('status-exames'),4000);
+  }catch(e){setStatus('status-importar-aso','error',e.message);}
+  finally{document.getElementById('btn-salvar-importacao').disabled=false;document.getElementById('spinner-importar').className='spinner';document.getElementById('label-importar').textContent='Importar ASO';}
+}
+
+// Sugere vencimento ao trocar tipo de ASO
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('imp-tipo')?.addEventListener('change',function(){
+    const data=document.getElementById('imp-data').value;
+    if(!data)return;
+    const d=new Date(data);
+    const meses={'Admissional':12,'Periodico':12,'Retorno':12,'Mudanca':12,'Demissional':0}[this.value]||12;
+    d.setMonth(d.getMonth()+meses);
+    document.getElementById('imp-prox').value=meses>0?d.toISOString().split('T')[0]:'';
+  });
 });
 
 inicializar();

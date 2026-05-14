@@ -602,7 +602,7 @@ async function carregarEmpresa(){
     ]);
     empresa=(await resEmp.json())[0];cnaes=await resCnaes.json();
     if(!empresa){window.location.href='empresas.html';return;}
-    renderHero();renderCampos();renderCNAEs();
+    renderHero();renderCampos();renderCNAEs();carregarDashboardASOs();
     const modulos=[
       {id:'btn-riscos',       href:`riscos.html?empresa_id=${empresaId}`},
       {id:'btn-psicossocial', href:`psicossocial_campanhas.html?empresa_id=${empresaId}`},
@@ -885,6 +885,45 @@ document.addEventListener('click',e=>{
 ['modal-setor','modal-funcao'].forEach(id=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this){if(id==='modal-setor')fecharModalSetor();else fecharModalFuncao();}});});
 
 carregarEmpresa();
+
+// ── DASHBOARD VENCIMENTOS DE ASO ──────────────────────────────
+async function carregarDashboardASOs(){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&data_prox_aso=not.is.null&select=id,nome_completo,data_prox_aso,tipo_prox_aso&order=data_prox_aso.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const funcs=await res.json();
+    if(!funcs.length)return;
+    const hoje=new Date();hoje.setHours(0,0,0,0);
+    const em30=new Date(hoje);em30.setDate(em30.getDate()+30);
+    const em90=new Date(hoje);em90.setDate(em90.getDate()+90);
+    const vencidos=funcs.filter(f=>new Date(f.data_prox_aso)<hoje);
+    const p30=funcs.filter(f=>{const d=new Date(f.data_prox_aso);return d>=hoje&&d<=em30;});
+    const p90=funcs.filter(f=>{const d=new Date(f.data_prox_aso);return d>em30&&d<=em90;});
+    if(!vencidos.length&&!p30.length&&!p90.length)return;
+    const fmtD=d=>new Date(d+'T00:00:00').toLocaleDateString('pt-BR');
+    const bloco=(titulo,lista,bg,bdr,cor)=>`
+      <div style="background:${bg};border:1px solid ${bdr};border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:600;color:${cor};text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">${titulo} (${lista.length})</div>
+        ${lista.slice(0,5).map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px;">
+          <span style="color:var(--text);">${escHtml(f.nome_completo)}</span>
+          <span style="color:${cor};font-family:var(--mono);font-size:11px;">${fmtD(f.data_prox_aso)} · ${f.tipo_prox_aso||'Periódico'}</span>
+        </div>`).join('')}
+        ${lista.length>5?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">+ ${lista.length-5} funcionário(s)...</div>`:''}
+      </div>`;
+
+    let dashEl=document.getElementById('dashboard-asos');
+    if(!dashEl){
+      const sec=document.createElement('div');
+      sec.style.cssText='margin-top:20px;';
+      sec.innerHTML=`<div style="font-size:13px;font-weight:500;margin-bottom:10px;display:flex;align-items:center;gap:8px;">📅 Controle de ASOs <a href="exames.html?empresa_id=${empresaId}" style="font-size:12px;color:var(--accent);text-decoration:none;margin-left:auto;">Gerenciar →</a></div><div id="dashboard-asos"></div>`;
+      document.querySelector('.container')?.appendChild(sec);
+      dashEl=document.getElementById('dashboard-asos');
+    }
+    dashEl.innerHTML=
+      (vencidos.length?bloco('⚠️ ASOs Vencidos',vencidos,'#2a1515','#4a2020','#e05555'):'')+
+      (p30.length?bloco('⏰ Vencem em até 30 dias',p30,'#1a1500','#4a3a10','#e0a855'):'')+
+      (p90.length?bloco('📋 Vencem em 31–90 dias',p90,'#0f1a10','#1a3a1a','#2dd4a0'):'');
+  }catch(e){console.error('Dashboard ASOs:',e);}
+}
 
 async function sugerirIA_Setor(){
   const nome=document.getElementById('s-nome').value.trim();
