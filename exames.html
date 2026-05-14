@@ -1271,7 +1271,8 @@ function abrirModalGerarASO(){
   ['aso-data-exame','aso-data-prox'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('aso-func-info').style.display='none';
   document.getElementById('aso-riscos-list').innerHTML='<span style="color:var(--text3);">Selecione um funcionário...</span>';
-  document.getElementById('aso-exames-list').innerHTML='<span style="color:var(--text3);">Selecione um funcionário...</span>';
+  document.getElementById('aso-exames-clinica').innerHTML='<span style="color:var(--text3);">Selecione um funcionário...</span>';
+  document.getElementById('btn-preview-aso').disabled=true;
   const st=document.getElementById('status-gerar-aso');if(st)st.className='status-bar';
   document.getElementById('modal-gerar-aso').classList.add('show');
 }
