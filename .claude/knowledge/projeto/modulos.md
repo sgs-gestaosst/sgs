@@ -98,8 +98,7 @@
 **Pendente (Fases 2-4):**
 - Fase 2: Demanda para clínica via link público (upload de resultados sem login)
 - Fase 3: Geração de ASO completo com campos NR-07 + revisão médica
-- Fase 4: PCMSO revisado (design, paginação, cronograma, vencimento)
-- Revisão PCMSO, AET, LTCAT
+- IA em ações, LTCAT, AET — revisão de conformidade, eSocial real, Treinamentos
 
 ### eSocial
 **Arquivos:** `esocial_s2220.html` (ASO), `esocial_s2240.html` (exposição)
@@ -111,7 +110,7 @@
 |---|---|---|
 | AET | `aet.html` | Validar conformidade com NR-17 atualizada |
 | LTCAT | `ltcat.html` | Revisar campos obrigatórios |
-| PCMSO | `pcmso.html` | Revisar conformidade NR-07 |
+| PCMSO | `pcmso.html` | ✅ Completo — 9 seções NR-07, cronograma integrado com ações, matriz riscos×exames |
 | Treinamentos | `treinamentos.html` | Integração e-Social pendente |
 | Checklists | `checklists.html` | Revisar fluxo |
 
