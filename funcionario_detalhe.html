@@ -172,6 +172,12 @@
       </div>
       <div id="lista-asos"></div>
 
+      <!-- Laudos da Clínica -->
+      <div style="margin-top:20px;">
+        <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:flex;align-items:center;gap:8px;">Laudos recebidos da clínica<span style="flex:1;height:1px;background:var(--border);display:block;"></span></div>
+        <div id="lista-laudos-clinica"><div style="color:var(--text3);font-size:12px;">Carregando...</div></div>
+      </div>
+
       <!-- Modal upload versão assinada -->
       <div class="modal-overlay" id="modal-upload-aso" style="z-index:1100;">
         <div class="modal" style="max-width:500px;">
@@ -292,7 +298,7 @@ function mudarAba(aba){
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.getElementById(`aba-${aba}`).classList.add('active');
   if(aba==='historico')carregarHistorico();
-  if(aba==='asos')carregarASOs();
+  if(aba==='asos'){carregarASOs();carregarLaudosClinica();}
 }
 
 // ── RENDER HERO ───────────────────────────────────────
@@ -881,6 +887,33 @@ inicializar();
 
 // ── GESTÃO DE ASOs ────────────────────────────────────────────
 let asoEditandoId=null;
+
+async function carregarLaudosClinica(){
+  const el=document.getElementById('lista-laudos-clinica');
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?funcionario_id=eq.${funcId}&select=exames_completos,clinica_demandas(titulo,criado_em)&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const rows=await res.json();
+    const todos=[];
+    rows.forEach(r=>{
+      (r.exames_completos||[]).filter(e=>e.arquivo_path).forEach(e=>{
+        todos.push({...e,demanda_titulo:r.clinica_demandas?.titulo||'Demanda'});
+      });
+    });
+    if(!todos.length){el.innerHTML=`<div style="color:var(--text3);font-size:12px;">Nenhum laudo enviado pela clínica ainda.</div>`;return;}
+    const fmtD=d=>d?new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}):'—';
+    const ext=p=>(p||'').split('.').pop().toLowerCase();
+    const icone=p=>({'pdf':'📄','jpg':'🖼️','jpeg':'🖼️','png':'🖼️'}[ext(p)]||'📎');
+    el.innerHTML=todos.map(a=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
+        <span style="font-size:20px;">${icone(a.arquivo_path)}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(a.nome||a.exame_nome||'Laudo')}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px;">${escHtml(a.demanda_titulo)} · ${fmtD(a.data_upload)}</div>
+        </div>
+        <a href="${SUPA_URL}/storage/v1/object/public/documentos-funcionarios/${escHtml(a.arquivo_path)}" target="_blank" class="btn btn-edit btn-sm" style="flex-shrink:0;">⬇ Baixar</a>
+      </div>`).join('');
+  }catch(e){el.innerHTML=`<div style="color:var(--danger);font-size:12px;">Erro: ${e.message}</div>`;}
+}
 
 async function carregarASOs(){
   const lista=document.getElementById('lista-asos');

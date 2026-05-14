@@ -314,13 +314,24 @@ async function inicializar() {
   document.getElementById('link-voltar').href = `funcionario_detalhe.html?id=${funcId}`;
   try {
     const headers = { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` };
-    const [resFunc, resDocs] = await Promise.all([
+    const [resFunc, resDocs, resLaudos] = await Promise.all([
       fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}&select=id,nome_completo,empresa_id,matricula`, { headers }),
-      fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?funcionario_id=eq.${funcId}&ativo=eq.true&select=*&order=criado_em.desc`, { headers })
+      fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?funcionario_id=eq.${funcId}&ativo=eq.true&select=*&order=criado_em.desc`, { headers }),
+      fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?funcionario_id=eq.${funcId}&select=exames_completos,clinica_demandas(titulo,criado_em)&order=criado_em.desc`, { headers })
     ]);
     const funcs = await resFunc.json();
     funcionario = funcs[0];
     docs = await resDocs.json();
+    // Processa laudos da clínica
+    const rowsLaudos = await resLaudos.json();
+    window._laudosClinica = [];
+    if(Array.isArray(rowsLaudos)){
+      rowsLaudos.forEach(r=>{
+        (r.exames_completos||[]).filter(e=>e.arquivo_path).forEach(e=>{
+          window._laudosClinica.push({...e, demanda_titulo: r.clinica_demandas?.titulo||'Demanda'});
+        });
+      });
+    }
     if (!funcionario) { window.location.href = 'empresas.html'; return; }
 
     // Busca empresa
@@ -395,6 +406,11 @@ function renderDocs() {
     cert: docs.filter(d => TIPOS_CERT.includes(d.tipo)),
     docs: docs.filter(d => TIPOS_DOCS.includes(d.tipo) || !['ASO', ...TIPOS_CERT, ...TIPOS_DOCS].includes(d.tipo))
   };
+  const laudos = window._laudosClinica || [];
+  const fmtD = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+  const ext = p => (p||'').split('.').pop().toLowerCase();
+  const icone = p => ({'pdf':'📄','jpg':'🖼️','jpeg':'🖼️','png':'🖼️'}[ext(p)]||'📎');
+
   el.innerHTML = SECOES.map(s => {
     const lista = grupos[s.key];
     if (!lista.length) return '';
@@ -402,7 +418,19 @@ function renderDocs() {
       <div class="doc-secao-titulo">${s.titulo}</div>
       ${lista.map(d => renderDocCard(d, s)).join('')}
     </div>`;
-  }).join('');
+  }).join('') + (laudos.length ? `
+    <div class="doc-secao">
+      <div class="doc-secao-titulo">🏥 Laudos da Clínica</div>
+      ${laudos.map(a=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
+          <span style="font-size:22px;">${icone(a.arquivo_path)}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(a.nome||a.exame_nome||'Laudo')}</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px;">${escHtml(a.demanda_titulo)} · ${fmtD(a.data_upload)}</div>
+          </div>
+          <a href="${SUPA_URL}/storage/v1/object/public/documentos-funcionarios/${escHtml(a.arquivo_path)}" target="_blank" class="btn btn-edit" style="font-size:12px;padding:6px 12px;flex-shrink:0;">⬇ Baixar</a>
+        </div>`).join('')}
+    </div>` : '');
 }
 
 function renderDocCard(d, s) {
