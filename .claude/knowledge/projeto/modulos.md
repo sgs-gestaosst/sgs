@@ -81,7 +81,7 @@
 - Fase 3: Histórico de acidentes/doenças por risco, confirmação digital de participação
 
 **Pendente:**
-- Visualização de respostas individuais do psicossocial (em andamento)
+- ~~Visualização de respostas individuais do psicossocial~~ ✅ concluído (2026-05-14) — modal decodificado por bloco/dimensão, escala colorida, funciona para Checklist NR-01, COPSOQ-III Média e Curta
 - Revisão PCMSO, AET, LTCAT
 
 ### eSocial
