@@ -700,7 +700,7 @@ function renderDocumento(){
   setPg('sumario-1',pgsIdent.length?nrPag(pgsIdent[0]):'—');
   setPg('sumario-2',pgsCaract.length?nrPag(pgsCaract[0]):'—');
   setPg('sumario-3',nrPag(pgSesmt));
-  setPg('sumario-3b',nrPag(pgMatriz));
+  setPg('sumario-3b',pgsMatriz.length?nrPag(pgsMatriz[0]):'—');
   const nrInv=pgsInv.length?nrPag(pgsInv[0]):'—';
   setPg('sumario-4',nrInv);setPg('sumario-41',nrInv);setPg('sumario-42',nrInv);setPg('sumario-43',nrInv);setPg('sumario-44',nrInv);
   setPg('sumario-5',nrPag(pgEpi));
