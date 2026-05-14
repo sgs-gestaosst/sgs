@@ -290,16 +290,13 @@
     </div>
 
     <div class="status-bar" id="status-gerar-aso"></div>
-    <div style="display:flex;gap:10px;justify-content:space-between;margin-top:16px;">
-      <button class="btn btn-edit" id="btn-preview-aso" onclick="abrirPreviewASO()" disabled>👁 Preview e Imprimir</button>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-cancel" onclick="document.getElementById('modal-gerar-aso').classList.remove('show')">Cancelar</button>
-        <button class="btn btn-save" id="btn-salvar-aso" onclick="salvarASO()">
-          <span class="spinner" id="spinner-aso"></span>
-          <span id="label-aso">Gerar e Salvar</span>
-        </button>
-      </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-cancel" onclick="document.getElementById('modal-gerar-aso').classList.remove('show')">Cancelar</button>
+      <button class="btn btn-save" id="btn-preview-aso" onclick="abrirPreviewASO()" disabled style="background:var(--accent);">
+        👁 Visualizar ASO
+      </button>
     </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:right;">Você poderá salvar na ficha do funcionário após revisar o documento.</div>
   </div>
 </div>
 
@@ -1317,6 +1314,7 @@ async function selecionarFuncionarioASO(funcId){
     const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}&select=*,funcoes(nome_funcao),setores(nome_setor)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const [f]=await res.json();
     funcionarioASO=f;
+    document.getElementById('btn-preview-aso').disabled=false;
     const info=document.getElementById('aso-func-info');
     info.style.display='block';
     info.innerHTML=`<div style="font-weight:600;color:var(--text);margin-bottom:4px;">${escHtml(f.nome_completo)}</div>
@@ -1498,11 +1496,15 @@ async function salvarASO(){
       await fetch(`${SUPA_URL}/rest/v1/esocial_s2220_exames`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
         body:JSON.stringify({s2220_id:s2220.id,exame_id:ex.exame_id,nome_exame:ex.nome_exame,codigo_tabela27_esocial:ex.codigo_tabela27,data_exame:dados.data_exame,resultado_exame:ex.resultado_exame,obrigatorio_pela_funcao:ex.obrigatorio})});
     }
-    // Salva dados no sessionStorage e abre preview para impressão
-    sessionStorage.setItem('sgs_aso_preview',JSON.stringify({...dados,aso_id:s2220.id}));
+    // Salva no localStorage com aso_id e abre preview via anchor (evita bloqueio de popup)
+    localStorage.setItem('sgs_aso_preview',JSON.stringify({...dados,aso_id:s2220.id}));
     document.getElementById('modal-gerar-aso').classList.remove('show');
-    setStatus('status-exames','success','ASO gerado e salvo! Abrindo para impressão...');
-    setTimeout(()=>{window.open('aso_preview.html','_blank');clearStatus('status-exames');},500);
+    setStatus('status-exames','success','ASO salvo! Abrindo documento...');
+    setTimeout(()=>{
+      const a=document.createElement('a');a.href='aso_preview.html';a.target='_blank';a.rel='noopener';
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      clearStatus('status-exames');
+    },300);
   }catch(e){setStatus('status-gerar-aso','error',e.message);}
   finally{document.getElementById('btn-salvar-aso').disabled=false;document.getElementById('spinner-aso').className='spinner';document.getElementById('label-aso').textContent='Gerar e Salvar';}
 }
