@@ -235,16 +235,18 @@ async function uploadExame(demFuncId,realFuncId,exameId,exameNome,input){
     const path=`${demanda.empresa_id}/clinica_demandas/${demToken}/${funcId}_${exameId}_${Date.now()}.${ext}`;
     const resUp=await fetch(`${SUPA_URL}/storage/v1/object/documentos-funcionarios/${path}`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'x-upsert':'true','Content-Type':file.type},body:file});
 
-    // Registra em funcionario_documentos
-    await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
-      body:JSON.stringify({funcionario_id:realFuncId,empresa_id:demanda.empresa_id,demanda_id:demanda.id,demanda_token:demToken,tipo:'Exame',subtipo:exameNome,arquivo_url:path,arquivo_nome:file.name,ativo:true})});
-
-    // Atualiza exames_completos na demanda_funcionario
+    // Atualiza exames_completos com path do arquivo (anon pode escrever em clinica_demanda_funcionarios)
     const f=funcionarios.find(x=>x.id===funcId);
     if(f){
-      const novosCompletos=[...(f.exames_completos||[]),{exame_id:exameId,nome:exameNome,data_upload:new Date().toISOString()}];
-      await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?id=eq.${f.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+      const novosCompletos=[...(f.exames_completos||[]),{
+        exame_id:exameId,nome:exameNome,
+        arquivo_path:path,arquivo_nome:file.name,
+        funcionario_id:realFuncId,
+        data_upload:new Date().toISOString()
+      }];
+      const resUp2=await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?id=eq.${f.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
         body:JSON.stringify({exames_completos:novosCompletos,data_ultimo_upload:new Date().toISOString(),status:novosCompletos.length>=(f.exames_pendentes||[]).length&&(f.exames_pendentes||[]).length>0?'Completo':'Parcial'})});
+      if(!resUp2.ok)throw new Error('Erro ao registrar upload');
       f.exames_completos=novosCompletos;
     }
 
