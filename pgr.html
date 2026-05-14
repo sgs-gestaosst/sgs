@@ -657,29 +657,8 @@ function renderDocumento(){
   wrap.appendChild(pgEpi);
   if(window.campanhasPsi&&window.campanhasPsi.length){
     renderAvaliacaoPsicossocial().forEach(pg=>{pgsPsi.push(pg);wrap.appendChild(pg);});
-  } else {
-    const pgPend=criarPagina();
-    pgPend.innerHTML=`
-    ${phHeader('7. Avaliação de Riscos Psicossociais')}
-    <div class="doc-section"><span class="num-secao">7</span>Avaliação de Riscos Psicossociais</div>
-    <div style="border:1.5pt solid #d97706;border-radius:6pt;padding:16pt 18pt;background:#fffbeb;margin-top:8pt;">
-      <div style="display:flex;align-items:center;gap:10pt;margin-bottom:10pt;">
-        <span style="font-size:18pt;line-height:1;">⚠️</span>
-        <div style="font-size:11pt;font-weight:700;color:#92400e;">Avaliação Psicossocial — Pendente</div>
-      </div>
-      <p class="doc-text" style="margin-bottom:10pt;color:#1f2937;">
-        A NR-01 (2025), subitem 1.5.4.4.3.2, item 10, exige a avaliação de riscos psicossociais como
-        parte obrigatória do inventário de riscos do PGR. Nenhuma campanha psicossocial foi encerrada
-        para esta empresa até a data de elaboração deste documento.
-      </p>
-      <div style="background:#fff8ed;border-left:3pt solid #f59e0b;padding:8pt 12pt;border-radius:0 4pt 4pt 0;">
-        <div style="font-size:8pt;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4pt;">Ação necessária</div>
-        <p class="doc-text" style="margin-bottom:0;color:#374151;">Realize e encerre uma campanha de avaliação psicossocial (COPSOQ-III Média ou Checklist NR-01) no módulo Psicossocial do SGS. Os resultados serão integrados automaticamente a este documento na próxima geração.</p>
-      </div>
-    </div>
-    ${pfFooter()}`;
-    pgsPsi.push(pgPend);wrap.appendChild(pgPend);
   }
+  // Se não há campanhas encerradas, a seção psicossocial simplesmente não aparece no documento
   pgsPlano.forEach(pg=>wrap.appendChild(pg));
   if(pgContrat)wrap.appendChild(pgContrat);
   if(pgPartic)wrap.appendChild(pgPartic);
@@ -1808,6 +1787,9 @@ function renderSecaoContratadas(){
 // ── SEÇÃO: PARTICIPAÇÃO DOS TRABALHADORES ─────────────────────
 function renderSecaoParticipacao(){
   const p=window.pgrParticipacao;
+  // Só renderiza se houver ao menos um campo preenchido ou confirmação registrada
+  const temDados=p&&(p.data_divulgacao||p.forma_divulgacao||p.responsavel_comunicacao||p.mecanismo_consulta||p.canal_comunicacao||p.confirmado_em);
+  if(!temDados)return null;
   const pg=criarPagina();
   const campo=(label,valor,id,placeholder)=>`
     <div style="margin-bottom:10pt;">
