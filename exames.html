@@ -652,7 +652,7 @@ async function criarDemanda(){
     // Cria demanda
     const resDem=await fetch(`${SUPA_URL}/rest/v1/clinica_demandas`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
       body:JSON.stringify({empresa_id:parseInt(empresaId),titulo,descricao:document.getElementById('dem-descricao').value.trim()||null,total_funcionarios:funcIds.length,ativo:true})});
-    if(!resDem.ok)throw new Error('Erro ao criar demanda');
+    if(!resDem.ok){const err=await resDem.json();throw new Error(err.message||err.hint||err.details||JSON.stringify(err));}
     const [demanda]=await resDem.json();
     // Insere funcionários na demanda
     const funcsParaInserir=todosFuncionarios.filter(f=>funcIds.includes(f.id));
