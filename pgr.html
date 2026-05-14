@@ -638,7 +638,7 @@ function renderDocumento(){
   const pgsIdent=renderIdentificacao();
   const pgsCaract=renderCaracterizacao();
   const pgSesmt=renderSESMT();
-  const pgMatriz=renderMatrizRisco();
+  const pgsMatriz=renderMatrizRisco();
   const pgsInv=renderInventarioRiscos();
   const pgEpi=renderMatrizEPI();
   const pgsPsi=[];
@@ -652,26 +652,32 @@ function renderDocumento(){
   pgsIdent.forEach(pg=>wrap.appendChild(pg));
   pgsCaract.forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(pgSesmt);
-  wrap.appendChild(pgMatriz);
+  pgsMatriz.forEach(pg=>wrap.appendChild(pg));
   pgsInv.forEach(pg=>wrap.appendChild(pg));
   wrap.appendChild(pgEpi);
   if(window.campanhasPsi&&window.campanhasPsi.length){
     renderAvaliacaoPsicossocial().forEach(pg=>{pgsPsi.push(pg);wrap.appendChild(pg);});
   } else {
-    const pgPend=document.createElement('div');
-    pgPend.className='pagina';
-    pgPend.innerHTML=`<div class="secao-titulo">6. Avaliação de Riscos Psicossociais</div>
-      <div style="border:2px solid #e0a855;border-radius:8px;padding:20px;background:#1a1500;margin-top:16px;">
-        <div style="color:#e0a855;font-weight:600;font-size:14px;margin-bottom:8px;">⚠️ Avaliação Psicossocial Pendente</div>
-        <p style="font-size:12px;color:#8892a4;line-height:1.7;">
-          A NR-01 (2025), subitem 1.5.4.4.3.2, exige a avaliação de riscos psicossociais como parte
-          obrigatória do inventário de riscos do PGR. Nenhuma campanha psicossocial foi encerrada
-          para esta empresa.<br><br>
-          <strong style="color:#e8eaf0;">Ação necessária:</strong> Realize e encerre uma campanha de avaliação
-          psicossocial (COPSOQ-III ou Checklist NR-01) no módulo Psicossocial para que os resultados
-          sejam integrados automaticamente a este documento.
-        </p>
-      </div>`;
+    const pgPend=criarPagina();
+    pgPend.innerHTML=`
+    ${phHeader('7. Avaliação de Riscos Psicossociais')}
+    <div class="doc-section"><span class="num-secao">7</span>Avaliação de Riscos Psicossociais</div>
+    <div style="border:1.5pt solid #d97706;border-radius:6pt;padding:16pt 18pt;background:#fffbeb;margin-top:8pt;">
+      <div style="display:flex;align-items:center;gap:10pt;margin-bottom:10pt;">
+        <span style="font-size:18pt;line-height:1;">⚠️</span>
+        <div style="font-size:11pt;font-weight:700;color:#92400e;">Avaliação Psicossocial — Pendente</div>
+      </div>
+      <p class="doc-text" style="margin-bottom:10pt;color:#1f2937;">
+        A NR-01 (2025), subitem 1.5.4.4.3.2, item 10, exige a avaliação de riscos psicossociais como
+        parte obrigatória do inventário de riscos do PGR. Nenhuma campanha psicossocial foi encerrada
+        para esta empresa até a data de elaboração deste documento.
+      </p>
+      <div style="background:#fff8ed;border-left:3pt solid #f59e0b;padding:8pt 12pt;border-radius:0 4pt 4pt 0;">
+        <div style="font-size:8pt;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4pt;">Ação necessária</div>
+        <p class="doc-text" style="margin-bottom:0;color:#374151;">Realize e encerre uma campanha de avaliação psicossocial (COPSOQ-III Média ou Checklist NR-01) no módulo Psicossocial do SGS. Os resultados serão integrados automaticamente a este documento na próxima geração.</p>
+      </div>
+    </div>
+    ${pfFooter()}`;
     pgsPsi.push(pgPend);wrap.appendChild(pgPend);
   }
   pgsPlano.forEach(pg=>wrap.appendChild(pg));
@@ -1938,15 +1944,16 @@ async function adicionarVersao(empresaId){
 
 function renderMatrizRisco(){
   const pg=criarPagina();
+  const pg2=criarPagina();
   const nivelCor=(p,s)=>{const v=p*s;if(v>=15)return{bg:'#fee2e2',color:'#991b1b',label:'MUITO ALTO'};if(v>=8)return{bg:'#ffedd5',color:'#9a3412',label:'ALTO'};if(v>=4)return{bg:'#fef9c3',color:'#854d0e',label:'MÉDIO'};return{bg:'#dcfce7',color:'#166534',label:'BAIXO'};};
   const probLabels=['','Muito baixa\n(improvável)','Baixa\n(raramente)','Média\n(possível)','Alta\n(provável)','Muito alta\n(quase certo)'];
   const sevLabels=['','Insignificante','Leve','Moderada','Grave','Catastrófica'];
   let cellsHtml='';
   for(let p=5;p>=1;p--){
-    cellsHtml+=`<tr><td style="font-size:7.5pt;font-weight:600;color:#1f2937;padding:6pt 8pt;background:#f8fafc;border:1pt solid #e5e7eb;width:60pt;line-height:1.3;"><strong style="font-size:8.5pt;">P${p}</strong><br><span style="font-weight:400;font-size:6.5pt;color:#4b5563;">${probLabels[p]}</span></td>`;
+    cellsHtml+=`<tr><td style="font-size:7.5pt;font-weight:600;color:#1f2937;padding:5pt 7pt;background:#f8fafc;border:1pt solid #e5e7eb;width:60pt;line-height:1.3;"><strong style="font-size:8pt;">P${p}</strong><br><span style="font-weight:400;font-size:6.5pt;color:#4b5563;">${probLabels[p]}</span></td>`;
     for(let s=1;s<=5;s++){
       const n=nivelCor(p,s);const v=p*s;
-      cellsHtml+=`<td style="background:${n.bg};color:${n.color};border:1pt solid #e5e7eb;text-align:center;padding:8pt 4pt;font-size:9pt;font-weight:700;min-width:36pt;">${v}<br><span style="font-size:6.5pt;font-weight:600;">${n.label}</span></td>`;
+      cellsHtml+=`<td style="background:${n.bg};color:${n.color};border:1pt solid #e5e7eb;text-align:center;padding:6pt 4pt;font-size:9pt;font-weight:700;min-width:34pt;">${v}<br><span style="font-size:6.5pt;font-weight:600;">${n.label}</span></td>`;
     }
     cellsHtml+='</tr>';
   }
@@ -1978,19 +1985,24 @@ function renderMatrizRisco(){
         <span style="color:#374151;">${n.d}</span>
       </div>`).join('')}
     </div>
-    <div style="background:#f0f4ff;border-left:3pt solid #2563eb;padding:8pt 12pt;border-radius:0 4pt 4pt 0;margin-top:8pt;margin-bottom:14pt;">
-      <div style="font-size:8pt;font-weight:600;color:#1e3a8a;margin-bottom:4pt;">Hierarquia de Controles — NR-01 subitem 1.5.4.4.4</div>
-      <div style="display:flex;gap:6pt;flex-wrap:wrap;">
-        ${[['1','Eliminação','#dc2626'],['2','Substituição','#d97706'],['3','Engenharia','#2563eb'],['4','Administrativo','#059669'],['5','EPI','#7c3aed']].map(([n,l,c])=>`<span style="background:#fff;border:1pt solid ${c};color:${c};font-size:7.5pt;font-weight:600;padding:2pt 8pt;border-radius:3pt;">${n}. ${l}</span>`).join('<span style="color:#6b7280;align-self:center;">→</span>')}
+    ${phHeader('4. Metodologia de Avaliação de Risco')}${pfFooter()}`;
+  // ── Página 2: Hierarquia + Critérios por categoria ──
+  pg2.innerHTML=`
+    ${phHeader('4. Metodologia de Avaliação de Risco (cont.)')}
+    <div style="background:#f0f4ff;border-left:3pt solid #2563eb;padding:10pt 14pt;border-radius:0 6pt 6pt 0;margin-bottom:18pt;">
+      <div style="font-size:9pt;font-weight:700;color:#1e3a8a;margin-bottom:6pt;">Hierarquia de Controles — NR-01 subitem 1.5.4.4.4</div>
+      <div style="display:flex;gap:8pt;flex-wrap:wrap;">
+        ${[['1','Eliminação','#dc2626'],['2','Substituição','#d97706'],['3','Engenharia','#2563eb'],['4','Administrativo','#059669'],['5','EPI','#7c3aed']].map(([n,l,c])=>`<span style="background:#fff;border:1.5pt solid ${c};color:${c};font-size:8pt;font-weight:700;padding:3pt 10pt;border-radius:4pt;">${n}. ${l}</span>`).join('<span style="color:#6b7280;align-self:center;font-size:10pt;">→</span>')}
       </div>
+      <p class="doc-text" style="margin-top:8pt;margin-bottom:0;">As medidas de controle devem ser implementadas preferencialmente nos níveis superiores da hierarquia. O EPI é a última opção, após esgotadas as possibilidades técnicas nos níveis anteriores.</p>
     </div>
-    <div style="font-size:9pt;font-weight:600;color:#374151;margin-bottom:8pt;text-transform:uppercase;letter-spacing:.04em;">Critérios de Avaliação por Categoria de Risco</div>
-    <table style="border-collapse:collapse;width:100%;font-size:8pt;">
+    <div class="doc-section" style="margin-top:0;"><span class="num-secao">4.1</span>Critérios de Avaliação por Categoria de Risco</div>
+    <table style="border-collapse:collapse;width:100%;font-size:9pt;">
       <thead><tr>
-        <th style="background:#0d2040;color:#fff;padding:5pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:18%;">Categoria</th>
-        <th style="background:#0d2040;color:#fff;padding:5pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:28%;">Probabilidade</th>
-        <th style="background:#0d2040;color:#fff;padding:5pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:28%;">Severidade</th>
-        <th style="background:#0d2040;color:#fff;padding:5pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:26%;">Referência normativa</th>
+        <th style="background:#0d2040;color:#fff;padding:6pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:16%;">Categoria</th>
+        <th style="background:#0d2040;color:#fff;padding:6pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:30%;">Probabilidade</th>
+        <th style="background:#0d2040;color:#fff;padding:6pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:30%;">Severidade</th>
+        <th style="background:#0d2040;color:#fff;padding:6pt 8pt;border:1pt solid #1e3a5f;text-align:left;width:24%;">Referência normativa</th>
       </tr></thead>
       <tbody>
         ${[
@@ -2001,15 +2013,15 @@ function renderMatrizRisco(){
           ['Acidente','Probabilidade de ocorrência do evento indesejado (frequência histórica)','Consequência potencial do acidente — lesão, morte, dano patrimonial','NR-01, FMEA'],
           ['Psicossocial','Prevalência de fatores de risco avaliados por instrumento validado','Impacto na saúde mental e desempenho organizacional','NR-01 (2025), COPSOQ-III'],
         ].map(([cat,prob,sev,ref],i)=>`<tr style="background:${i%2?'#f8fafc':'#fff'};">
-          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;font-weight:600;color:#0d2040;">${cat}</td>
-          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#374151;">${prob}</td>
-          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#374151;">${sev}</td>
-          <td style="padding:5pt 8pt;border:1pt solid #e5e7eb;color:#4b5563;font-size:8pt;">${ref}</td>
+          <td style="padding:7pt 8pt;border:1pt solid #e5e7eb;font-weight:700;color:#0d2040;">${cat}</td>
+          <td style="padding:7pt 8pt;border:1pt solid #e5e7eb;color:#1f2937;">${prob}</td>
+          <td style="padding:7pt 8pt;border:1pt solid #e5e7eb;color:#1f2937;">${sev}</td>
+          <td style="padding:7pt 8pt;border:1pt solid #e5e7eb;color:#374151;font-size:8.5pt;">${ref}</td>
         </tr>`).join('')}
       </tbody>
     </table>
-    ${phHeader('4. Metodologia de Avaliação de Risco')}${pfFooter()}`;
-  return pg;
+    ${pfFooter()}`;
+  return [pg,pg2];
 }
 
 function renderPlanoAcao(){
@@ -2045,7 +2057,7 @@ function renderPlanoAcao(){
     }
   });
 
-  const theadHtml=`<thead><tr><th style="width:34%;">Ação / Origem</th><th style="width:10%;text-align:center;">Prioridade</th><th style="width:14%;">Responsável</th><th style="width:11%;text-align:center;">Prazo</th><th style="width:10%;text-align:center;">Status</th><th style="width:21%;">Indicador / Meta</th></tr></thead>`;
+  const theadHtml=`<thead><tr><th style="width:36%;">Ação / Origem</th><th style="width:11%;text-align:center;">Prioridade</th><th style="width:14%;">Responsável</th><th style="width:12%;text-align:center;">Prazo</th><th style="width:13%;text-align:center;">Status</th><th style="width:14%;">Indicador</th></tr></thead>`;
   const rowHtml=a=>{
     const prior=a.prioridade||'Média';
     const prazo=a.prazo?fmtData(a.prazo):'—';
@@ -2060,8 +2072,8 @@ function renderPlanoAcao(){
       <td style="text-align:center;"><span style="background:${PRIOR_BG[prior]||'#f3f4f6'};color:${PRIOR_COR[prior]||'#374151'};padding:2pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">${h(prior)}</span></td>
       <td style="font-size:8pt;">${h(a.responsavel||'—')}</td>
       <td style="text-align:center;font-size:8pt;font-family:'IBM Plex Mono',monospace;">${prazo}</td>
-      <td style="text-align:center;font-size:7.5pt;font-weight:500;">${h(a.status||'Pendente')}</td>
-      <td style="font-size:7.5pt;color:#374151;">${a.indicador?h(a.indicador):'<span style="color:#6b7280;">—</span>'}</td>
+      <td style="text-align:center;font-size:8pt;font-weight:600;white-space:nowrap;">${h(a.status||'Pendente')}</td>
+      <td style="font-size:8pt;color:#1f2937;">${a.indicador?h(a.indicador):'<span style="color:#6b7280;">—</span>'}</td>
     </tr>`;
   };
 
