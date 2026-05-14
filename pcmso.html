@@ -661,8 +661,8 @@ function atualizarElaboradora(){
   // Atualiza data de elaboração na capa
   const dataEl=document.querySelector('.capa-topo-meta strong');
   if(dataEl&&elaboradora.dataElab){dataEl.textContent=new Date(elaboradora.dataElab+'T00:00:00').toLocaleDateString('pt-BR');}
-  // Recria capa para aplicar lógica de elaboradora
-  renderDocumento();
+  // Recria capa apenas se os dados já estiverem carregados
+  if(empresa)renderDocumento();
   document.querySelectorAll('.elab-responsavel').forEach(el=>{el.textContent=elaboradora.responsavel||'—';});
   document.querySelectorAll('.elab-nome-field').forEach(el=>{el.textContent=elaboradora.nome||'—';});
   document.querySelectorAll('.elab-cnpj-field').forEach(el=>{el.textContent=elaboradora.cnpj||'—';});
