@@ -575,15 +575,27 @@ async function adicionarExame(exameId){
   if(!ctxId)return;
   try{
     const data=await upsertExame(tabela,campo,ctxId,exameId,exame?.periodicidade_padrao||'Anual',exame?.obrigatorio_esocial||false);
-    // Remove da lista local se já estava (evitar duplicata visual)
     if(contexto==='setor')examesSetor=examesSetor.filter(e=>e.exame_id!==exameId);
     else examesFuncao=examesFuncao.filter(e=>e.exame_id!==exameId);
     if(contexto==='setor')examesSetor.push(data);
     else examesFuncao.push(data);
+    // Propagação setor → funções (igual ao módulo de riscos)
+    if(contexto==='setor'&&funcoesSetor.length){
+      await propagarExameParaFuncoes(exameId,exame?.periodicidade_padrao||'Anual',exame?.obrigatorio_esocial||false);
+    }
     renderPainel();renderNavSetores();
-    setStatus('status-exames','success','Exame adicionado!');
+    const msgProp=contexto==='setor'&&funcoesSetor.length?` (propagado para ${funcoesSetor.length} função(ões))`:'';
+    setStatus('status-exames','success','Exame adicionado'+msgProp+'!');
     setTimeout(()=>clearStatus('status-exames'),2000);
   }catch(e){setStatus('status-exames','error',e.message);}
+}
+
+async function propagarExameParaFuncoes(exameId,periodicidade,obrigatorio){
+  for(const funcao of funcoesSetor){
+    try{
+      await upsertExame('funcao_exames','funcao_id',funcao.id,exameId,periodicidade,obrigatorio);
+    }catch(e){console.error('Erro ao propagar exame para função',funcao.nome_funcao,e.message);}
+  }
 }
 
 async function atualizarPeriodicidade(seId,valor){
@@ -866,6 +878,10 @@ async function adicionarExamesSugeridos(){
         if(contexto==='setor')examesSetor=examesSetor.filter(e=>e.exame_id!==exame.id);
         else examesFuncao=examesFuncao.filter(e=>e.exame_id!==exame.id);
         if(contexto==='setor')examesSetor.push(d);else examesFuncao.push(d);
+        // Propaga setor → funções
+        if(contexto==='setor'&&funcoesSetor.length){
+          await propagarExameParaFuncoes(exame.id,exame.periodicidade_padrao||'Anual',exame.obrigatorio_esocial||false);
+        }
       }catch(e){console.error('Erro ao adicionar exame',exame.nome,e.message);}
     }
     document.getElementById('modal-sugestao-risco').classList.remove('show');
