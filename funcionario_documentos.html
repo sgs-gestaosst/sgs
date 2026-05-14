@@ -321,19 +321,7 @@ async function inicializar() {
     const funcs = await resFunc.json();
     funcionario = funcs[0];
     docs = await resDocs.json();
-    // Laudos da clínica — fetch separado para não quebrar a página se falhar
     window._laudosClinica = [];
-    try{
-      const resLaudos=await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?funcionario_id=eq.${funcId}&select=exames_completos,clinica_demandas(titulo)&order=criado_em.desc`,{headers});
-      const rowsLaudos=await resLaudos.json();
-      if(Array.isArray(rowsLaudos)){
-        rowsLaudos.forEach(r=>{
-          (r.exames_completos||[]).filter(e=>e.arquivo_path).forEach(e=>{
-            window._laudosClinica.push({...e,demanda_titulo:r.clinica_demandas?.titulo||'Demanda'});
-          });
-        });
-      }
-    }catch(e){console.warn('Laudos clínica:',e);}
     if (!funcionario) { window.location.href = 'empresas.html'; return; }
 
     // Busca empresa
@@ -349,9 +337,38 @@ async function inicializar() {
     await atualizarStatusVencidos();
     renderStats();
     renderDocs();
+    // Carrega laudos da clínica de forma independente
+    carregarLaudosClinicaDocs();
   } catch(e) {
     console.error('Erro ao inicializar:', e);
   }
+}
+
+async function carregarLaudosClinicaDocs(){
+  try{
+    const headers={'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`};
+    const res=await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?funcionario_id=eq.${funcId}&select=exames_completos`,{headers});
+    const rows=await res.json();
+    if(!Array.isArray(rows))return;
+    const laudos=[];
+    rows.forEach(r=>(r.exames_completos||[]).filter(e=>e.arquivo_path).forEach(e=>laudos.push(e)));
+    if(!laudos.length)return;
+    const fmtD=d=>d?new Date(d).toLocaleDateString('pt-BR'):'—';
+    const ext=p=>(p||'').split('.').pop().toLowerCase();
+    const icone=p=>({'pdf':'📄','jpg':'🖼️','jpeg':'🖼️','png':'🖼️'}[ext(p)]||'📎');
+    const secao=document.createElement('div');
+    secao.className='doc-secao';
+    secao.innerHTML=`<div class="doc-secao-titulo">🏥 Laudos da Clínica</div>`+
+      laudos.map(a=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
+        <span style="font-size:22px;">${icone(a.arquivo_path)}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(a.nome||a.exame_nome||'Laudo')}</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;">${fmtD(a.data_upload)}</div>
+        </div>
+        <a href="${SUPA_URL}/storage/v1/object/public/documentos-funcionarios/${escHtml(a.arquivo_path)}" target="_blank" class="btn btn-edit" style="font-size:12px;padding:6px 12px;flex-shrink:0;">⬇ Baixar</a>
+      </div>`).join('');
+    document.getElementById('lista-docs').appendChild(secao);
+  }catch(e){console.warn('Laudos clínica docs:',e);}
 }
 
 async function atualizarStatusVencidos() {
@@ -399,8 +416,7 @@ const TIPOS_DOCS = ['CPF','RG','CTPS','Outro'];
 
 function renderDocs() {
   const el = document.getElementById('lista-docs');
-  const laudos = window._laudosClinica || [];
-  if (!docs.length && !laudos.length) {
+  if (!docs.length) {
     el.innerHTML = `<div class="empty">📁<br><br>Nenhum documento cadastrado.</div>`;
     return;
   }
@@ -409,11 +425,6 @@ function renderDocs() {
     cert: docs.filter(d => TIPOS_CERT.includes(d.tipo)),
     docs: docs.filter(d => TIPOS_DOCS.includes(d.tipo) || !['ASO', ...TIPOS_CERT, ...TIPOS_DOCS].includes(d.tipo))
   };
-  const laudos = window._laudosClinica || [];
-  const fmtD = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
-  const ext = p => (p||'').split('.').pop().toLowerCase();
-  const icone = p => ({'pdf':'📄','jpg':'🖼️','jpeg':'🖼️','png':'🖼️'}[ext(p)]||'📎');
-
   el.innerHTML = SECOES.map(s => {
     const lista = grupos[s.key];
     if (!lista.length) return '';
@@ -421,19 +432,7 @@ function renderDocs() {
       <div class="doc-secao-titulo">${s.titulo}</div>
       ${lista.map(d => renderDocCard(d, s)).join('')}
     </div>`;
-  }).join('') + (laudos.length ? `
-    <div class="doc-secao">
-      <div class="doc-secao-titulo">🏥 Laudos da Clínica</div>
-      ${laudos.map(a=>`
-        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
-          <span style="font-size:22px;">${icone(a.arquivo_path)}</span>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(a.nome||a.exame_nome||'Laudo')}</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:2px;">${escHtml(a.demanda_titulo)} · ${fmtD(a.data_upload)}</div>
-          </div>
-          <a href="${SUPA_URL}/storage/v1/object/public/documentos-funcionarios/${escHtml(a.arquivo_path)}" target="_blank" class="btn btn-edit" style="font-size:12px;padding:6px 12px;flex-shrink:0;">⬇ Baixar</a>
-        </div>`).join('')}
-    </div>` : '');
+  }).join('');
 }
 
 function renderDocCard(d, s) {
