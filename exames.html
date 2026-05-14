@@ -1456,9 +1456,14 @@ function abrirPreviewASO(){
   if(!validarASO())return;
   const dados=prepararDadosASO();
   sessionStorage.setItem('sgs_aso_preview',JSON.stringify(dados));
-  // Abre em nova aba (pode ser bloqueado por popup blocker — informa o usuário)
-  const w=window.open('aso_preview.html','_blank');
-  if(!w)setStatus('status-gerar-aso','info','Popup bloqueado. Permita popups para este site e tente novamente.');
+  // Usa anchor para evitar bloqueio de popup
+  const a=document.createElement('a');
+  a.href='aso_preview.html';
+  a.target='_blank';
+  a.rel='noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 async function salvarASO(){
@@ -1469,7 +1474,7 @@ async function salvarASO(){
   const dados=prepararDadosASO();
   try{
     const resS=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220`,{method:'POST',headers:{...{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},'Prefer':'return=representation'},
-      body:JSON.stringify({funcionario_id:funcionarioASO.id,empresa_id:parseInt(empresaId),tipo_aso:dados.tipo_aso,tipo_exame:dados.tipo_aso,data_exame:dados.data_exame,resultado:dados.resultado_geral,resultado_geral:dados.resultado_geral,data_validade_aso:dados.data_prox_aso,data_prox_aso:dados.data_prox_aso,cpf_funcionario:funcionarioASO.cpf,rg_funcionario:funcionarioASO.rg,nome_funcao:funcionarioASO.funcoes?.nome_funcao,nome_setor:funcionarioASO.setores?.nome_setor,riscos_ocupacionais:dados.riscos,restricoes_recomendacoes:dados.restricoes,observacoes:dados.restricoes,nome_medico_examinador:dados.medico_nome,crm_examinador:dados.medico_crm,uf_crm_examinador:dados.medico_uf,status_esocial:'Pendente'})});
+      body:JSON.stringify({funcionario_id:funcionarioASO.id,tipo_aso:dados.tipo_aso,tipo_exame:dados.tipo_aso,data_exame:dados.data_exame,resultado:dados.resultado_geral,resultado_geral:dados.resultado_geral,data_validade_aso:dados.data_prox_aso,data_prox_aso:dados.data_prox_aso,cpf_funcionario:funcionarioASO.cpf,rg_funcionario:funcionarioASO.rg,nome_funcao:funcionarioASO.funcoes?.nome_funcao,nome_setor:funcionarioASO.setores?.nome_setor,riscos_ocupacionais:dados.riscos,restricoes_recomendacoes:dados.restricoes,observacoes:dados.restricoes,nome_medico_examinador:dados.medico_nome,crm_examinador:dados.medico_crm,uf_crm_examinador:dados.medico_uf,status_esocial:'Pendente'})});
     if(!resS.ok){const e=await resS.json();throw new Error(e.message||JSON.stringify(e));}
     const [s2220]=await resS.json();
     for(const ex of dados.exames){
