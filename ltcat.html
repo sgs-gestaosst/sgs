@@ -19,23 +19,42 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
 .btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 .btn-edit:hover{border-color:var(--border-focus);}
+.btn-action{background:#3b1f6b;color:#e9d5ff;border:1px solid #5a2a90;}
+.btn-action:hover{background:#4a2880;}
 .btn-print{background:var(--accent2);color:#0f1117;}
 .btn-print:hover{background:#3de8b4;}
 .screen-body{padding:40px 24px;display:flex;justify-content:center;}
 .pages-wrap{display:flex;flex-direction:column;gap:24px;align-items:center;width:100%;}
+/* Status bar */
+#status-ltcat{display:none;padding:10px 32px;font-size:12px;font-weight:500;}
 /* Painel elaboradora */
 #painel-elaboradora{display:none;background:var(--surface2);border-bottom:1px solid var(--border);padding:16px 32px;}
 /* A4 */
 .page{background:#fff;width:210mm;min-height:297mm;padding:20mm 20mm 20mm 25mm;box-shadow:0 4px 32px rgba(0,0,0,.5);position:relative;color:#1a1a2e;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;}
 .page::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8mm;background:linear-gradient(180deg,#2a1060 0%,#1a0840 100%);}
 /* Tipografia */
-.doc-section{font-size:12pt;font-weight:700;color:#1a0840;text-transform:uppercase;letter-spacing:.06em;border-bottom:2pt solid #5a2a90;padding-bottom:4pt;margin:16pt 0 10pt;}
-.doc-subsection{font-size:10pt;font-weight:600;color:#5a2a90;margin:10pt 0 6pt;}
-.doc-text{font-size:9.5pt;color:#374151;line-height:1.6;text-align:justify;}
+.doc-section{font-size:11pt;font-weight:700;color:#1a0840;text-transform:uppercase;letter-spacing:.06em;border-bottom:2pt solid #5a2a90;padding-bottom:5pt;margin:18pt 0 11pt;}
+.doc-subsection{font-size:10pt;font-weight:600;color:#3b0764;margin:12pt 0 7pt;padding-bottom:3pt;border-bottom:1pt solid #e5e7eb;}
+.doc-text{font-size:10pt;color:#1f2937;line-height:1.65;text-align:justify;}
 .num-secao{color:#7c3aed;font-family:'IBM Plex Mono',monospace;font-size:9pt;margin-right:6pt;}
 /* Capa */
-.capa{display:flex;flex-direction:column;height:100%;min-height:257mm;}
-.capa-divider{height:3pt;background:linear-gradient(90deg,#1a0840,#5a2a90,#a78bfa);margin:20pt 0;border-radius:2pt;}
+.capa{display:flex;flex-direction:column;height:100%;max-height:257mm;overflow:hidden;}
+.capa-topo{display:flex;align-items:center;gap:14pt;margin-bottom:4pt;}
+.capa-topo-info{flex:1;min-width:0;}
+.capa-topo-nome{font-size:13pt;font-weight:700;color:#1a0840;line-height:1.2;}
+.capa-topo-meta{font-size:8.5pt;color:#4b5563;margin-top:3pt;}
+.capa-logo-box{width:60pt;height:60pt;background:#1a0840;display:flex;align-items:center;justify-content:center;border-radius:6pt;flex-shrink:0;overflow:hidden;cursor:pointer;position:relative;}
+.capa-logo-text{font-family:'IBM Plex Mono',monospace;font-size:18pt;font-weight:700;color:#fff;}
+.capa-divider{height:3pt;background:linear-gradient(90deg,#1a0840,#5a2a90,#a78bfa);margin:16pt 0 18pt;border-radius:2pt;}
+.capa-empresa-box{background:#f5f3ff;border-left:4pt solid #7c3aed;padding:14pt 18pt;margin-bottom:18pt;border-radius:0 6pt 6pt 0;}
+.capa-rodape-bloco{margin-top:auto;}
+.capa-elab-strip{margin-top:12pt;padding:10pt 12pt;border:1pt solid #e5e7eb;border-radius:6pt;background:#fafbfc;display:flex;align-items:center;gap:14pt;}
+.capa-elab-strip-label{font-size:7.5pt;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.1em;flex-shrink:0;}
+.capa-elab-strip-content{display:flex;align-items:center;gap:10pt;flex:1;min-width:0;}
+.capa-elab-strip-logo{width:32pt;height:32pt;background:#f3f4f6;border:1pt solid #d1d5db;border-radius:5pt;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+.capa-elab-strip-sigla{font-family:'IBM Plex Mono',monospace;font-size:10pt;font-weight:700;color:#4b5563;}
+.capa-elab-strip-nome{font-size:9.5pt;font-weight:600;color:#1f2937;line-height:1.3;}
+.capa-elab-strip-cnpj{font-size:8pt;color:#4b5563;font-family:'IBM Plex Mono',monospace;margin-top:1pt;}
 /* Ficha */
 .ficha-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1pt solid #e5e7eb;border-radius:4pt;overflow:hidden;margin:8pt 0;}
 .ficha-grid-3{grid-template-columns:1fr 1fr 1fr;}
@@ -43,51 +62,83 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .ficha-item:nth-child(2n){border-right:none;}
 .ficha-grid-3 .ficha-item:nth-child(3n){border-right:none;}
 .ficha-item:last-child,.ficha-item:nth-last-child(2){border-bottom:none;}
+.ficha-grid-3 .ficha-item:nth-last-child(3){border-bottom:none;}
 .ficha-full{grid-column:1/-1;border-right:none!important;}
-.ficha-label{font-size:7pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:2pt;}
-.ficha-value{font-size:9.5pt;color:#1a1a2e;font-weight:500;}
+.ficha-label{font-size:7.5pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-bottom:3pt;}
+.ficha-value{font-size:10pt;color:#0d0826;font-weight:500;}
 /* Tabela */
 .doc-table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9pt;}
-.doc-table th{background:#1a0840;color:#fff;padding:6pt 8pt;text-align:left;font-size:8pt;font-weight:600;text-transform:uppercase;}
-.doc-table td{padding:6pt 8pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;}
+.doc-table th{background:#1a0840;color:#fff;padding:6pt 8pt;text-align:left;font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.doc-table td{padding:6pt 8pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;color:#1f2937;}
 .doc-table tr:nth-child(even) td{background:#f9fafb;}
 .doc-table tr:last-child td{border-bottom:none;}
 /* Badges */
-.res-dentro{background:#dcfce7;color:#166534;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:600;}
-.res-acima{background:#fee2e2;color:#991b1b;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:600;}
-.res-nq{background:#f3f4f6;color:#6b7280;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:600;}
-.insal-badge{background:#fef9c3;color:#854d0e;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:600;}
-.apos-badge{background:#f3e8ff;color:#6b21a8;padding:2pt 6pt;border-radius:3pt;font-size:8pt;font-weight:600;}
+.res-dentro{background:#dcfce7;color:#166534;padding:2pt 7pt;border-radius:4pt;font-size:8pt;font-weight:700;border:1pt solid #86efac;}
+.res-acima{background:#fee2e2;color:#991b1b;padding:2pt 7pt;border-radius:4pt;font-size:8pt;font-weight:700;border:1pt solid #fca5a5;}
+.res-nq{background:#f3f4f6;color:#4b5563;padding:2pt 7pt;border-radius:4pt;font-size:8pt;font-weight:600;border:1pt solid #d1d5db;}
+.insal-badge{background:#fef9c3;color:#854d0e;padding:2pt 7pt;border-radius:4pt;font-size:8pt;font-weight:700;border:1pt solid #fde68a;}
+.apos-badge{background:#f3e8ff;color:#6b21a8;padding:2pt 7pt;border-radius:4pt;font-size:8pt;font-weight:700;border:1pt solid #d8b4fe;}
 /* Em breve */
 .em-breve{background:#f9fafb;border:1pt dashed #d1d5db;border-radius:4pt;padding:16pt;text-align:center;margin:10pt 0;}
 /* Header/Footer */
-.page-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1pt solid #e5e7eb;padding-bottom:8pt;margin-bottom:14pt;}
-.ph-empresa{font-size:8pt;font-weight:600;color:#374151;}
-.ph-doc{font-size:8pt;color:#9ca3af;font-family:'IBM Plex Mono',monospace;}
-.page-footer{position:absolute;bottom:15mm;left:25mm;right:20mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #e5e7eb;padding-top:6pt;}
-.pf-label{font-size:7.5pt;color:#9ca3af;}
-.pf-page{font-family:'IBM Plex Mono',monospace;font-size:8pt;color:#6b7280;}
+.page-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1.5pt solid #e5e7eb;padding-bottom:8pt;margin-bottom:16pt;}
+.ph-empresa{font-size:8.5pt;font-weight:700;color:#1f2937;}
+.ph-doc{font-size:8pt;color:#6b7280;font-family:'IBM Plex Mono',monospace;}
+.page-footer{position:absolute;bottom:10mm;left:25mm;right:20mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #d1d5db;padding-top:6pt;height:12mm;overflow:hidden;}
+.pf-label{font-size:7.5pt;color:#6b7280;font-weight:500;}
+.pf-page{font-family:'IBM Plex Mono',monospace;font-size:8pt;color:#4b5563;font-weight:600;}
 /* Medição box */
-.med-box{border:1pt solid #e5e7eb;border-radius:4pt;margin:8pt 0;overflow:hidden;}
-.med-box-header{background:#f5f3ff;padding:8pt 10pt;border-bottom:1pt solid #e5e7eb;display:flex;align-items:center;gap:8pt;}
+.med-box{border:1pt solid #e5e7eb;border-radius:6pt;margin:10pt 0;overflow:hidden;page-break-inside:avoid;break-inside:avoid;}
+.med-box-header{background:#f5f3ff;padding:9pt 12pt;border-bottom:1pt solid #e5e7eb;display:flex;align-items:center;gap:8pt;flex-wrap:wrap;}
 .med-box-cat{font-size:7pt;padding:2pt 7pt;border-radius:3pt;font-weight:700;}
-.med-box-nome{font-size:10pt;font-weight:600;color:#1a0840;flex:1;}
-.med-box-body{padding:8pt 10pt;}
-.med-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6pt;margin-bottom:8pt;}
-.med-field .label{font-size:7pt;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2pt;}
-.med-field .value{font-size:9pt;color:#374151;font-weight:500;}
-.conclusao-box{background:#faf5ff;border-left:3pt solid #7c3aed;padding:8pt 10pt;font-size:9pt;color:#374151;margin-top:6pt;}
-/* Print */
+.med-box-nome{font-size:10.5pt;font-weight:700;color:#1a0840;flex:1;}
+.med-box-body{padding:10pt 12pt;}
+.med-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8pt;margin-bottom:8pt;}
+.med-field .label{font-size:7.5pt;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3pt;}
+.med-field .value{font-size:9pt;color:#1f2937;font-weight:500;}
+.conclusao-box{background:#faf5ff;border-left:3pt solid #7c3aed;padding:8pt 12pt;font-size:9.5pt;color:#1f2937;margin-top:8pt;border-radius:0 4pt 4pt 0;line-height:1.5;}
+/* Print — robusto igual PGR e PCMSO */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  body{background:#fff!important;}
-  .screen-header{display:none!important;}
-  #painel-elaboradora{display:none!important;}
-  .screen-body{padding:0!important;}
-  .pages-wrap{gap:0!important;}
-  .page{box-shadow:none!important;margin:0!important;page-break-after:always;width:210mm!important;min-height:297mm!important;}
-  .page:last-child{page-break-after:avoid;}
+  body{background:#fff!important;margin:0!important;padding:0!important;}
+  .screen-header,#painel-elaboradora,#status-ltcat{display:none!important;}
+  .screen-body{padding:0!important;display:block!important;}
+  .pages-wrap{gap:0!important;display:block!important;align-items:unset!important;}
   @page{size:A4;margin:0;}
+  .page{
+    box-shadow:none!important;margin:0!important;
+    width:210mm!important;height:297mm!important;
+    min-height:unset!important;max-height:unset!important;
+    overflow:hidden!important;
+    padding:14mm 16mm 28mm 22mm!important;
+    border-left:8mm solid #1a0840!important;
+    page-break-after:always!important;break-after:page!important;
+    position:relative!important;box-sizing:border-box!important;
+  }
+  .page::before{display:none!important;}
+  .page:last-child{page-break-after:auto!important;break-after:auto!important;}
+  .page-footer{
+    position:absolute!important;bottom:10mm!important;
+    left:22mm!important;right:16mm!important;
+    margin-top:0!important;border-top:1pt solid #d1d5db!important;
+    padding-top:5pt!important;display:flex!important;
+    justify-content:space-between!important;background:#fff!important;
+    height:12mm!important;overflow:hidden!important;
+  }
+  .capa{max-height:257mm!important;overflow:hidden!important;}
+  .capa-rodape-bloco{page-break-inside:avoid;break-inside:avoid;}
+  .doc-section{page-break-after:avoid;break-after:avoid;}
+  .med-box{page-break-inside:avoid;break-inside:avoid;}
+  .doc-table tr{page-break-inside:avoid;break-inside:avoid;}
+  .ficha-grid{page-break-inside:avoid;break-inside:avoid;}
+  /* Contraste total para impressão */
+  .ficha-label,.med-field .label,.ph-doc,.pf-label{color:#4b5563!important;}
+  .ficha-value,.med-field .value,.doc-text{color:#0d0826!important;}
+  .ph-empresa{color:#0d0826!important;font-weight:700!important;}
+  .pf-page{color:#374151!important;font-weight:600!important;}
+  .conclusao-box{color:#0d0826!important;}
+  [style*="color:#9ca3af"],[style*="color:#6b7280"]{color:#374151!important;}
+  .res-dentro,.res-acima,.res-nq,.insal-badge,.apos-badge{print-color-adjust:exact!important;-webkit-print-color-adjust:exact!important;}
 }
 @media(max-width:230mm){.page{width:100%;padding:15mm 12mm 15mm 18mm;}.page::before{width:5mm;}}
 </style>
@@ -95,20 +146,23 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 <body>
 <div class="screen-header">
   <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
-  <span style="font-size:13px;color:var(--text2);">Visualização do documento</span>
+  <span style="font-size:13px;color:var(--text2);">LTCAT — Visualização</span>
   <div class="screen-actions">
-    <button class="btn btn-edit" onclick="toggleElaboradora()">✏️ Empresa elaboradora</button>
+    <button class="btn btn-edit" onclick="toggleElaboradora()">✏️ Elaboradora</button>
+    <button class="btn btn-action" id="btn-gerar-acoes" onclick="gerarAcoesLTCAT()">⚡ Gerar Ações</button>
     <a id="btn-voltar" href="#" class="btn btn-edit" style="text-decoration:none;">← Voltar</a>
-    <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+    <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir / PDF</button>
   </div>
 </div>
 
+<div id="status-ltcat"></div>
+
 <!-- Painel elaboradora -->
 <div id="painel-elaboradora">
-  <div style="max-width:900px;margin:0 auto;display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:16px;align-items:end;">
+  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr;gap:14px;align-items:end;">
     <div>
-      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Logo</label>
-      <div id="logo-preview" onclick="document.getElementById('elab-logo-input').click()" style="width:60px;height:60px;border-radius:8px;background:#1a2540;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font-size:11px;color:var(--text3);text-align:center;line-height:1.3;">📷<br>Logo</div>
+      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Logo elaboradora</label>
+      <div id="logo-preview" onclick="document.getElementById('elab-logo-input').click()" style="width:56px;height:56px;border-radius:8px;background:#1a2540;border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font-size:11px;color:var(--text3);text-align:center;line-height:1.3;">📷<br>Logo</div>
       <input type="file" id="elab-logo-input" accept="image/*" style="display:none;" onchange="carregarLogo(this)">
     </div>
     <div>
@@ -116,15 +170,23 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <input type="text" id="elab-nome" placeholder="Nome da empresa" oninput="atualizarElaboradora()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
     </div>
     <div>
+      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">CNPJ elaboradora</label>
+      <input type="text" id="elab-cnpj" placeholder="00.000.000/0000-00" oninput="atualizarElaboradora()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 12px;outline:none;">
+    </div>
+    <div>
       <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Responsável técnico</label>
       <input type="text" id="elab-responsavel" placeholder="Nome + CREA/CRM" oninput="atualizarElaboradora()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
     </div>
     <div>
       <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Nº ART</label>
-      <input type="text" id="elab-art" placeholder="Número da ART" oninput="atualizarElaboradora()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+      <input type="text" id="elab-art" placeholder="Número da ART" oninput="atualizarElaboradora()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 12px;outline:none;">
+    </div>
+    <div>
+      <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Data de elaboração</label>
+      <input type="date" id="elab-data" oninput="atualizarElaboradora()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
     </div>
   </div>
-  <div style="max-width:900px;margin:8px auto 0;font-size:11px;color:var(--text3);">ℹ️ Não salvo no banco — preencha antes de imprimir.</div>
+  <div style="max-width:1100px;margin:8px auto 0;font-size:11px;color:var(--text3);">ℹ️ Dados não salvos no banco — preencha antes de imprimir.</div>
 </div>
 
 <div class="screen-body">
@@ -142,9 +204,11 @@ const params=new URLSearchParams(window.location.search);
 const empresaId=params.get('empresa_id');
 if(!empresaId)window.location.href='empresas.html';
 document.getElementById('btn-voltar').href=`medicoes.html?empresa_id=${empresaId}`;
+// Init date input
+document.getElementById('elab-data').value=new Date().toISOString().split('T')[0];
 
-let empresa,cnaes,setores,medicoes,riscos,categorias;
-let elaboradora={nome:'',responsavel:'',art:'',logoUrl:''};
+let empresa,cnaes,setores,medicoes,riscos,categorias,setorRiscos;
+let elaboradora={nome:'',cnpj:'',responsavel:'',art:'',logoUrl:'',dataElaboracao:new Date().toISOString().split('T')[0]};
 
 const grInfo={1:{label:'GR 1 — Baixo'},2:{label:'GR 2 — Médio-Baixo'},3:{label:'GR 3 — Médio-Alto'},4:{label:'GR 4 — Alto'}};
 const CAT_CORES={'Físico':{bg:'#fef9c3',color:'#854d0e'},'Químico':{bg:'#fee2e2',color:'#991b1b'},'Biológico':{bg:'#f3e8ff',color:'#6b21a8'},'Ergonômico':{bg:'#dbeafe',color:'#1d4ed8'},'Acidente':{bg:'#ffedd5',color:'#9a3412'},'Psicossocial':{bg:'#fce7f3',color:'#9d174d'}};
@@ -155,190 +219,421 @@ function fmtDataAtual(){return new Date().toLocaleDateString('pt-BR',{day:'2-dig
 function fmtAno(){return new Date().getFullYear();}
 function getCatNome(catId){return categorias?.find(x=>x.id===catId)?.nome||'—';}
 function getCatCor(catId){return CAT_CORES[getCatNome(catId)]||{bg:'#f3f4f6',color:'#374151'};}
+function setStatus(msg,tipo){
+  const el=document.getElementById('status-ltcat');
+  el.style.display='block';el.textContent=msg;
+  el.style.background=tipo==='success'?'#166534':tipo==='error'?'#7f1d1d':'#1e3a5f';
+  el.style.color='#fff';el.style.padding='10px 32px';
+  if(tipo==='success')setTimeout(()=>el.style.display='none',3500);
+}
 
 async function carregar(){
   try{
+    const H={'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`};
     const [resEmp,resCnaes,resSets,resMed,resRiscos,resCats]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?empresa_id=eq.${empresaId}&select=*&order=tipo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/medicoes_ambientais?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=setor_id.asc,data_medicao.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,categoria_risco_id,limite_tolerancia,limite_tolerancia_esocial,metodologia_avaliacao,codigo_tabela24_esocial,gera_aposentadoria_especial`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:H}),
+      fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?empresa_id=eq.${empresaId}&select=*&order=tipo.asc`,{headers:H}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:H}),
+      fetch(`${SUPA_URL}/rest/v1/medicoes_ambientais?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=setor_id.asc,data_medicao.desc`,{headers:H}),
+      fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,categoria_risco_id,limite_tolerancia,limite_tolerancia_esocial,metodologia_avaliacao,codigo_tabela24_esocial,gera_aposentadoria_especial`,{headers:H}),
+      fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome`,{headers:H}),
     ]);
-    [empresa,cnaes,setores,medicoes,riscos,categorias]=await Promise.all([resEmp.json(),resCnaes.json(),resSets.json(),resMed.json(),resRiscos.json(),resCats.json()]);
+    [empresa,cnaes,setores,medicoes,riscos,categorias]=await Promise.all([
+      resEmp.json(),resCnaes.json(),resSets.json(),resMed.json(),resRiscos.json(),resCats.json()
+    ]);
     empresa=empresa[0];
+    if(setores.length>0){
+      const setorIds=setores.map(s=>s.id).join(',');
+      const resSR=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=in.(${setorIds})&ativo=eq.true&select=*`,{headers:H});
+      setorRiscos=await resSR.json();
+    }else{setorRiscos=[];}
     renderDocumento();
   }catch(e){
-    document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro: ${e.message}</div>`;
+    document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro: ${escHtml(e.message)}</div>`;
   }
 }
 
 function renderDocumento(){
   const wrap=document.getElementById('pages-wrap');
   wrap.innerHTML='';
-  wrap.appendChild(renderCapa());
-  wrap.appendChild(renderIdentificacao());
-  wrap.appendChild(renderMedicoes());
-  wrap.appendChild(renderConclusao());
+  const allPages=[];
+  allPages.push(renderCapa());
+  allPages.push(renderSumario());
+  allPages.push(renderIdentificacao());
+  allPages.push(renderBaseLegal());
+  renderProcessos().forEach(p=>allPages.push(p));
+  renderMedicoes().forEach(p=>allPages.push(p));
+  renderMedidas().forEach(p=>allPages.push(p));
+  allPages.push(renderConclusao());
+  allPages.forEach(p=>wrap.appendChild(p));
+  numerarPaginas(allPages);
 }
 
+function numerarPaginas(pages){
+  const idx={};
+  pages.forEach((p,i)=>{const s=p.dataset.section;if(s&&!idx[s])idx[s]=i+1;});
+  pages.forEach((p,i)=>{const el=p.querySelector('.pf-page');if(el)el.textContent=`Página ${i+1}`;});
+  const sumario=pages.find(p=>p.dataset.section==='sumario');
+  if(sumario)sumario.querySelectorAll('[data-sec-ref]').forEach(el=>{const n=idx[el.dataset.secRef];el.textContent=n?n:'—';});
+}
+
+function makePg(section){const pg=document.createElement('div');pg.className='page';pg.dataset.section=section;return pg;}
+function hdr(nm,ano){return`<div class="page-header"><span class="ph-empresa">${escHtml(nm)}</span><span class="ph-doc">LTCAT — ${ano}</span></div>`;}
+function ftr(nm){return`<div class="page-footer"><span class="pf-label">LTCAT — ${escHtml(nm)}</span><span class="pf-page">—</span></div>`;}
+
+// ── CAPA ─────────────────────────────────────────────
 function renderCapa(){
-  const pg=document.createElement('div');pg.className='page';
+  const pg=makePg('capa');
   const gr=empresa.grau_risco;
   const cnpj=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'—';
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
+  const aposCount=medicoes.filter(m=>m.gera_aposentadoria_especial).length;
+  const insalCount=medicoes.filter(m=>m.gera_insalubridade).length;
+  const sigla=(empresa.razao_social||empresa.nome_fantasia||'EMP').replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()||'EMP';
+
   pg.innerHTML=`
   <div class="capa">
-    <div style="display:flex;align-items:center;gap:12pt;margin-bottom:40pt;">
-      <div id="doc-elab-logo" style="width:50pt;height:50pt;background:#1a0840;display:flex;align-items:center;justify-content:center;border-radius:6pt;"><span style="font-family:'IBM Plex Mono',monospace;font-size:14pt;font-weight:700;color:#fff;">SST</span></div>
-      <div>
-        <div id="doc-elab-nome" style="font-size:10pt;font-weight:700;color:#1a0840;">Empresa Elaboradora</div>
-        <div style="font-size:9pt;color:#6b7280;">Documento gerado em <strong>${fmtDataAtual()}</strong></div>
+    <div class="capa-topo">
+      <div class="capa-logo-box" id="capa-empresa-logo-box" onclick="document.getElementById('empresa-logo-input').click()" title="Clique para adicionar logo">
+        <span class="capa-logo-text" id="capa-empresa-sigla">${sigla}</span>
+      </div>
+      <div class="capa-topo-info">
+        <div style="font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#7c3aed;margin-bottom:6pt;">Laudo Técnico das Condições Ambientais do Trabalho</div>
+        <div style="font-size:30pt;font-weight:700;color:#1a0840;line-height:1;margin-bottom:4pt;">LTCAT</div>
+        <div style="font-size:9pt;color:#4b5563;">Conforme Lei nº 9.032/95 e Decreto nº 3.048/99</div>
       </div>
     </div>
+    <input type="file" id="empresa-logo-input" accept="image/*" style="display:none;" onchange="carregarLogoEmpresa(this)">
     <div class="capa-divider"></div>
-    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
-      <div style="font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:#7c3aed;margin-bottom:8pt;">Laudo Técnico das Condições Ambientais do Trabalho</div>
-      <div style="font-size:28pt;font-weight:700;color:#1a0840;line-height:1.15;margin-bottom:6pt;">LTCAT</div>
-      <div style="font-size:13pt;color:#7c3aed;font-weight:400;margin-bottom:24pt;">Conforme Lei nº 9.032/95 e Decreto nº 3.048/99</div>
-      <div style="background:#f5f3ff;border-left:4pt solid #7c3aed;padding:12pt 16pt;margin-bottom:20pt;border-radius:0 4pt 4pt 0;">
-        <div style="font-size:15pt;font-weight:700;color:#1a0840;margin-bottom:3pt;">${escHtml(empresa.razao_social||empresa.nome_fantasia||'—')}</div>
-        ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#4b5563;margin-bottom:4pt;">${escHtml(empresa.nome_fantasia)}</div>`:''}
-        <div style="font-size:9pt;color:#6b7280;font-family:'IBM Plex Mono',monospace;">CNPJ: ${escHtml(cnpj)}</div>
-      </div>
-      <div style="display:flex;gap:8pt;flex-wrap:wrap;">
-        ${gr?`<span style="background:#ede9fe;color:#6d28d9;border:1pt solid #c4b5fd;padding:3pt 10pt;border-radius:20pt;font-size:8pt;font-weight:600;">${grInfo[gr]?.label||''}</span>`:''}
-        ${cnpePrincipal?`<span style="background:#f3f4f6;color:#374151;border:1pt solid #d1d5db;padding:3pt 10pt;border-radius:20pt;font-size:8pt;font-weight:600;">CNAE: ${escHtml(cnpePrincipal.cnae)}</span>`:''}
-        <span style="background:#f3f4f6;color:#374151;border:1pt solid #d1d5db;padding:3pt 10pt;border-radius:20pt;font-size:8pt;font-weight:600;">${medicoes.length} medição(ões) realizada(s)</span>
+    <div class="capa-empresa-box">
+      <div style="font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#7c3aed;margin-bottom:8pt;">Empresa Avaliada</div>
+      <div style="font-size:16pt;font-weight:700;color:#1a0840;line-height:1.2;margin-bottom:4pt;">${escHtml(empresa.razao_social||'—')}</div>
+      ${empresa.nome_fantasia&&empresa.nome_fantasia!==empresa.razao_social?`<div style="font-size:10pt;color:#4b5563;margin-bottom:6pt;">${escHtml(empresa.nome_fantasia)}</div>`:''}
+      <div style="display:flex;gap:20pt;flex-wrap:wrap;margin-top:6pt;">
+        <div><div style="font-size:7pt;color:#7c3aed;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">CNPJ</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9pt;color:#1f2937;">${escHtml(cnpj)}</div></div>
+        ${cnpePrincipal?`<div><div style="font-size:7pt;color:#7c3aed;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">CNAE</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9pt;color:#1f2937;">${escHtml(cnpePrincipal.cnae)}</div></div>`:''}
+        ${gr?`<div><div style="font-size:7pt;color:#7c3aed;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Grau de Risco</div><div style="font-size:9pt;color:#1f2937;">${grInfo[gr]?.label||''}</div></div>`:''}
+        <div><div style="font-size:7pt;color:#7c3aed;font-weight:700;text-transform:uppercase;letter-spacing:.06em;">Município / UF</div><div style="font-size:9pt;color:#1f2937;">${escHtml([empresa.cidade,empresa.estado].filter(Boolean).join(' / ')||'—')}</div></div>
       </div>
     </div>
-    <div style="border-top:1pt solid #e5e7eb;padding-top:10pt;display:flex;justify-content:space-between;">
-      <div><div style="font-size:8pt;color:#9ca3af;">Versão</div><div style="font-size:9pt;font-weight:500;">1.0 — ${fmtAno()}</div></div>
-      <div style="text-align:center;"><div style="font-size:8pt;color:#9ca3af;">Responsável técnico</div><div id="doc-elab-resp" style="font-size:9pt;font-weight:500;">—</div></div>
-      <div style="text-align:right;"><div style="font-size:8pt;color:#9ca3af;">Nº ART</div><div id="doc-elab-art" style="font-size:9pt;font-weight:500;">—</div></div>
+    <div class="ficha-grid ficha-grid-3" style="margin:10pt 0;">
+      <div class="ficha-item"><div class="ficha-label">Medições realizadas</div><div class="ficha-value" style="font-size:16pt;color:#1a0840;">${medicoes.length}</div></div>
+      <div class="ficha-item"><div class="ficha-label">Geradores de insalubridade</div><div class="ficha-value" style="font-size:16pt;color:${insalCount>0?'#854d0e':'#1a0840'};">${insalCount}</div></div>
+      <div class="ficha-item"><div class="ficha-label">Aposentadoria especial</div><div class="ficha-value" style="font-size:16pt;color:${aposCount>0?'#6b21a8':'#1a0840'};">${aposCount}</div></div>
+    </div>
+    <div class="capa-rodape-bloco">
+      <div class="capa-elab-strip">
+        <div class="capa-elab-strip-label">Elaborado por</div>
+        <div class="capa-elab-strip-content">
+          <div class="capa-elab-strip-logo"><div id="doc-elab-logo-sm"><span class="capa-elab-strip-sigla">SST</span></div></div>
+          <div>
+            <div class="capa-elab-strip-nome" id="doc-elab-nome">Empresa Elaboradora</div>
+            <div class="capa-elab-strip-cnpj" id="doc-elab-cnpj">—</div>
+          </div>
+        </div>
+        <div style="margin-left:auto;text-align:right;flex-shrink:0;">
+          <div style="font-size:7.5pt;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3pt;">Responsável / ART</div>
+          <div id="doc-elab-resp" style="font-size:9pt;color:#1f2937;font-weight:500;">—</div>
+          <div id="doc-elab-art-val" style="font-size:8pt;color:#4b5563;font-family:'IBM Plex Mono',monospace;">—</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:8pt;">
+        <span style="font-size:8pt;color:#9ca3af;">Elaborado em: <span id="doc-data-elab">${fmtDataAtual()}</span> — Versão 1.0</span>
+      </div>
     </div>
   </div>`;
   return pg;
 }
 
+// ── SUMÁRIO ───────────────────────────────────────────
+function renderSumario(){
+  const pg=makePg('sumario');
+  const nm=empresa.nome_fantasia||empresa.razao_social;
+  const secoes=[
+    {num:'1',nome:'Identificação da Empresa e Responsável Técnico',ref:'identificacao'},
+    {num:'2',nome:'Base Legal',ref:'base-legal'},
+    {num:'3',nome:'Processos Produtivos e Atividades',ref:'processos'},
+    {num:'4',nome:'Avaliação dos Agentes Nocivos',ref:'medicoes'},
+    {num:'5',nome:'Medidas de Controle',ref:'medidas'},
+    {num:'6',nome:'Conclusão Técnica',ref:'conclusao'},
+  ];
+  pg.innerHTML=`
+  ${hdr(nm,fmtAno())}
+  <div class="doc-section">Sumário</div>
+  <table style="width:100%;border-collapse:collapse;margin-top:10pt;">
+    ${secoes.map(s=>`
+    <tr>
+      <td style="padding:10pt 0;border-bottom:1pt dotted #e5e7eb;width:28pt;vertical-align:middle;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9.5pt;color:#7c3aed;font-weight:700;">${s.num}</span>
+      </td>
+      <td style="padding:10pt 10pt;border-bottom:1pt dotted #e5e7eb;font-size:10pt;color:#1f2937;vertical-align:middle;">${escHtml(s.nome)}</td>
+      <td style="padding:10pt 0 10pt 10pt;border-bottom:1pt dotted #e5e7eb;text-align:right;width:40pt;vertical-align:middle;">
+        <span data-sec-ref="${s.ref}" style="font-family:'IBM Plex Mono',monospace;font-size:9pt;color:#4b5563;">—</span>
+      </td>
+    </tr>`).join('')}
+  </table>
+  ${ftr(nm)}`;
+  return pg;
+}
+
+// ── IDENTIFICAÇÃO ─────────────────────────────────────
 function renderIdentificacao(){
-  const pg=document.createElement('div');pg.className='page';
+  const pg=makePg('identificacao');
+  const nm=empresa.nome_fantasia||empresa.razao_social;
   const cnpj=empresa.cnpj_completo||empresa.cnpj||empresa.cnpj_raiz||'—';
   const gr=empresa.grau_risco;
   const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
+  const cnaesSecundarios=cnaes.filter(c=>c.tipo!=='Principal');
+
   pg.innerHTML=`
-  <div class="page-header">
-    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="ph-doc">LTCAT — ${fmtAno()}</span>
-  </div>
+  ${hdr(nm,fmtAno())}
   <div class="doc-section"><span class="num-secao">1</span>Identificação da Empresa</div>
   <div class="ficha-grid">
     <div class="ficha-item ficha-full"><div class="ficha-label">Razão Social</div><div class="ficha-value" style="font-size:11pt;">${escHtml(empresa.razao_social||'—')}</div></div>
     <div class="ficha-item ficha-full"><div class="ficha-label">Nome Fantasia</div><div class="ficha-value">${escHtml(empresa.nome_fantasia||'—')}</div></div>
     <div class="ficha-item"><div class="ficha-label">CNPJ</div><div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${escHtml(cnpj)}</div></div>
-    <div class="ficha-item"><div class="ficha-label">Grau de Risco</div><div class="ficha-value">${gr?grInfo[gr]?.label:'—'}</div></div>
-    <div class="ficha-item"><div class="ficha-label">CNAE Principal</div><div class="ficha-value">${cnpePrincipal?escHtml(cnpePrincipal.cnae):'—'}</div></div>
-    <div class="ficha-item"><div class="ficha-label">Atividade</div><div class="ficha-value">${cnpePrincipal?escHtml(cnpePrincipal.descricao||'—'):'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Grau de Risco (NR-4)</div><div class="ficha-value">${gr?grInfo[gr]?.label:'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">CNAE Principal</div><div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${cnpePrincipal?escHtml(cnpePrincipal.cnae):'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Atividade Econômica</div><div class="ficha-value">${cnpePrincipal?escHtml(cnpePrincipal.descricao||'—'):'—'}</div></div>
     <div class="ficha-item"><div class="ficha-label">Endereço</div><div class="ficha-value">${escHtml(empresa.endereco||'—')}</div></div>
     <div class="ficha-item"><div class="ficha-label">Município / Estado</div><div class="ficha-value">${escHtml([empresa.cidade,empresa.estado].filter(Boolean).join(' / ')||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">CEP</div><div class="ficha-value" style="font-family:'IBM Plex Mono',monospace;">${escHtml(empresa.cep||'—')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Telefone</div><div class="ficha-value">${escHtml(empresa.telefone||'—')}</div></div>
   </div>
-  <div class="doc-section" style="margin-top:14pt;"><span class="num-secao">2</span>Setores Avaliados</div>
+  ${cnaesSecundarios.length?`
+  <div class="doc-subsection">CNAEs Secundários</div>
   <table class="doc-table">
-    <thead><tr><th>Setor</th><th style="text-align:center;">Func. previstos</th><th style="text-align:center;">Medições</th></tr></thead>
+    <thead><tr><th>CNAE</th><th>Descrição</th></tr></thead>
+    <tbody>${cnaesSecundarios.map(c=>`<tr><td style="font-family:'IBM Plex Mono',monospace;">${escHtml(c.cnae)}</td><td>${escHtml(c.descricao||'—')}</td></tr>`).join('')}</tbody>
+  </table>`:''}
+  <div class="doc-section" style="margin-top:14pt;"><span class="num-secao">—</span>Setores Avaliados</div>
+  <table class="doc-table">
+    <thead><tr><th>Setor</th><th style="text-align:center;">Funcionários</th><th style="text-align:center;">Medições</th><th>Agentes identificados</th></tr></thead>
     <tbody>
       ${setores.map(s=>{
         const meds=medicoes.filter(m=>m.setor_id===s.id);
-        return`<tr>
-          <td style="font-weight:500;">${escHtml(s.nome_setor)}</td>
-          <td style="text-align:center;">${s.num_funcionarios_previsto||0}</td>
-          <td style="text-align:center;">${meds.length}</td>
-        </tr>`;
+        const ag=[s.tem_agente_fisico?'Físico':null,s.tem_agente_quimico?'Químico':null,s.tem_agente_biologico?'Biológico':null,s.tem_agente_ergonomico?'Ergonômico':null,s.tem_agente_acidente?'Acidente':null].filter(Boolean);
+        return`<tr><td style="font-weight:500;">${escHtml(s.nome_setor)}</td><td style="text-align:center;">${s.num_funcionarios_previsto||0}</td><td style="text-align:center;">${meds.length}</td><td style="font-size:8.5pt;">${ag.join(', ')||'—'}</td></tr>`;
       }).join('')}
     </tbody>
   </table>
-  <div class="doc-section" style="margin-top:14pt;"><span class="num-secao">3</span>Responsável Técnico</div>
-  <div class="ficha-grid">
-    <div class="ficha-item"><div class="ficha-label">Nome / Registro</div><div class="ficha-value elab-resp-field">—</div></div>
+  <div class="doc-section" style="margin-top:14pt;"><span class="num-secao">—</span>Responsável Técnico</div>
+  <div class="ficha-grid ficha-grid-3">
+    <div class="ficha-item"><div class="ficha-label">Nome / Registro profissional</div><div class="ficha-value elab-resp-field">—</div></div>
     <div class="ficha-item"><div class="ficha-label">Empresa elaboradora</div><div class="ficha-value elab-nome-field">—</div></div>
-    <div class="ficha-item"><div class="ficha-label">Nº ART</div><div class="ficha-value elab-art-field">—</div></div>
-    <div class="ficha-item"><div class="ficha-label">Data do laudo</div><div class="ficha-value">${fmtDataAtual()}</div></div>
+    <div class="ficha-item"><div class="ficha-label">CNPJ elaboradora</div><div class="ficha-value elab-cnpj-field" style="font-family:'IBM Plex Mono',monospace;">—</div></div>
+    <div class="ficha-item"><div class="ficha-label">Nº ART</div><div class="ficha-value elab-art-field" style="font-family:'IBM Plex Mono',monospace;">—</div></div>
+    <div class="ficha-item"><div class="ficha-label">Data de elaboração</div><div class="ficha-value elab-data-field">${fmtDataAtual()}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Próxima revisão</div><div class="ficha-value">${fmtAno()+1}</div></div>
   </div>
-  <div class="page-footer">
-    <span class="pf-label">LTCAT — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="pf-page">Página 2</span>
-  </div>`;
+  ${ftr(nm)}`;
   return pg;
 }
 
-function renderMedicoes(){
-  const pg=document.createElement('div');pg.className='page';
-  if(!medicoes.length){
-    pg.innerHTML=`
-    <div class="page-header"><span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span><span class="ph-doc">LTCAT — ${fmtAno()}</span></div>
-    <div class="doc-section"><span class="num-secao">4</span>Avaliação dos Agentes Nocivos</div>
-    <div class="em-breve"><div style="font-size:20pt;margin-bottom:6pt;">📊</div><div style="font-size:9pt;color:#9ca3af;font-style:italic;">Nenhuma medição registrada. Acesse o módulo de Medições Ambientais para registrar as avaliações.</div></div>
-    <div class="page-footer"><span class="pf-label">LTCAT — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span><span class="pf-page">Página 3</span></div>`;
-    return pg;
-  }
-  // Agrupa por setor
-  const porSetor={};
-  medicoes.forEach(m=>{if(!porSetor[m.setor_id])porSetor[m.setor_id]=[];porSetor[m.setor_id].push(m);});
+// ── BASE LEGAL ────────────────────────────────────────
+function renderBaseLegal(){
+  const pg=makePg('base-legal');
+  const nm=empresa.nome_fantasia||empresa.razao_social;
+  const refs=[
+    {cod:'Lei nº 8.213/91',desc:'Plano de Benefícios da Previdência Social — Arts. 57 e 58: define aposentadoria especial e obrigação de comprovação de exposição a agentes nocivos mediante laudo técnico.'},
+    {cod:'Lei nº 9.032/95',desc:'Altera a Lei nº 8.213/91 e institui a obrigatoriedade do LTCAT, emitido por médico do trabalho ou engenheiro de segurança do trabalho.'},
+    {cod:'Decreto nº 3.048/99',desc:'Regulamento da Previdência Social — Anexo IV: lista de agentes nocivos para aposentadoria especial; Anexo XV: modelo e requisitos do LTCAT.'},
+    {cod:'IN INSS/PRES nº 77/2015',desc:'Instrução Normativa do INSS — Arts. 261 a 263: define o conteúdo mínimo obrigatório do LTCAT, periodicidade de atualização e obrigações do empregador.'},
+    {cod:'IN INSS nº 128/2022',desc:'Atualiza procedimentos para análise de pedidos de reconhecimento de direitos dos segurados, incluindo aposentadoria especial, PPP e LTCAT.'},
+    {cod:'NR-15 (Portaria MTE nº 3.214/78)',desc:'Atividades e Operações Insalubres — Anexos I ao XIV: limites de tolerância para agentes físicos (ruído, calor, frio, radiações ionizantes e não ionizantes), químicos e biológicos.'},
+    {cod:'NR-16 (Portaria MTE nº 3.214/78)',desc:'Atividades e Operações Perigosas — Regula a caracterização de periculosidade para inflamáveis, explosivos, energia elétrica, radiações ionizantes e substâncias tóxicas.'},
+    {cod:'NHOs FUNDACENTRO',desc:'Normas de Higiene Ocupacional: NHO-01 (ruído), NHO-06 (benzeno), NHO-07 (sílica), NHO-09 (calor) — metodologias de avaliação ambiental quantitativa.'},
+  ];
   pg.innerHTML=`
-  <div class="page-header"><span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span><span class="ph-doc">LTCAT — ${fmtAno()}</span></div>
-  <div class="doc-section"><span class="num-secao">4</span>Avaliação dos Agentes Nocivos</div>
-  <p class="doc-text" style="margin-bottom:12pt;">As avaliações ambientais foram realizadas conforme metodologias previstas nas Normas de Higiene Ocupacional (NHO) da FUNDACENTRO e nos Anexos das NR-15 e NR-16, com equipamentos calibrados e operados por profissional habilitado.</p>
-  ${Object.entries(porSetor).map(([setorId,meds])=>{
-    const setor=setores.find(s=>s.id==setorId);
-    return`<div style="margin-bottom:14pt;">
-      <div style="background:#f5f3ff;border-left:3pt solid #7c3aed;padding:6pt 10pt;margin-bottom:8pt;font-size:10pt;font-weight:600;color:#1a0840;">🗂️ ${escHtml(setor?.nome_setor||'—')} <span style="font-weight:400;font-size:9pt;color:#6b7280;">(${setor?.num_funcionarios_previsto||0} funcionários)</span></div>
-      ${meds.map(m=>{
-        const risco=riscos.find(r=>r.id===m.risco_id);
-        const catCor=getCatCor(risco?.categoria_risco_id);
-        const catNome=getCatNome(risco?.categoria_risco_id);
-        const resBadge=m.resultado==='Acima do limite'?'<span class="res-acima">Acima do limite</span>':m.resultado==='Dentro do limite'?'<span class="res-dentro">Dentro do limite</span>':'<span class="res-nq">Não quantitativo</span>';
-        return`<div class="med-box">
-          <div class="med-box-header">
-            <span class="med-box-cat" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
-            <span class="med-box-nome">${escHtml(risco?.nome_risco||'—')}</span>
-            ${resBadge}
-            ${m.gera_insalubridade?`<span class="insal-badge">Insalubridade ${m.percentual_insalubridade||''}%</span>`:''}
-            ${m.gera_aposentadoria_especial?`<span class="apos-badge">Apos. Especial</span>`:''}
-          </div>
-          <div class="med-box-body">
-            <div class="med-grid">
-              <div class="med-field"><div class="label">Data</div><div class="value">${fmtData(m.data_medicao)}</div></div>
-              <div class="med-field"><div class="label">Valor medido</div><div class="value">${m.valor_medido?m.valor_medido+' '+(m.unidade||''):'—'}</div></div>
-              <div class="med-field"><div class="label">Limite tolerância</div><div class="value">${escHtml(risco?.limite_tolerancia_esocial||risco?.limite_tolerancia||'—')}</div></div>
-              <div class="med-field"><div class="label">Exposição</div><div class="value">${m.duracao_exposicao?m.duracao_exposicao+'h/dia':'—'}</div></div>
-              <div class="med-field"><div class="label">Metodologia</div><div class="value" style="font-size:8pt;">${escHtml(risco?.metodologia_avaliacao||'—')}</div></div>
-              <div class="med-field"><div class="label">Equipamento</div><div class="value" style="font-size:8pt;">${escHtml(m.equipamento_utilizado||'—')}</div></div>
-              <div class="med-field"><div class="label">Responsável</div><div class="value" style="font-size:8pt;">${escHtml(m.responsavel_tecnico||'—')}</div></div>
-              <div class="med-field"><div class="label">ART</div><div class="value" style="font-size:8pt;">${escHtml(m.numero_art||'—')}</div></div>
-            </div>
-            ${m.conclusao_tecnica?`<div class="conclusao-box">💬 ${escHtml(m.conclusao_tecnica)}</div>`:''}
-          </div>
-        </div>`;
-      }).join('')}
+  ${hdr(nm,fmtAno())}
+  <div class="doc-section"><span class="num-secao">2</span>Base Legal</div>
+  <p class="doc-text" style="margin-bottom:12pt;">Este laudo foi elaborado com fundamento nas seguintes normas legais e regulamentares:</p>
+  <table class="doc-table">
+    <thead><tr><th style="width:34%;">Instrumento Legal</th><th>Aplicação neste LTCAT</th></tr></thead>
+    <tbody>
+      ${refs.map(r=>`<tr>
+        <td style="font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:8pt;vertical-align:top;">${escHtml(r.cod)}</td>
+        <td style="font-size:8.5pt;">${escHtml(r.desc)}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+  <div class="conclusao-box" style="margin-top:14pt;">
+    <strong>Vigência e atualização obrigatória:</strong> O LTCAT deve ser revisado sempre que ocorrerem alterações nos processos produtivos, equipamentos ou condições ambientais que possam modificar a exposição dos trabalhadores (IN 77/2015, art. 261, § 1º). Recomenda-se revisão mínima anual.
+  </div>
+  ${ftr(nm)}`;
+  return pg;
+}
+
+// ── PROCESSOS PRODUTIVOS ──────────────────────────────
+function renderProcessos(){
+  const pages=[];
+  const pg=makePg('processos');
+  const nm=empresa.nome_fantasia||empresa.razao_social;
+  const cnpePrincipal=cnaes.find(c=>c.tipo==='Principal');
+
+  pg.innerHTML=`
+  ${hdr(nm,fmtAno())}
+  <div class="doc-section"><span class="num-secao">3</span>Processos Produtivos e Atividades</div>
+  <p class="doc-text" style="margin-bottom:12pt;">A empresa exerce atividade de <strong>${escHtml(cnpePrincipal?.descricao||'atividade não especificada')}</strong> (CNAE ${escHtml(cnpePrincipal?.cnae||'—')}). A seguir, a descrição de cada setor avaliado:</p>
+  ${setores.map(s=>{
+    const meds=medicoes.filter(m=>m.setor_id===s.id);
+    const ag=[
+      s.tem_agente_fisico?{nm:'Físico',cor:CAT_CORES['Físico']}:null,
+      s.tem_agente_quimico?{nm:'Químico',cor:CAT_CORES['Químico']}:null,
+      s.tem_agente_biologico?{nm:'Biológico',cor:CAT_CORES['Biológico']}:null,
+      s.tem_agente_ergonomico?{nm:'Ergonômico',cor:CAT_CORES['Ergonômico']}:null,
+      s.tem_agente_acidente?{nm:'Acidente',cor:CAT_CORES['Acidente']}:null,
+      s.tem_agente_psicossocial?{nm:'Psicossocial',cor:CAT_CORES['Psicossocial']}:null,
+    ].filter(Boolean);
+    return`<div style="border:1pt solid #e5e7eb;border-radius:6pt;margin-bottom:10pt;overflow:hidden;page-break-inside:avoid;break-inside:avoid;">
+      <div style="background:#f5f3ff;padding:8pt 12pt;border-bottom:1pt solid #e5e7eb;display:flex;align-items:center;gap:10pt;flex-wrap:wrap;">
+        <span style="font-size:10.5pt;font-weight:700;color:#1a0840;flex:1;">${escHtml(s.nome_setor)}</span>
+        <span style="font-size:8pt;color:#6b7280;">${s.num_funcionarios_previsto||0} funcionário(s)</span>
+        ${meds.length?`<span style="font-size:8pt;color:#7c3aed;font-weight:600;">${meds.length} medição(ões)</span>`:''}
+      </div>
+      <div style="padding:8pt 12pt;">
+        ${s.descricao?`<p style="font-size:9pt;color:#1f2937;margin-bottom:8pt;line-height:1.55;">${escHtml(s.descricao)}</p>`:`<p style="font-size:9pt;color:#9ca3af;font-style:italic;margin-bottom:8pt;">Descrição das atividades não cadastrada. Acesse o cadastro de setores para detalhar os processos produtivos.</p>`}
+        <div style="display:flex;gap:6pt;flex-wrap:wrap;">
+          ${s.andar?`<span style="font-size:7.5pt;background:#f3f4f6;color:#374151;border:1pt solid #e5e7eb;padding:2pt 7pt;border-radius:3pt;">📍 ${escHtml(s.andar)}</span>`:''}
+          ${s.area_m2?`<span style="font-size:7.5pt;background:#f3f4f6;color:#374151;border:1pt solid #e5e7eb;padding:2pt 7pt;border-radius:3pt;">📐 ${s.area_m2} m²</span>`:''}
+          ${s.responsavel_setor?`<span style="font-size:7.5pt;background:#f3f4f6;color:#374151;border:1pt solid #e5e7eb;padding:2pt 7pt;border-radius:3pt;">👤 ${escHtml(s.responsavel_setor)}</span>`:''}
+          ${ag.map(a=>`<span style="font-size:7.5pt;background:${a.cor.bg};color:${a.cor.color};border:1pt solid ${a.cor.bg};padding:2pt 7pt;border-radius:3pt;font-weight:600;">⚠️ ${a.nm}</span>`).join('')}
+        </div>
+      </div>
     </div>`;
   }).join('')}
-  <div class="page-footer"><span class="pf-label">LTCAT — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span><span class="pf-page">Página 3</span></div>`;
-  return pg;
+  ${ftr(nm)}`;
+  pages.push(pg);
+  return pages;
 }
 
+// ── AVALIAÇÃO DOS AGENTES ─────────────────────────────
+function renderMedicoes(){
+  const pages=[];
+  const nm=empresa.nome_fantasia||empresa.razao_social;
+  if(!medicoes.length){
+    const pg=makePg('medicoes');
+    pg.innerHTML=`${hdr(nm,fmtAno())}<div class="doc-section"><span class="num-secao">4</span>Avaliação dos Agentes Nocivos</div><div class="em-breve"><div style="font-size:24pt;margin-bottom:8pt;">📊</div><p style="font-size:9pt;color:#9ca3af;font-style:italic;">Nenhuma medição registrada. Acesse o módulo de Medições Ambientais para registrar as avaliações quantitativas e qualitativas.</p></div>${ftr(nm)}`;
+    pages.push(pg);return pages;
+  }
+  const porSetor={};
+  medicoes.forEach(m=>{if(!porSetor[m.setor_id])porSetor[m.setor_id]=[];porSetor[m.setor_id].push(m);});
+  let isFirst=true;
+  Object.entries(porSetor).forEach(([setorId,meds])=>{
+    const setor=setores.find(s=>s.id==setorId);
+    const pg=makePg('medicoes');
+    const medHtml=meds.map(m=>{
+      const risco=riscos.find(r=>r.id===m.risco_id);
+      const catCor=getCatCor(risco?.categoria_risco_id);
+      const catNome=getCatNome(risco?.categoria_risco_id);
+      const resBadge=m.resultado==='Acima do limite'?'<span class="res-acima">Acima do limite</span>':m.resultado==='Dentro do limite'?'<span class="res-dentro">Dentro do limite</span>':'<span class="res-nq">Não quantitativo</span>';
+      const cod24=risco?.codigo_tabela24_esocial;
+      return`<div class="med-box">
+        <div class="med-box-header">
+          <span class="med-box-cat" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
+          <span class="med-box-nome">${escHtml(risco?.nome_risco||'—')}</span>
+          ${resBadge}
+          ${m.gera_insalubridade?`<span class="insal-badge">Insalubridade ${m.percentual_insalubridade||''}%</span>`:''}
+          ${m.gera_aposentadoria_especial?`<span class="apos-badge">Apos. Especial</span>`:''}
+        </div>
+        <div class="med-box-body">
+          <div class="med-grid">
+            <div class="med-field"><div class="label">Data da medição</div><div class="value">${fmtData(m.data_medicao)}</div></div>
+            <div class="med-field"><div class="label">Valor medido</div><div class="value">${m.valor_medido?escHtml(m.valor_medido+' '+(m.unidade||'')):'—'}</div></div>
+            <div class="med-field"><div class="label">Limite de tolerância</div><div class="value">${escHtml(risco?.limite_tolerancia_esocial||risco?.limite_tolerancia||'—')}</div></div>
+            <div class="med-field"><div class="label">Exposição diária</div><div class="value">${m.duracao_exposicao?m.duracao_exposicao+'h/dia':'—'}</div></div>
+            <div class="med-field"><div class="label">Metodologia</div><div class="value" style="font-size:8pt;">${escHtml(risco?.metodologia_avaliacao||'—')}</div></div>
+            <div class="med-field"><div class="label">Equipamento</div><div class="value" style="font-size:8pt;">${escHtml(m.equipamento_utilizado||'—')}</div></div>
+            <div class="med-field"><div class="label">Responsável / ART</div><div class="value" style="font-size:8pt;">${escHtml(m.responsavel_tecnico||'—')}${m.numero_art?' / ART '+escHtml(m.numero_art):''}</div></div>
+            <div class="med-field"><div class="label">Cód. Tabela 24 eSocial</div><div class="value" style="font-size:8pt;font-family:'IBM Plex Mono',monospace;">${cod24?escHtml(cod24):'—'}</div></div>
+          </div>
+          ${m.conclusao_tecnica?`<div class="conclusao-box">💬 ${escHtml(m.conclusao_tecnica)}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    pg.innerHTML=`
+    ${hdr(nm,fmtAno())}
+    ${isFirst?`<div class="doc-section"><span class="num-secao">4</span>Avaliação dos Agentes Nocivos</div><p class="doc-text" style="margin-bottom:12pt;">Avaliações realizadas conforme NHOs FUNDACENTRO e Anexos das NR-15 e NR-16, com equipamentos calibrados e operados por profissional habilitado.</p>`:''}
+    <div style="background:#f5f3ff;border-left:3pt solid #7c3aed;padding:7pt 12pt;margin-bottom:10pt;border-radius:0 4pt 4pt 0;">
+      <span style="font-size:10.5pt;font-weight:700;color:#1a0840;">🗂️ ${escHtml(setor?.nome_setor||'—')}</span>
+      <span style="font-size:9pt;color:#6b7280;margin-left:10pt;">${setor?.num_funcionarios_previsto||0} funcionário(s) · ${meds.length} medição(ões)</span>
+    </div>
+    ${medHtml}
+    ${ftr(nm)}`;
+    pages.push(pg);isFirst=false;
+  });
+  return pages;
+}
+
+// ── MEDIDAS DE CONTROLE ───────────────────────────────
+function renderMedidas(){
+  const pages=[];
+  const pg=makePg('medidas');
+  const nm=empresa.nome_fantasia||empresa.razao_social;
+  const porRisco={};
+  (setorRiscos||[]).forEach(sr=>{if(!porRisco[sr.risco_id])porRisco[sr.risco_id]=[];porRisco[sr.risco_id].push(sr);});
+  const riscoIds=Object.keys(porRisco);
+
+  const medidasHtml=riscoIds.length?riscoIds.map(rid=>{
+    const risco=riscos.find(r=>r.id==rid);
+    const srs=porRisco[rid];
+    const catCor=getCatCor(risco?.categoria_risco_id);
+    const catNome=getCatNome(risco?.categoria_risco_id);
+    const temElim=srs.some(sr=>sr.medida_elim);
+    const temSubs=srs.some(sr=>sr.medida_subs);
+    const temEng=srs.some(sr=>sr.medida_eng);
+    const temAdm=srs.some(sr=>sr.medida_adm);
+    const temEpi=srs.some(sr=>sr.medida_epi);
+    if(!temElim&&!temSubs&&!temEng&&!temAdm&&!temEpi)return'';
+    const descElim=srs.map(sr=>sr.medida_elim_desc).filter(Boolean).join('; ');
+    const descSubs=srs.map(sr=>sr.medida_subs_desc).filter(Boolean).join('; ');
+    const descEng=srs.map(sr=>sr.medida_eng_desc).filter(Boolean).join('; ');
+    const descAdm=srs.map(sr=>sr.medida_adm_desc).filter(Boolean).join('; ');
+    const setoresNomes=srs.map(sr=>setores.find(s=>s.id===sr.setor_id)?.nome_setor).filter(Boolean);
+    return`<div style="border:1pt solid #e5e7eb;border-radius:6pt;margin-bottom:10pt;overflow:hidden;page-break-inside:avoid;break-inside:avoid;">
+      <div class="med-box-header">
+        <span class="med-box-cat" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
+        <span class="med-box-nome">${escHtml(risco?.nome_risco||'—')}</span>
+        <span style="font-size:8pt;color:#6b7280;">${setoresNomes.join(' · ')}</span>
+      </div>
+      <div class="med-box-body" style="padding:6pt 12pt;">
+        <table style="width:100%;border-collapse:collapse;font-size:9pt;">
+          ${temElim?`<tr style="border-bottom:1pt solid #f3f4f6;"><td style="padding:5pt 8pt;width:30%;font-weight:600;color:#166534;background:#f0fdf4;border-radius:3pt 0 0 3pt;">🚫 Eliminação</td><td style="padding:5pt 8pt;">${escHtml(descElim||'Prevista no inventário de riscos.')}</td></tr>`:''}
+          ${temSubs?`<tr style="border-bottom:1pt solid #f3f4f6;"><td style="padding:5pt 8pt;width:30%;font-weight:600;color:#1d4ed8;background:#eff6ff;">🔄 Substituição</td><td style="padding:5pt 8pt;">${escHtml(descSubs||'Prevista no inventário de riscos.')}</td></tr>`:''}
+          ${temEng?`<tr style="border-bottom:1pt solid #f3f4f6;"><td style="padding:5pt 8pt;width:30%;font-weight:600;color:#854d0e;background:#fffbeb;">🔧 Engenharia / EPC</td><td style="padding:5pt 8pt;">${escHtml(descEng||'Prevista no inventário de riscos.')}</td></tr>`:''}
+          ${temAdm?`<tr style="border-bottom:1pt solid #f3f4f6;"><td style="padding:5pt 8pt;width:30%;font-weight:600;color:#6b21a8;background:#f5f3ff;">📋 Administrativo</td><td style="padding:5pt 8pt;">${escHtml(descAdm||'Prevista no inventário de riscos.')}</td></tr>`:''}
+          ${temEpi?`<tr><td style="padding:5pt 8pt;width:30%;font-weight:600;color:#991b1b;background:#fef2f2;">🦺 EPI Obrigatório</td><td style="padding:5pt 8pt;">Uso de EPI obrigatório conforme CAEPI/MTE. Verificar CA e data de validade junto ao técnico responsável.</td></tr>`:''}
+        </table>
+      </div>
+    </div>`;
+  }).filter(Boolean).join(''):`<div class="em-breve"><p style="font-size:9pt;color:#9ca3af;font-style:italic;">Medidas de controle não cadastradas no inventário de riscos. Acesse o módulo de Riscos para registrar as medidas por setor.</p></div>`;
+
+  pg.innerHTML=`
+  ${hdr(nm,fmtAno())}
+  <div class="doc-section"><span class="num-secao">5</span>Medidas de Controle</div>
+  <p class="doc-text" style="margin-bottom:12pt;">As medidas de controle seguem a hierarquia NR-1 (2025): <strong>Eliminação → Substituição → Controles de Engenharia (EPC) → Medidas Administrativas → EPI</strong>, priorizando sempre os controles coletivos.</p>
+  ${medidasHtml}
+  ${ftr(nm)}`;
+  pages.push(pg);
+  return pages;
+}
+
+// ── CONCLUSÃO TÉCNICA ─────────────────────────────────
 function renderConclusao(){
-  const pg=document.createElement('div');pg.className='page';
+  const pg=makePg('conclusao');
+  const nm=empresa.nome_fantasia||empresa.razao_social;
   const insalubres=medicoes.filter(m=>m.gera_insalubridade);
   const aposEspecial=medicoes.filter(m=>m.gera_aposentadoria_especial);
   const acima=medicoes.filter(m=>m.resultado==='Acima do limite');
+
   pg.innerHTML=`
-  <div class="page-header"><span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span><span class="ph-doc">LTCAT — ${fmtAno()}</span></div>
-  <div class="doc-section"><span class="num-secao">5</span>Conclusão Técnica</div>
-  <p class="doc-text" style="margin-bottom:12pt;">Com base nas avaliações ambientais realizadas, conclui-se que:</p>
+  ${hdr(nm,fmtAno())}
+  <div class="doc-section"><span class="num-secao">6</span>Conclusão Técnica</div>
+  <p class="doc-text" style="margin-bottom:12pt;">Com base nas avaliações ambientais realizadas neste estabelecimento, conclui-se que:</p>
   ${insalubres.length?`
-  <div class="doc-subsection">Agentes geradores de insalubridade</div>
+  <div class="doc-subsection">Agentes geradores de insalubridade (NR-15)</div>
   <table class="doc-table">
-    <thead><tr><th>Setor</th><th>Agente</th><th>Percentual</th><th>Fundamentação</th></tr></thead>
+    <thead><tr><th>Setor</th><th>Agente nocivo</th><th>Grau</th><th>Cód. Tab. 24</th><th>Base</th></tr></thead>
     <tbody>
       ${insalubres.map(m=>{
         const s=setores.find(x=>x.id===m.setor_id);
@@ -347,15 +642,16 @@ function renderConclusao(){
           <td>${escHtml(s?.nome_setor||'—')}</td>
           <td style="font-weight:500;">${escHtml(r?.nome_risco||'—')}</td>
           <td style="text-align:center;"><span class="insal-badge">${m.percentual_insalubridade||'—'}%</span></td>
-          <td style="font-size:8.5pt;">NR-15 / Código eSocial: ${escHtml(r?.codigo_tabela24_esocial||'—')}</td>
+          <td style="font-family:'IBM Plex Mono',monospace;font-size:8pt;">${escHtml(r?.codigo_tabela24_esocial||'—')}</td>
+          <td style="font-size:8pt;">NR-15</td>
         </tr>`;
       }).join('')}
     </tbody>
-  </table>`:'<p class="doc-text" style="margin-bottom:12pt;">Não foram identificados agentes geradores de insalubridade nas condições avaliadas.</p>'}
+  </table>`:`<p class="doc-text" style="margin-bottom:8pt;">✅ Não foram identificados agentes geradores de insalubridade nas condições avaliadas.</p>`}
   ${aposEspecial.length?`
-  <div class="doc-subsection" style="margin-top:12pt;">Agentes para aposentadoria especial</div>
+  <div class="doc-subsection" style="margin-top:12pt;">Enquadramento para aposentadoria especial (Dec. 3.048/99, Anexo IV)</div>
   <table class="doc-table">
-    <thead><tr><th>Setor</th><th>Agente</th><th>Código Tabela 24</th></tr></thead>
+    <thead><tr><th>Setor</th><th>Agente nocivo</th><th>Cód. Tabela 24 eSocial</th></tr></thead>
     <tbody>
       ${aposEspecial.map(m=>{
         const s=setores.find(x=>x.id===m.setor_id);
@@ -363,20 +659,32 @@ function renderConclusao(){
         return`<tr><td>${escHtml(s?.nome_setor||'—')}</td><td style="font-weight:500;">${escHtml(r?.nome_risco||'—')}</td><td style="font-family:'IBM Plex Mono',monospace;">${escHtml(r?.codigo_tabela24_esocial||'—')}</td></tr>`;
       }).join('')}
     </tbody>
-  </table>`:''}
-  <div class="doc-subsection" style="margin-top:12pt;">Resumo das avaliações</div>
+  </table>`:`<p class="doc-text" style="margin-bottom:8pt;">✅ Não foram identificados agentes que enquadrem os trabalhadores para aposentadoria especial.</p>`}
+  <div class="doc-subsection" style="margin-top:12pt;">Resumo quantitativo</div>
   <div class="ficha-grid ficha-grid-3">
-    <div class="ficha-item"><div class="ficha-label">Total de medições</div><div class="ficha-value" style="font-size:16pt;color:#1a0840;font-weight:700;">${medicoes.length}</div></div>
-    <div class="ficha-item"><div class="ficha-label">Acima do limite</div><div class="ficha-value" style="font-size:16pt;color:#991b1b;font-weight:700;">${acima.length}</div></div>
-    <div class="ficha-item"><div class="ficha-label">Gerando insalubridade</div><div class="ficha-value" style="font-size:16pt;color:#854d0e;font-weight:700;">${insalubres.length}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Total de medições</div><div class="ficha-value" style="font-size:16pt;color:#1a0840;">${medicoes.length}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Acima do limite</div><div class="ficha-value" style="font-size:16pt;color:${acima.length?'#991b1b':'#1a0840'};">${acima.length}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Gera insalubridade</div><div class="ficha-value" style="font-size:16pt;color:${insalubres.length?'#854d0e':'#1a0840'};">${insalubres.length}</div></div>
   </div>
-  <div class="doc-subsection" style="margin-top:14pt;">Validade e revisão</div>
-  <p class="doc-text">Este LTCAT deverá ser revisado sempre que ocorrerem alterações nos processos produtivos, nos equipamentos ou nas condições ambientais que possam modificar a exposição dos trabalhadores aos agentes nocivos identificados, conforme estabelecido pelo Decreto nº 3.048/99 e pela IN INSS/PRES nº 77/2015.</p>
-  <div style="margin-top:30pt;display:grid;grid-template-columns:1fr 1fr;gap:30pt;">
-    <div style="text-align:center;"><div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:50pt;"><div class="elab-resp-field" style="font-size:9pt;font-weight:500;"></div><div style="font-size:8pt;color:#6b7280;">Responsável técnico</div><div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">ART nº <span class="elab-art-field"></span></div></div></div>
-    <div style="text-align:center;"><div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:50pt;"><div style="font-size:9pt;font-weight:500;">${escHtml(empresa.razao_social||'—')}</div><div style="font-size:8pt;color:#6b7280;">Representante da empresa</div><div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">Data: ___/___/______</div></div></div>
+  <div class="doc-subsection" style="margin-top:12pt;">Validade e revisão</div>
+  <p class="doc-text">Este LTCAT deverá ser revisado sempre que ocorrerem alterações nos processos produtivos, equipamentos ou condições ambientais que possam modificar a exposição dos trabalhadores, conforme IN INSS/PRES nº 77/2015, art. 261, § 1º, e Decreto nº 3.048/99.</p>
+  <div style="margin-top:28pt;display:grid;grid-template-columns:1fr 1fr;gap:30pt;">
+    <div style="text-align:center;">
+      <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:48pt;">
+        <div class="elab-resp-field" style="font-size:9pt;font-weight:600;"></div>
+        <div style="font-size:8pt;color:#6b7280;">Responsável técnico</div>
+        <div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">ART nº <span class="elab-art-field"></span></div>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:48pt;">
+        <div style="font-size:9pt;font-weight:600;">${escHtml(empresa.razao_social||'—')}</div>
+        <div style="font-size:8pt;color:#6b7280;">Representante legal da empresa</div>
+        <div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">Data: ___/___/______</div>
+      </div>
+    </div>
   </div>
-  <div class="page-footer"><span class="pf-label">LTCAT — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span><span class="pf-page">Página 4</span></div>`;
+  ${ftr(nm)}`;
   return pg;
 }
 
@@ -391,27 +699,101 @@ function carregarLogo(input){
   reader.onload=e=>{
     elaboradora.logoUrl=e.target.result;
     document.getElementById('logo-preview').innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;">`;
-    atualizarLogoDocumento();
+    atualizarLogoElaboradora();
   };
   reader.readAsDataURL(file);
 }
-function atualizarLogoDocumento(){
-  const logoEl=document.getElementById('doc-elab-logo');
-  if(!logoEl)return;
-  if(elaboradora.logoUrl){logoEl.innerHTML=`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">`;logoEl.style.background='#fff';}
-  else{const s=(elaboradora.nome||'SST').replace(/[^A-Z]/gi,'').slice(0,3).toUpperCase()||'SST';logoEl.innerHTML=`<span style="font-family:'IBM Plex Mono',monospace;font-size:14pt;font-weight:700;color:#fff;">${s}</span>`;logoEl.style.background='#1a0840';}
+function carregarLogoEmpresa(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const box=document.getElementById('capa-empresa-logo-box');
+    if(box){
+      box.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:contain;border-radius:4pt;">
+        <input type="file" id="empresa-logo-input" accept="image/*" style="display:none;" onchange="carregarLogoEmpresa(this)">`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+function atualizarLogoElaboradora(){
+  const el=document.getElementById('doc-elab-logo-sm');if(!el)return;
+  if(elaboradora.logoUrl){
+    el.innerHTML=`<img src="${elaboradora.logoUrl}" style="width:100%;height:100%;object-fit:contain;border-radius:3pt;">`;
+  }else{
+    const s=(elaboradora.nome||'SST').replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()||'SST';
+    el.innerHTML=`<span class="capa-elab-strip-sigla">${s}</span>`;
+  }
 }
 function atualizarElaboradora(){
   elaboradora.nome=document.getElementById('elab-nome').value.trim();
+  elaboradora.cnpj=document.getElementById('elab-cnpj').value.trim();
   elaboradora.responsavel=document.getElementById('elab-responsavel').value.trim();
   elaboradora.art=document.getElementById('elab-art').value.trim();
-  document.getElementById('doc-elab-nome').textContent=elaboradora.nome||'Empresa Elaboradora';
-  document.getElementById('doc-elab-resp').textContent=elaboradora.responsavel||'—';
-  document.getElementById('doc-elab-art').textContent=elaboradora.art||'—';
-  atualizarLogoDocumento();
+  elaboradora.dataElaboracao=document.getElementById('elab-data').value;
+
+  const q=(id,txt)=>{const el=document.getElementById(id);if(el)el.textContent=txt;};
+  q('doc-elab-nome',elaboradora.nome||'Empresa Elaboradora');
+  q('doc-elab-cnpj',elaboradora.cnpj||'—');
+  q('doc-elab-resp',elaboradora.responsavel||'—');
+  q('doc-elab-art-val',elaboradora.art?'ART: '+elaboradora.art:'—');
+  q('doc-data-elab',elaboradora.dataElaboracao?fmtData(elaboradora.dataElaboracao):fmtDataAtual());
+
   document.querySelectorAll('.elab-resp-field').forEach(el=>el.textContent=elaboradora.responsavel||'—');
   document.querySelectorAll('.elab-nome-field').forEach(el=>el.textContent=elaboradora.nome||'—');
   document.querySelectorAll('.elab-art-field').forEach(el=>el.textContent=elaboradora.art||'—');
+  document.querySelectorAll('.elab-cnpj-field').forEach(el=>el.textContent=elaboradora.cnpj||'—');
+  document.querySelectorAll('.elab-data-field').forEach(el=>el.textContent=elaboradora.dataElaboracao?fmtData(elaboradora.dataElaboracao):fmtDataAtual());
+  atualizarLogoElaboradora();
+}
+
+// ── GERAR AÇÕES LTCAT ─────────────────────────────────
+async function gerarAcoesLTCAT(){
+  const btn=document.getElementById('btn-gerar-acoes');
+  btn.disabled=true;btn.textContent='⏳ Gerando...';
+  setStatus('Criando ações na Central de Ações...','info');
+  const H={'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=minimal'};
+  const hoje=new Date();
+  const add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().split('T')[0];};
+
+  const acoes=[];
+  // Medições acima do limite → ação de controle
+  medicoes.filter(m=>m.resultado==='Acima do limite').forEach(m=>{
+    const risco=riscos.find(r=>r.id===m.risco_id);
+    const setor=setores.find(s=>s.id===m.setor_id);
+    acoes.push({
+      empresa_id:parseInt(empresaId),setor_id:m.setor_id,
+      titulo:`Controlar exposição — ${risco?.nome_risco||'agente'} · ${setor?.nome_setor||'setor'}`,
+      descricao:`Medição de ${fmtData(m.data_medicao)} revelou valor acima do limite de tolerância (${m.valor_medido||'—'} ${m.unidade||''}). Implementar medidas de controle conforme hierarquia NR-1.`,
+      origem:'LTCAT',prioridade:'Alta',prazo:add(hoje,60),status:'Pendente',
+    });
+  });
+  // Aposentadoria especial → emitir PPP por setor
+  const setoresApos=[...new Set(medicoes.filter(m=>m.gera_aposentadoria_especial).map(m=>m.setor_id))];
+  setoresApos.forEach(sid=>{
+    const setor=setores.find(s=>s.id===sid);
+    acoes.push({
+      empresa_id:parseInt(empresaId),setor_id:sid,
+      titulo:`Emitir PPP — aposentadoria especial · ${setor?.nome_setor||'setor'}`,
+      descricao:'Trabalhadores deste setor são expostos a agente enquadrado para aposentadoria especial. Emitir Perfil Profissiográfico Previdenciário (PPP) conforme IN INSS 77/2015.',
+      origem:'LTCAT',prioridade:'Alta',prazo:add(hoje,30),status:'Pendente',
+    });
+  });
+  // Revisão anual
+  acoes.push({
+    empresa_id:parseInt(empresaId),
+    titulo:`Revisão do LTCAT — ${hoje.getFullYear()+1}`,
+    descricao:'Revisão anual do Laudo Técnico das Condições Ambientais do Trabalho conforme Decreto nº 3.048/99 e IN INSS/PRES nº 77/2015, art. 261.',
+    origem:'LTCAT',prioridade:'Média',prazo:add(hoje,365),status:'Pendente',
+  });
+
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/acoes`,{method:'POST',headers:H,body:JSON.stringify(acoes)});
+    if(!res.ok)throw new Error(await res.text());
+    setStatus(`✅ ${acoes.length} ação(ões) criada(s) com sucesso na Central de Ações!`,'success');
+  }catch(e){
+    setStatus(`Erro: ${e.message}`,'error');
+  }
+  btn.disabled=false;btn.textContent='⚡ Gerar Ações';
 }
 
 carregar();
