@@ -397,7 +397,8 @@ const TIPOS_DOCS = ['CPF','RG','CTPS','Outro'];
 
 function renderDocs() {
   const el = document.getElementById('lista-docs');
-  if (!docs.length) {
+  const laudos = window._laudosClinica || [];
+  if (!docs.length && !laudos.length) {
     el.innerHTML = `<div class="empty">📁<br><br>Nenhum documento cadastrado.</div>`;
     return;
   }
