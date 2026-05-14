@@ -851,9 +851,9 @@ function renderIdentificacao(){
 
 // ── CARACTERIZAÇÃO ────────────────────────────────────────────
 function renderCaracterizacao(){
-  const ALTURA_UTIL_PX=210*96/25.4;
+  const ALTURA_UTIL_PX=Math.round(200*96/25.4);
   const cont=document.createElement('div');
-  cont.style.cssText=`position:absolute;left:-9999px;top:0;width:168mm;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;`;
+  cont.style.cssText=`position:absolute;left:-9999px;top:0;width:160mm;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;`;
   document.body.appendChild(cont);
   const medir=html=>{cont.innerHTML=html;return cont.getBoundingClientRect().height;};
 
@@ -1094,7 +1094,7 @@ function renderSecaoGHE(){
 // ── INVENTÁRIO DE RISCOS POR FUNÇÃO ───────────────────────────
 function renderInventarioRiscos(){
   const paginas=[];
-  const ALTURA_UTIL_PX=210*96/25.4;
+  const ALTURA_UTIL_PX=Math.round(200*96/25.4);
 
   const setoresPorFuncao={};
   funcaoSetores.forEach(fs=>{
@@ -1120,7 +1120,7 @@ function renderInventarioRiscos(){
   }
 
   const container=document.createElement('div');
-  container.style.cssText=`position:absolute;left:-9999px;top:0;width:168mm;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;`;
+  container.style.cssText=`position:absolute;left:-9999px;top:0;width:160mm;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;`;
   document.body.appendChild(container);
   const medir=html=>{container.innerHTML=html;return container.getBoundingClientRect().height;};
 
@@ -2085,42 +2085,71 @@ function renderPlanoAcao(){
   </div>`;
 
   const paginas=[];
-  const ROWS_FIRST=10,ROWS_CONT=15;
+  const ALTURA_MAX=Math.round(200*96/25.4); // 200mm úteis (conservador, inclui segurança)
 
   if(!acoesAgrupadas.length){
     const pg=criarPagina();
     pg.innerHTML=`${phHeader()}
-    <div class="doc-section"><span class="num-secao">7</span>Plano de Ação</div>
+    <div class="doc-section"><span class="num-secao">8</span>Plano de Ação</div>
     <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a implementar, com responsáveis, prazos e status, seguindo a hierarquia da NR-1.</p>
     <div class="em-breve"><div class="em-breve-icon">📋</div><div class="em-breve-label">Nenhuma ação selecionada.<br>Clique em "Revisar plano de ação" para selecionar.</div></div>
-    ${monitHtml}
-    ${pfFooter()}`;
+    ${monitHtml}${pfFooter()}`;
     paginas.push(pg);
     return paginas;
   }
 
-  const lotes=[acoesAgrupadas.slice(0,ROWS_FIRST)];
-  for(let i=ROWS_FIRST;i<acoesAgrupadas.length;i+=ROWS_CONT)lotes.push(acoesAgrupadas.slice(i,i+ROWS_CONT));
+  // Medição por altura real — igual ao inventário de riscos
+  const medContainer=document.createElement('div');
+  medContainer.style.cssText=`position:absolute;left:-9999px;top:0;width:160mm;font-family:'IBM Plex Sans',sans-serif;font-size:9pt;line-height:1.5;`;
+  document.body.appendChild(medContainer);
+  const medir=html=>{medContainer.innerHTML=html;return medContainer.getBoundingClientRect().height;};
 
-  lotes.forEach((lote,idx)=>{
-    const pg=criarPagina();
-    const isLast=idx===lotes.length-1;
-    if(idx===0){
-      pg.innerHTML=`${phHeader()}
-      <div class="doc-section"><span class="num-secao">7</span>Plano de Ação</div>
-      <p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a implementar, com responsáveis, prazos e status, seguindo a hierarquia da NR-1.</p>
-      <table class="doc-table">${theadHtml}<tbody>${lote.map(rowHtml).join('')}</tbody></table>
-      ${isLast?monitHtml:''}
-      ${pfFooter()}`;
-    }else{
-      pg.innerHTML=`${phHeader()}
-      <div class="doc-subsection" style="margin-top:6pt;">Plano de Ação (continuação)</div>
-      <table class="doc-table">${theadHtml}<tbody>${lote.map(rowHtml).join('')}</tbody></table>
-      ${isLast?monitHtml:''}
-      ${pfFooter()}`;
-    }
+  const introHtml=`${phHeader()}<div class="doc-section"><span class="num-secao">8</span>Plano de Ação</div><p class="doc-text" style="margin-bottom:12pt;">O Plano de Ação estabelece as medidas de prevenção e controle a implementar, com responsáveis, prazos e status, seguindo a hierarquia da NR-1.</p>`;
+  const contHtml=`${phHeader()}<div class="doc-subsection" style="margin-top:6pt;">Plano de Ação (continuação)</div>`;
+  const theadBlock=`<table class="doc-table">${theadHtml}<tbody>`;
+
+  let pg=criarPagina();
+  let isFirst=true;
+  let corpo='';
+  let alt=0;
+  let rows='';
+
+  function abrirPagina(){
+    const cab=isFirst?introHtml:contHtml;
+    isFirst=false;
+    corpo=cab;
+    alt=medir(cab)+medir(theadBlock+'</tbody></table>');
+    rows='';
+  }
+  function fecharPagina(extra=''){
+    pg.innerHTML=corpo+theadBlock+rows+'</tbody></table>'+extra+pfFooter();
     paginas.push(pg);
+    pg=criarPagina();
+  }
+
+  abrirPagina();
+  acoesAgrupadas.forEach((a,i)=>{
+    const row=rowHtml(a);
+    const rowH=medir(`<table class="doc-table"><tbody>${row}</tbody></table>`);
+    if(alt+rowH>ALTURA_MAX){
+      fecharPagina();
+      abrirPagina();
+    }
+    rows+=row;
+    alt+=rowH;
   });
+
+  // Último lote — tenta incluir monitHtml, senão nova página
+  const monitH=medir(monitHtml);
+  if(alt+monitH>ALTURA_MAX){
+    fecharPagina();
+    pg.innerHTML=`${phHeader()}${monitHtml}${pfFooter()}`;
+    paginas.push(pg);
+  }else{
+    fecharPagina(monitHtml);
+  }
+
+  document.body.removeChild(medContainer);
   return paginas;
 }
 
