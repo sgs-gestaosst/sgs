@@ -121,6 +121,7 @@
     </div>
     <div class="hero-actions">
       <button class="btn btn-edit" onclick="abrirModalEnviarClinica()" style="border-color:#7aabf7;color:#7aabf7;">📤 Enviar para clínica</button>
+      <button class="btn btn-edit" onclick="abrirModalDemandas()" style="border-color:#a78bfa;color:#a78bfa;" id="btn-demandas">📋 Demandas <span id="badge-demandas" style="display:none;background:#a78bfa;color:#0f1117;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
       <a id="btn-pcmso" href="#" class="btn btn-pcmso" target="_blank">📋 Gerar PCMSO</a>
     </div>
   </div>
@@ -173,6 +174,19 @@
         </button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- MODAL DEMANDAS ENVIADAS -->
+<div class="modal-overlay" id="modal-demandas">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-titulo">
+      <span>📋 Demandas para clínica</span>
+      <button onclick="document.getElementById('modal-demandas').classList.remove('show')" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Gerencie as demandas enviadas para as clínicas. Clique em uma para ver o status por funcionário.</div>
+    <div id="lista-demandas-content" style="max-height:520px;overflow-y:auto;"></div>
+    <div class="status-bar" id="status-demandas"></div>
   </div>
 </div>
 
@@ -357,6 +371,7 @@ async function inicializar(){
     const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
     document.getElementById('hero-nome').textContent=`Exames Ocupacionais — ${nome}`;
     document.getElementById('hero-sub').textContent=`${setores.length} setores · ${funcoes.length} funções · ${todosExames.length} exames no catálogo`;
+    carregarBadgeDemandas();
     document.getElementById('header-nome').textContent=nome;
     renderNavSetores();
   }catch(e){console.error(e);}
@@ -638,6 +653,134 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.busca-wrap'))document.getElementById('busca-dropdown')?.classList.remove('show');
 });
 
+// ── PAINEL DE DEMANDAS ───────────────────────────────────────
+async function carregarBadgeDemandas(){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/clinica_demandas?empresa_id=eq.${empresaId}&status=eq.Ativa&ativo=eq.true&select=id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const data=await res.json();
+    const badge=document.getElementById('badge-demandas');
+    if(data.length){badge.textContent=data.length;badge.style.display='inline';}
+    else badge.style.display='none';
+  }catch(e){}
+}
+
+async function abrirModalDemandas(){
+  document.getElementById('modal-demandas').classList.add('show');
+  document.getElementById('lista-demandas-content').innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);">↻ Carregando demandas...</div>`;
+  await carregarDemandas();
+}
+
+async function carregarDemandas(){
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/clinica_demandas?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const demandas=await res.json();
+    const container=document.getElementById('lista-demandas-content');
+    if(!demandas.length){
+      container.innerHTML=`<div style="text-align:center;padding:40px;color:var(--text3);">Nenhuma demanda criada ainda.<br>Clique em "📤 Enviar para clínica" para começar.</div>`;
+      return;
+    }
+    const baseUrl=window.location.origin+window.location.pathname.replace('exames.html','');
+    container.innerHTML=demandas.map(d=>{
+      const expirado=new Date(d.data_expiracao)<new Date();
+      const statusCor=d.status==='Finalizada'?'var(--accent2)':d.status==='Cancelada'?'var(--danger)':expirado?'var(--text3)':'var(--warning)';
+      const statusLabel=d.status==='Finalizada'?'✓ Finalizada':d.status==='Cancelada'?'Cancelada':expirado?'Expirada':'Ativa';
+      const pct=d.total_funcionarios>0?Math.round((d.funcionarios_com_upload/d.total_funcionarios)*100):0;
+      const link=`${baseUrl}clinica_upload.html?token=${d.token}`;
+      return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;margin-bottom:3px;">${escHtml(d.titulo)}</div>
+            <div style="font-size:11px;color:var(--text2);">Criada em ${new Date(d.criado_em).toLocaleDateString('pt-BR')} · Expira em ${new Date(d.data_expiracao).toLocaleDateString('pt-BR')}</div>
+          </div>
+          <span style="font-size:11px;font-weight:600;color:${statusCor};background:${statusCor}20;border:1px solid ${statusCor}40;padding:3px 10px;border-radius:20px;white-space:nowrap;">${statusLabel}</span>
+        </div>
+        <!-- Progresso -->
+        <div style="margin:10px 0 6px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px;">
+            <span>Uploads recebidos</span>
+            <span style="font-weight:600;color:${pct===100?'var(--success)':'var(--text)'};">${d.funcionarios_com_upload} / ${d.total_funcionarios} funcionário(s)</span>
+          </div>
+          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:${pct===100?'var(--success)':'var(--accent)'};transition:width .3s;"></div>
+          </div>
+        </div>
+        <!-- Ações -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <button class="btn btn-edit btn-sm" onclick="verDetalhesDemanda(${d.id})">👁 Ver detalhes</button>
+          ${!expirado&&d.status==='Ativa'?`<button class="btn btn-edit btn-sm" onclick="copiarLinkDemanda('${link}')">🔗 Copiar link</button>`:''}
+          ${d.status==='Ativa'?`<button class="btn btn-edit btn-sm" onclick="finalizarDemanda(${d.id})" style="border-color:var(--accent2);color:var(--accent2);">✓ Finalizar</button>`:''}
+          <button class="btn btn-danger btn-sm" onclick="excluirDemanda(${d.id},'${escHtml(d.titulo)}')">🗑 Excluir</button>
+        </div>
+        <!-- Detalhes expandíveis -->
+        <div id="detalhe-dem-${d.id}" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:12px;"></div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('lista-demandas-content').innerHTML=`<div style="color:var(--danger);padding:16px;">Erro: ${e.message}</div>`;
+  }
+}
+
+function copiarLinkDemanda(link){
+  navigator.clipboard.writeText(link).then(()=>toast('Link copiado!'));
+}
+
+async function verDetalhesDemanda(demandaId){
+  const el=document.getElementById(`detalhe-dem-${demandaId}`);
+  if(el.style.display==='block'){el.style.display='none';return;}
+  el.style.display='block';
+  el.innerHTML=`<div style="color:var(--text2);font-size:12px;">↻ Carregando...</div>`;
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?demanda_id=eq.${demandaId}&select=*&order=funcionario_nome.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const funcs=await res.json();
+    el.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr style="background:var(--bg);">
+        <th style="padding:6px 10px;text-align:left;color:var(--text2);font-weight:600;">Funcionário</th>
+        <th style="padding:6px 10px;text-align:left;color:var(--text2);font-weight:600;">Função / Setor</th>
+        <th style="padding:6px 10px;text-align:center;color:var(--text2);font-weight:600;">Exames</th>
+        <th style="padding:6px 10px;text-align:center;color:var(--text2);font-weight:600;">Status</th>
+        <th style="padding:6px 10px;text-align:center;color:var(--text2);font-weight:600;">Último upload</th>
+      </tr></thead>
+      <tbody>${funcs.map(f=>{
+        const pend=(f.exames_pendentes||[]).length;
+        const comp=(f.exames_completos||[]).length;
+        const stCor=f.status==='Completo'?'var(--success)':f.status==='Parcial'?'var(--warning)':'var(--text3)';
+        const stLabel=f.status==='Completo'?'✓ Completo':f.status==='Parcial'?'Parcial':'⏳ Pendente';
+        const ultUpload=f.data_ultimo_upload?new Date(f.data_ultimo_upload).toLocaleDateString('pt-BR'):'—';
+        return`<tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:8px 10px;">${escHtml(f.funcionario_nome)}</td>
+          <td style="padding:8px 10px;color:var(--text2);">${escHtml(f.funcao_nome||'')}${f.setor_nome?' · '+escHtml(f.setor_nome):''}</td>
+          <td style="padding:8px 10px;text-align:center;">${comp}/${pend||'?'}</td>
+          <td style="padding:8px 10px;text-align:center;"><span style="color:${stCor};font-weight:600;">${stLabel}</span></td>
+          <td style="padding:8px 10px;text-align:center;color:var(--text2);">${ultUpload}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  }catch(e){el.innerHTML=`<div style="color:var(--danger);">Erro: ${e.message}</div>`;}
+}
+
+async function finalizarDemanda(demandaId){
+  if(!confirm('Finalizar esta demanda? O link deixará de aceitar novos uploads.'))return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/clinica_demandas?id=eq.${demandaId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({status:'Finalizada'})});
+    await carregarDemandas();
+    await carregarBadgeDemandas();
+    setStatus('status-demandas','success','Demanda finalizada.');
+    setTimeout(()=>clearStatus('status-demandas'),3000);
+  }catch(e){setStatus('status-demandas','error',e.message);}
+}
+
+async function excluirDemanda(demandaId,titulo){
+  if(!confirm(`Excluir a demanda "${titulo}"?\nOs uploads já recebidos ficam salvos nos documentos dos funcionários, mas o link deixará de funcionar.`))return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?demanda_id=eq.${demandaId}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    await fetch(`${SUPA_URL}/rest/v1/clinica_demandas?id=eq.${demandaId}`,{method:'DELETE',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    await carregarDemandas();
+    await carregarBadgeDemandas();
+    setStatus('status-demandas','success','Demanda excluída.');
+    setTimeout(()=>clearStatus('status-demandas'),3000);
+  }catch(e){setStatus('status-demandas','error',e.message);}
+}
+
 // ── ENVIAR PARA CLÍNICA ───────────────────────────────────────
 let todosFuncionarios=[];
 
@@ -791,6 +934,7 @@ async function criarDemanda(){
     document.getElementById('link-demanda-gerado').value=link;
     document.getElementById('bloco-link-gerado').style.display='block';
     document.getElementById('btn-criar-demanda').style.display='none';
+    carregarBadgeDemandas();
     setStatus('status-dem','success',`Demanda criada para ${funcIds.length} funcionário(s)!`);
   }catch(e){setStatus('status-dem','error',e.message);}
   finally{document.getElementById('spinner-dem').className='spinner';document.getElementById('label-dem').textContent='Gerar link';document.getElementById('btn-criar-demanda').disabled=false;}
