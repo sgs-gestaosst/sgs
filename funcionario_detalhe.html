@@ -137,6 +137,7 @@
       <div class="tab" data-aba="contrato" onclick="mudarAba('contrato')">Contrato</div>
       <div class="tab" data-aba="endereco" onclick="mudarAba('endereco')">Endereço</div>
       <div class="tab" data-aba="historico" onclick="mudarAba('historico')">Histórico</div>
+      <div class="tab" data-aba="asos" onclick="mudarAba('asos')">🩺 ASOs</div>
     </div>
 
     <!-- ABA DADOS PESSOAIS -->
@@ -161,6 +162,38 @@
         <button class="btn btn-edit" style="font-size:12px;padding:6px 12px;" onclick="abrirModalHistorico()">+ Registrar evento</button>
       </div>
       <div id="lista-historico"></div>
+    </div>
+
+    <!-- ABA ASOs -->
+    <div class="tab-content" id="aba-asos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;">Atestados de Saúde Ocupacional</div>
+        <a id="btn-gerar-aso-func" href="#" class="btn btn-edit" style="font-size:12px;padding:6px 12px;border-color:var(--accent2);color:var(--accent2);">📋 Gerar novo ASO</a>
+      </div>
+      <div id="lista-asos"></div>
+
+      <!-- Modal upload versão assinada -->
+      <div class="modal-overlay" id="modal-upload-aso" style="z-index:1100;">
+        <div class="modal" style="max-width:500px;">
+          <div class="modal-titulo">
+            <span>📎 Anexar versão assinada</span>
+            <button onclick="document.getElementById('modal-upload-aso').classList.remove('show')" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Faça upload do ASO físico assinado pelo médico e pelo funcionário.</div>
+          <div class="modal-field">
+            <label>Arquivo PDF/imagem *</label>
+            <input type="file" id="aso-upload-file" accept=".pdf,image/*" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+          </div>
+          <div class="status-bar" id="status-upload-aso" style="margin-top:10px;"></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+            <button class="btn btn-cancel" onclick="document.getElementById('modal-upload-aso').classList.remove('show')">Cancelar</button>
+            <button class="btn btn-save" id="btn-confirmar-upload-aso" onclick="confirmarUploadASOAssinado()">
+              <span class="spinner" id="spinner-upload-aso"></span>
+              <span id="label-upload-aso">Salvar</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -259,6 +292,7 @@ function mudarAba(aba){
   document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
   document.getElementById(`aba-${aba}`).classList.add('active');
   if(aba==='historico')carregarHistorico();
+  if(aba==='asos')carregarASOs();
 }
 
 // ── RENDER HERO ───────────────────────────────────────
@@ -844,6 +878,96 @@ async function inicializar(){
 }
 
 inicializar();
+
+// ── GESTÃO DE ASOs ────────────────────────────────────────────
+let asoEditandoId=null;
+
+async function carregarASOs(){
+  const lista=document.getElementById('lista-asos');
+  lista.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2);">↻ Carregando ASOs...</div>`;
+  // Link para gerar ASO nesta ficha
+  const empresaId=funcionario?.empresa_id;
+  const btnGerar=document.getElementById('btn-gerar-aso-func');
+  if(btnGerar&&empresaId)btnGerar.href=`exames.html?empresa_id=${empresaId}`;
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?funcionario_id=eq.${funcionarioId}&select=*&order=data_exame.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const asos=await res.json();
+    const ativos=asos.filter(a=>a.status_esocial!=='Cancelado');
+    const cancelados=asos.filter(a=>a.status_esocial==='Cancelado');
+    if(!ativos.length&&!cancelados.length){
+      lista.innerHTML=`<div style="text-align:center;padding:30px;color:var(--text3);">Nenhum ASO gerado para este funcionário.<br><a href="exames.html?empresa_id=${empresaId}" style="color:var(--accent);text-decoration:none;">Gerar primeiro ASO →</a></div>`;
+      return;
+    }
+    const fmtD=d=>d?new Date(d+'T00:00:00').toLocaleDateString('pt-BR'):'—';
+    const renderASO=(a,cancelado=false)=>{
+      const corRes=a.resultado==='Apto'?'var(--success)':'var(--danger)';
+      const temPDF=!!a.arquivo_pdf_url;
+      const temAssinado=!!a.arquivo_assinado_url;
+      return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;${cancelado?'opacity:.5;':''}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${escHtml(a.tipo_aso||a.tipo_exame||'ASO')}</div>
+            <div style="font-size:12px;color:var(--text2);">📅 ${fmtD(a.data_exame)} &nbsp;·&nbsp; Próximo: ${fmtD(a.data_prox_aso||a.data_validade_aso)}</div>
+            <div style="font-size:12px;color:var(--text2);">👨‍⚕️ ${escHtml(a.nome_medico_examinador||a.nome_medico_coordenador||'—')} (CRM ${escHtml(a.crm_examinador||'')})</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="font-size:13px;font-weight:700;color:${corRes};">${a.resultado||'—'}</span>
+            ${cancelado?'<div style="font-size:11px;color:var(--danger);margin-top:4px;">Cancelado</div>':''}
+          </div>
+        </div>
+        ${a.restricoes_recomendacoes||a.observacoes?`<div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:6px;font-size:12px;color:var(--text2);">📝 ${escHtml(a.restricoes_recomendacoes||a.observacoes||'')}</div>`:''}
+        ${!cancelado?`<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          ${temPDF?`<a href="${SUPA_URL}/storage/v1/object/public/documentos-funcionarios/${escHtml(a.arquivo_pdf_url||'')}" target="_blank" class="btn btn-edit btn-sm">📄 Ver ASO gerado</a>`:''}
+          ${temAssinado?`<a href="${SUPA_URL}/storage/v1/object/public/documentos-funcionarios/${escHtml(a.arquivo_assinado_url||'')}" target="_blank" class="btn btn-edit btn-sm">✅ Ver ASO assinado</a>`:''}
+          <button class="btn btn-edit btn-sm" onclick="abrirUploadASOAssinado(${a.id})" style="border-color:var(--accent2);color:var(--accent2);">📎 ${temAssinado?'Substituir assinado':'Anexar assinado'}</button>
+          <button class="btn btn-danger btn-sm" onclick="cancelarASO(${a.id},'${escHtml(a.tipo_aso||a.tipo_exame||'ASO')}')">🗑 Excluir</button>
+        </div>`:''}
+      </div>`;
+    };
+    lista.innerHTML=ativos.map(a=>renderASO(a)).join('')+
+      (cancelados.length?`<div style="margin-top:16px;"><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Cancelados</div>${cancelados.map(a=>renderASO(a,true)).join('')}</div>`:'');
+  }catch(e){lista.innerHTML=`<div style="color:var(--danger);padding:16px;">Erro: ${e.message}</div>`;}
+}
+
+function abrirUploadASOAssinado(asoId){
+  asoEditandoId=asoId;
+  document.getElementById('aso-upload-file').value='';
+  const st=document.getElementById('status-upload-aso');if(st)st.className='status-bar';
+  document.getElementById('modal-upload-aso').classList.add('show');
+}
+
+async function confirmarUploadASOAssinado(){
+  const file=document.getElementById('aso-upload-file').files[0];
+  if(!file){alert('Selecione um arquivo.');return;}
+  document.getElementById('btn-confirmar-upload-aso').disabled=true;
+  document.getElementById('spinner-upload-aso').className='spinner show';
+  document.getElementById('label-upload-aso').textContent='Salvando...';
+  try{
+    const ext=file.name.split('.').pop();
+    const path=`${funcionario?.empresa_id}/asos/${funcionarioId}_aso_assinado_${asoEditandoId}_${Date.now()}.${ext}`;
+    const resUp=await fetch(`${SUPA_URL}/storage/v1/object/documentos-funcionarios/${path}`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'x-upsert':'true','Content-Type':file.type},body:file});
+    if(!resUp.ok)throw new Error('Erro no upload');
+    // Salva URL no ASO
+    await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?id=eq.${asoEditandoId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({arquivo_assinado_url:path})});
+    document.getElementById('modal-upload-aso').classList.remove('show');
+    await carregarASOs();
+  }catch(e){
+    const st=document.getElementById('status-upload-aso');
+    if(st){st.className='status-bar show error';st.textContent='✕ Erro: '+e.message;}
+  }finally{
+    document.getElementById('btn-confirmar-upload-aso').disabled=false;
+    document.getElementById('spinner-upload-aso').className='spinner';
+    document.getElementById('label-upload-aso').textContent='Salvar';
+  }
+}
+
+async function cancelarASO(asoId,tipo){
+  if(!confirm(`Excluir o ASO "${tipo}"? Os dados ficarão registrados como cancelados.`))return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?id=eq.${asoId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({status_esocial:'Cancelado'})});
+    await carregarASOs();
+  }catch(e){alert('Erro: '+e.message);}
+}
 </script>
 </body>
 </html>
