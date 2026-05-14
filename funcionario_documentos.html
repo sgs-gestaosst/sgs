@@ -314,24 +314,26 @@ async function inicializar() {
   document.getElementById('link-voltar').href = `funcionario_detalhe.html?id=${funcId}`;
   try {
     const headers = { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${token}` };
-    const [resFunc, resDocs, resLaudos] = await Promise.all([
+    const [resFunc, resDocs] = await Promise.all([
       fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}&select=id,nome_completo,empresa_id,matricula`, { headers }),
-      fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?funcionario_id=eq.${funcId}&ativo=eq.true&select=*&order=criado_em.desc`, { headers }),
-      fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?funcionario_id=eq.${funcId}&select=exames_completos,clinica_demandas(titulo,criado_em)&order=criado_em.desc`, { headers })
+      fetch(`${SUPA_URL}/rest/v1/funcionario_documentos?funcionario_id=eq.${funcId}&ativo=eq.true&select=*&order=criado_em.desc`, { headers })
     ]);
     const funcs = await resFunc.json();
     funcionario = funcs[0];
     docs = await resDocs.json();
-    // Processa laudos da clínica
-    const rowsLaudos = await resLaudos.json();
+    // Laudos da clínica — fetch separado para não quebrar a página se falhar
     window._laudosClinica = [];
-    if(Array.isArray(rowsLaudos)){
-      rowsLaudos.forEach(r=>{
-        (r.exames_completos||[]).filter(e=>e.arquivo_path).forEach(e=>{
-          window._laudosClinica.push({...e, demanda_titulo: r.clinica_demandas?.titulo||'Demanda'});
+    try{
+      const resLaudos=await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?funcionario_id=eq.${funcId}&select=exames_completos,clinica_demandas(titulo)&order=criado_em.desc`,{headers});
+      const rowsLaudos=await resLaudos.json();
+      if(Array.isArray(rowsLaudos)){
+        rowsLaudos.forEach(r=>{
+          (r.exames_completos||[]).filter(e=>e.arquivo_path).forEach(e=>{
+            window._laudosClinica.push({...e,demanda_titulo:r.clinica_demandas?.titulo||'Demanda'});
+          });
         });
-      });
-    }
+      }
+    }catch(e){console.warn('Laudos clínica:',e);}
     if (!funcionario) { window.location.href = 'empresas.html'; return; }
 
     // Busca empresa
