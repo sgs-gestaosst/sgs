@@ -789,30 +789,9 @@ function renderCronograma(){
     </tbody>
   </table>`:''}
 
-  <div class="doc-section" style="margin-top:20pt;"><span class="num-secao">6</span>Disposições Finais</div>
-  <p class="doc-text">Conforme a NR-7, este PCMSO deverá ser revisado:</p>
-  <ul style="margin:8pt 0 8pt 16pt;font-size:9.5pt;color:#374151;line-height:1.8;">
-    <li><strong>Anualmente</strong> — revisão periódica obrigatória;</li>
-    <li>Sempre que houver <strong>alteração nos processos produtivos</strong> ou nos riscos ocupacionais;</li>
-    <li>Após <strong>acidente de trabalho grave, fatal</strong> ou surto de doença ocupacional;</li>
-    <li>Quando houver <strong>mudança significativa no quadro de funcionários</strong>;</li>
-    <li>Quando determinado pelo <strong>Médico Coordenador</strong> ou por <strong>Auditor Fiscal do Trabalho</strong>.</li>
-  </ul>
-  <p class="doc-text" style="margin-top:8pt;">Os resultados dos exames realizados deverão ser registrados em prontuário individual e comunicados ao trabalhador por meio do Atestado de Saúde Ocupacional (ASO), conforme exigido pela NR-7.</p>
-
-  <div style="margin-top:30pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
-    ${['Médico Coordenador / RT','Representante da empresa','Técnico de SST'].map(label=>`
-    <div style="text-align:center;">
-      <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:40pt;">
-        <div style="font-size:8pt;color:#6b7280;">${label}</div>
-        <div style="font-size:8pt;color:#9ca3af;margin-top:2pt;">Data: ___/___/______</div>
-      </div>
-    </div>`).join('')}
-  </div>
-
   <div class="page-footer">
     <span class="pf-label">PCMSO — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
-    <span class="pf-page">Página 4</span>
+    <span class="pf-page"></span>
   </div>`;
   return pg;
 }
