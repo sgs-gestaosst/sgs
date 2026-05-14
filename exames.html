@@ -1471,7 +1471,7 @@ function prepararDadosASO(){
 function abrirPreviewASO(){
   if(!validarASO())return;
   const dados=prepararDadosASO();
-  sessionStorage.setItem('sgs_aso_preview',JSON.stringify(dados));
+  localStorage.setItem('sgs_aso_preview',JSON.stringify(dados));
   // Usa anchor para evitar bloqueio de popup
   const a=document.createElement('a');
   a.href='aso_preview.html';
