@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Envio de Exames</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;--danger:#e05555;--warning:#e0a855;--success:#2dd4a0;--radius:6px;--sans:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;}
+.logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);border:1px solid #2a4070;padding:4px 10px;border-radius:var(--radius);}
+.header-sub{font-size:13px;color:var(--text2);}
+.container{max-width:860px;margin:0 auto;padding:28px 20px 60px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px;}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.func-nome{font-size:15px;font-weight:600;color:var(--text);}
+.func-meta{font-size:12px;color:var(--text2);margin-top:3px;}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+.badge-pendente{background:#1a1500;color:#e0a855;border:1px solid #4a3a10;}
+.badge-parcial{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+.badge-completo{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.exame-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px;}
+.exame-row:last-child{margin-bottom:0;}
+.exame-nome{font-size:13px;font-weight:500;}
+.exame-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.btn-upload{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--radius);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text);transition:all .15s;}
+.btn-upload:hover{border-color:var(--accent);color:var(--accent);}
+.btn-upload.enviado{background:#0e2820;border-color:#1a4a38;color:var(--success);}
+.upload-status{font-size:11px;color:var(--text2);}
+.upload-status.ok{color:var(--success);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-top:10px;}
+.progress-fill{height:100%;background:var(--accent2);transition:width .4s;}
+.state-loading,.state-erro,.state-expirado{display:none;text-align:center;padding:80px 20px;}
+.state-loading.show,.state-erro.show,.state-expirado.show{display:block;}
+.state-icon{font-size:48px;margin-bottom:16px;}
+.state-titulo{font-size:20px;font-weight:600;margin-bottom:8px;}
+.state-sub{font-size:14px;color:var(--text2);}
+.resumo-topo{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:20px;display:flex;gap:24px;align-items:center;}
+.resumo-item{text-align:center;}
+.resumo-valor{font-size:22px;font-weight:700;}
+.resumo-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:24px;right:24px;background:#1e2333;border:1px solid var(--border);border-radius:8px;padding:12px 18px;font-size:13px;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+input[type="file"]{display:none;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">SGS</span>
+  <span class="header-sub" id="header-empresa">Sistema de Gestão em SST — Envio de Exames</span>
+</div>
+
+<div class="container">
+  <!-- Estado: Carregando -->
+  <div class="state-loading show" id="state-loading">
+    <div class="state-icon">⏳</div>
+    <div class="state-titulo">Validando acesso...</div>
+    <div class="state-sub">Aguarde enquanto verificamos o link.</div>
+  </div>
+
+  <!-- Estado: Erro / Token inválido -->
+  <div class="state-erro" id="state-erro">
+    <div class="state-icon">🔒</div>
+    <div class="state-titulo" id="erro-titulo">Link inválido</div>
+    <div class="state-sub" id="erro-sub">Este link não existe ou já expirou. Solicite um novo link à empresa.</div>
+  </div>
+
+  <!-- Estado: Conteúdo válido -->
+  <div id="state-valido" style="display:none;">
+    <div style="margin-bottom:20px;">
+      <h1 style="font-size:18px;font-weight:600;margin-bottom:4px;" id="titulo-demanda"></h1>
+      <div style="font-size:12px;color:var(--text2);" id="meta-demanda"></div>
+    </div>
+
+    <!-- Resumo de status -->
+    <div class="resumo-topo">
+      <div class="resumo-item">
+        <div class="resumo-valor" id="res-total">—</div>
+        <div class="resumo-label">Funcionários</div>
+      </div>
+      <div class="resumo-item">
+        <div class="resumo-valor" style="color:var(--success);" id="res-completos">0</div>
+        <div class="resumo-label">Completos</div>
+      </div>
+      <div class="resumo-item">
+        <div class="resumo-valor" style="color:var(--warning);" id="res-pendentes">0</div>
+        <div class="resumo-label">Pendentes</div>
+      </div>
+      <div style="flex:1;text-align:right;">
+        <div style="font-size:11px;color:var(--text3);">⏰ Válido até</div>
+        <div style="font-size:13px;font-weight:500;" id="data-expiracao-display"></div>
+      </div>
+    </div>
+
+    <!-- Descrição / instrução da empresa -->
+    <div id="descricao-demanda" style="display:none;background:var(--surface2);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;margin-bottom:20px;color:var(--text2);"></div>
+
+    <!-- Lista de funcionários -->
+    <div id="lista-cards"></div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const params=new URLSearchParams(window.location.search);
+const demToken=params.get('token');
+
+let demanda=null;
+let funcionarios=[];
+
+function h(s){return(s===null||s===undefined?'':(s+'')).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function show(id){document.getElementById(id).style.display='block';}
+function hide(id){document.getElementById(id).style.display='none';}
+function showState(s){['state-loading','state-erro','state-valido'].forEach(id=>{document.getElementById(id).style.display=id===s?'block':'none';});if(s==='state-loading')document.getElementById('state-loading').classList.add('show');}
+
+function toast(msg){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span>✓</span><span>${msg}</span>`;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),4000);
+}
+
+async function inicializar(){
+  if(!demToken){
+    document.getElementById('erro-titulo').textContent='Link incompleto';
+    document.getElementById('erro-sub').textContent='O link não contém o token de acesso. Verifique o link enviado pela empresa.';
+    showState('state-erro');return;
+  }
+  try{
+    const [resDem]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/clinica_demandas?token=eq.${demToken}&select=*`,{headers:{'apikey':SUPA_KEY}})
+        .then(r=>r.json())
+    ]);
+    if(!resDem.length||!resDem[0].ativo){
+      document.getElementById('erro-titulo').textContent='Link inválido';
+      document.getElementById('erro-sub').textContent='Este link não existe. Verifique o endereço ou solicite um novo link à empresa.';
+      showState('state-erro');return;
+    }
+    demanda=resDem[0];
+    if(new Date(demanda.data_expiracao)<new Date()){
+      document.getElementById('erro-titulo').textContent='Link expirado';
+      document.getElementById('erro-sub').textContent=`Este link expirou em ${new Date(demanda.data_expiracao).toLocaleDateString('pt-BR')}. Solicite um novo link à empresa.`;
+      showState('state-erro');return;
+    }
+    // Carrega funcionários
+    const resFuncs=await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?demanda_id=eq.${demanda.id}&select=*&order=funcionario_nome.asc`,{headers:{'apikey':SUPA_KEY}});
+    funcionarios=await resFuncs.json();
+    renderDemanda();
+    showState('state-valido');
+  }catch(e){
+    document.getElementById('erro-titulo').textContent='Erro de conexão';
+    document.getElementById('erro-sub').textContent='Não foi possível carregar os dados. Verifique sua conexão e tente novamente.';
+    showState('state-erro');
+  }
+}
+
+function renderDemanda(){
+  document.getElementById('header-empresa').textContent=`SGS — ${h(demanda.titulo)}`;
+  document.getElementById('titulo-demanda').textContent=demanda.titulo;
+  document.getElementById('meta-demanda').textContent=`${funcionarios.length} funcionário(s) · Criado em ${new Date(demanda.criado_em).toLocaleDateString('pt-BR')}`;
+  document.getElementById('data-expiracao-display').textContent=new Date(demanda.data_expiracao).toLocaleDateString('pt-BR');
+  if(demanda.descricao){document.getElementById('descricao-demanda').textContent=demanda.descricao;show('descricao-demanda');}
+  atualizarResumo();
+  const lista=document.getElementById('lista-cards');
+  lista.innerHTML=funcionarios.map(f=>renderCard(f)).join('');
+}
+
+function renderCard(f){
+  const exames=f.exames_pendentes||[];
+  const completos=f.exames_completos||[];
+  const totalEx=exames.length;
+  const totalComp=completos.length;
+  const pct=totalEx>0?Math.round((totalComp/totalEx)*100):0;
+  const statusCls=totalComp===0?'badge-pendente':totalComp>=totalEx?'badge-completo':'badge-parcial';
+  const statusLabel=totalComp===0?'Pendente':totalComp>=totalEx?'✓ Completo':'Parcial';
+
+  const examesHtml=exames.length?exames.map((e,i)=>{
+    const jaEnviado=completos.some(c=>c.exame_id===e.exame_id);
+    return`<div class="exame-row" id="ex-row-${f.id}-${e.exame_id}">
+      <div>
+        <div class="exame-nome">${h(e.nome)}${e.obrigatorio?'<span style="font-size:10px;color:var(--warning);margin-left:6px;">obrigatório</span>':''}</div>
+      </div>
+      <div class="upload-status ${jaEnviado?'ok':''}" id="st-${f.id}-${e.exame_id}">${jaEnviado?'✓ Enviado':'—'}</div>
+      <div>
+        <input type="file" id="file-${f.id}-${e.exame_id}" accept=".pdf,image/*" onchange="uploadExame(${f.id},${e.exame_id},'${h(e.nome)}',this)">
+        <button class="btn-upload ${jaEnviado?'enviado':''}" id="btn-${f.id}-${e.exame_id}" onclick="document.getElementById('file-${f.id}-${e.exame_id}').click()">
+          <span class="spinner" id="sp-${f.id}-${e.exame_id}"></span>
+          ${jaEnviado?'✓ Enviado':'📎 Enviar'}
+        </button>
+      </div>
+    </div>`;
+  }).join(''):`<div style="font-size:12px;color:var(--text3);padding:10px;">Nenhum exame específico cadastrado para este funcionário. Envie os laudos disponíveis.</div>
+    <div class="exame-row" id="ex-row-${f.id}-0">
+      <div><div class="exame-nome">Laudo / ASO geral</div></div>
+      <div class="upload-status" id="st-${f.id}-0">—</div>
+      <div>
+        <input type="file" id="file-${f.id}-0" accept=".pdf,image/*" onchange="uploadExame(${f.id},0,'Laudo geral',this)">
+        <button class="btn-upload" id="btn-${f.id}-0" onclick="document.getElementById('file-${f.id}-0').click()">📎 Enviar</button>
+      </div>
+    </div>`;
+
+  return`<div class="card" id="card-${f.id}">
+    <div class="card-header">
+      <div>
+        <div class="func-nome">${h(f.funcionario_nome)}</div>
+        <div class="func-meta">${f.funcionario_cpf?'CPF: '+h(f.funcionario_cpf)+' · ':''}${h(f.funcao_nome||'')}${f.setor_nome?' · '+h(f.setor_nome):''}</div>
+      </div>
+      <div>
+        <span class="status-badge ${statusCls}" id="badge-${f.id}">${statusLabel}</span>
+        ${totalEx>0?`<div style="font-size:11px;color:var(--text3);text-align:right;margin-top:4px;">${totalComp}/${totalEx} exames</div>`:''}
+      </div>
+    </div>
+    ${examesHtml}
+    ${totalEx>0?`<div class="progress-bar" style="margin-top:12px;"><div class="progress-fill" id="prog-${f.id}" style="width:${pct}%;"></div></div>`:''}
+  </div>`;
+}
+
+async function uploadExame(funcId,exameId,exameNome,input){
+  const file=input.files[0];
+  if(!file)return;
+  const btnEl=document.getElementById(`btn-${funcId}-${exameId}`);
+  const spEl=document.getElementById(`sp-${funcId}-${exameId}`);
+  const stEl=document.getElementById(`st-${funcId}-${exameId}`);
+  btnEl.disabled=true;spEl.className='spinner show';
+  try{
+    // Upload para Storage
+    const ext=file.name.split('.').pop();
+    const path=`${demanda.empresa_id}/clinica_demandas/${demToken}/${funcId}_${exameId}_${Date.now()}.${ext}`;
+    const resUp=await fetch(`${SUPA_URL}/storage/v1/object/documentos/${path}`,{method:'POST',headers:{'Authorization':`Bearer ${SUPA_KEY}`,'x-upsert':'true','Content-Type':file.type},body:file});
+
+    // Registra em funcionario_documentos
+    await fetch(`${SUPA_URL}/rest/v1/funcionario_documentos`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+      body:JSON.stringify({funcionario_id:funcId,empresa_id:demanda.empresa_id,demanda_id:demanda.id,demanda_token:demToken,tipo:'Exame',subtipo:exameNome,arquivo_url:path,arquivo_nome:file.name,ativo:true})});
+
+    // Atualiza exames_completos na demanda_funcionario
+    const f=funcionarios.find(x=>x.id===funcId);
+    if(f){
+      const novosCompletos=[...(f.exames_completos||[]),{exame_id:exameId,nome:exameNome,data_upload:new Date().toISOString()}];
+      await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios?id=eq.${f.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+        body:JSON.stringify({exames_completos:novosCompletos,data_ultimo_upload:new Date().toISOString(),status:novosCompletos.length>=(f.exames_pendentes||[]).length&&(f.exames_pendentes||[]).length>0?'Completo':'Parcial'})});
+      f.exames_completos=novosCompletos;
+    }
+
+    // Atualiza UI
+    btnEl.className='btn-upload enviado';btnEl.innerHTML='<span class="spinner"></span>✓ Enviado';
+    stEl.className='upload-status ok';stEl.textContent='✓ Enviado';
+    atualizarCardStatus(funcId);
+    atualizarResumo();
+    toast(`Arquivo enviado com sucesso!`);
+  }catch(e){
+    alert('Erro ao enviar arquivo: '+e.message);
+    btnEl.disabled=false;btnEl.innerHTML='📎 Enviar';
+  }finally{spEl.className='spinner';}
+}
+
+function atualizarCardStatus(funcId){
+  const f=funcionarios.find(x=>x.id===funcId);
+  if(!f)return;
+  const totalEx=(f.exames_pendentes||[]).length||1;
+  const totalComp=(f.exames_completos||[]).length;
+  const pct=Math.round((totalComp/totalEx)*100);
+  const badge=document.getElementById(`badge-${funcId}`);
+  const prog=document.getElementById(`prog-${funcId}`);
+  if(prog)prog.style.width=pct+'%';
+  if(badge){
+    if(totalComp>=totalEx){badge.className='status-badge badge-completo';badge.textContent='✓ Completo';}
+    else if(totalComp>0){badge.className='status-badge badge-parcial';badge.textContent='Parcial';}
+  }
+}
+
+function atualizarResumo(){
+  const total=funcionarios.length;
+  const completos=funcionarios.filter(f=>{const ex=(f.exames_pendentes||[]).length||1;return(f.exames_completos||[]).length>=ex;}).length;
+  document.getElementById('res-total').textContent=total;
+  document.getElementById('res-completos').textContent=completos;
+  document.getElementById('res-pendentes').textContent=total-completos;
+}
+
+inicializar();
+</script>
+</body>
+</html>

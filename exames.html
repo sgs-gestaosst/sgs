@@ -120,6 +120,7 @@
       <div class="hero-sub" id="hero-sub">Carregando...</div>
     </div>
     <div class="hero-actions">
+      <button class="btn btn-edit" onclick="abrirModalEnviarClinica()" style="border-color:#7aabf7;color:#7aabf7;">📤 Enviar para clínica</button>
       <a id="btn-pcmso" href="#" class="btn btn-pcmso" target="_blank">📋 Gerar PCMSO</a>
     </div>
   </div>
@@ -171,6 +172,53 @@
           <span id="label-sugestao">Adicionar selecionados</span>
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENVIAR PARA CLÍNICA -->
+<div class="modal-overlay" id="modal-enviar-clinica">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-titulo">
+      <span>📤 Enviar demanda para clínica</span>
+      <button onclick="document.getElementById('modal-enviar-clinica').classList.remove('show')" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:16px;">Um link único será gerado. A clínica acessa sem precisar de login no SGS, vê a lista de funcionários e faz upload dos laudos. O sistema registra automaticamente.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="modal-field" style="grid-column:1/-1;">
+        <label>Título da demanda *</label>
+        <input type="text" id="dem-titulo" placeholder="Ex: Exames periódicos — Junho 2026" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+      </div>
+      <div class="modal-field" style="grid-column:1/-1;">
+        <label>Selecionar funcionários *</label>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input type="text" id="dem-busca-func" placeholder="Filtrar funcionários..." oninput="filtrarFuncionariosDemanda()" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:7px 12px;outline:none;">
+          <button onclick="toggleTodosFuncs()" class="btn btn-edit btn-sm">Todos</button>
+        </div>
+        <div id="lista-func-demanda" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:8px;background:var(--bg);"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;"><span id="count-func-demanda">0</span> funcionário(s) selecionado(s)</div>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1;">
+        <label>Mensagem para a clínica (opcional)</label>
+        <textarea id="dem-descricao" placeholder="Ex: Favor realizar os exames em até 30 dias. Dúvidas: (11) 99999-9999" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;resize:vertical;min-height:60px;"></textarea>
+      </div>
+    </div>
+    <div class="status-bar" id="status-dem"></div>
+    <!-- Link gerado -->
+    <div id="bloco-link-gerado" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:14px;">
+      <div style="font-size:12px;color:var(--accent2);font-weight:600;margin-bottom:8px;">✅ Demanda criada! Compartilhe este link com a clínica:</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input id="link-demanda-gerado" type="text" readonly style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:12px;padding:8px 12px;outline:none;">
+        <button class="btn btn-edit btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('link-demanda-gerado').value).then(()=>toast('Link copiado!'))">📋 Copiar</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);">⏰ Válido por 30 dias · A clínica não precisa de login</div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="document.getElementById('modal-enviar-clinica').classList.remove('show')">Fechar</button>
+      <button class="btn btn-save" id="btn-criar-demanda" onclick="criarDemanda()">
+        <span class="spinner" id="spinner-dem"></span>
+        <span id="label-dem">Gerar link</span>
+      </button>
     </div>
   </div>
 </div>
@@ -544,6 +592,91 @@ function fecharModalExcluir(){document.getElementById('modal-excluir').classList
 document.addEventListener('click',e=>{
   if(!e.target.closest('.busca-wrap'))document.getElementById('busca-dropdown')?.classList.remove('show');
 });
+
+// ── ENVIAR PARA CLÍNICA ───────────────────────────────────────
+let todosFuncionarios=[];
+
+async function abrirModalEnviarClinica(){
+  document.getElementById('bloco-link-gerado').style.display='none';
+  document.getElementById('dem-titulo').value=`Exames ocupacionais — ${new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}`;
+  document.getElementById('dem-descricao').value='';
+  const st=document.getElementById('status-dem');if(st)st.className='status-bar';
+  // Carrega funcionários
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,funcao_id,setor_id,funcoes(nome_funcao),setores(nome_setor)&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    todosFuncionarios=await res.json();
+    renderFuncionariosDemanda(todosFuncionarios);
+  }catch(e){todosFuncionarios=[];}
+  document.getElementById('modal-enviar-clinica').classList.add('show');
+}
+
+function renderFuncionariosDemanda(lista){
+  const container=document.getElementById('lista-func-demanda');
+  if(!lista.length){container.innerHTML=`<div style="color:var(--text3);font-size:12px;padding:8px;">Nenhum funcionário cadastrado nesta empresa.</div>`;return;}
+  container.innerHTML=lista.map(f=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:7px 6px;cursor:pointer;border-radius:4px;font-size:13px;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+      <input type="checkbox" class="cb-func-dem" value="${f.id}" onchange="atualizarCountDemanda()" style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+      <span style="flex:1;">${escHtml(f.nome_completo)}</span>
+      <span style="font-size:11px;color:var(--text3);">${escHtml(f.setores?.nome_setor||'')} ${f.funcoes?.nome_funcao?'· '+escHtml(f.funcoes.nome_funcao):''}</span>
+    </label>`).join('');
+  atualizarCountDemanda();
+}
+
+function filtrarFuncionariosDemanda(){
+  const termo=document.getElementById('dem-busca-func').value.toLowerCase();
+  const filtrados=todosFuncionarios.filter(f=>f.nome_completo.toLowerCase().includes(termo)||(f.setores?.nome_setor||'').toLowerCase().includes(termo)||(f.funcoes?.nome_funcao||'').toLowerCase().includes(termo));
+  renderFuncionariosDemanda(filtrados);
+}
+
+function toggleTodosFuncs(){
+  const cbs=document.querySelectorAll('.cb-func-dem');
+  const allChecked=[...cbs].every(c=>c.checked);
+  cbs.forEach(c=>c.checked=!allChecked);
+  atualizarCountDemanda();
+}
+
+function atualizarCountDemanda(){
+  const sel=document.querySelectorAll('.cb-func-dem:checked').length;
+  document.getElementById('count-func-demanda').textContent=sel;
+}
+
+async function criarDemanda(){
+  const titulo=document.getElementById('dem-titulo').value.trim();
+  const funcIds=[...document.querySelectorAll('.cb-func-dem:checked')].map(c=>parseInt(c.value));
+  if(!titulo){alert('Informe o título da demanda.');return;}
+  if(!funcIds.length){alert('Selecione ao menos um funcionário.');return;}
+  document.getElementById('btn-criar-demanda').disabled=true;
+  document.getElementById('spinner-dem').className='spinner show';
+  document.getElementById('label-dem').textContent='Criando...';
+  try{
+    // Cria demanda
+    const resDem=await fetch(`${SUPA_URL}/rest/v1/clinica_demandas`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({empresa_id:parseInt(empresaId),titulo,descricao:document.getElementById('dem-descricao').value.trim()||null,total_funcionarios:funcIds.length,ativo:true})});
+    if(!resDem.ok)throw new Error('Erro ao criar demanda');
+    const [demanda]=await resDem.json();
+    // Insere funcionários na demanda
+    const funcsParaInserir=todosFuncionarios.filter(f=>funcIds.includes(f.id));
+    for(const f of funcsParaInserir){
+      // Busca exames obrigatórios da função
+      let examesPend=[];
+      if(f.funcao_id){
+        const resEx=await fetch(`${SUPA_URL}/rest/v1/funcao_exames?funcao_id=eq.${f.funcao_id}&ativo=eq.true&select=exame_id,obrigatorio,catalogo_exames(nome,codigo_tabela27_esocial)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+        const exs=await resEx.json();
+        examesPend=exs.map(e=>({exame_id:e.exame_id,nome:e.catalogo_exames?.nome||'Exame',obrigatorio:e.obrigatorio}));
+      }
+      await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
+        body:JSON.stringify({demanda_id:demanda.id,funcionario_id:f.id,funcionario_nome:f.nome_completo,funcionario_cpf:f.cpf||'',funcao_nome:f.funcoes?.nome_funcao||'',setor_nome:f.setores?.nome_setor||'',exames_pendentes:examesPend,status:'Pendente'})});
+    }
+    // Mostra link gerado
+    const baseUrl=window.location.origin+window.location.pathname.replace('exames.html','');
+    const link=`${baseUrl}clinica_upload.html?token=${demanda.token}`;
+    document.getElementById('link-demanda-gerado').value=link;
+    document.getElementById('bloco-link-gerado').style.display='block';
+    document.getElementById('btn-criar-demanda').style.display='none';
+    setStatus('status-dem','success',`Demanda criada para ${funcIds.length} funcionário(s)!`);
+  }catch(e){setStatus('status-dem','error',e.message);}
+  finally{document.getElementById('spinner-dem').className='spinner';document.getElementById('label-dem').textContent='Gerar link';document.getElementById('btn-criar-demanda').disabled=false;}
+}
 
 // ── SUGESTÃO DE EXAMES POR RISCO ─────────────────────────────
 let examesSugeridosAtual=[];
