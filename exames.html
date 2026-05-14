@@ -120,6 +120,7 @@
       <div class="hero-sub" id="hero-sub">Carregando...</div>
     </div>
     <div class="hero-actions">
+      <button class="btn btn-edit" onclick="abrirModalGerarASO()" style="border-color:#2dd4a0;color:#2dd4a0;">📋 Gerar ASO</button>
       <button class="btn btn-edit" onclick="abrirModalEnviarClinica()" style="border-color:#7aabf7;color:#7aabf7;">📤 Enviar para clínica</button>
       <button class="btn btn-edit" onclick="abrirModalDemandas()" style="border-color:#a78bfa;color:#a78bfa;" id="btn-demandas">📋 Demandas <span id="badge-demandas" style="display:none;background:#a78bfa;color:#0f1117;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;"></span></button>
       <a id="btn-pcmso" href="#" class="btn btn-pcmso" target="_blank">📋 Gerar PCMSO</a>
@@ -185,6 +186,102 @@
       <button onclick="document.getElementById('modal-arquivos-func').classList.remove('show')" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
     </div>
     <div id="modal-arq-content" style="max-height:420px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- MODAL GERAR ASO -->
+<div class="modal-overlay" id="modal-gerar-aso">
+  <div class="modal" style="max-width:760px;max-height:90vh;overflow-y:auto;">
+    <div class="modal-titulo">
+      <span>📋 Gerar ASO — Atestado de Saúde Ocupacional</span>
+      <button onclick="document.getElementById('modal-gerar-aso').classList.remove('show')" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <!-- 1. Funcionário -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">1 — Funcionário</div>
+    <div class="modal-field" style="margin-bottom:14px;">
+      <label>Funcionário *</label>
+      <div style="position:relative;">
+        <input type="text" id="aso-busca-func" placeholder="Digite o nome ou CPF..." oninput="filtrarFuncionariosASO()" autocomplete="off"
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+        <div id="aso-dropdown-func" class="busca-dropdown"></div>
+      </div>
+      <div id="aso-func-info" style="display:none;margin-top:8px;padding:10px;background:var(--bg);border:1px solid var(--border-focus);border-radius:var(--radius);font-size:12px;"></div>
+    </div>
+    <!-- 2. Tipo e datas -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">2 — Tipo e Datas</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="modal-field">
+        <label>Tipo de ASO *</label>
+        <select id="aso-tipo" onchange="calcularProximoASO()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+          <option value="">— Selecione —</option>
+          <option value="Admissional">Admissional</option>
+          <option value="Periódico">Periódico</option>
+          <option value="Retorno ao Trabalho">Retorno ao Trabalho</option>
+          <option value="Mudança de Função">Mudança de Função</option>
+          <option value="Demissional">Demissional</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Data do exame *</label>
+        <input type="date" id="aso-data-exame" onchange="calcularProximoASO()" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+      </div>
+    </div>
+    <!-- 3. Riscos -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">3 — Riscos Ocupacionais (PGR)</div>
+    <div id="aso-riscos-list" style="min-height:60px;max-height:140px;overflow-y:auto;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--text2);margin-bottom:14px;">Selecione um funcionário...</div>
+    <!-- 4. Exames realizados -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">4 — Exames Realizados *</div>
+    <div id="aso-exames-list" style="min-height:80px;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:10px;background:var(--bg);margin-bottom:14px;font-size:12px;color:var(--text2);">Selecione um funcionário...</div>
+    <!-- 5. Resultado -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">5 — Resultado</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="modal-field">
+        <label>Resultado *</label>
+        <select id="aso-resultado" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+          <option value="">— Selecione —</option>
+          <option value="Apto">✅ Apto</option>
+          <option value="Inapto">❌ Inapto</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Próximo ASO (calculado)</label>
+        <input type="date" id="aso-data-prox" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+      </div>
+    </div>
+    <div class="modal-field" style="margin-bottom:14px;">
+      <label>Restrições / Recomendações (opcional)</label>
+      <textarea id="aso-restricoes" placeholder="Ex: Afastado de trabalho em altura. Revisão em 6 meses..." style="width:100%;height:70px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;resize:vertical;"></textarea>
+    </div>
+    <!-- 6. Médico -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">6 — Médico Examinador</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div class="modal-field">
+        <label>Nome *</label>
+        <input type="text" id="aso-medico-nome" placeholder="Dr. João Silva" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+      </div>
+      <div class="modal-field">
+        <label>CRM *</label>
+        <input type="text" id="aso-medico-crm" placeholder="12345" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+      </div>
+      <div class="modal-field">
+        <label>UF *</label>
+        <select id="aso-medico-uf" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+          <option value="">—</option>
+          ${['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'].map(u=>`<option value="${u}">${u}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="status-bar" id="status-gerar-aso"></div>
+    <div style="display:flex;gap:10px;justify-content:space-between;margin-top:16px;">
+      <button class="btn btn-edit" onclick="abrirPreviewASO()">👁 Preview e Imprimir</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-cancel" onclick="document.getElementById('modal-gerar-aso').classList.remove('show')">Cancelar</button>
+        <button class="btn btn-save" id="btn-salvar-aso" onclick="salvarASO()">
+          <span class="spinner" id="spinner-aso"></span>
+          <span id="label-aso">Gerar e Salvar</span>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1145,6 +1242,169 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 inicializar();
+
+// ── GERAR ASO ─────────────────────────────────────────────────
+let funcionarioASO=null,examesFuncaoASO=[],riscosFuncaoASO=[];
+
+function abrirModalGerarASO(){
+  funcionarioASO=null;examesFuncaoASO=[];riscosFuncaoASO=[];
+  ['aso-busca-func','aso-medico-nome','aso-medico-crm','aso-restricoes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['aso-tipo','aso-resultado','aso-medico-uf'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['aso-data-exame','aso-data-prox'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('aso-func-info').style.display='none';
+  document.getElementById('aso-riscos-list').innerHTML='<span style="color:var(--text3);">Selecione um funcionário...</span>';
+  document.getElementById('aso-exames-list').innerHTML='<span style="color:var(--text3);">Selecione um funcionário...</span>';
+  const st=document.getElementById('status-gerar-aso');if(st)st.className='status-bar';
+  document.getElementById('modal-gerar-aso').classList.add('show');
+}
+document.getElementById('modal-gerar-aso').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');});
+
+async function filtrarFuncionariosASO(){
+  const termo=document.getElementById('aso-busca-func').value.trim().toLowerCase();
+  const dd=document.getElementById('aso-dropdown-func');
+  if(!termo||termo.length<2){dd.classList.remove('show');return;}
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,cpf,rg,funcao_id,setor_id,funcoes(nome_funcao),setores(nome_setor)&nome_completo=ilike.*${termo}*&order=nome_completo.asc&limit=15`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const lista=await res.json();
+    if(!lista.length){dd.innerHTML=`<div class="busca-option" style="color:var(--text3);cursor:default;">Nenhum funcionário encontrado</div>`;dd.classList.add('show');return;}
+    dd.innerHTML=lista.map(f=>`<div class="busca-option" onclick="selecionarFuncionarioASO(${f.id})">
+      <div class="busca-option-nome">${escHtml(f.nome_completo)}</div>
+      <div class="busca-option-meta"><span>${escHtml(f.funcoes?.nome_funcao||'—')}</span><span>${f.cpf||''}</span></div>
+    </div>`).join('');
+    dd.classList.add('show');
+  }catch(e){console.error(e);}
+}
+
+async function selecionarFuncionarioASO(funcId){
+  document.getElementById('aso-dropdown-func').classList.remove('show');
+  document.getElementById('aso-busca-func').value='';
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${funcId}&select=*,funcoes(nome_funcao),setores(nome_setor)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const [f]=await res.json();
+    funcionarioASO=f;
+    const info=document.getElementById('aso-func-info');
+    info.style.display='block';
+    info.innerHTML=`<div style="font-weight:600;color:var(--text);margin-bottom:4px;">${escHtml(f.nome_completo)}</div>
+      <div style="color:var(--text2);font-size:11px;">CPF: ${escHtml(f.cpf||'—')} &nbsp;·&nbsp; RG: ${escHtml(f.rg||'—')}</div>
+      <div style="color:var(--text2);font-size:11px;margin-top:2px;">Função: ${escHtml(f.funcoes?.nome_funcao||'—')} &nbsp;·&nbsp; Setor: ${escHtml(f.setores?.nome_setor||'—')}</div>`;
+    await Promise.all([carregarRiscosASO(f.funcao_id),carregarExamesASO(f.funcao_id)]);
+  }catch(e){setStatus('status-gerar-aso','error','Erro ao carregar funcionário: '+e.message);}
+}
+
+async function carregarRiscosASO(funcaoId){
+  const el=document.getElementById('aso-riscos-list');
+  if(!funcaoId){el.innerHTML='<span style="color:var(--text3);">Sem função vinculada.</span>';riscosFuncaoASO=[];return;}
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&ativo=eq.true&select=risco_id,riscos(nome_risco,categorias_risco(nome))`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    riscosFuncaoASO=await res.json();
+    if(!riscosFuncaoASO.length){el.innerHTML='<span style="color:var(--text3);">Nenhum risco mapeado para esta função no PGR.</span>';return;}
+    el.innerHTML=riscosFuncaoASO.map(r=>`<div style="padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;">
+      <span style="color:var(--warning);">⚠</span>
+      <span style="font-size:12px;"><strong>${escHtml(r.riscos?.nome_risco||'—')}</strong> <span style="color:var(--text3);font-size:11px;">(${escHtml(r.riscos?.categorias_risco?.nome||'')})</span></span>
+    </div>`).join('');
+  }catch(e){el.innerHTML='<span style="color:var(--danger);">Erro ao carregar riscos.</span>';}
+}
+
+async function carregarExamesASO(funcaoId){
+  const el=document.getElementById('aso-exames-list');
+  if(!funcaoId){el.innerHTML='<span style="color:var(--text3);">Sem função vinculada.</span>';examesFuncaoASO=[];return;}
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcao_exames?funcao_id=eq.${funcaoId}&ativo=eq.true&select=*,catalogo_exames(id,nome,categoria,codigo_tabela27_esocial)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    examesFuncaoASO=await res.json();
+    if(!examesFuncaoASO.length){el.innerHTML='<span style="color:var(--text3);">Nenhum exame vinculado a esta função.</span>';return;}
+    el.innerHTML=examesFuncaoASO.map((fe,i)=>`
+      <div style="display:grid;grid-template-columns:20px 1fr 150px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <input type="checkbox" id="aso-ex-${i}" data-idx="${i}" checked style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;">
+        <label for="aso-ex-${i}" style="font-size:12px;cursor:pointer;">
+          ${escHtml(fe.catalogo_exames?.nome||'—')}
+          ${fe.obrigatorio?'<span style="font-size:10px;color:var(--warning);margin-left:4px;">obrigatório</span>':''}
+        </label>
+        <select id="aso-res-${i}" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:11px;padding:5px 6px;outline:none;">
+          <option value="">Resultado...</option>
+          <option value="Normal">Normal</option>
+          <option value="Alterado">Alterado</option>
+          <option value="Inconclusivo">Inconclusivo</option>
+        </select>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<span style="color:var(--danger);">Erro ao carregar exames.</span>';}
+}
+
+function calcularProximoASO(){
+  const tipo=document.getElementById('aso-tipo').value;
+  const dataEx=document.getElementById('aso-data-exame').value;
+  if(!dataEx){return;}
+  const d=new Date(dataEx+'T00:00:00');
+  if(tipo==='Demissional'){document.getElementById('aso-data-prox').value='';return;}
+  // Periodicidade padrão: Anual para a maioria
+  const meses=tipo==='Admissional'?12:12;
+  d.setMonth(d.getMonth()+meses);d.setDate(d.getDate()-1);
+  document.getElementById('aso-data-prox').value=d.toISOString().split('T')[0];
+}
+
+function validarASO(){
+  if(!funcionarioASO){setStatus('status-gerar-aso','error','Selecione um funcionário.');return false;}
+  if(!document.getElementById('aso-tipo').value){setStatus('status-gerar-aso','error','Selecione o tipo de ASO.');return false;}
+  if(!document.getElementById('aso-data-exame').value){setStatus('status-gerar-aso','error','Informe a data do exame.');return false;}
+  if(!document.querySelectorAll('[id^="aso-ex-"]:checked').length){setStatus('status-gerar-aso','error','Selecione ao menos um exame realizado.');return false;}
+  if(!document.getElementById('aso-resultado').value){setStatus('status-gerar-aso','error','Selecione o resultado.');return false;}
+  if(!document.getElementById('aso-medico-nome').value.trim()){setStatus('status-gerar-aso','error','Informe o nome do médico.');return false;}
+  if(!document.getElementById('aso-medico-crm').value.trim()){setStatus('status-gerar-aso','error','Informe o CRM.');return false;}
+  if(!document.getElementById('aso-medico-uf').value){setStatus('status-gerar-aso','error','Selecione a UF do CRM.');return false;}
+  clearStatus('status-gerar-aso');return true;
+}
+
+function prepararDadosASO(){
+  const exsSel=[...document.querySelectorAll('[id^="aso-ex-"]:checked')].map(cb=>{
+    const i=parseInt(cb.dataset.idx);
+    return{exame_id:examesFuncaoASO[i]?.exame_id,nome_exame:examesFuncaoASO[i]?.catalogo_exames?.nome,codigo_tabela27:examesFuncaoASO[i]?.catalogo_exames?.codigo_tabela27_esocial,resultado_exame:document.getElementById(`aso-res-${i}`)?.value||'',obrigatorio:examesFuncaoASO[i]?.obrigatorio};
+  });
+  return{
+    funcionario:funcionarioASO,
+    tipo_aso:document.getElementById('aso-tipo').value,
+    data_exame:document.getElementById('aso-data-exame').value,
+    resultado_geral:document.getElementById('aso-resultado').value,
+    restricoes:document.getElementById('aso-restricoes').value.trim()||null,
+    data_prox_aso:document.getElementById('aso-data-prox').value||null,
+    medico_nome:document.getElementById('aso-medico-nome').value.trim(),
+    medico_crm:document.getElementById('aso-medico-crm').value.trim(),
+    medico_uf:document.getElementById('aso-medico-uf').value,
+    riscos:riscosFuncaoASO.map(r=>r.riscos?.nome_risco).filter(Boolean),
+    exames:exsSel,
+    empresa_nome:empresa?.nome_fantasia||empresa?.razao_social||''
+  };
+}
+
+function abrirPreviewASO(){
+  if(!validarASO())return;
+  const dados=prepararDadosASO();
+  sessionStorage.setItem('sgs_aso_preview',JSON.stringify(dados));
+  window.open('aso_preview.html','_blank');
+}
+
+async function salvarASO(){
+  if(!validarASO())return;
+  document.getElementById('btn-salvar-aso').disabled=true;
+  document.getElementById('spinner-aso').className='spinner show';
+  document.getElementById('label-aso').textContent='Salvando...';
+  const dados=prepararDadosASO();
+  try{
+    const resS=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220`,{method:'POST',headers:{...{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},'Prefer':'return=representation'},
+      body:JSON.stringify({funcionario_id:funcionarioASO.id,empresa_id:parseInt(empresaId),tipo_aso:dados.tipo_aso,tipo_exame:dados.tipo_aso,data_exame:dados.data_exame,resultado:dados.resultado_geral,resultado_geral:dados.resultado_geral,data_validade_aso:dados.data_prox_aso,data_prox_aso:dados.data_prox_aso,cpf_funcionario:funcionarioASO.cpf,rg_funcionario:funcionarioASO.rg,nome_funcao:funcionarioASO.funcoes?.nome_funcao,nome_setor:funcionarioASO.setores?.nome_setor,riscos_ocupacionais:dados.riscos,restricoes_recomendacoes:dados.restricoes,observacoes:dados.restricoes,nome_medico_examinador:dados.medico_nome,crm_examinador:dados.medico_crm,uf_crm_examinador:dados.medico_uf,status_esocial:'Pendente'})});
+    if(!resS.ok){const e=await resS.json();throw new Error(e.message||JSON.stringify(e));}
+    const [s2220]=await resS.json();
+    for(const ex of dados.exames){
+      if(!ex.exame_id)continue;
+      await fetch(`${SUPA_URL}/rest/v1/esocial_s2220_exames`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+        body:JSON.stringify({s2220_id:s2220.id,exame_id:ex.exame_id,nome_exame:ex.nome_exame,codigo_tabela27_esocial:ex.codigo_tabela27,data_exame:dados.data_exame,resultado_exame:ex.resultado_exame,obrigatorio_pela_funcao:ex.obrigatorio})});
+    }
+    // Salva dados no sessionStorage e abre preview para impressão
+    sessionStorage.setItem('sgs_aso_preview',JSON.stringify({...dados,aso_id:s2220.id}));
+    document.getElementById('modal-gerar-aso').classList.remove('show');
+    setStatus('status-exames','success','ASO gerado e salvo! Abrindo para impressão...');
+    setTimeout(()=>{window.open('aso_preview.html','_blank');clearStatus('status-exames');},500);
+  }catch(e){setStatus('status-gerar-aso','error',e.message);}
+  finally{document.getElementById('btn-salvar-aso').disabled=false;document.getElementById('spinner-aso').className='spinner';document.getElementById('label-aso').textContent='Gerar e Salvar';}
+}
 </script>
 </body>
 </html>
