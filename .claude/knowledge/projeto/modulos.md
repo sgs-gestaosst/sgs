@@ -82,6 +82,23 @@
 
 **Pendente:**
 - ~~Visualização de respostas individuais do psicossocial~~ ✅ concluído (2026-05-14) — modal decodificado por bloco/dimensão, escala colorida, funciona para Checklist NR-01, COPSOQ-III Média e Curta
+
+## Módulo Exames / PCMSO — Fase 1 implementada (2026-05-14)
+**Arquivos:** `exames.html`, `empresa_detalhe.html`, `acoes.html`
+**Tabelas novas:** `risco_exame_mapping`, colunas `funcionarios.data_prox_aso/tipo_prox_aso`, `esocial_s2220.importado`
+**Catálogo:** 40 exames NR-07 pré-cadastrados com código tabela 27 eSocial
+
+**Implementado:**
+- Busca de exames: mostra lista ao abrir (onfocus) — não precisa mais digitar para ver opções
+- Sugestão por risco: cruza riscos do PGR com `risco_exame_mapping` → modal com checkboxes
+- Importação de ASO: modal para registrar ASOs existentes (empresa em andamento) + upload PDF + atualiza data_prox_aso
+- Dashboard de vencimentos: aparece automaticamente em empresa_detalhe.html (vencidos, 30 dias, 90 dias)
+- Ação automática: botão "ASOs vencidos" em acoes.html cria ações para cada funcionário com ASO vencido
+
+**Pendente (Fases 2-4):**
+- Fase 2: Demanda para clínica via link público (upload de resultados sem login)
+- Fase 3: Geração de ASO completo com campos NR-07 + revisão médica
+- Fase 4: PCMSO revisado (design, paginação, cronograma, vencimento)
 - Revisão PCMSO, AET, LTCAT
 
 ### eSocial
