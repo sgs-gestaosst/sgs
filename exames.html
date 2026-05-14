@@ -199,6 +199,20 @@
         <div style="font-size:11px;color:var(--text3);margin-top:4px;"><span id="count-func-demanda">0</span> funcionário(s) selecionado(s)</div>
       </div>
       <div class="modal-field" style="grid-column:1/-1;">
+        <label style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Exames desta demanda *</span>
+          <span style="font-size:11px;color:var(--text3);font-weight:400;">Selecione os exames que esta clínica realizará</span>
+        </label>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button onclick="toggleTodosExamesDem(true)" class="btn btn-edit btn-sm">Todos</button>
+          <button onclick="toggleTodosExamesDem(false)" class="btn btn-edit btn-sm">Nenhum</button>
+          <span id="count-exames-dem" style="font-size:11px;color:var(--text3);align-self:center;margin-left:4px;"></span>
+        </div>
+        <div id="lista-exames-demanda" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:8px;background:var(--bg);">
+          <div style="color:var(--text3);font-size:12px;padding:8px;">Selecione funcionários para ver os exames disponíveis...</div>
+        </div>
+      </div>
+      <div class="modal-field" style="grid-column:1/-1;">
         <label>Mensagem para a clínica (opcional)</label>
         <textarea id="dem-descricao" placeholder="Ex: Favor realizar os exames em até 30 dias. Dúvidas: (11) 99999-9999" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;resize:vertical;min-height:60px;"></textarea>
       </div>
@@ -607,6 +621,9 @@ async function abrirModalEnviarClinica(){
     todosFuncionarios=await res.json();
     renderFuncionariosDemanda(todosFuncionarios);
   }catch(e){todosFuncionarios=[];}
+  examesDemandaCache={};
+  document.getElementById('lista-exames-demanda').innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Selecione funcionários para ver os exames disponíveis...</div>';
+  document.getElementById('count-exames-dem').textContent='';
   document.getElementById('modal-enviar-clinica').classList.add('show');
 }
 
@@ -615,7 +632,7 @@ function renderFuncionariosDemanda(lista){
   if(!lista.length){container.innerHTML=`<div style="color:var(--text3);font-size:12px;padding:8px;">Nenhum funcionário cadastrado nesta empresa.</div>`;return;}
   container.innerHTML=lista.map(f=>`
     <label style="display:flex;align-items:center;gap:10px;padding:7px 6px;cursor:pointer;border-radius:4px;font-size:13px;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
-      <input type="checkbox" class="cb-func-dem" value="${f.id}" onchange="atualizarCountDemanda()" style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
+      <input type="checkbox" class="cb-func-dem" value="${f.id}" onchange="atualizarCountDemanda().catch(()=>{})" style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;">
       <span style="flex:1;">${escHtml(f.nome_completo)}</span>
       <span style="font-size:11px;color:var(--text3);">${escHtml(f.setores?.nome_setor||'')} ${f.funcoes?.nome_funcao?'· '+escHtml(f.funcoes.nome_funcao):''}</span>
     </label>`).join('');
@@ -632,12 +649,79 @@ function toggleTodosFuncs(){
   const cbs=document.querySelectorAll('.cb-func-dem');
   const allChecked=[...cbs].every(c=>c.checked);
   cbs.forEach(c=>c.checked=!allChecked);
-  atualizarCountDemanda();
+  atualizarCountDemanda().catch(()=>{});
 }
 
-function atualizarCountDemanda(){
+let examesDemandaCache={};// funcao_id -> [{exame_id,nome,obrigatorio}]
+
+async function atualizarCountDemanda(){
   const sel=document.querySelectorAll('.cb-func-dem:checked').length;
   document.getElementById('count-func-demanda').textContent=sel;
+  await carregarExamesDemanda();
+}
+
+async function carregarExamesDemanda(){
+  const funcIds=[...document.querySelectorAll('.cb-func-dem:checked')].map(c=>parseInt(c.value));
+  const container=document.getElementById('lista-exames-demanda');
+  if(!funcIds.length){container.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Selecione funcionários para ver os exames disponíveis...</div>';document.getElementById('count-exames-dem').textContent='';return;}
+
+  // Busca funcao_id dos funcionários selecionados
+  const funcsSel=todosFuncionarios.filter(f=>funcIds.includes(f.id));
+  const funcaoIds=[...new Set(funcsSel.map(f=>f.funcao_id).filter(Boolean))];
+
+  // Carrega exames de cada função (com cache)
+  const examesMap={};// exame_id -> {exame_id, nome, obrigatorio, categorias:[funcao_nome]}
+  for(const fid of funcaoIds){
+    if(!examesDemandaCache[fid]){
+      try{
+        const res=await fetch(`${SUPA_URL}/rest/v1/funcao_exames?funcao_id=eq.${fid}&ativo=eq.true&select=exame_id,obrigatorio,catalogo_exames(nome,categoria,periodicidade_padrao)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+        examesDemandaCache[fid]=await res.json();
+      }catch(e){examesDemandaCache[fid]=[];}
+    }
+    const funcNome=funcsSel.find(f=>f.funcao_id===fid)?.funcoes?.nome_funcao||'';
+    (examesDemandaCache[fid]||[]).forEach(e=>{
+      if(!examesMap[e.exame_id])examesMap[e.exame_id]={exame_id:e.exame_id,nome:e.catalogo_exames?.nome||'Exame',categoria:e.catalogo_exames?.categoria||'',periodicidade:e.catalogo_exames?.periodicidade_padrao||'',obrigatorio:e.obrigatorio,funcoes:[]};
+      if(funcNome&&!examesMap[e.exame_id].funcoes.includes(funcNome))examesMap[e.exame_id].funcoes.push(funcNome);
+    });
+  }
+
+  const examesLista=Object.values(examesMap);
+  if(!examesLista.length){
+    container.innerHTML='<div style="color:var(--text3);font-size:12px;padding:8px;">Nenhum exame cadastrado para as funções selecionadas. Adicione exames no módulo de exames primeiro.</div>';
+    document.getElementById('count-exames-dem').textContent='';
+    return;
+  }
+
+  // Agrupa por categoria
+  const porCategoria={};
+  examesLista.forEach(e=>{const cat=e.categoria||'Outros';if(!porCategoria[cat])porCategoria[cat]=[];porCategoria[cat].push(e);});
+
+  container.innerHTML=Object.entries(porCategoria).map(([cat,exs])=>`
+    <div style="margin-bottom:10px;">
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;padding:4px 6px;background:var(--surface2);border-radius:4px;">${escHtml(cat)}</div>
+      ${exs.map(e=>`
+        <label style="display:flex;align-items:flex-start;gap:10px;padding:6px;cursor:pointer;border-radius:4px;font-size:12px;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+          <input type="checkbox" class="cb-exam-dem" value="${e.exame_id}" checked onchange="atualizarCountExamesDem()" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin-top:2px;">
+          <div style="flex:1;">
+            <span style="color:var(--text);">${escHtml(e.nome)}</span>
+            ${e.obrigatorio?'<span style="font-size:10px;color:var(--warning);margin-left:6px;">obrigatório</span>':''}
+            <div style="font-size:10px;color:var(--text3);margin-top:1px;">${e.periodicidade?e.periodicidade+' ·':''} ${escHtml(e.funcoes.join(', '))}</div>
+          </div>
+        </label>`).join('')}
+    </div>`).join('');
+
+  atualizarCountExamesDem();
+}
+
+function atualizarCountExamesDem(){
+  const sel=document.querySelectorAll('.cb-exam-dem:checked').length;
+  const total=document.querySelectorAll('.cb-exam-dem').length;
+  document.getElementById('count-exames-dem').textContent=`${sel} de ${total} exame(s) selecionado(s)`;
+}
+
+function toggleTodosExamesDem(checked){
+  document.querySelectorAll('.cb-exam-dem').forEach(c=>c.checked=checked);
+  atualizarCountExamesDem();
 }
 
 async function criarDemanda(){
@@ -655,14 +739,17 @@ async function criarDemanda(){
     if(!resDem.ok){const err=await resDem.json();throw new Error(err.message||err.hint||err.details||JSON.stringify(err));}
     const [demanda]=await resDem.json();
     // Insere funcionários na demanda
+    // Exames selecionados pelo técnico para esta demanda
+    const examesSelecionadosIds=new Set([...document.querySelectorAll('.cb-exam-dem:checked')].map(c=>parseInt(c.value)));
     const funcsParaInserir=todosFuncionarios.filter(f=>funcIds.includes(f.id));
     for(const f of funcsParaInserir){
-      // Busca exames obrigatórios da função
+      // Filtra apenas os exames selecionados para esta clínica
       let examesPend=[];
       if(f.funcao_id){
-        const resEx=await fetch(`${SUPA_URL}/rest/v1/funcao_exames?funcao_id=eq.${f.funcao_id}&ativo=eq.true&select=exame_id,obrigatorio,catalogo_exames(nome,codigo_tabela27_esocial)`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-        const exs=await resEx.json();
-        examesPend=exs.map(e=>({exame_id:e.exame_id,nome:e.catalogo_exames?.nome||'Exame',obrigatorio:e.obrigatorio}));
+        const examesDaFuncao=examesDemandaCache[f.funcao_id]||[];
+        examesPend=examesDaFuncao
+          .filter(e=>examesSelecionadosIds.has(e.exame_id))
+          .map(e=>({exame_id:e.exame_id,nome:e.catalogo_exames?.nome||'Exame',obrigatorio:e.obrigatorio}));
       }
       await fetch(`${SUPA_URL}/rest/v1/clinica_demanda_funcionarios`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},
         body:JSON.stringify({demanda_id:demanda.id,funcionario_id:f.id,funcionario_nome:f.nome_completo,funcionario_cpf:f.cpf||'',funcao_nome:f.funcoes?.nome_funcao||'',setor_nome:f.setores?.nome_setor||'',exames_pendentes:examesPend,status:'Pendente'})});
