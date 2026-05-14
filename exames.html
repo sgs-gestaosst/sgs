@@ -540,6 +540,29 @@ function navBusca(e){
   if(buscaIdx>=0)opcoes[buscaIdx].scrollIntoView({block:'nearest'});
 }
 
+async function upsertExame(tabela,campo,ctxId,exameId,periodicidade,obrigatorio){
+  // Verifica se já existe (inclusive ativo=false) para reativar em vez de inserir duplicado
+  const resCheck=await fetch(`${SUPA_URL}/rest/v1/${tabela}?${campo}=eq.${ctxId}&exame_id=eq.${exameId}&select=id,ativo`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+  const existing=await resCheck.json();
+  if(existing.length){
+    // Reativa registro existente
+    const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}?id=eq.${existing[0].id}`,{
+      method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({ativo:true,periodicidade,obrigatorio})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao reativar exame');}
+    return(await res.json())[0];
+  }else{
+    // Insere novo
+    const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{
+      method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({[campo]:ctxId,exame_id:exameId,periodicidade,obrigatorio,ativo:true})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao adicionar exame');}
+    return(await res.json())[0];
+  }
+}
+
 async function adicionarExame(exameId){
   const inp=document.getElementById('busca-input');
   const dd=document.getElementById('busca-dropdown');
@@ -551,17 +574,13 @@ async function adicionarExame(exameId){
   const ctxId=contexto==='setor'?setorAtivo.id:funcaoAtiva?.id;
   if(!ctxId)return;
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
-      body:JSON.stringify({[campo]:ctxId,exame_id:exameId,periodicidade:exame?.periodicidade_padrao||'Anual',obrigatorio:exame?.obrigatorio_esocial||false,ativo:true})
-    });
-    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
-    const data=await res.json();
-    if(contexto==='setor')examesSetor.push(data[0]);
-    else examesFuncao.push(data[0]);
-    renderPainel();
-    renderNavSetores();
+    const data=await upsertExame(tabela,campo,ctxId,exameId,exame?.periodicidade_padrao||'Anual',exame?.obrigatorio_esocial||false);
+    // Remove da lista local se já estava (evitar duplicata visual)
+    if(contexto==='setor')examesSetor=examesSetor.filter(e=>e.exame_id!==exameId);
+    else examesFuncao=examesFuncao.filter(e=>e.exame_id!==exameId);
+    if(contexto==='setor')examesSetor.push(data);
+    else examesFuncao.push(data);
+    renderPainel();renderNavSetores();
     setStatus('status-exames','success','Exame adicionado!');
     setTimeout(()=>clearStatus('status-exames'),2000);
   }catch(e){setStatus('status-exames','error',e.message);}
@@ -838,12 +857,16 @@ async function adicionarExamesSugeridos(){
   document.getElementById('spinner-sugestao').className='spinner show';
   document.getElementById('label-sugestao').textContent='Adicionando...';
   try{
+    const tabela=contexto==='setor'?'setor_exames':'funcao_exames';
+    const campo=contexto==='setor'?'setor_id':'funcao_id';
+    const ctxId=contexto==='setor'?setorAtivo.id:funcaoAtiva?.id;
     for(const exame of selecionados){
-      const tabela=contexto==='setor'?'setor_exames':'funcao_exames';
-      const campo=contexto==='setor'?'setor_id':'funcao_id';
-      const ctxId=contexto==='setor'?setorAtivo.id:funcaoAtiva?.id;
-      const res=await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify({[campo]:ctxId,exame_id:exame.id,periodicidade:exame.periodicidade_padrao||'Anual',obrigatorio:exame.obrigatorio_esocial||false,ativo:true})});
-      if(res.ok){const d=await res.json();if(contexto==='setor')examesSetor.push(d[0]);else examesFuncao.push(d[0]);}
+      try{
+        const d=await upsertExame(tabela,campo,ctxId,exame.id,exame.periodicidade_padrao||'Anual',exame.obrigatorio_esocial||false);
+        if(contexto==='setor')examesSetor=examesSetor.filter(e=>e.exame_id!==exame.id);
+        else examesFuncao=examesFuncao.filter(e=>e.exame_id!==exame.id);
+        if(contexto==='setor')examesSetor.push(d);else examesFuncao.push(d);
+      }catch(e){console.error('Erro ao adicionar exame',exame.nome,e.message);}
     }
     document.getElementById('modal-sugestao-risco').classList.remove('show');
     renderPainel();renderNavSetores();
