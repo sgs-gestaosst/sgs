@@ -238,7 +238,7 @@ const empresaId=params.get('empresa_id');
 if(!empresaId)window.location.href='empresas.html';
 document.getElementById('btn-voltar').href=`exames.html?empresa_id=${empresaId}`;
 
-let empresa,cnaes,setores,funcoes,setor_exames,funcao_exames,catalogo,funcionarios=[],ultimosAsos=[];
+let empresa,cnaes,setores,funcoes,setor_exames,funcao_exames,catalogo,funcionarios=[],ultimosAsos=[],funcaoRiscos=[],todosRiscos=[],categoriasRisco=[];
 let empresaLogoUrlPCMSO='';
 const grInfo={1:{label:'GR 1 — Baixo',cls:'badge-gr1'},2:{label:'GR 2 — Médio-Baixo',cls:'badge-gr2'},3:{label:'GR 3 — Médio-Alto',cls:'badge-gr3'},4:{label:'GR 4 — Alto',cls:'badge-gr4'}};
 function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -277,6 +277,16 @@ async function carregar(){
       ultimosAsos=todosAsos.filter(a=>{if(visto.has(a.funcionario_id))return false;visto.add(a.funcionario_id);return true;});
     }
     await carregarAcoesPCMSO();
+    try{
+      const [rFR,rRiscos,rCats]=await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/funcao_riscos?ativo=eq.true&select=funcao_id,risco_id&order=funcao_id.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+        fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,categoria_risco_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+        fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+      ]);
+      funcaoRiscos=await rFR.json().catch(()=>[]);
+      todosRiscos=await rRiscos.json().catch(()=>[]);
+      categoriasRisco=await rCats.json().catch(()=>[]);
+    }catch(e){funcaoRiscos=[];todosRiscos=[];categoriasRisco=[];}
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro: ${e.message}</div>`;
@@ -288,8 +298,12 @@ function renderDocumento(){
   wrap.innerHTML='';
   wrap.appendChild(renderCapa());
   wrap.appendChild(renderIdentificacao());
+  wrap.appendChild(renderBaseLegal());
   wrap.appendChild(renderProgramaExames());
+  wrap.appendChild(renderMatrizRiscos());
   wrap.appendChild(renderCronograma());
+  wrap.appendChild(renderCriteriosConduta());
+  wrap.appendChild(renderSigiloFinal());
 }
 
 function renderCapa(){
@@ -421,6 +435,217 @@ function renderIdentificacao(){
   return pg;
 }
 
+function renderBaseLegal(){
+  const pg=document.createElement('div');pg.className='page';
+  pg.innerHTML=`
+  <div class="page-header">
+    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="ph-doc">PCMSO — ${fmtAno()}</span>
+  </div>
+  <div class="doc-section"><span class="num-secao">3</span>Base Legal e Objetivos</div>
+
+  <div class="doc-subsection">3.1 Fundamentação Legal</div>
+  <p class="doc-text">Este Programa de Controle Médico de Saúde Ocupacional — PCMSO é elaborado em cumprimento às seguintes normas:</p>
+  <table class="doc-table" style="margin-top:8pt;">
+    <thead><tr><th style="width:35%;">Norma</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">CLT — Art. 168 e 169</td><td>Obrigatoriedade de exames médicos admissional, periódico, demissional e de retorno ao trabalho</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-07 / Portaria 1.031/2018</td><td>Programa de Controle Médico de Saúde Ocupacional — exames, periodicidade, responsabilidades</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-09</td><td>Avaliação e controle dos agentes físicos, químicos e biológicos presentes no ambiente de trabalho</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-15</td><td>Atividades e operações insalubres — limites de tolerância para agentes nocivos</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Portaria MTE 1.031/2018</td><td>Aprova a NR-07 e estabelece as tabelas de exames obrigatórios por agente de risco</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">LGPD — Lei 13.709/2018</td><td>Proteção dos dados pessoais sensíveis de saúde dos trabalhadores</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Resolução CFM 1.658/2002</td><td>Normatiza a emissão do Atestado de Saúde Ocupacional — ASO</td></tr>
+    </tbody>
+  </table>
+
+  <div class="doc-subsection" style="margin-top:14pt;">3.2 Objetivos do Programa</div>
+  <p class="doc-text" style="margin-bottom:8pt;">O presente PCMSO tem por objetivos:</p>
+  <ul style="margin:0 0 10pt 16pt;font-size:9.5pt;color:#1f2937;line-height:1.8;">
+    <li>Promover e preservar a saúde dos trabalhadores, prevenindo doenças relacionadas ao trabalho;</li>
+    <li>Detectar precocemente alterações que possam indicar comprometimento da saúde em decorrência dos riscos ocupacionais;</li>
+    <li>Registrar e controlar os dados de saúde dos trabalhadores, garantindo sigilo e rastreabilidade;</li>
+    <li>Cumprir as exigências legais da NR-07 e demais normas pertinentes;</li>
+    <li>Integrar com o PGR — Programa de Gerenciamento de Riscos, fundamentando cada exame nos riscos identificados;</li>
+    <li>Subsidiar o envio dos eventos S-2220 (ASO) e S-2240 (Condições Ambientais) ao eSocial.</li>
+  </ul>
+
+  <div class="doc-subsection">3.3 Responsável Técnico</div>
+  <div class="ficha-grid">
+    <div class="ficha-item"><div class="ficha-label">Médico Coordenador / Responsável Técnico</div><div class="ficha-value elab-responsavel">—</div></div>
+    <div class="ficha-item"><div class="ficha-label">Empresa Elaboradora</div><div class="ficha-value elab-nome-field">—</div></div>
+    <div class="ficha-item"><div class="ficha-label">CNPJ da Elaboradora</div><div class="ficha-value elab-cnpj-field" style="font-family:'IBM Plex Mono',monospace;">—</div></div>
+    <div class="ficha-item"><div class="ficha-label">Data de Elaboração</div><div class="ficha-value">${new Date().toLocaleDateString('pt-BR')}</div></div>
+  </div>
+
+  <div class="page-footer">
+    <span class="pf-label">PCMSO — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="pf-page"></span>
+  </div>`;
+  return pg;
+}
+
+function renderMatrizRiscos(){
+  const pg=document.createElement('div');pg.className='page';
+  // Monta matriz: por função → riscos do PGR → exames do PCMSO
+  const funcaoIds=[...new Set([...funcaoRiscos.map(fr=>fr.funcao_id),...funcao_exames.map(fe=>fe.funcao_id)])];
+  const linhas=funcaoIds.map(fid=>{
+    const funcao=funcoes.find(f=>f.id===fid);
+    if(!funcao)return'';
+    const riscosDaFuncao=funcaoRiscos.filter(fr=>fr.funcao_id===fid).map(fr=>{
+      const r=todosRiscos.find(x=>x.id===fr.risco_id);
+      const cat=r?categoriasRisco.find(c=>c.id===r.categoria_risco_id):null;
+      return r?{nome:r.nome_risco,cat:cat?.nome||'—'}:null;
+    }).filter(Boolean);
+    const examesDaFuncao=funcao_exames.filter(fe=>fe.funcao_id===fid).map(fe=>{
+      const cat=catalogo.find(c=>c.id===fe.exame_id);
+      return cat?{nome:cat.nome,periodicidade:fe.periodicidade||cat.periodicidade_padrao||'Anual'}:null;
+    }).filter(Boolean);
+    if(!riscosDaFuncao.length&&!examesDaFuncao.length)return'';
+    return`<tr>
+      <td style="font-weight:600;vertical-align:top;color:#062018;">${escHtml(funcao.nome_funcao)}</td>
+      <td style="vertical-align:top;font-size:8.5pt;">${riscosDaFuncao.length?riscosDaFuncao.map(r=>`<div style="margin-bottom:3pt;"><span style="background:#fff7ed;color:#9a3412;border:1pt solid #fed7aa;border-radius:3pt;padding:1pt 5pt;font-size:7.5pt;font-weight:600;">${escHtml(r.cat)}</span> ${escHtml(r.nome)}</div>`).join(''):'<span style="color:#6b7280;">—</span>'}</td>
+      <td style="vertical-align:top;font-size:8.5pt;">${examesDaFuncao.length?examesDaFuncao.map(e=>`<div style="margin-bottom:3pt;">${escHtml(e.nome)} <span style="background:#dbeafe;color:#1d4ed8;border-radius:3pt;padding:1pt 5pt;font-size:7pt;font-weight:600;">${escHtml(e.periodicidade)}</span></div>`).join(''):'<span style="color:#6b7280;">—</span>'}</td>
+    </tr>`;
+  }).filter(Boolean).join('');
+  pg.innerHTML=`
+  <div class="page-header">
+    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="ph-doc">PCMSO — ${fmtAno()}</span>
+  </div>
+  <div class="doc-section"><span class="num-secao">5</span>Matriz de Riscos × Exames</div>
+  <p class="doc-text" style="margin-bottom:10pt;">Relação entre os riscos ocupacionais identificados no PGR e os exames obrigatórios do PCMSO, fundamentando a indicação de cada procedimento médico conforme NR-07 subitem 7.2.</p>
+  ${!linhas?`<div class="em-breve"><div class="em-breve-icon">🔗</div><div class="em-breve-label">Vincule riscos às funções no módulo de Riscos e exames no módulo de Exames para gerar esta matriz automaticamente.</div></div>`
+  :`<table class="doc-table">
+    <thead><tr><th style="width:22%;">Função</th><th style="width:40%;">Riscos Identificados (PGR)</th><th>Exames Obrigatórios (PCMSO)</th></tr></thead>
+    <tbody>${linhas}</tbody>
+  </table>`}
+  <div class="page-footer">
+    <span class="pf-label">PCMSO — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="pf-page"></span>
+  </div>`;
+  return pg;
+}
+
+function renderCriteriosConduta(){
+  const pg=document.createElement('div');pg.className='page';
+  pg.innerHTML=`
+  <div class="page-header">
+    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="ph-doc">PCMSO — ${fmtAno()}</span>
+  </div>
+  <div class="doc-section"><span class="num-secao">7</span>Critérios de Aptidão e Conduta Médica</div>
+
+  <div class="doc-subsection">7.1 Critérios para Emissão do ASO</div>
+  <p class="doc-text" style="margin-bottom:8pt;">Conforme NR-07 subitem 7.4.4, o Atestado de Saúde Ocupacional — ASO deverá ser emitido em duas vias e conterá obrigatoriamente:</p>
+  <ul style="margin:0 0 10pt 16pt;font-size:9.5pt;color:#1f2937;line-height:1.8;">
+    <li>Nome completo, CPF, RG e função do trabalhador;</li>
+    <li>Riscos ocupacionais específicos existentes ou ausência de risco;</li>
+    <li>Indicação dos procedimentos médicos realizados com respectivos resultados;</li>
+    <li>Nome e CRM do médico coordenador e examinador;</li>
+    <li>Definição de <strong>APTO</strong> ou <strong>INAPTO</strong> para a função;</li>
+    <li>Data do próximo exame periódico.</li>
+  </ul>
+
+  <div class="doc-subsection">7.2 Definição de Aptidão</div>
+  <table class="doc-table">
+    <thead><tr><th style="width:20%;text-align:center;">Conclusão</th><th>Critérios</th><th style="width:30%;">Providências</th></tr></thead>
+    <tbody>
+      <tr>
+        <td style="text-align:center;"><span style="background:#dcfce7;color:#166534;border:1pt solid #86efac;border-radius:3pt;padding:3pt 10pt;font-weight:700;font-size:9.5pt;">✓ APTO</span></td>
+        <td style="font-size:9pt;">Trabalhador em condições de saúde compatíveis com a função e seus riscos, sem restrições.</td>
+        <td style="font-size:9pt;">Registro do ASO. Próximo exame conforme periodicidade.</td>
+      </tr>
+      <tr>
+        <td style="text-align:center;"><span style="background:#fee2e2;color:#991b1b;border:1pt solid #fca5a5;border-radius:3pt;padding:3pt 10pt;font-weight:700;font-size:9.5pt;">✗ INAPTO</span></td>
+        <td style="font-size:9pt;">Trabalhador com condição de saúde incompatível com a função e/ou seus riscos específicos.</td>
+        <td style="font-size:9pt;">Ver seção 7.3 — Conduta frente ao Inapto.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="doc-subsection" style="margin-top:14pt;">7.3 Conduta frente ao Trabalhador Inapto</div>
+  <p class="doc-text" style="margin-bottom:8pt;">Quando declarado inapto, o seguinte protocolo deve ser seguido:</p>
+  <div style="counter-reset:passo;">
+    ${[
+      ['Comunicação imediata','O médico comunica ao empregador e ao SESMT/SST o resultado, preservando o sigilo com o trabalhador.'],
+      ['Análise da causa','Verificar se a inaptidão é temporária (doença tratável) ou permanente (limitação definitiva).'],
+      ['Readaptação funcional','Avaliar possibilidade de realocar o trabalhador em função compatível com sua condição de saúde.'],
+      ['Afastamento','Se não houver função adequada, encaminhar para afastamento previdenciário (B-31 ou B-91) via INSS.'],
+      ['Acompanhamento','Manter monitoramento clínico. Reavaliação em prazo determinado pelo médico coordenador.'],
+      ['Registro','Toda a conduta deve ser documentada em prontuário individual e no sistema de gestão SST.'],
+    ].map(([t,d])=>`<div style="display:flex;gap:10pt;margin-bottom:8pt;align-items:flex-start;">
+      <span style="background:#062018;color:#fff;border-radius:50%;width:18pt;height:18pt;display:flex;align-items:center;justify-content:center;font-size:8pt;font-weight:700;flex-shrink:0;margin-top:1pt;">${[].indexOf.call([].indexOf,t)+1||['Comunicação imediata','Análise da causa','Readaptação funcional','Afastamento','Acompanhamento','Registro'].indexOf(t)+1}</span>
+      <div><div style="font-size:9.5pt;font-weight:600;color:#062018;margin-bottom:2pt;">${escHtml(t)}</div><div style="font-size:9pt;color:#374151;">${escHtml(d)}</div></div>
+    </div>`).join('')}
+  </div>
+
+  <div class="page-footer">
+    <span class="pf-label">PCMSO — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="pf-page"></span>
+  </div>`;
+  return pg;
+}
+
+function renderSigiloFinal(){
+  const pg=document.createElement('div');pg.className='page';
+  pg.innerHTML=`
+  <div class="page-header">
+    <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="ph-doc">PCMSO — ${fmtAno()}</span>
+  </div>
+  <div class="doc-section"><span class="num-secao">8</span>Sigilo Médico e Proteção de Dados</div>
+
+  <div class="doc-subsection">8.1 Sigilo Médico</div>
+  <p class="doc-text" style="margin-bottom:8pt;">Em conformidade com o Código de Ética Médica e a NR-07, as informações de saúde dos trabalhadores são estritamente confidenciais:</p>
+  <ul style="margin:0 0 10pt 16pt;font-size:9.5pt;color:#1f2937;line-height:1.8;">
+    <li>Os prontuários médicos são de uso exclusivo do médico coordenador e equipe de saúde;</li>
+    <li>O empregador tem acesso <strong>apenas à conclusão do ASO</strong> (Apto/Inapto), não ao diagnóstico;</li>
+    <li>A empresa não pode obrigar o trabalhador a revelar diagnósticos ou tratamentos;</li>
+    <li>Resultados de exames são comunicados diretamente ao trabalhador pelo médico examinador.</li>
+  </ul>
+
+  <div class="doc-subsection">8.2 Proteção de Dados — LGPD (Lei 13.709/2018)</div>
+  <p class="doc-text" style="margin-bottom:8pt;">Os dados de saúde são classificados como <strong>dados pessoais sensíveis</strong> pela LGPD (Art. 5º, II e Art. 11). Esta empresa adota as seguintes medidas:</p>
+  <table class="doc-table">
+    <thead><tr><th style="width:30%;">Medida</th><th>Descrição</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:500;">Base legal</td><td>Tratamento fundamentado no cumprimento de obrigação legal (NR-07/CLT) — Art. 11, II, a da LGPD</td></tr>
+      <tr><td style="font-weight:500;">Finalidade</td><td>Dados coletados exclusivamente para fins de saúde ocupacional e cumprimento da NR-07</td></tr>
+      <tr><td style="font-weight:500;">Acesso restrito</td><td>Apenas médico coordenador e técnicos de SST autorizados têm acesso aos registros</td></tr>
+      <tr><td style="font-weight:500;">Retenção</td><td>Prontuários e ASOs mantidos por mínimo de 20 anos conforme NR-07 subitem 7.4.5</td></tr>
+      <tr><td style="font-weight:500;">Segurança</td><td>Dados armazenados em sistema com controle de acesso e isolamento por empresa</td></tr>
+    </tbody>
+  </table>
+
+  <div class="doc-section" style="margin-top:16pt;"><span class="num-secao">9</span>Disposições Finais</div>
+  <p class="doc-text">Conforme a NR-7, este PCMSO deverá ser revisado:</p>
+  <ul style="margin:8pt 0 8pt 16pt;font-size:9.5pt;color:#1f2937;line-height:1.8;">
+    <li><strong>Anualmente</strong> — revisão periódica obrigatória;</li>
+    <li>Após <strong>alteração nos processos produtivos</strong> ou nos riscos ocupacionais;</li>
+    <li>Após <strong>acidente de trabalho grave, fatal</strong> ou surto de doença ocupacional;</li>
+    <li>Quando houver <strong>mudança significativa no quadro de funcionários</strong>;</li>
+    <li>Quando determinado pelo <strong>Médico Coordenador</strong> ou por <strong>Auditor Fiscal do Trabalho</strong>.</li>
+  </ul>
+  <p class="doc-text" style="margin-top:8pt;">Os resultados dos exames deverão ser comunicados ao trabalhador por meio do ASO, conforme NR-07. Este documento deverá ser mantido em local acessível para fiscalização, pelo período mínimo de 20 anos.</p>
+
+  <div style="margin-top:28pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20pt;">
+    ${['Médico Coordenador / RT','Representante da empresa','Técnico de SST'].map(label=>`
+    <div style="text-align:center;">
+      <div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:36pt;">
+        <div style="font-size:8pt;color:#6b7280;">${label}</div>
+        <div style="font-size:8pt;color:#6b7280;margin-top:2pt;">Data: ___/___/______</div>
+      </div>
+    </div>`).join('')}
+  </div>
+
+  <div class="page-footer">
+    <span class="pf-label">PCMSO — ${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
+    <span class="pf-page"></span>
+  </div>`;
+  return pg;
+}
+
 function renderProgramaExames(){
   const pg=document.createElement('div');pg.className='page';
   // Consolida exames por setor
@@ -440,6 +665,7 @@ function renderProgramaExames(){
     <span class="ph-doc">PCMSO — ${fmtAno()}</span>
   </div>
   <div class="doc-section"><span class="num-secao">4</span>Programa de Exames Ocupacionais</div>
+  <p class="doc-text" style="margin-bottom:10pt;">Exames definidos com base nos riscos ocupacionais identificados no PGR, nas exigências da NR-07 e nas Normas Regulamentadoras aplicáveis a cada função.</p>
   <p class="doc-text" style="margin-bottom:12pt;">Os exames a seguir foram definidos com base nos riscos ocupacionais identificados, nas exigências legais da NR-7 e nas Normas Regulamentadoras aplicáveis a cada função e setor de trabalho.</p>
   ${!totalExames?`
     <div class="em-breve">
@@ -545,7 +771,7 @@ function renderCronograma(){
     <span class="ph-empresa">${escHtml(empresa.nome_fantasia||empresa.razao_social)}</span>
     <span class="ph-doc">PCMSO — ${fmtAno()}</span>
   </div>
-  <div class="doc-section"><span class="num-secao">5</span>Cronograma Anual de Exames</div>
+  <div class="doc-section"><span class="num-secao">6</span>Cronograma Anual de Exames</div>
   <p class="doc-text" style="margin-bottom:10pt;">Planejamento dos exames ocupacionais por função, gerado a partir do Plano de Ação e sincronizado com o PGR.</p>
   ${calendarioHtml}
   ${listaExames.length?`
