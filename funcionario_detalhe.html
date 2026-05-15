@@ -556,8 +556,9 @@ async function buscarDadosCPF(){
     const d=await res.json();
     const nome=document.getElementById('nome_completo');
     const nasc=document.getElementById('data_nascimento');
-    const nomeVal=d.name||d.nome||d.nome_completo||'';
-    const nascVal=d.birthDate||d.data_nascimento||d.nascimento||'';
+    const dd=d.data||d;
+    const nomeVal=dd.name||dd.nome||dd.nome_completo||'';
+    const nascVal=dd.birthDate||dd.birth_date||dd.data_nascimento||dd.nascimento||'';
     if(nome&&nomeVal){nome.value=nomeVal;nome.style.borderColor='var(--accent2)';}
     if(nasc&&nascVal){
       let dt=nascVal;
