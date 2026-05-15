@@ -1631,6 +1631,7 @@ async function toggleHier(srId,nivel,checked){
     const lista=contexto==='setor'?riscosSetor:riscosFuncao;
     const sr=lista.find(x=>x.id===srId);
     if(sr){sr[checkCampo]=checked;if(!checked)sr[descCampo]=null;}
+    if(!checked)await removerAcaoMedida(srId,nivel);
     // Propaga para funcao_riscos se contexto for setor
     if(contexto==='setor'){
       await fetch(
@@ -1684,50 +1685,68 @@ async function salvarMedida(srId,nivel,valor){
         {method:'PATCH',headers:h2(),body:JSON.stringify(updates)}
       );
     }
-    if(valor&&valor.trim()&&checked)await criarAcaoFromMedida(srId,nivel,valor.trim());
+    if(valor&&valor.trim()&&checked)await upsertAcaoMedida(srId,nivel,valor.trim());
+    else if(!valor||!valor.trim())await removerAcaoMedida(srId,nivel);
   }catch(e){console.error(e);}
 }
 
-async function criarAcaoFromMedida(srId,nivel,descricao){
+async function upsertAcaoMedida(srId,nivel,descricao){
   try{
     const lista=contexto==='setor'?riscosSetor:riscosFuncao;
     const sr=lista.find(x=>x.id===srId);
     const risco=sr?todosRiscos.find(r=>r.id===sr.risco_id):null;
     const nomeRisco=risco?.nome_risco||'Risco';
     const nomeNivel={elim:'Eliminação',subs:'Substituição',eng:'Engenharia',adm:'Administrativo',epi:'EPI'}[nivel]||nivel;
+    const ref=`[ref:${srId}-${nivel}]`;
     const titulo=`[${nomeNivel}] ${descricao.length>80?descricao.slice(0,80)+'…':descricao}`.trim();
+    const descricaoCompleta=`${ref} Medida de controle (${nomeNivel}) para o risco: ${nomeRisco}`;
 
-    // Verifica se já existe ação com mesmo título para esta empresa
+    // Busca ação existente pela referência única srId-nivel
     const resCheck=await fetch(
-      `${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&titulo=eq.${encodeURIComponent(titulo)}&ativo=eq.true&select=id&limit=1`,
+      `${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&descricao=like.${encodeURIComponent(ref+'%')}&ativo=eq.true&select=id&limit=1`,
       {headers:h2()}
     );
     const existente=await resCheck.json();
 
     if(existente.length){
-      // Já existe — só atualiza o timestamp
+      // Já existe — atualiza com o novo texto da medida
       await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${existente[0].id}`,{
         method:'PATCH',headers:h2(),
-        body:JSON.stringify({atualizado_em:new Date().toISOString()})
+        body:JSON.stringify({titulo,descricao:descricaoCompleta,atualizado_em:new Date().toISOString()})
       });
-      return;
+    }else{
+      // Não existe — cria nova
+      await fetch(`${SUPA_URL}/rest/v1/acoes`,{
+        method:'POST',headers:{...h2(),'Prefer':'return=representation'},
+        body:JSON.stringify({
+          empresa_id:parseInt(empresaId),titulo,descricao:descricaoCompleta,
+          origem:'Gestão de Riscos',
+          prioridade:risco?.gut_total>=12?'Alta':risco?.gut_total>=6?'Média':'Baixa',
+          setor_id:contexto==='setor'?setorAtivo?.id:null,
+          funcao_id:contexto==='funcao'?funcaoAtiva?.id:null,
+          status:'Pendente',ativo:true
+        })
+      });
+      toast('Ação criada na Central de Ações',`acoes.html?empresa_id=${empresaId}`);
     }
+  }catch(e){console.error('Erro ao salvar ação:',e);}
+}
 
-    // Não existe — cria nova
-    await fetch(`${SUPA_URL}/rest/v1/acoes`,{
-      method:'POST',headers:{...h2(),'Prefer':'return=representation'},
-      body:JSON.stringify({
-        empresa_id:parseInt(empresaId),titulo,
-        descricao:`Medida de controle (${nomeNivel}) para o risco: ${nomeRisco}`,
-        origem:'Gestão de Riscos',
-        prioridade:risco?.gut_total>=12?'Alta':risco?.gut_total>=6?'Média':'Baixa',
-        setor_id:contexto==='setor'?setorAtivo?.id:null,
-        funcao_id:contexto==='funcao'?funcaoAtiva?.id:null,
-        status:'Pendente',ativo:true
-      })
-    });
-    toast('Ação criada na Central de Ações',`acoes.html?empresa_id=${empresaId}`);
-  }catch(e){console.error('Erro ao criar ação:',e);}
+async function removerAcaoMedida(srId,nivel){
+  try{
+    const ref=`[ref:${srId}-${nivel}]`;
+    const res=await fetch(
+      `${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&descricao=like.${encodeURIComponent(ref+'%')}&ativo=eq.true&select=id`,
+      {headers:h2()}
+    );
+    const acoes=await res.json();
+    for(const a of acoes){
+      await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${a.id}`,{
+        method:'PATCH',headers:h2(),
+        body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})
+      });
+    }
+  }catch(e){console.error('Erro ao remover ação:',e);}
 }
 
 // ── EPIs ───────────────────────────────────────────────────────
