@@ -879,7 +879,7 @@ function renderFuncionarios(funcionarios){
 }
 
 document.addEventListener('click',e=>{
-  if(!document.getElementById('menu-modulos')?.contains(e.target))document.getElementById('dropdown-modulos').style.display='none';
+  const ddMod=document.getElementById('dropdown-modulos');if(ddMod&&!document.getElementById('menu-modulos')?.contains(e.target))ddMod.style.display='none';
   if(!e.target.closest('.cbo-wrap'))document.getElementById('cbo-dropdown')?.classList.remove('show');
 });
 ['modal-setor','modal-funcao'].forEach(id=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this){if(id==='modal-setor')fecharModalSetor();else fecharModalFuncao();}});});
