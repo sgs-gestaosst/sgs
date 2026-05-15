@@ -23,7 +23,7 @@
   document.head.appendChild(style);
 })();
 
-const _GROQ_KEY='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';
+const _GROQ_KEY='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';
 const _GROQ_URL='https://api.groq.com/openai/v1/chat/completions';
 
 async function _chamarGemini(prompt){
