@@ -889,6 +889,9 @@ function renderRiscoCard(sr){
         <label style="display:flex;align-items:center;gap:4px;">Nível residual
           <span title="Nível do risco APÓS aplicar as medidas de controle (EPC, EPI, treinamentos). Se eficazes, deve ser menor que o nível bruto (P×S). Campo opcional — não interfere no PGR se deixado em branco." style="width:14px;height:14px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);font-size:9px;color:var(--text2);cursor:help;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">?</span>
         </label>
+        <div id="nivel-bruto-ref-${sr.id}" style="font-size:10px;color:var(--text3);margin-bottom:4px;">
+          Nível bruto (P×S): ${(()=>{const n=calcularNivel(sr.probabilidade,sr.severidade);return n?`<span class="nivel-badge nivel-${n}" style="font-size:9px;padding:1px 6px;">${nivelLabel(n)}</span>`:'<span style="color:var(--text3);">—</span>';})()}
+        </div>
         <select onchange="salvarNivelResidual(${sr.id},this.value)" id="resid-${sr.id}" style="border-color:${sr.nivel_risco_residual?'var(--accent2)':'var(--border)'};">
           <option value="">— Não avaliado —</option>
           ${['BAIXO','MEDIO','ALTO','MUITO-ALTO'].map(n=>`<option value="${n}" ${sr.nivel_risco_residual===n?'selected':''}>${nivelLabel(n)}</option>`).join('')}
@@ -1585,7 +1588,7 @@ async function atualizarAvaliacao(srId,el,campo){
     const lista=contexto==='setor'?riscosSetor:riscosFuncao;
     const sr=lista.find(x=>x.id===srId);
     if(sr){sr[campo]=val;if(nivel!==undefined)sr.nivel_risco=nivel;}
-    // Atualiza badge visual
+    // Atualiza badge visual e referência de nível bruto
     if(nivel!==undefined){
       const card=document.getElementById(`risco-card-${srId}`);
       const badgeEl=card?.querySelector('.nivel-badge');
@@ -1593,6 +1596,8 @@ async function atualizarAvaliacao(srId,el,campo){
         badgeEl.className=`nivel-badge nivel-${nivel||'BAIXO'}`;
         badgeEl.textContent=nivelLabel(nivel||'');
       }
+      const refEl=document.getElementById(`nivel-bruto-ref-${srId}`);
+      if(refEl)refEl.innerHTML=`Nível bruto (P×S): ${nivel?`<span class="nivel-badge nivel-${nivel}" style="font-size:9px;padding:1px 6px;">${nivelLabel(nivel)}</span>`:'<span style="color:var(--text3);">—</span>'}`;
     }
     // Propaga para funcao_riscos se estiver no contexto setor
     if(contexto==='setor'){
