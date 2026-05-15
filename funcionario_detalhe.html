@@ -374,8 +374,8 @@ function renderCamposPessoal(){
   document.getElementById('campos-pessoal').innerHTML=`
     <div class="section-label">Identificação</div>
     <div class="grid-2">
-      ${campo('nome_completo','Nome completo',f.nome_completo,'text',null,true)}
       ${campo('cpf','CPF',fmtCPF(f.cpf),'text')}
+      ${campo('nome_completo','Nome completo',f.nome_completo,'text',null,true)}
     </div>
     <div class="grid-3">
       ${campo('rg','RG',f.rg,'text')}
@@ -556,11 +556,12 @@ async function buscarDadosCPF(){
     const d=await res.json();
     const nome=document.getElementById('nome_completo');
     const nasc=document.getElementById('data_nascimento');
-    if(nome&&d.nome){nome.value=d.nome;nome.style.borderColor='var(--accent2)';}
-    if(nasc&&d.data_nascimento){
-      // Converte DD/MM/YYYY → YYYY-MM-DD se necessário
-      let dt=d.data_nascimento;
-      if(dt&&dt.includes('/')){ const p=dt.split('/');dt=`${p[2]}-${p[1]}-${p[0]}`; }
+    const nomeVal=d.name||d.nome||d.nome_completo||'';
+    const nascVal=d.birthDate||d.data_nascimento||d.nascimento||'';
+    if(nome&&nomeVal){nome.value=nomeVal;nome.style.borderColor='var(--accent2)';}
+    if(nasc&&nascVal){
+      let dt=nascVal;
+      if(dt.includes('/')){const p=dt.split('/');dt=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;}
       nasc.value=dt;nasc.style.borderColor='var(--accent2)';
     }
     st.className='status-bar success show';
