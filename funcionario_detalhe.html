@@ -268,6 +268,7 @@
 <script>
 const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const CPFHUB_KEY='adb319e8e79e915f9636cbc28d45334e6f2955159dd3870af01691ece40a9b9e';
 const token=localStorage.getItem('sgs_token');
 if(!token)window.location.href='login.html';
 
@@ -526,7 +527,7 @@ function filtrarSetoresPorFuncao(){
   if(funcaoId&&setoresVinculados.length&&!setoresVinculados.includes(parseInt(valAtual)))setorSel.value='';
 }
 
-// ── MÁSCARAS ──────────────────────────────────────────
+// ── MÁSCARAS + LOOKUP CPF ─────────────────────────────
 function aplicarMascaras(){
   const cpf=document.getElementById('cpf');
   if(cpf){
@@ -537,6 +538,38 @@ function aplicarMascaras(){
       else if(v.length>3)v=v.slice(0,3)+'.'+v.slice(3);
       this.value=v;
     });
+    cpf.addEventListener('blur',buscarDadosCPF);
+  }
+}
+
+async function buscarDadosCPF(){
+  const cpfEl=document.getElementById('cpf');
+  if(!cpfEl)return;
+  const cpf=cpfEl.value.replace(/\D/g,'');
+  if(cpf.length!==11)return;
+  const st=document.getElementById('status-hero');
+  st.className='status-bar info show';
+  st.innerHTML='<span class="spinner spinner-w show"></span> Buscando dados na Receita Federal...';
+  try{
+    const res=await fetch(`https://api.cpfhub.io/cpf/${cpf}`,{headers:{'x-api-key':CPFHUB_KEY}});
+    if(!res.ok)throw new Error('não encontrado');
+    const d=await res.json();
+    const nome=document.getElementById('nome_completo');
+    const nasc=document.getElementById('data_nascimento');
+    if(nome&&d.nome){nome.value=d.nome;nome.style.borderColor='var(--accent2)';}
+    if(nasc&&d.data_nascimento){
+      // Converte DD/MM/YYYY → YYYY-MM-DD se necessário
+      let dt=d.data_nascimento;
+      if(dt&&dt.includes('/')){ const p=dt.split('/');dt=`${p[2]}-${p[1]}-${p[0]}`; }
+      nasc.value=dt;nasc.style.borderColor='var(--accent2)';
+    }
+    st.className='status-bar success show';
+    st.innerHTML='✓ Nome e nascimento preenchidos pela Receita Federal — edite se necessário';
+    setTimeout(()=>{st.className='status-bar';if(nome)nome.style.borderColor='';if(nasc)nasc.style.borderColor='';},5000);
+  }catch(e){
+    st.className='status-bar error show';
+    st.innerHTML='⚠ CPF não encontrado na Receita Federal — preencha os dados manualmente';
+    setTimeout(()=>st.className='status-bar',4000);
   }
 }
 
@@ -550,21 +583,27 @@ function aplicarMascaraCEP(){
     });
     cep.addEventListener('blur',async function(){
       const v=this.value.replace(/\D/g,'');
-      if(v.length===8){
-        try{
-          const res=await fetch(`https://viacep.com.br/ws/${v}/json/`);
-          const d=await res.json();
-          if(!d.erro){
-            const log=document.getElementById('logradouro');
-            const bairro=document.getElementById('bairro');
-            const cidade=document.getElementById('cidade');
-            const estado=document.getElementById('estado');
-            if(log&&!log.value)log.value=d.logradouro||'';
-            if(bairro&&!bairro.value)bairro.value=d.bairro||'';
-            if(cidade&&!cidade.value)cidade.value=d.localidade||'';
-            if(estado)estado.value=d.uf||'';
-          }
-        }catch(e){}
+      if(v.length!==8)return;
+      const st=document.getElementById('status-hero');
+      st.className='status-bar info show';
+      st.innerHTML='<span class="spinner spinner-w show"></span> Buscando endereço...';
+      try{
+        const res=await fetch(`https://viacep.com.br/ws/${v}/json/`);
+        const d=await res.json();
+        if(d.erro)throw new Error('CEP não encontrado');
+        const q=id=>{const el=document.getElementById(id);if(el)el.style.borderColor='var(--accent2)';return el;};
+        const log=q('logradouro');const bairro=q('bairro');const cidade=q('cidade');const estado=document.getElementById('estado');
+        if(log)log.value=d.logradouro||'';
+        if(bairro)bairro.value=d.bairro||'';
+        if(cidade)cidade.value=d.localidade||'';
+        if(estado)estado.value=d.uf||'';
+        st.className='status-bar success show';
+        st.innerHTML='✓ Endereço preenchido pelo ViaCEP — edite se necessário';
+        setTimeout(()=>{st.className='status-bar';['logradouro','bairro','cidade'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor='';});},5000);
+      }catch(e){
+        st.className='status-bar error show';
+        st.innerHTML='⚠ CEP não encontrado — preencha o endereço manualmente';
+        setTimeout(()=>st.className='status-bar',4000);
       }
     });
   }
