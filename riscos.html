@@ -1023,15 +1023,18 @@ function renderHierarquia(sr,riscoNome,catNome){
               ${(sr.epis||[]).map(e=>{
                 const nome=e.epi_nome||(todosEpis.find(x=>x.id===e.epi_id)?.nome)||'EPI';
                 const valDisp=e.validade_ca?new Date(e.validade_ca+'T00:00:00').toLocaleDateString('pt-BR'):'';
-                const tagId=`epitag-${sr.id}-${e.epi_id||e.id}`;
-                return`<div class="epi-tag" id="${tagId}">
+                const epiId=e.epi_id||e.id;
+                const tagId=`epitag-${sr.id}-${epiId}`;
+                return`<div class="epi-tag" id="${tagId}" data-nome="${h(nome)}" data-ca="${h(e.ca||'')}" data-validade="${e.validade_ca||''}">
                   <span class="epi-tag-nome">🛡 ${h(nome)}</span>
                   ${e.ca?`<span class="epi-tag-ca">CA:${h(e.ca)}</span>`:''}
                   ${valDisp?`<span class="epi-tag-ca">Val:${valDisp}</span>`:''}
-                  <button onclick="removerEPITag('${tagId}',${sr.id},${e.epi_id||'null'})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;" title="Remover">✕</button>
+                  <button onclick="abrirEditarEPI(${sr.id},${epiId})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;padding:0 2px;line-height:1;opacity:.7;" title="Editar CA e validade">✏️</button>
+                  <button onclick="removerEPITag('${tagId}',${sr.id},${e.epi_id||'null'})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 2px;line-height:1;" title="Remover">✕</button>
                 </div>`;
               }).join('')}
             </div>
+            <div id="epi-edit-${sr.id}" style="display:none;"></div>
           </div>
         </div>
       </div>`;
@@ -1805,14 +1808,84 @@ async function adicionarEPIsIASugeridos(srId){
     if(!document.getElementById(tagKey)){
       const tag=document.createElement('div');
       tag.id=tagKey;tag.className='epi-tag';
+      tag.dataset.nome=epiNome;tag.dataset.ca='';tag.dataset.validade='';
       tag.innerHTML=`<span class="epi-tag-nome">🛡 ${h(epiNome)}</span>
-        <button onclick="removerEPITag('${tagKey}',${srId},${epiId})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;" title="Remover">✕</button>`;
+        <button onclick="abrirEditarEPI(${srId},${epiId})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;padding:0 2px;line-height:1;opacity:.7;" title="Editar CA e validade">✏️</button>
+        <button onclick="removerEPITag('${tagKey}',${srId},${epiId})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 2px;line-height:1;" title="Remover">✕</button>`;
       lista?.appendChild(tag);
     }
     await _salvarEPISimples(srId,epiId,epiNome);
   }
   area.innerHTML='<div style="font-size:11px;color:var(--accent2);padding:6px 0;">✓ EPIs adicionados!</div>';
   setTimeout(()=>{if(area)area.innerHTML='';},2500);
+}
+
+function abrirEditarEPI(srId,epiId){
+  const area=document.getElementById(`epi-edit-${srId}`);
+  if(!area)return;
+  if(area.style.display!=='none'&&area.dataset.editEpiId==epiId){area.style.display='none';return;}
+  const tag=document.getElementById(`epitag-${srId}-${epiId}`);
+  const nome=tag?.dataset.nome||'EPI';
+  const caAtual=tag?.dataset.ca||'';
+  const valAtual=tag?.dataset.validade||'';
+  area.dataset.editEpiId=epiId;
+  area.style.display='block';
+  const linkHtml=caAtual?`<a href="https://consultaca.com/${caAtual}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);text-decoration:none;">🔗 Verificar CA ${caAtual} no ConsultaCA</a>`:'';
+  area.innerHTML=`
+    <div style="background:var(--surface);border:1px solid var(--border-focus);border-radius:var(--radius);padding:10px 12px;margin-top:6px;">
+      <div style="font-size:11px;color:var(--accent2);font-weight:500;margin-bottom:10px;">✏️ Editar: ${h(nome)}</div>
+      <div style="margin-bottom:8px;">
+        <label style="display:block;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Nº do CA</label>
+        <input type="text" id="edit-ca-${srId}" value="${caAtual}" placeholder="Ex: 12345"
+          oninput="atualizarLinkCA(${srId})"
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:7px 10px;outline:none;margin-bottom:4px;">
+        <div id="edit-ca-link-${srId}">${linkHtml}</div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="display:block;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Validade do CA</label>
+        <input type="date" id="edit-val-${srId}" value="${valAtual}"
+          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:7px 10px;outline:none;">
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="salvarEdicaoEPI(${srId},${epiId})" style="flex:1;padding:7px;background:var(--accent);border:none;border-radius:var(--radius);color:#fff;font-size:12px;cursor:pointer;font-weight:500;">Salvar</button>
+        <button onclick="document.getElementById('epi-edit-${srId}').style.display='none'" style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer;">Cancelar</button>
+      </div>
+    </div>`;
+}
+
+function atualizarLinkCA(srId){
+  const ca=(document.getElementById(`edit-ca-${srId}`)?.value||'').trim().replace(/\D/g,'');
+  const div=document.getElementById(`edit-ca-link-${srId}`);
+  if(div)div.innerHTML=ca?`<a href="https://consultaca.com/${ca}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);text-decoration:none;">🔗 Verificar CA ${ca} no ConsultaCA</a>`:'';
+}
+
+async function salvarEdicaoEPI(srId,epiId){
+  const ca=(document.getElementById(`edit-ca-${srId}`)?.value||'').trim()||null;
+  const validade=document.getElementById(`edit-val-${srId}`)?.value||null;
+  const tabela=contexto==='setor'?'setor_risco_medidas':'funcao_risco_medidas';
+  const campo=contexto==='setor'?'setor_risco_id':'funcao_risco_id';
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/${tabela}?${campo}=eq.${srId}&epi_id=eq.${epiId}&nivel=eq.EPI&ativo=eq.true`,{
+      method:'PATCH',headers:h2(),
+      body:JSON.stringify({ca:ca||null,validade_ca:validade||null,atualizado_em:new Date().toISOString()})
+    });
+    // Atualiza tag no DOM
+    const tagId=`epitag-${srId}-${epiId}`;
+    const tag=document.getElementById(tagId);
+    if(tag){
+      const nome=tag.dataset.nome||'EPI';
+      tag.dataset.ca=ca||'';
+      tag.dataset.validade=validade||'';
+      const valDisp=validade?new Date(validade+'T00:00:00').toLocaleDateString('pt-BR'):'';
+      tag.innerHTML=`<span class="epi-tag-nome">🛡 ${h(nome)}</span>
+        ${ca?`<span class="epi-tag-ca">CA:${h(ca)}</span>`:''}
+        ${valDisp?`<span class="epi-tag-ca">Val:${valDisp}</span>`:''}
+        <button onclick="abrirEditarEPI(${srId},${epiId})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;padding:0 2px;line-height:1;opacity:.7;" title="Editar CA e validade">✏️</button>
+        <button onclick="removerEPITag('${tagId}',${srId},${epiId})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 2px;line-height:1;" title="Remover">✕</button>`;
+    }
+    document.getElementById(`epi-edit-${srId}`).style.display='none';
+    toast('EPI atualizado!');
+  }catch(e){console.error('Erro ao salvar EPI:',e);}
 }
 
 async function _salvarEPISimples(srId,epiId,epiNome){
@@ -1984,10 +2057,12 @@ async function adicionarEPI(srId){
   if(!document.getElementById(tagKey)){
     const tag=document.createElement('div');
     tag.id=tagKey;tag.className='epi-tag';
+    tag.dataset.nome=nome;tag.dataset.ca=ca||'';tag.dataset.validade=validadeISO||'';
     tag.innerHTML=`<span class="epi-tag-nome">🛡 ${h(nome)}</span>
       ${ca?`<span class="epi-tag-ca">CA:${h(ca)}</span>`:''}
       ${validadeDisplay?`<span class="epi-tag-ca">Val:${validadeDisplay}</span>`:''}
-      <button onclick="removerEPITag('${tagKey}',${srId},${epiId||'null'})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;" title="Remover">✕</button>`;
+      <button onclick="abrirEditarEPI(${srId},${epiId||'null'})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:10px;padding:0 2px;line-height:1;opacity:.7;" title="Editar CA e validade">✏️</button>
+      <button onclick="removerEPITag('${tagKey}',${srId},${epiId||'null'})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 2px;line-height:1;" title="Remover">✕</button>`;
     lista.appendChild(tag);
   }
 
