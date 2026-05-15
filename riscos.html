@@ -1831,24 +1831,27 @@ function abrirEditarEPI(srId,epiId){
   area.dataset.editEpiId=epiId;
   area.style.display='block';
   const linkHtml=caAtual?`<a href="https://consultaca.com/${caAtual}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);text-decoration:none;">🔗 Verificar CA ${caAtual} no ConsultaCA</a>`:'';
+  const linkInicial=caAtual?`<a href="https://consultaca.com/${caAtual}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);text-decoration:none;">🔗 Verificar CA ${caAtual} no ConsultaCA</a>`:`<span style="font-size:11px;color:var(--text3);">🔗 Digite o CA para verificar</span>`;
   area.innerHTML=`
-    <div style="background:var(--surface);border:1px solid var(--border-focus);border-radius:var(--radius);padding:10px 12px;margin-top:6px;">
-      <div style="font-size:11px;color:var(--accent2);font-weight:500;margin-bottom:10px;">✏️ Editar: ${h(nome)}</div>
-      <div style="margin-bottom:8px;">
-        <label style="display:block;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Nº do CA</label>
-        <input type="text" id="edit-ca-${srId}" value="${caAtual}" placeholder="Ex: 12345"
-          oninput="atualizarLinkCA(${srId})"
-          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:7px 10px;outline:none;margin-bottom:4px;">
-        <div id="edit-ca-link-${srId}">${linkHtml}</div>
+    <div style="background:var(--surface);border:1px solid var(--border-focus);border-radius:var(--radius);padding:8px 10px;margin-top:6px;">
+      <div style="font-size:11px;color:var(--accent2);font-weight:500;margin-bottom:8px;">✏️ ${h(nome)}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
+        <div>
+          <label style="display:block;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Nº CA</label>
+          <input type="text" id="edit-ca-${srId}" value="${caAtual}" placeholder="Ex: 12345"
+            oninput="atualizarLinkCA(${srId})"
+            style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 8px;outline:none;">
+        </div>
+        <div>
+          <label style="display:block;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Validade</label>
+          <input type="date" id="edit-val-${srId}" value="${valAtual}"
+            style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;padding:5px 8px;outline:none;">
+        </div>
       </div>
-      <div style="margin-bottom:10px;">
-        <label style="display:block;font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Validade do CA</label>
-        <input type="date" id="edit-val-${srId}" value="${valAtual}"
-          style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;padding:7px 10px;outline:none;">
-      </div>
+      <div id="edit-ca-link-${srId}" style="margin-bottom:8px;">${linkInicial}</div>
       <div style="display:flex;gap:6px;">
-        <button onclick="salvarEdicaoEPI(${srId},${epiId})" style="flex:1;padding:7px;background:var(--accent);border:none;border-radius:var(--radius);color:#fff;font-size:12px;cursor:pointer;font-weight:500;">Salvar</button>
-        <button onclick="document.getElementById('epi-edit-${srId}').style.display='none'" style="padding:7px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer;">Cancelar</button>
+        <button onclick="salvarEdicaoEPI(${srId},${epiId})" style="flex:1;padding:5px 10px;background:var(--accent);border:none;border-radius:var(--radius);color:#fff;font-size:12px;cursor:pointer;font-weight:500;">Salvar</button>
+        <button onclick="document.getElementById('epi-edit-${srId}').style.display='none'" style="padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer;">Cancelar</button>
       </div>
     </div>`;
 }
@@ -1856,7 +1859,9 @@ function abrirEditarEPI(srId,epiId){
 function atualizarLinkCA(srId){
   const ca=(document.getElementById(`edit-ca-${srId}`)?.value||'').trim().replace(/\D/g,'');
   const div=document.getElementById(`edit-ca-link-${srId}`);
-  if(div)div.innerHTML=ca?`<a href="https://consultaca.com/${ca}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);text-decoration:none;">🔗 Verificar CA ${ca} no ConsultaCA</a>`:'';
+  if(div)div.innerHTML=ca
+    ?`<a href="https://consultaca.com/${ca}" target="_blank" rel="noopener" style="font-size:11px;color:var(--accent);text-decoration:none;">🔗 Verificar CA ${ca} no ConsultaCA</a>`
+    :`<span style="font-size:11px;color:var(--text3);">🔗 Digite o CA para verificar</span>`;
 }
 
 async function salvarEdicaoEPI(srId,epiId){
