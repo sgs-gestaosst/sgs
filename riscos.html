@@ -886,7 +886,9 @@ function renderRiscoCard(sr){
         <input type="number" min="0" value="${sr.num_expostos||''}" placeholder="0" onchange="atualizarAvaliacao(${sr.id},this,'num_expostos')" id="exp-${sr.id}">
       </div>
       <div class="aval-field">
-        <label title="Nível de risco após aplicação das medidas de controle">Nível residual</label>
+        <label style="display:flex;align-items:center;gap:4px;">Nível residual
+          <span title="Nível do risco APÓS aplicar as medidas de controle (EPC, EPI, treinamentos). Se eficazes, deve ser menor que o nível bruto (P×S). Campo opcional — não interfere no PGR se deixado em branco." style="width:14px;height:14px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);font-size:9px;color:var(--text2);cursor:help;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">?</span>
+        </label>
         <select onchange="salvarNivelResidual(${sr.id},this.value)" id="resid-${sr.id}" style="border-color:${sr.nivel_risco_residual?'var(--accent2)':'var(--border)'};">
           <option value="">— Não avaliado —</option>
           ${['BAIXO','MEDIO','ALTO','MUITO-ALTO'].map(n=>`<option value="${n}" ${sr.nivel_risco_residual===n?'selected':''}>${nivelLabel(n)}</option>`).join('')}
@@ -1458,7 +1460,7 @@ async function confirmarAdicionarRiscos(){
         // Insere no setor_riscos
         const res=await fetch(`${SUPA_URL}/rest/v1/setor_riscos`,{
           method:'POST',headers:{...h2(),'Prefer':'return=representation'},
-          body:JSON.stringify({setor_id:setorAtivo.id,risco_id:riscoId,perigo_id:perigoSelecionado?.id||null,ativo:true})
+          body:JSON.stringify({setor_id:setorAtivo.id,risco_id:riscoId,perigo_id:perigoSelecionado?.id||null,probabilidade:1,severidade:1,nivel_risco:'BAIXO',ativo:true})
         });
         if(!res.ok)throw new Error('Erro ao adicionar risco ao setor');
         const data=await res.json();
@@ -1473,6 +1475,7 @@ async function confirmarAdicionarRiscos(){
           body:JSON.stringify({
             funcao_id:funcaoAtiva.id,risco_id:riscoId,
             perigo_id:perigoSelecionado?.id||null,
+            probabilidade:1,severidade:1,nivel_risco:'BAIXO',
             propagado_do_setor:false,ativo:true
           })
         });
