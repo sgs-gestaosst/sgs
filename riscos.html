@@ -1014,7 +1014,11 @@ function renderHierarquia(sr,riscoNome,catNome){
             </div>
             <!-- Preview do EPI selecionado -->
             <div class="epi-preview" id="epi-preview-${sr.id}"></div>
-            <button onclick="adicionarEPI(${sr.id})" style="padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer;width:100%;margin-bottom:8px;">+ Adicionar EPI</button>
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+              <button onclick="adicionarEPI(${sr.id})" style="flex:1;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;cursor:pointer;">+ Adicionar EPI</button>
+              <button class="btn-ia" style="padding:6px 12px;font-size:11px;" onclick="sugerirEPIsIA(${sr.id})" title="Sugerir EPIs com IA">✨ Sugerir com IA</button>
+            </div>
+            <div id="ia-epi-area-${sr.id}"></div>
             <div class="epis-lista" id="epis-${sr.id}">
               ${(sr.epis||[]).map(e=>{
                 const nome=e.epi_nome||(todosEpis.find(x=>x.id===e.epi_id)?.nome)||'EPI';
@@ -1750,6 +1754,83 @@ async function removerAcaoMedida(srId,nivel){
 }
 
 // ── EPIs ───────────────────────────────────────────────────────
+// ── SUGESTÃO DE EPI POR IA ────────────────────────────────────
+async function sugerirEPIsIA(srId){
+  const area=document.getElementById(`ia-epi-area-${srId}`);
+  if(!area)return;
+  const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+  const sr=lista.find(x=>x.id===srId);
+  const risco=sr?todosRiscos.find(r=>r.id===sr.risco_id):null;
+  if(!risco){area.innerHTML='<div style="font-size:11px;color:var(--danger);padding:4px 0;">Risco não identificado.</div>';return;}
+  if(!todosEpis.length){area.innerHTML='<div style="font-size:11px;color:var(--text3);padding:4px 0;">Catálogo de EPIs vazio — cadastre EPIs primeiro.</div>';return;}
+
+  area.innerHTML='<div style="font-size:11px;color:var(--text2);padding:6px 0;">⏳ Consultando IA...</div>';
+  try{
+    const ids=await ia_sugerirEPI(
+      risco.nome_risco,
+      getCatNome(risco.categoria_risco_id),
+      risco.epi_indicado||'',
+      risco.via_absorcao||'',
+      todosEpis
+    );
+    const sugeridos=todosEpis.filter(e=>ids.includes(e.id));
+    if(!sugeridos.length){
+      area.innerHTML='<div style="font-size:11px;color:var(--text3);padding:6px 0;">Nenhum EPI do catálogo encontrado para este risco.</div>';
+      return;
+    }
+    area.innerHTML=`
+      <div style="font-size:11px;color:var(--accent2);margin-bottom:6px;font-weight:500;">✨ Sugestões para ${h(risco.nome_risco)}:</div>
+      ${sugeridos.map(e=>`
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);padding:4px 0;cursor:pointer;">
+          <input type="checkbox" value="${e.id}" data-nome="${e.nome.replace(/"/g,'&quot;')}" checked style="accent-color:var(--accent);width:14px;height:14px;">
+          ${h(e.nome)} <span style="font-size:10px;color:var(--text3);">(${h(e.categoria)})</span>
+        </label>`).join('')}
+      <button onclick="adicionarEPIsIASugeridos(${srId})" style="margin-top:8px;padding:6px 14px;background:var(--accent);border:none;border-radius:var(--radius);color:#fff;font-size:12px;cursor:pointer;font-weight:500;">+ Adicionar selecionados</button>`;
+  }catch(e){
+    area.innerHTML=`<div style="font-size:11px;color:var(--danger);padding:6px 0;">${e.message}</div>`;
+  }
+}
+
+async function adicionarEPIsIASugeridos(srId){
+  const area=document.getElementById(`ia-epi-area-${srId}`);
+  const cbs=area?.querySelectorAll('input[type=checkbox]:checked');
+  if(!cbs?.length)return;
+  const lista=document.getElementById(`epis-${srId}`);
+  for(const cb of cbs){
+    const epiId=parseInt(cb.value);
+    const epiNome=cb.dataset.nome;
+    const tagKey=`epitag-${srId}-${epiId}`;
+    if(!document.getElementById(tagKey)){
+      const tag=document.createElement('div');
+      tag.id=tagKey;tag.className='epi-tag';
+      tag.innerHTML=`<span class="epi-tag-nome">🛡 ${h(epiNome)}</span>
+        <button onclick="removerEPITag('${tagKey}',${srId},${epiId})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;" title="Remover">✕</button>`;
+      lista?.appendChild(tag);
+    }
+    await _salvarEPISimples(srId,epiId,epiNome);
+  }
+  area.innerHTML='<div style="font-size:11px;color:var(--accent2);padding:6px 0;">✓ EPIs adicionados!</div>';
+  setTimeout(()=>{if(area)area.innerHTML='';},2500);
+}
+
+async function _salvarEPISimples(srId,epiId,epiNome){
+  const tabela=contexto==='setor'?'setor_risco_medidas':'funcao_risco_medidas';
+  const campo=contexto==='setor'?'setor_risco_id':'funcao_risco_id';
+  const tabelaRisco=contexto==='setor'?'setor_riscos':'funcao_riscos';
+  // Evita duplicata
+  const resChk=await fetch(`${SUPA_URL}/rest/v1/${tabela}?${campo}=eq.${srId}&epi_id=eq.${epiId}&nivel=eq.EPI&select=id&limit=1`,{headers:h2()});
+  const ex=await resChk.json();
+  if(ex.length)return;
+  await fetch(`${SUPA_URL}/rest/v1/${tabela}`,{
+    method:'POST',headers:h2(),
+    body:JSON.stringify({[campo]:srId,nivel:'EPI',epi_id:epiId,epi_nome:epiNome,ativo:true})
+  });
+  await fetch(`${SUPA_URL}/rest/v1/${tabelaRisco}?id=eq.${srId}`,{
+    method:'PATCH',headers:h2(),
+    body:JSON.stringify({medida_epi:true,atualizado_em:new Date().toISOString()})
+  });
+}
+
 // ── BUSCA EPI DA BASE CAEPI ───────────────────────────────────
 const _epiSelecionado={};
 let _epiDebounce=null;

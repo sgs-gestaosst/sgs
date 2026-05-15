@@ -137,6 +137,25 @@ Selecione entre 3 e 8 riscos. Use apenas IDs do catálogo acima.`;
   }catch(e){throw new Error('IA retornou resposta inválida. Tente novamente.');}
 }
 
+async function ia_sugerirEPI(nomeRisco,catRisco,epiIndicado,viaAbsorcao,catalogoEpis){
+  const lista=catalogoEpis.map(e=>`${e.id}: ${e.nome} (${e.categoria})`).join('\n');
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
+Para o risco "${nomeRisco}" (categoria: ${catRisco}${viaAbsorcao?`, via de absorção: ${viaAbsorcao}`:''})${epiIndicado?`\nEPIs recomendados pelo catálogo de riscos: "${epiIndicado}"`:''}, selecione do catálogo abaixo os EPIs mais adequados para proteção dos trabalhadores expostos.
+
+CATÁLOGO DE EPIs DISPONÍVEIS:
+${lista}
+
+Responda SOMENTE com JSON válido, sem markdown:
+{"ids": [IDs dos EPIs mais adequados]}
+
+Selecione 1 a 4 EPIs. Use apenas IDs existentes no catálogo acima.`;
+  const text=await _chamarGemini(prompt);
+  try{
+    const parsed=JSON.parse(text);
+    return Array.isArray(parsed.ids)?parsed.ids.map(Number):[];
+  }catch(e){throw new Error('IA retornou resposta inválida. Tente novamente.');}
+}
+
 async function ia_sugerirMedida(nomeRisco,catRisco,tipoMedida){
   const descTipo={
     elim:'Eliminação — remover completamente a fonte do risco',
