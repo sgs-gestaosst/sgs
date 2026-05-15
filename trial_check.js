@@ -76,7 +76,10 @@ async function renovarTokenSeNecessario(SUPA_URL, SUPA_KEY, token) {
   try {
     const payload  = JSON.parse(atob(token.split('.')[1]));
     const expiraEm = payload.exp * 1000;
-    if (Date.now() < expiraEm - 5 * 60 * 1000) return token;
+    if (Date.now() < expiraEm - 5 * 60 * 1000) {
+      sessionStorage.removeItem('sgs_recarregou'); // token ok, limpa flag de reload
+      return token;
+    }
   } catch(e) { /* token malformado, tenta renovar */ }
 
   const refreshToken = localStorage.getItem('sgs_refresh_token');
@@ -92,7 +95,17 @@ async function renovarTokenSeNecessario(SUPA_URL, SUPA_KEY, token) {
     const data = await res.json();
     localStorage.setItem('sgs_token', data.access_token);
     if (data.refresh_token) localStorage.setItem('sgs_refresh_token', data.refresh_token);
-    return data.access_token;
+
+    // Reload para que todas as páginas leiam o token renovado do localStorage.
+    // Flag no sessionStorage evita loop infinito caso o novo token também falhe.
+    if (!sessionStorage.getItem('sgs_recarregou')) {
+      sessionStorage.setItem('sgs_recarregou', '1');
+      window.location.reload();
+      return null;
+    }
+    // Segunda falha consecutiva → logout
+    redirecionarLogin();
+    return null;
   } catch(e) {
     console.error('Erro ao renovar token:', e);
     return token;
