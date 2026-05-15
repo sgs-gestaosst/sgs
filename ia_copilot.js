@@ -140,15 +140,17 @@ Selecione entre 3 e 8 riscos. Use apenas IDs do catálogo acima.`;
 async function ia_sugerirEPI(nomeRisco,catRisco,epiIndicado,viaAbsorcao,catalogoEpis){
   const lista=catalogoEpis.map(e=>`${e.id}: ${e.nome} (${e.categoria})`).join('\n');
   const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
-Para o risco "${nomeRisco}" (categoria: ${catRisco}${viaAbsorcao?`, via de absorção: ${viaAbsorcao}`:''})${epiIndicado?`\nEPIs recomendados pelo catálogo de riscos: "${epiIndicado}"`:''}, selecione do catálogo abaixo os EPIs mais adequados para proteção dos trabalhadores expostos.
+Para o risco "${nomeRisco}" (categoria: ${catRisco}${viaAbsorcao?`, via de absorção: ${viaAbsorcao}`:''})${epiIndicado?`\nEPIs recomendados pelo catálogo: "${epiIndicado}"`:''}, selecione do catálogo abaixo apenas os EPIs que tenham relação direta com a proteção contra este risco.
+
+ATENÇÃO: Se nenhum EPI do catálogo for adequado para este risco (ex: riscos ergonômicos geralmente não têm EPI específico), responda com ids vazio. Não force sugestões inadequadas.
 
 CATÁLOGO DE EPIs DISPONÍVEIS:
 ${lista}
 
 Responda SOMENTE com JSON válido, sem markdown:
-{"ids": [IDs dos EPIs mais adequados]}
+{"ids": [IDs dos EPIs diretamente adequados, ou array vazio se nenhum for pertinente]}
 
-Selecione 1 a 4 EPIs. Use apenas IDs existentes no catálogo acima.`;
+Selecione no máximo 4 EPIs. Use apenas IDs existentes no catálogo acima.`;
   const text=await _chamarGemini(prompt);
   try{
     const parsed=JSON.parse(text);

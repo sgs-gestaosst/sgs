@@ -1775,7 +1775,7 @@ async function sugerirEPIsIA(srId){
     );
     const sugeridos=todosEpis.filter(e=>ids.includes(e.id));
     if(!sugeridos.length){
-      area.innerHTML='<div style="font-size:11px;color:var(--text3);padding:6px 0;">Nenhum EPI do catálogo encontrado para este risco.</div>';
+      area.innerHTML='<div style="font-size:11px;color:var(--text3);padding:6px 0;">ℹ️ Nenhum EPI do catálogo é adequado para este risco — priorize medidas de eliminação, engenharia ou administrativas.</div>';
       return;
     }
     area.innerHTML=`
