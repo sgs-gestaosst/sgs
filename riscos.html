@@ -1771,7 +1771,9 @@ async function sugerirEPIsIA(srId){
       getCatNome(risco.categoria_risco_id),
       risco.epi_indicado||'',
       risco.via_absorcao||'',
-      todosEpis
+      todosEpis,
+      risco.fonte_geradora||'',
+      risco.danos_saude||''
     );
     const sugeridos=todosEpis.filter(e=>ids.includes(e.id));
     if(!sugeridos.length){

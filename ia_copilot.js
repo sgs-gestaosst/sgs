@@ -137,12 +137,24 @@ Selecione entre 3 e 8 riscos. Use apenas IDs do catálogo acima.`;
   }catch(e){throw new Error('IA retornou resposta inválida. Tente novamente.');}
 }
 
-async function ia_sugerirEPI(nomeRisco,catRisco,epiIndicado,viaAbsorcao,catalogoEpis){
+async function ia_sugerirEPI(nomeRisco,catRisco,epiIndicado,viaAbsorcao,catalogoEpis,fonteGeradora,danosSaude){
   const lista=catalogoEpis.map(e=>`${e.id}: ${e.nome} (${e.categoria})`).join('\n');
+  const linhasCtx=[
+    `Risco: ${nomeRisco}`,
+    `Categoria: ${catRisco}`,
+    viaAbsorcao?`Via de absorção: ${viaAbsorcao}`:'',
+    fonteGeradora?`Fonte geradora: ${fonteGeradora}`:'',
+    danosSaude?`Danos à saúde: ${danosSaude}`:'',
+    epiIndicado?`EPIs recomendados pelo catálogo de riscos: "${epiIndicado}"`:''
+  ].filter(Boolean).join('\n');
   const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
-Para o risco "${nomeRisco}" (categoria: ${catRisco}${viaAbsorcao?`, via de absorção: ${viaAbsorcao}`:''})${epiIndicado?`\nEPIs recomendados pelo catálogo: "${epiIndicado}"`:''}, selecione do catálogo abaixo apenas os EPIs que tenham relação direta com a proteção contra este risco.
 
-ATENÇÃO: Se nenhum EPI do catálogo for adequado para este risco (ex: riscos ergonômicos geralmente não têm EPI específico), responda com ids vazio. Não force sugestões inadequadas.
+CONTEXTO DO RISCO:
+${linhasCtx}
+
+Com base no contexto acima, selecione do catálogo abaixo apenas os EPIs que tenham relação direta com a proteção contra este risco. Use a via de absorção, fonte geradora e danos à saúde para identificar quais partes do corpo precisam de proteção.
+
+ATENÇÃO: Se nenhum EPI do catálogo for adequado (ex: riscos ergonômicos geralmente não têm EPI específico), responda com ids vazio. Não force sugestões inadequadas.
 
 CATÁLOGO DE EPIs DISPONÍVEIS:
 ${lista}
