@@ -637,7 +637,7 @@ async function inicializar(){
     const [resEmp,resSets,resFuncs,resRiscos,resEpis,resCats,resPerigos,resPerRiscos,resOcorr]=await Promise.all([
       fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:h2()}),
-      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:h2()}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao,descricao,trabalho_altura,trabalho_confinado,trabalho_eletrico,trabalho_insalubre,trabalho_periculoso,nr_aplicavel,cbo&order=nome_funcao.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,codigo_risco,categoria_risco_id,danos_saude,epi_indicado,epc_indicado,nr_relacionada,fonte_geradora,via_absorcao,limite_tolerancia,metodologia_avaliacao&order=nome_risco.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/catalogo_epis?ativo=eq.true&select=id,nome,categoria&order=categoria.asc,nome.asc`,{headers:h2()}),
       fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome,cor_identificacao`,{headers:h2()}),
@@ -2108,18 +2108,53 @@ async function abrirModalIARiscos(){
   document.getElementById('ia-riscos-count').textContent='';
   try{
     const jaAdicionados=(contexto==='setor'?riscosSetor:riscosFuncao).map(r=>r.risco_id);
+
+    // Agentes ativos no setor — usados para filtrar catálogo e enriquecer contexto
+    const agentesAtivos=[
+      setorAtivo.tem_agente_fisico&&'Físico',
+      setorAtivo.tem_agente_quimico&&'Químico',
+      setorAtivo.tem_agente_biologico&&'Biológico',
+      setorAtivo.tem_agente_ergonomico&&'Ergonômico',
+      setorAtivo.tem_agente_acidente&&'Acidente',
+      setorAtivo.tem_agente_psicossocial&&'Psicossocial',
+    ].filter(Boolean);
+
+    // Catálogo filtrado pelas categorias do setor (reduz tokens ~70%)
     const catalogo=todosRiscos
       .filter(r=>!jaAdicionados.includes(r.id))
+      .filter(r=>agentesAtivos.length===0||agentesAtivos.includes(getCatNome(r.categoria_risco_id)))
       .map(r=>({id:r.id,nome_risco:r.nome_risco,categoria:getCatNome(r.categoria_risco_id)}));
+
     if(!catalogo.length){
       document.getElementById('ia-riscos-lista').innerHTML='<div style="text-align:center;padding:30px;color:var(--text2);">Todos os riscos do catálogo já foram adicionados.</div>';
       return;
     }
-    const ids=await ia_sugerirRiscos(nomeCtx,tipoCtx,catalogo);
+
+    // Contexto rico: setor + função com descrições e condições especiais
+    const ctxRico={
+      setorNome:setorAtivo.nome_setor,
+      setorDescricao:setorAtivo.descricao||'',
+      agentes:{
+        fisico:!!setorAtivo.tem_agente_fisico,
+        quimico:!!setorAtivo.tem_agente_quimico,
+        biologico:!!setorAtivo.tem_agente_biologico,
+        ergonomico:!!setorAtivo.tem_agente_ergonomico,
+        acidente:!!setorAtivo.tem_agente_acidente,
+        psicossocial:!!setorAtivo.tem_agente_psicossocial,
+      },
+      funcaoDescricao:funcaoAtiva?.descricao||'',
+      trabalhoAltura:!!funcaoAtiva?.trabalho_altura,
+      trabalhoConfinado:!!funcaoAtiva?.trabalho_confinado,
+      trabalhoEletrico:!!funcaoAtiva?.trabalho_eletrico,
+      insalubre:!!funcaoAtiva?.trabalho_insalubre,
+      periculoso:!!funcaoAtiva?.trabalho_periculoso,
+    };
+
+    const ids=await ia_sugerirRiscos(nomeCtx,tipoCtx,catalogo,ctxRico);
     riscosIASugeridos=todosRiscos.filter(r=>ids.includes(r.id));
     renderListaIARiscos(nomeCtx);
   }catch(e){
-    document.getElementById('ia-riscos-lista').innerHTML=`<div style="color:var(--danger);padding:16px;">Erro: ${e.message}</div>`;
+    document.getElementById('ia-riscos-lista').innerHTML=`<div style="color:var(--danger);padding:16px;">${e.message}</div>`;
   }
 }
 

@@ -37,7 +37,12 @@ async function _chamarGemini(prompt){
       max_tokens:512
     })
   });
-  if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error?.message||'Erro HTTP '+res.status);}
+  if(!res.ok){
+    const err=await res.json().catch(()=>({}));
+    if(res.status===429)throw new Error('Limite de requisições atingido — aguarde alguns segundos e tente novamente.');
+    if(res.status===401)throw new Error('Chave da IA inválida ou expirada — contate o suporte.');
+    throw new Error(err.error?.message||'Erro HTTP '+res.status);
+  }
   const data=await res.json();
   let text=data.choices?.[0]?.message?.content||'';
   return text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
@@ -84,23 +89,52 @@ Critérios para true: altura=trabalho habitual acima de 2m/NR-35; confinado=espa
   }catch(e){throw new Error('IA retornou resposta inválida para função. Tente novamente.');}
 }
 
-async function ia_sugerirRiscos(nomeContexto,tipoContexto,catalogoRiscos){
+async function ia_sugerirRiscos(nomeContexto,tipoContexto,catalogoRiscos,ctxRico={}){
   const lista=catalogoRiscos.map(r=>`${r.id}: ${r.nome_risco} (${r.categoria})`).join('\n');
-  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
-Para o ${tipoContexto} "${nomeContexto}", selecione do catálogo abaixo os riscos ocupacionais mais prováveis.
 
-CATÁLOGO DE RISCOS DISPONÍVEIS:
+  // Monta bloco de contexto com todas as informações disponíveis
+  const linhasCtx=[];
+  if(ctxRico.setorNome)linhasCtx.push(`Setor: ${ctxRico.setorNome}`);
+  if(ctxRico.setorDescricao)linhasCtx.push(`Descrição do setor: ${ctxRico.setorDescricao}`);
+  const agNomes=[
+    ctxRico.agentes?.fisico&&'Físico (ruído, calor, vibração, radiação)',
+    ctxRico.agentes?.quimico&&'Químico (poeiras, fumos, gases, solventes)',
+    ctxRico.agentes?.biologico&&'Biológico (vírus, bactérias, fungos)',
+    ctxRico.agentes?.ergonomico&&'Ergonômico (postura, repetição, esforço)',
+    ctxRico.agentes?.acidente&&'Acidente (quedas, cortes, choques elétricos)',
+    ctxRico.agentes?.psicossocial&&'Psicossocial (pressão, assédio, jornada)',
+  ].filter(Boolean);
+  if(agNomes.length)linhasCtx.push(`Agentes de risco presentes no setor: ${agNomes.join('; ')}`);
+  if(tipoContexto==='função'){
+    if(ctxRico.funcaoDescricao)linhasCtx.push(`Descrição da função: ${ctxRico.funcaoDescricao}`);
+    const conds=[
+      ctxRico.trabalhoAltura&&'trabalho em altura (NR-35)',
+      ctxRico.trabalhoConfinado&&'espaços confinados (NR-33)',
+      ctxRico.trabalhoEletrico&&'instalações elétricas (NR-10)',
+      ctxRico.insalubre&&'atividade insalubre (NR-15)',
+      ctxRico.periculoso&&'atividade perigosa (NR-16)',
+    ].filter(Boolean);
+    if(conds.length)linhasCtx.push(`Condições especiais da função: ${conds.join(', ')}`);
+  }
+  const blocoCtx=linhasCtx.length?`\nCONTEXTO:\n${linhasCtx.join('\n')}\n`:''
+
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
+${blocoCtx}
+Com base no contexto acima, selecione do catálogo os riscos ocupacionais mais prováveis para o ${tipoContexto} "${nomeContexto}". Priorize os agentes identificados no setor e considere as descrições fornecidas.
+
+CATÁLOGO:
 ${lista}
 
 Responda SOMENTE com JSON válido, sem markdown:
-{"ids": [lista de IDs inteiros dos riscos mais relevantes]}
+{"ids": [IDs inteiros dos riscos mais relevantes]}
 
-Selecione entre 3 e 8 riscos. Use apenas IDs existentes no catálogo acima.`;
+Selecione entre 3 e 8 riscos. Use apenas IDs do catálogo acima.`;
+
   const text=await _chamarGemini(prompt);
   try{
     const parsed=JSON.parse(text);
     return Array.isArray(parsed.ids)?parsed.ids.map(Number):[];
-  }catch(e){throw new Error('IA retornou resposta inválida para riscos. Tente novamente.');}
+  }catch(e){throw new Error('IA retornou resposta inválida. Tente novamente.');}
 }
 
 async function ia_sugerirMedida(nomeRisco,catRisco,tipoMedida){
