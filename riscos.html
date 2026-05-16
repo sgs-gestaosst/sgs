@@ -841,12 +841,12 @@ function renderRiscoCard(sr){
           onblur="salvarCampoExposicao(${sr.id},'limite_tolerancia_custom',this.value)"
           id="ltc-${sr.id}">
       </div>`:''}
-      ${risco.metodologia_avaliacao||sr.metodologia_avaliacao_custom?`
+      ${!naoAvaliado&&(risco.metodologia_avaliacao||sr.metodologia_avaliacao_custom)?`
       <div class="aval-field" style="grid-column:1/-1;">
-        <label>${naoAvaliado?`<span style="color:var(--text3);font-style:italic;">Metodologia sugerida</span>`:`Metodologia de avaliação`}</label>
+        <label>Metodologia de avaliação</label>
         <input type="text" placeholder="${h(risco.metodologia_avaliacao||'')}"
           value="${h(sr.metodologia_avaliacao_custom||risco.metodologia_avaliacao||'')}"
-          ${naoAvaliado?`readonly title="Inicie a avaliação para editar" style="color:var(--text3);cursor:default;"`:`onblur="salvarCampoExposicao(${sr.id},'metodologia_avaliacao_custom',this.value)"`}
+          onblur="salvarCampoExposicao(${sr.id},'metodologia_avaliacao_custom',this.value)"
           id="met-${sr.id}">
       </div>`:''}
     </div>`;
@@ -922,7 +922,7 @@ function renderRiscoCard(sr){
         <div class="aval-field">
           <label>Tipo de avaliação</label>
           <select onchange="mudarTipoAvaliacao(${sr.id},this.value)" id="tav-${sr.id}">
-            <option value="">— Selecionar —</option>
+            <option value="">— Não avaliado —</option>
             <option value="Qualitativa" ${sr.tipo_avaliacao==='Qualitativa'?'selected':''}>Qualitativa</option>
             <option value="Quantitativa" ${sr.tipo_avaliacao==='Quantitativa'?'selected':''}>Quantitativa</option>
           </select>
@@ -971,14 +971,16 @@ function renderRiscoCard(sr){
         </div>
       </div>`:``}
       <div class="exposicao-row" style="margin-top:8px;">
-        <div class="aval-field" style="grid-column:1/-1;position:relative;">
+        <div class="aval-field" style="grid-column:1/-1;">
           <label>Observações / Conclusão técnica</label>
           <textarea id="conc-${sr.id}" rows="3"
             placeholder="Descreva as condições observadas e a conclusão técnica da avaliação..."
             onblur="salvarCampoExposicao(${sr.id},'conclusao_qualitativa',this.value)"
-            style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 36px 8px 10px;outline:none;resize:vertical;min-height:60px;"
+            style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;resize:vertical;min-height:60px;"
           >${h(sr.conclusao_qualitativa||'')}</textarea>
-          <button class="btn-ia-medida" onclick="sugerirConclusaoIA(${sr.id})" title="Sugerir conclusão com IA">✨</button>
+          <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+            <button class="btn-ia" style="font-size:11px;padding:4px 10px;" onclick="sugerirConclusaoIA(${sr.id})" title="Sugerir conclusão com IA">✨ Sugerir com IA</button>
+          </div>
         </div>
       </div>
       <div class="exposicao-row">
@@ -1588,8 +1590,7 @@ async function salvarCampoExposicao(srId,campo,valor){
 }
 
 async function mudarTipoAvaliacao(srId,tipo){
-  if(!tipo)return;
-  await salvarCampoExposicao(srId,'tipo_avaliacao',tipo);
+  await salvarCampoExposicao(srId,'tipo_avaliacao',tipo||null);
   const lista=contexto==='setor'?riscosSetor:riscosFuncao;
   const sr=lista.find(x=>x.id===srId);
   if(sr)sr.tipo_avaliacao=tipo;
