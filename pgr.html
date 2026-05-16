@@ -389,6 +389,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .setor-detalhe-body{padding:8pt 10pt;display:grid;grid-template-columns:1fr 1fr;gap:6pt;}
 </style>
 </head>
+<script src="trial_check.js"></script>
 <body>
 
 <div class="screen-header">
@@ -523,7 +524,7 @@ function getPerigo(perigoId){return perigos?.find(p=>p.id===perigoId);}
 function nivelLabel(n){return{'MUITO-ALTO':'Muito alto','ALTO':'Alto','MEDIO':'Médio','BAIXO':'Baixo'}[n]||n||'—';}
 function h(s){return escHtml(s);}
 
-function headers(){return{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`};}
+function headers(){return{'apikey':SUPA_KEY,'Authorization':`Bearer ${localStorage.getItem('sgs_token')}`};}
 
 async function carregar(){
   try{
@@ -539,10 +540,17 @@ async function carregar(){
       fetch(`${SUPA_URL}/rest/v1/perigos?ativo=eq.true&select=id,nome,descricao,categoria_risco_id`,{headers:headers()}),
     ]);
 
+    if(resEmp.status===401){window.location.href='login.html';return;}
     [empresa,cnaes,setores,funcoes,funcaoSetores,riscos,categorias,epis,perigos]=await Promise.all([
-      resEmp.json().then(d=>d[0]),
-      resCnaes.json(),resSets.json(),resFuncs.json(),resFuncSets.json(),
-      resRiscos.json(),resCats.json(),resEpis.json(),resPerigos.json(),
+      resEmp.json().then(d=>Array.isArray(d)?d[0]:d),
+      resCnaes.json().then(d=>Array.isArray(d)?d:[]),
+      resSets.json().then(d=>Array.isArray(d)?d:[]),
+      resFuncs.json().then(d=>Array.isArray(d)?d:[]),
+      resFuncSets.json().then(d=>Array.isArray(d)?d:[]),
+      resRiscos.json().then(d=>Array.isArray(d)?d:[]),
+      resCats.json().then(d=>Array.isArray(d)?d:[]),
+      resEpis.json().then(d=>Array.isArray(d)?d:[]),
+      resPerigos.json().then(d=>Array.isArray(d)?d:[]),
     ]);
 
     // Busca setor_riscos e funcao_riscos filtrados pela empresa (via setores)
