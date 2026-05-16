@@ -1608,13 +1608,15 @@ async function sugerirConclusaoIA(srId){
   const btn=document.querySelector(`#risco-card-${srId} [onclick*="sugerirConclusaoIA"]`);
   if(btn){btn.disabled=true;btn.textContent='⏳';}
   try{
+    const metInput=document.getElementById(`met-${srId}`);
+    const metodologia=metInput?metInput.value.trim():(sr.metodologia_avaliacao_custom||'');
     const texto=await ia_sugerirConclusao(
       risco.nome_risco,
       getCatNome(risco.categoria_risco_id),
       sr.fonte_geradora_especifica||risco.fonte_geradora||'',
       sr.via_absorcao_custom||risco.via_absorcao||'',
       risco.danos_saude||'',
-      sr.metodologia_avaliacao_custom||risco.metodologia_avaliacao||'',
+      metodologia,
       sr.probabilidade,sr.severidade
     );
     if(textarea){
