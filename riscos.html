@@ -1642,6 +1642,21 @@ async function salvarMedidaRespPrazo(srId,nivel,tipo,valor){
     const sr=lista.find(x=>x.id===srId);
     if(sr)sr[campo]=val;
     if(contexto==='setor') await propagarAvaliacaoParaFuncoes(srId,updates);
+    // Atualiza prazo/responsável na ação correspondente
+    const ref=`[ref:${srId}-${nivel}]`;
+    const resAcao=await fetch(
+      `${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&descricao=like.${encodeURIComponent(ref+'%')}&ativo=eq.true&select=id&limit=1`,
+      {headers:h2()}
+    );
+    const acaoArr=await resAcao.json();
+    if(acaoArr.length){
+      const atualizacaoAcao={atualizado_em:new Date().toISOString()};
+      if(tipo==='prazo')atualizacaoAcao.prazo=val;
+      if(tipo==='responsavel')atualizacaoAcao.responsavel=val;
+      await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${acaoArr[0].id}`,{
+        method:'PATCH',headers:h2(),body:JSON.stringify(atualizacaoAcao)
+      });
+    }
   }catch(e){console.error('Erro salvarMedidaRespPrazo:',e);}
 }
 
