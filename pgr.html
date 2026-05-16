@@ -1235,7 +1235,10 @@ function renderInventarioRiscos(){
     if(fr.tempo_exposicao_horas_dia)tecnicoPartes.push(`<b>Exposição:</b> ${fr.tempo_exposicao_horas_dia}h/dia${fr.frequencia_dias_semana?' · '+fr.frequencia_dias_semana+'x/sem':''}`);
     if(fr.tipo_avaliacao==='Quantitativa'&&fr.valor_medido!=null)
       tecnicoPartes.push(`<b>Medido:</b> ${fr.valor_medido}${fr.unidade_medida?' '+fr.unidade_medida:''}${fr.limite_tolerancia_nr?' (limite: '+fr.limite_tolerancia_nr+')':''}`);
+    if(fr.data_avaliacao)tecnicoPartes.push(`<b>Data avaliação:</b> ${fmtData(fr.data_avaliacao)}`);
+    if(fr.responsavel_avaliacao)tecnicoPartes.push(`<b>Responsável:</b> ${h(fr.responsavel_avaliacao)}`);
     const tecnicoHtml=tecnicoPartes.length?`<div class="risco-tecnico">${tecnicoPartes.join(' &nbsp;·&nbsp; ')}</div>`:'';
+    const conclusaoHtml=fr.conclusao_qualitativa?`<div style="margin-top:5pt;padding:6pt 8pt;background:#faf5ff;border-left:2pt solid #7c3aed;border-radius:0 4pt 4pt 0;"><div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#7c3aed;margin-bottom:3pt;">💬 Conclusão técnica</div><div style="font-size:8.5pt;color:#1f2937;line-height:1.5;">${h(fr.conclusao_qualitativa)}</div></div>`:'';
 
     return`<div class="risco-funcao">
       <!-- Linha 1: contexto -->
@@ -1253,7 +1256,9 @@ function renderInventarioRiscos(){
       ${metricasHtml}
       <!-- Linha 4: técnico discreto -->
       ${tecnicoHtml}
-      <!-- Linha 5: danos -->
+      <!-- Linha 5: conclusão técnica -->
+      ${conclusaoHtml}
+      <!-- Linha 6: danos -->
       ${risco.danos_saude?`<div class="risco-danos-texto"><div class="risco-danos-label">🩺 Danos à saúde potenciais</div>${h(risco.danos_saude)}</div>`:''}
       <!-- Linha 6: medidas -->
       ${medidasItens?`<div class="medidas-box"><div class="medidas-label">Medidas de prevenção e controle (Hierarquia NR-1)</div>${medidasItens}</div>`:''}
