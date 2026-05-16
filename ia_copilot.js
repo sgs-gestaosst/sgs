@@ -190,7 +190,7 @@ Escreva 2 a 3 frases técnicas descrevendo: a condição de exposição identifi
   return await _chamarGemini(prompt);
 }
 
-async function ia_sugerirMedida(nomeRisco,catRisco,tipoMedida){
+async function ia_sugerirMedida(nomeRisco,catRisco,tipoMedida,conclusaoTecnica=''){
   const descTipo={
     elim:'Eliminação — remover completamente a fonte do risco',
     subs:'Substituição — substituir por processo ou material menos perigoso',
@@ -198,9 +198,10 @@ async function ia_sugerirMedida(nomeRisco,catRisco,tipoMedida){
     adm:'Administrativa — procedimentos, treinamentos, rodízio, sinalização, limitação de tempo de exposição',
     epi:'EPI — Equipamento de Proteção Individual adequado ao risco'
   }[tipoMedida]||tipoMedida;
+  const ctxAvaliacao=conclusaoTecnica?`\nContexto da avaliação realizada:\n"${conclusaoTecnica}"\n`:'';
   const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
-Sugira uma medida de controle do tipo "${descTipo}" para o risco "${nomeRisco}" (categoria: ${catRisco}).
-Requisitos: técnica, específica, baseada nas NRs brasileiras vigentes, aplicável na prática.
+Sugira uma medida de controle do tipo "${descTipo}" para o risco "${nomeRisco}" (categoria: ${catRisco}).${ctxAvaliacao}
+Requisitos: técnica, específica, baseada nas NRs brasileiras vigentes, aplicável na prática. Use o contexto da avaliação para tornar a sugestão mais precisa.
 Responda SOMENTE com o texto da medida em 1-3 frases. Sem títulos, prefixos ou formatação.`;
   return await _chamarGemini(prompt);
 }

@@ -2497,9 +2497,13 @@ async function sugerirMedidaIA(btn){
   const catNome=btn.dataset.cat;
   const textarea=document.getElementById(`textarea-med-${srId}-${nivel}`);
   if(!textarea)return;
+  // Busca conclusão técnica da avaliação para enriquecer o contexto da IA
+  const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+  const sr=lista.find(x=>x.id==srId);
+  const conclusao=sr?.conclusao_qualitativa||'';
   btn.disabled=true;btn.textContent='⏳';
   try{
-    const sugestao=await ia_sugerirMedida(riscoNome,catNome,nivel);
+    const sugestao=await ia_sugerirMedida(riscoNome,catNome,nivel,conclusao);
     if(!textarea.value.trim()){
       textarea.value=sugestao;
     }else if(confirm('Substituir o texto atual pela sugestão da IA?')){
