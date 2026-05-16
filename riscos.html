@@ -1783,7 +1783,7 @@ async function upsertAcaoMedida(srId,nivel,descricao){
     const nomeRisco=risco?.nome_risco||'Risco';
     const nomeNivel={elim:'Eliminação',subs:'Substituição',eng:'Engenharia',adm:'Administrativo',epi:'EPI'}[nivel]||nivel;
     const ref=`[ref:${srId}-${nivel}]`;
-    const titulo=`[${nomeNivel}] ${descricao.length>80?descricao.slice(0,80)+'…':descricao}`.trim();
+    const titulo=`[${nomeNivel}] ${descricao.length>200?descricao.slice(0,200)+'…':descricao}`.trim();
     const descricaoCompleta=`${ref} Medida de controle (${nomeNivel}) para o risco: ${nomeRisco}`;
 
     // Busca ação existente pela referência única srId-nivel

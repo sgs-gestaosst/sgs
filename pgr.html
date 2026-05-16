@@ -1164,8 +1164,26 @@ function renderInventarioRiscos(){
     const risco=getRisco(fr.risco_id);if(!risco)return'';
     const catCor=getCatCor(risco.categoria_risco_id);
     const catNome=getCatNome(risco.categoria_risco_id);
-    // Risco sem avaliação → card pendente + coleta para plano de ação
-    if(!fr.tipo_avaliacao){
+    // Fallback: se funcao_riscos não tem tipo_avaliacao, usa setor_riscos correspondente
+    const srFallback=setor_riscos.find(sr=>sr.risco_id===fr.risco_id&&sr.tipo_avaliacao);
+    const tipoAvFinal=fr.tipo_avaliacao||srFallback?.tipo_avaliacao||null;
+    // Mescla dados de setor quando funcao não tem
+    if(!fr.tipo_avaliacao&&srFallback){
+      fr={...fr,
+        tipo_avaliacao:srFallback.tipo_avaliacao,
+        probabilidade:fr.probabilidade||srFallback.probabilidade,
+        severidade:fr.severidade||srFallback.severidade,
+        conclusao_qualitativa:fr.conclusao_qualitativa||srFallback.conclusao_qualitativa,
+        data_avaliacao:fr.data_avaliacao||srFallback.data_avaliacao,
+        responsavel_avaliacao:fr.responsavel_avaliacao||srFallback.responsavel_avaliacao,
+        valor_medido:fr.valor_medido??srFallback.valor_medido,
+        unidade_medida:fr.unidade_medida||srFallback.unidade_medida,
+        limite_tolerancia_nr:fr.limite_tolerancia_nr||srFallback.limite_tolerancia_nr,
+      };
+    }
+    // Risco sem avaliação → card pendente (exceto Acidente que não precisa de avaliação formal)
+    const ehAcidente=catNome==='Acidente';
+    if(!tipoAvFinal&&!ehAcidente){
       if(!window.riscosSemAvaliacao)window.riscosSemAvaliacao=[];
       const funcaoFr=funcoes.find(f=>f.id===fr.funcao_id);
       window.riscosSemAvaliacao.push({fr,risco,funcao:funcaoFr});
