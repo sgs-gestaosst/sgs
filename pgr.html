@@ -1165,9 +1165,9 @@ function renderInventarioRiscos(){
         <div class="risco-ctx"><span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span></div>
         <div class="risco-principal">
           <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
-          <span style="background:#fffbeb;color:#92400e;border:1pt solid #fde68a;padding:2pt 7pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">⏳ Avaliação pendente</span>
+          <span style="background:#fffbeb;color:#92400e;border:1pt solid #fde68a;padding:2pt 7pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">📋 Avaliação programada</span>
         </div>
-        <div style="font-size:8pt;color:#92400e;margin-top:4pt;">Ação gerada no Plano de Ação para realizar a avaliação.${risco.metodologia_avaliacao?` Metodologia sugerida: ${h(risco.metodologia_avaliacao)}.`:''}</div>
+        <div style="font-size:8pt;color:#92400e;margin-top:4pt;">Avaliação será realizada conforme Plano de Ação.${risco.metodologia_avaliacao?` Metodologia prevista: ${h(risco.metodologia_avaliacao)}.`:''}</div>
       </div>`;
     }
     const perigo=fr.perigo_id?getPerigo(fr.perigo_id):null;
