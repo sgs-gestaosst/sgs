@@ -794,7 +794,10 @@ function renderRiscoCard(sr){
   const estilo=getCatEstilo(risco.categoria_risco_id);
   const catNome=getCatNome(risco.categoria_risco_id);
   const nivel=sr.nivel_risco||calcularNivel(sr.probabilidade,sr.severidade);
-  const nivelHtml=nivel?`<span class="nivel-badge nivel-${nivel}">${nivelLabel(nivel)}</span>`:'';
+  const naoAvaliado=!sr.tipo_avaliacao;
+  const nivelHtml=naoAvaliado
+    ?`<span class="nivel-badge" style="background:#2a1f05;color:#e0a855;border:1px solid #4a3a10;cursor:default;">⏳ Avaliar</span>`
+    :(nivel?`<span class="nivel-badge nivel-${nivel}">${nivelLabel(nivel)}</span>`:'');
   const propagBadge=sr.propagado_do_setor&&contexto==='funcao'?`<span class="prop-badge">🔗 Do setor</span>`:'';
 
   // Nome do perigo (se tiver)
@@ -840,10 +843,10 @@ function renderRiscoCard(sr){
       </div>`:''}
       ${risco.metodologia_avaliacao||sr.metodologia_avaliacao_custom?`
       <div class="aval-field" style="grid-column:1/-1;">
-        <label>Metodologia de avaliação</label>
+        <label>${naoAvaliado?`<span style="color:var(--text3);font-style:italic;">Metodologia sugerida</span>`:`Metodologia de avaliação`}</label>
         <input type="text" placeholder="${h(risco.metodologia_avaliacao||'')}"
           value="${h(sr.metodologia_avaliacao_custom||risco.metodologia_avaliacao||'')}"
-          onblur="salvarCampoExposicao(${sr.id},'metodologia_avaliacao_custom',this.value)"
+          ${naoAvaliado?`readonly title="Inicie a avaliação para editar" style="color:var(--text3);cursor:default;"`:`onblur="salvarCampoExposicao(${sr.id},'metodologia_avaliacao_custom',this.value)"`}
           id="met-${sr.id}">
       </div>`:''}
     </div>`;
@@ -866,7 +869,7 @@ function renderRiscoCard(sr){
       </div>
     </div>
 
-    <div class="avaliacao-grid">
+    ${naoAvaliado?'':`<div class="avaliacao-grid">
       <div class="aval-field">
         <label>Probabilidade</label>
         <select onchange="atualizarAvaliacao(${sr.id},this,'probabilidade')" id="prob-${sr.id}">
@@ -897,16 +900,28 @@ function renderRiscoCard(sr){
           ${['BAIXO','MEDIO','ALTO','MUITO-ALTO'].map(n=>`<option value="${n}" ${sr.nivel_risco_residual===n?'selected':''}>${nivelLabel(n)}</option>`).join('')}
         </select>
       </div>
-    </div>
+    </div>`}
 
-    ${temExposicao?`
+    ${naoAvaliado?`
+    <div class="exposicao-section">
+      <div style="background:#1e2333;border:1px dashed var(--border);border-radius:var(--radius);padding:12px 14px;">
+        <div style="font-size:11px;color:#e0a855;font-weight:500;margin-bottom:10px;">⏳ Avaliação não realizada — selecione o tipo para iniciar</div>
+        <div class="aval-field" style="max-width:220px;">
+          <label>Tipo de avaliação</label>
+          <select onchange="mudarTipoAvaliacao(${sr.id},this.value)" id="tav-${sr.id}">
+            <option value="">— Selecionar —</option>
+            <option value="Qualitativa">Qualitativa</option>
+            <option value="Quantitativa">Quantitativa</option>
+          </select>
+        </div>
+      </div>
+    </div>`:(temExposicao?`
     <div class="exposicao-section">
       <div class="exposicao-titulo">Caracterização da exposição</div>
-
       <div class="exposicao-grid">
         <div class="aval-field">
           <label>Tipo de avaliação</label>
-          <select onchange="salvarCampoExposicao(${sr.id},'tipo_avaliacao',this.value);toggleQuantitativo(${sr.id},this.value)" id="tav-${sr.id}">
+          <select onchange="mudarTipoAvaliacao(${sr.id},this.value)" id="tav-${sr.id}">
             <option value="">— Selecionar —</option>
             <option value="Qualitativa" ${sr.tipo_avaliacao==='Qualitativa'?'selected':''}>Qualitativa</option>
             <option value="Quantitativa" ${sr.tipo_avaliacao==='Quantitativa'?'selected':''}>Quantitativa</option>
@@ -927,8 +942,8 @@ function renderRiscoCard(sr){
             id="freq-${sr.id}">
         </div>
       </div>
-
-      <div class="quant-section" id="quant-${sr.id}" style="${isQuantitativa?'':'display:none;'}">
+      ${isQuantitativa?`
+      <div class="quant-section" id="quant-${sr.id}">
         <div class="quant-section-titulo">📊 Dados da avaliação quantitativa</div>
         <div class="exposicao-grid">
           <div class="aval-field">
@@ -954,24 +969,34 @@ function renderRiscoCard(sr){
               id="ltnr-${sr.id}">
           </div>
         </div>
-        <div class="exposicao-row">
-          <div class="aval-field">
-            <label>Data da medição</label>
-            <input type="date"
-              value="${sr.data_medicao||''}"
-              onblur="salvarCampoExposicao(${sr.id},'data_medicao',this.value||null)"
-              id="dmed-${sr.id}">
-          </div>
-          <div class="aval-field">
-            <label>Responsável pela medição</label>
-            <input type="text" placeholder="Empresa ou técnico"
-              value="${h(sr.responsavel_medicao||'')}"
-              onblur="salvarCampoExposicao(${sr.id},'responsavel_medicao',this.value)"
-              id="rmed-${sr.id}">
-          </div>
+      </div>`:``}
+      <div class="exposicao-row" style="margin-top:8px;">
+        <div class="aval-field" style="grid-column:1/-1;position:relative;">
+          <label>Observações / Conclusão técnica</label>
+          <textarea id="conc-${sr.id}" rows="3"
+            placeholder="Descreva as condições observadas e a conclusão técnica da avaliação..."
+            onblur="salvarCampoExposicao(${sr.id},'conclusao_qualitativa',this.value)"
+            style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 36px 8px 10px;outline:none;resize:vertical;min-height:60px;"
+          >${h(sr.conclusao_qualitativa||'')}</textarea>
+          <button class="btn-ia-medida" onclick="sugerirConclusaoIA(${sr.id})" title="Sugerir conclusão com IA">✨</button>
         </div>
       </div>
-    </div>`:''}
+      <div class="exposicao-row">
+        <div class="aval-field">
+          <label>Data da avaliação</label>
+          <input type="date" value="${sr.data_avaliacao||''}"
+            onblur="salvarCampoExposicao(${sr.id},'data_avaliacao',this.value||null)"
+            id="dav-${sr.id}">
+        </div>
+        <div class="aval-field">
+          <label>Responsável pela avaliação</label>
+          <input type="text" placeholder="Técnico ou empresa"
+            value="${h(sr.responsavel_avaliacao||'')}"
+            onblur="salvarCampoExposicao(${sr.id},'responsavel_avaliacao',this.value)"
+            id="rav-${sr.id}">
+        </div>
+      </div>
+    </div>`:``)}
 
     <div class="hierarquia">
       <div class="hier-titulo">Hierarquia de controle — NR-1</div>
@@ -1562,9 +1587,44 @@ async function salvarCampoExposicao(srId,campo,valor){
   }catch(e){console.error('Erro salvarCampoExposicao:',e);}
 }
 
-function toggleQuantitativo(srId,tipo){
-  const el=document.getElementById(`quant-${srId}`);
-  if(el)el.style.display=tipo==='Quantitativa'?'':'none';
+async function mudarTipoAvaliacao(srId,tipo){
+  if(!tipo)return;
+  await salvarCampoExposicao(srId,'tipo_avaliacao',tipo);
+  const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+  const sr=lista.find(x=>x.id===srId);
+  if(sr)sr.tipo_avaliacao=tipo;
+  renderedRiscosCache[srId]=null;
+  const cardEl=document.getElementById(`risco-card-${srId}`);
+  if(cardEl)cardEl.outerHTML=renderRiscoCard(sr);
+}
+
+async function sugerirConclusaoIA(srId){
+  const lista=contexto==='setor'?riscosSetor:riscosFuncao;
+  const sr=lista.find(x=>x.id===srId);
+  const risco=sr?todosRiscos.find(r=>r.id===sr.risco_id):null;
+  if(!risco)return;
+  const textarea=document.getElementById(`conc-${srId}`);
+  const btn=document.querySelector(`#risco-card-${srId} [onclick*="sugerirConclusaoIA"]`);
+  if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const texto=await ia_sugerirConclusao(
+      risco.nome_risco,
+      getCatNome(risco.categoria_risco_id),
+      sr.fonte_geradora_especifica||risco.fonte_geradora||'',
+      sr.via_absorcao_custom||risco.via_absorcao||'',
+      risco.danos_saude||'',
+      sr.metodologia_avaliacao_custom||risco.metodologia_avaliacao||'',
+      sr.probabilidade,sr.severidade
+    );
+    if(textarea){
+      textarea.value=texto;
+      textarea.style.borderColor='var(--accent2)';
+      setTimeout(()=>textarea.style.borderColor='',5000);
+    }
+  }catch(e){
+    if(textarea)textarea.placeholder='Erro: '+e.message;
+  }
+  if(btn){btn.disabled=false;btn.textContent='✨';}
 }
 
 // ── RESPONSÁVEL E PRAZO DAS MEDIDAS ───────────────────────────

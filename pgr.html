@@ -1093,6 +1093,7 @@ function renderSecaoGHE(){
 
 // ── INVENTÁRIO DE RISCOS POR FUNÇÃO ───────────────────────────
 function renderInventarioRiscos(){
+  window.riscosSemAvaliacao=[];
   const paginas=[];
   const ALTURA_UTIL_PX=Math.round(200*96/25.4);
 
@@ -1155,6 +1156,20 @@ function renderInventarioRiscos(){
     const risco=getRisco(fr.risco_id);if(!risco)return'';
     const catCor=getCatCor(risco.categoria_risco_id);
     const catNome=getCatNome(risco.categoria_risco_id);
+    // Risco sem avaliação → card pendente + coleta para plano de ação
+    if(!fr.tipo_avaliacao){
+      if(!window.riscosSemAvaliacao)window.riscosSemAvaliacao=[];
+      const funcaoFr=funcoes.find(f=>f.id===fr.funcao_id);
+      window.riscosSemAvaliacao.push({fr,risco,funcao:funcaoFr});
+      return`<div class="risco-funcao" style="background:#fffbeb;border:1pt dashed #fde68a;">
+        <div class="risco-ctx"><span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span></div>
+        <div class="risco-principal">
+          <span class="risco-funcao-nome">${h(risco.nome_risco)}</span>
+          <span style="background:#fffbeb;color:#92400e;border:1pt solid #fde68a;padding:2pt 7pt;border-radius:3pt;font-size:7.5pt;font-weight:600;">⏳ Avaliação pendente</span>
+        </div>
+        <div style="font-size:8pt;color:#92400e;margin-top:4pt;">Ação gerada no Plano de Ação para realizar a avaliação.${risco.metodologia_avaliacao?` Metodologia sugerida: ${h(risco.metodologia_avaliacao)}.`:''}</div>
+      </div>`;
+    }
     const perigo=fr.perigo_id?getPerigo(fr.perigo_id):null;
     const mds=medidas_funcao.filter(m=>m.funcao_risco_id===fr.id);
     const episFr=mds.filter(m=>m.nivel==='EPI'&&m.epi_id);
@@ -2007,6 +2022,16 @@ function renderMatrizRisco(){
 }
 
 function renderPlanoAcao(){
+  // Limpa riscos sem avaliação ao re-renderizar
+  const pendentes=(window.riscosSemAvaliacao||[]).map(({fr,risco,funcao})=>{
+    const metod=fr.metodologia_avaliacao_custom||risco.metodologia_avaliacao||'';
+    const setoresNomes=funcaoSetores.filter(fs=>fs.funcao_id===fr.funcao_id).map(fs=>setores.find(s=>s.id===fs.setor_id)?.nome_setor).filter(Boolean);
+    const vinculos=[
+      funcao?'👷 '+funcao.nome_funcao:'',
+      ...setoresNomes.map(s=>'📁 '+s),
+    ].filter(Boolean);
+    return{titulo:`Realizar avaliação — ${risco.nome_risco}`,origem:'Gestão de Riscos',prioridade:'Média',responsavel:null,prazo:null,status:'Pendente',indicador:metod?`Metodologia: ${metod}`:null,vinculos};
+  });
   const todasAcoes=window.acoesData||[];
   const idsAtivos=acoesSelecionadasIds||todasAcoes.map(a=>a.id);
   const acoes=todasAcoes.filter(a=>idsAtivos.includes(a.id)&&a.status!=='Arquivada'&&a.status!=='Cancelada');
@@ -2015,8 +2040,9 @@ function renderPlanoAcao(){
   const setoresMap={};setores.forEach(s=>{setoresMap[s.id]=s.nome_setor;});
   const funcoesMap={};funcoes.forEach(f=>{funcoesMap[f.id]=f.nome_funcao;});
 
-  const acoesAgrupadas=[];
+  const acoesAgrupadas=[...pendentes];
   const titlosVistos={};
+  pendentes.forEach((p,i)=>{titlosVistos[p.titulo.trim()]=i;});
   acoes.forEach(a=>{
     const titulo=a.titulo.trim();
     if(titlosVistos[titulo]!==undefined){

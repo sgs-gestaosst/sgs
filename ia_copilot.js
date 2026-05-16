@@ -170,6 +170,26 @@ Selecione no máximo 4 EPIs. Use apenas IDs existentes no catálogo acima.`;
   }catch(e){throw new Error('IA retornou resposta inválida. Tente novamente.');}
 }
 
+async function ia_sugerirConclusao(nomeRisco,catRisco,fonteGeradora,viaAbsorcao,danosSaude,metodologia,probabilidade,severidade){
+  const nivel={1:'Muito baixa',2:'Baixa',3:'Média',4:'Alta',5:'Muito alta'};
+  const nivelS={1:'Insignificante',2:'Leve',3:'Moderada',4:'Grave',5:'Catastrófica'};
+  const ps=(probabilidade&&severidade)?probabilidade*severidade:null;
+  const nivelRisco=ps?ps>=15?'Muito Alto':ps>=8?'Alto':ps>=4?'Médio':'Baixo':'não definido';
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
+Elabore uma conclusão técnica objetiva para a avaliação qualitativa do seguinte risco ocupacional:
+
+Risco: ${nomeRisco}
+Categoria: ${catRisco}
+${fonteGeradora?`Fonte geradora: ${fonteGeradora}`:''}
+${viaAbsorcao?`Via de absorção: ${viaAbsorcao}`:''}
+${danosSaude?`Danos à saúde: ${danosSaude}`:''}
+${metodologia?`Metodologia aplicada: ${metodologia}`:''}
+${probabilidade?`Probabilidade: ${probabilidade} — ${nivel[probabilidade]||''}`:''} ${severidade?`| Severidade: ${severidade} — ${nivelS[severidade]||''}`:''} ${ps?`| Nível: ${nivelRisco}`:''}
+
+Escreva 2 a 3 frases técnicas descrevendo: a condição de exposição identificada, o nível de risco encontrado e a justificativa. Baseie-se nas NRs brasileiras vigentes. Sem títulos, sem bullets, texto corrido.`;
+  return await _chamarGemini(prompt);
+}
+
 async function ia_sugerirMedida(nomeRisco,catRisco,tipoMedida){
   const descTipo={
     elim:'Eliminação — remover completamente a fonte do risco',
