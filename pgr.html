@@ -1192,13 +1192,13 @@ function renderInventarioRiscos(){
       }
       const marcada=fr[`medida_${mc.key}`];const desc=fr[`medida_${mc.key}_desc`];
       if(!marcada&&!desc)return'';
-      const efic=fr[`medida_${mc.key}_eficacia`]||'Não avaliada';
-      const eficCor={Eficaz:{bg:'#dcfce7',c:'#166534'},Parcial:{bg:'#fef9c3',c:'#854d0e'},Ineficaz:{bg:'#fee2e2',c:'#991b1b'},'Não avaliada':{bg:'#f3f4f6',c:'#6b7280'}}[efic]||{bg:'#f3f4f6',c:'#6b7280'};
+      const efic=fr[`medida_${mc.key}_eficacia`]||null;
+      const eficCor={Eficaz:{bg:'#dcfce7',c:'#166534'},Parcial:{bg:'#fef9c3',c:'#854d0e'},Ineficaz:{bg:'#fee2e2',c:'#991b1b'}}[efic]||null;
       return`<div class="medida-item">
         <div class="medida-num" style="background:${mc.bg};color:${mc.cor};">${{elim:1,subs:2,eng:3,adm:4}[mc.key]}</div>
         <div class="medida-label" style="color:${mc.cor};">${mc.label}</div>
         <div class="medida-desc" style="flex:1;">${desc?h(desc):'<span style="color:#6b7280;font-style:italic;">Medida indicada — descrição não preenchida</span>'}
-          <span style="display:inline-block;margin-left:6pt;background:${eficCor.bg};color:${eficCor.c};font-size:7pt;font-weight:700;padding:1pt 6pt;border-radius:3pt;border:1pt solid ${eficCor.c};">${efic}</span>
+          ${efic&&eficCor?`<span style="display:inline-block;margin-left:6pt;background:${eficCor.bg};color:${eficCor.c};font-size:7pt;font-weight:700;padding:1pt 6pt;border-radius:3pt;border:1pt solid ${eficCor.c};">${efic}</span>`:''}
         </div>
       </div>`;
     }).filter(Boolean).join('');
