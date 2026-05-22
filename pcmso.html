@@ -361,9 +361,82 @@ function renderDocumento(){
   wrap.appendChild(renderProgramaExames());
   wrap.appendChild(renderMatrizRiscos());
   wrap.appendChild(renderCronograma());
+  if(setores.some(s=>s.tem_agente_psicossocial))wrap.appendChild(renderSaudeMental());
+  wrap.appendChild(renderVacinacao());
   wrap.appendChild(renderRelatorioAnual());
   wrap.appendChild(renderCriteriosConduta());
   wrap.appendChild(renderSigiloFinal());
+}
+
+function renderSaudeMental(){
+  const pg=document.createElement('div');pg.className='page';
+  const nm=escHtml(empresa.nome_fantasia||empresa.razao_social);
+  const setoresPsi=setores.filter(s=>s.tem_agente_psicossocial).map(s=>escHtml(s.nome_setor)).join(', ');
+  pg.innerHTML=`
+  <div class="page-header"><span class="ph-empresa">${nm}</span><span class="ph-doc">PCMSO — ${fmtAno()}</span></div>
+  <div class="doc-section"><span class="num-secao">6-A</span>Protocolo de Saúde Mental Ocupacional</div>
+  <div class="conclusao-box" style="margin-bottom:12pt;">
+    <strong>Base legal — NR-01 2025:</strong> O PGR desta empresa identificou riscos psicossociais nos setores: <strong>${setoresPsi||'—'}</strong>. Conforme a NR-01 (vigência mai/2025), o PCMSO deve incluir protocolo de vigilância de saúde mental compatível com os riscos psicossociais identificados. A ausência deste protocolo configura dupla não conformidade (NR-01 + NR-07).
+  </div>
+  <div class="doc-subsection">Instrumentos de triagem adotados</div>
+  <table class="doc-table">
+    <thead><tr><th style="width:20%;">Instrumento</th><th style="width:30%;">O que avalia</th><th style="width:20%;text-align:center;">Ponto de corte</th><th>Periodicidade</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:600;">PHQ-9</td><td>Sintomas depressivos (9 questões)</td><td style="text-align:center;">≥10: depressão moderada</td><td>Anual para expostos a risco psicossocial</td></tr>
+      <tr><td style="font-weight:600;">GAD-7</td><td>Transtorno de ansiedade generalizada (7 questões)</td><td style="text-align:center;">≥10: ansiedade moderada</td><td>Anual, junto ao PHQ-9</td></tr>
+      <tr><td style="font-weight:600;">AUDIT-C</td><td>Uso problemático de álcool (3 questões)</td><td style="text-align:center;">H≥4 / M≥3: risco</td><td>Anual</td></tr>
+      <tr><td style="font-weight:600;">Questionário Nórdico</td><td>Distúrbios músculo-esqueléticos por região corporal</td><td style="text-align:center;">Qualitativo</td><td>Anual para expostos a ergonômico</td></tr>
+    </tbody>
+  </table>
+  <div class="doc-subsection" style="margin-top:12pt;">Fluxo de encaminhamento</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8pt;margin-top:8pt;">
+    ${[
+      ['1. Triagem','Aplicação anual dos questionários a todos os trabalhadores expostos a risco psicossocial identificado no PGR'],
+      ['2. Avaliação','PHQ-9 ≥10 ou GAD-7 ≥10 → consulta médica com médico coordenador ou clínico geral'],
+      ['3. Encaminhamento','Casos moderados/graves (PHQ-9 ≥15) → encaminhamento a psiquiatra ou psicólogo do trabalho'],
+      ['4. Registro','Todos os casos documentados em prontuário individual. Relatório anual inclui estatísticas por CID-F'],
+    ].map(([t,d])=>`<div style="border:1pt solid #e5e7eb;border-radius:4pt;padding:8pt;background:#faf5ff;">
+      <div style="font-size:8.5pt;font-weight:700;color:#4b21a8;margin-bottom:4pt;">${escHtml(t)}</div>
+      <div style="font-size:8pt;color:#374151;line-height:1.5;">${escHtml(d)}</div>
+    </div>`).join('')}
+  </div>
+  <div class="doc-subsection" style="margin-top:12pt;">Protocolo de retorno ao trabalho após afastamento por CID-F</div>
+  <p class="doc-text" style="margin-bottom:8pt;">Trabalhadores afastados por transtorno mental (CID-F) por período superior a 30 dias passarão pelo seguinte protocolo de gestão de retorno:</p>
+  <ul style="margin:0 0 8pt 16pt;font-size:9pt;color:#1f2937;line-height:1.8;">
+    <li><strong>Exame de retorno obrigatório</strong> no primeiro dia de retorno (NR-07 item 7.5.3);</li>
+    <li><strong>Avaliação de aptidão</strong> com possibilidade de readaptação funcional progressiva;</li>
+    <li><strong>Acompanhamento pós-retorno</strong> por 90 dias: consultas mensais com o médico coordenador;</li>
+    <li><strong>Comunicação estruturada</strong> com INSS nos casos de habilitação profissional;</li>
+    <li>Registro de todo o processo em prontuário individual.</li>
+  </ul>
+  <div class="page-footer"><span class="pf-label">PCMSO — ${nm}</span><span class="pf-page"></span></div>`;
+  return pg;
+}
+
+function renderVacinacao(){
+  const pg=document.createElement('div');pg.className='page';
+  const nm=escHtml(empresa.nome_fantasia||empresa.razao_social);
+  const temBiologico=setores.some(s=>s.tem_agente_biologico);
+  const temQuimico=setores.some(s=>s.tem_agente_quimico);
+  const gr=empresa.grau_risco||1;
+  pg.innerHTML=`
+  <div class="page-header"><span class="ph-empresa">${nm}</span><span class="ph-doc">PCMSO — ${fmtAno()}</span></div>
+  <div class="doc-section"><span class="num-secao">6-B</span>Programa de Vacinação Ocupacional</div>
+  <p class="doc-text" style="margin-bottom:10pt;">O programa de vacinação integra o PCMSO como medida de prevenção de doenças infecciosas relacionadas ao trabalho, conforme as recomendações da NR-07 e do Ministério da Saúde. As vacinas abaixo são indicadas com base nos riscos identificados no PGR e nas características da atividade econômica desta empresa.</p>
+  <table class="doc-table">
+    <thead><tr><th>Vacina</th><th style="width:28%;">Público-alvo</th><th style="text-align:center;width:16%;">Periodicidade</th><th style="width:15%;">Base</th><th style="text-align:center;width:12%;">Obrigatória</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:600;">Hepatite B</td><td>${temBiologico?'Todos os expostos a agentes biológicos':'Recomendada para todos os trabalhadores'}</td><td style="text-align:center;">3 doses + reforço conforme sorologia</td><td>NR-07 / MS</td><td style="text-align:center;"><span style="background:${temBiologico?'#dcfce7':'#f3f4f6'};color:${temBiologico?'#166534':'#374151'};padding:1pt 6pt;border-radius:3pt;font-size:7pt;font-weight:700;">${temBiologico?'Sim':'Recomendada'}</span></td></tr>
+      <tr><td style="font-weight:600;">Tétano (dT)</td><td>Trabalhadores rurais, construção civil, esgoto, manejo de resíduos</td><td style="text-align:center;">A cada 10 anos</td><td>MS / NR-07</td><td style="text-align:center;"><span style="background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;font-size:7pt;font-weight:700;">Recomendada</span></td></tr>
+      <tr><td style="font-weight:600;">Influenza</td><td>Profissionais de saúde, trabalhadores ≥50 anos, portadores de doenças crônicas</td><td style="text-align:center;">Anual (campanha MS)</td><td>MS</td><td style="text-align:center;"><span style="background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;font-size:7pt;font-weight:700;">Recomendada</span></td></tr>
+      ${temBiologico?`<tr><td style="font-weight:600;">Hepatite A</td><td>Trabalhadores com exposição a esgoto, alimentos, agentes biológicos intestinais</td><td style="text-align:center;">2 doses</td><td>MS / NR-07</td><td style="text-align:center;"><span style="background:#dcfce7;color:#166534;padding:1pt 6pt;border-radius:3pt;font-size:7pt;font-weight:700;">Sim</span></td></tr>`:''}
+      <tr><td style="font-weight:600;">Febre Amarela</td><td>Trabalhadores em áreas endêmicas ou de transmissão (silvicultores, trabalhadores rurais, viagens)</td><td style="text-align:center;">Dose única (reforço a critério MS)</td><td>MS</td><td style="text-align:center;"><span style="background:#f3f4f6;color:#374151;padding:1pt 6pt;border-radius:3pt;font-size:7pt;font-weight:700;">Conforme risco</span></td></tr>
+    </tbody>
+  </table>
+  <div class="doc-subsection" style="margin-top:12pt;">Controle de cobertura vacinal</div>
+  <p class="doc-text">O médico coordenador é responsável por manter o controle de cobertura vacinal dos trabalhadores, verificando carteiras de vacinação nos exames periódicos e admissionais. Trabalhadores não vacinados para as vacinas obrigatórias indicadas devem ser encaminhados para vacinação antes da exposição ao agente de risco. O registro deve constar em prontuário individual.</p>
+  <div class="page-footer"><span class="pf-label">PCMSO — ${nm}</span><span class="pf-page"></span></div>`;
+  return pg;
 }
 
 function renderRelatorioAnual(){
@@ -547,6 +620,8 @@ function renderIdentificacao(){
       }).join('')}
     </tbody>
   </table>
+  <div class="doc-subsection" style="margin-top:12pt;">Cobertura de trabalhadores terceirizados</div>
+  <p class="doc-text">Conforme o princípio de solidariedade previsto na legislação trabalhista, este PCMSO estende sua cobertura aos trabalhadores terceirizados que prestam serviços de forma habitual nas instalações desta empresa, assegurando o cumprimento dos exames admissional, periódico e demissional compatíveis com os riscos da função exercida no estabelecimento tomador. Cabe à empresa contratada comprovar a realização dos exames e apresentar os ASOs quando solicitado pelo SESMT ou médico coordenador.</p>
   <div class="doc-section" style="margin-top:16pt;"><span class="num-secao">3</span>Responsável Técnico (Médico do Trabalho)</div>
   <div class="ficha-grid">
     <div class="ficha-item"><div class="ficha-label">Nome / CRM</div><div class="ficha-value elab-responsavel" style="color:#374151;">—</div></div>
@@ -869,23 +944,32 @@ function renderCronograma(){
       </tbody>
     </table>`:
     `<div class="em-breve"><div class="em-breve-icon">📅</div><div class="em-breve-label">Nenhum cronograma gerado.<br>Clique em "📅 Gerar cronograma" para definir as datas dos exames por função.</div></div>`;
-  // Cronograma por funcionário: próximo exame e status
-  const linhasFuncionarios=funcionarios.map(f=>{
+  // Cronograma por funcionário: ordenado por urgência com alertas 30 dias
+  const em30dias=new Date(hoje);em30dias.setDate(em30dias.getDate()+30);
+  const funcsSorted=[...funcionarios].sort((a,b)=>{
+    const pa=a.data_prox_aso?new Date(a.data_prox_aso+'T00:00:00'):null;
+    const pb=b.data_prox_aso?new Date(b.data_prox_aso+'T00:00:00'):null;
+    const ua=!pa?3:pa<hoje?0:pa<=em30dias?1:2;
+    const ub=!pb?3:pb<hoje?0:pb<=em30dias?1:2;
+    if(ua!==ub)return ua-ub;
+    return(pa||new Date('9999'))-(pb||new Date('9999'));
+  });
+  const linhasFuncionarios=funcsSorted.map(f=>{
     const aso=ultimosAsos.find(a=>a.funcionario_id===f.id);
     const prox=f.data_prox_aso;
     const proxD=prox?new Date(prox+'T00:00:00'):null;
     const vencido=proxD&&proxD<hoje;
-    const statusCor=!prox?'#6b7280':vencido?'#991b1b':'#166534';
-    const statusBg=!prox?'#f3f4f6':vencido?'#fee2e2':'#dcfce7';
-    const statusLabel=!prox?'Não agendado':vencido?'Vencido':'Em dia';
+    const vencendo=proxD&&!vencido&&proxD<=em30dias;
+    const statusCor=!prox?'#6b7280':vencido?'#991b1b':vencendo?'#854d0e':'#166534';
+    const statusBg=!prox?'#f3f4f6':vencido?'#fee2e2':vencendo?'#fef9c3':'#dcfce7';
+    const statusLabel=!prox?'Não agendado':vencido?'🔴 Vencido':vencendo?'⚠️ Vencendo':'✅ Em dia';
     const funcao=funcoes.find(fn=>fn.id===f.funcao_id);
-    const examesFuncao=funcao_exames.filter(fe=>fe.funcao_id===f.funcao_id).map(fe=>{const cat=catalogo.find(c=>c.id===fe.exame_id);return cat?.nome||'';}).filter(Boolean);
-    return`<tr>
+    return`<tr${vencido?' style="background:#fff5f5;"':vencendo?' style="background:#fffbeb;"':''}>
       <td style="font-weight:500;font-size:9pt;">${escHtml(f.nome_completo)}</td>
       <td style="font-size:8.5pt;color:#374151;">${escHtml(funcao?.nome_funcao||'—')}</td>
       <td style="font-size:8.5pt;color:#374151;">${fmtD(aso?.data_exame||f.aso_ultima_data)}</td>
-      <td style="font-size:8.5pt;font-weight:600;color:#374151;">${fmtD(prox)}</td>
-      <td style="text-align:center;"><span style="background:${statusBg};color:${statusCor};padding:2pt 7pt;border-radius:3pt;font-size:7.5pt;font-weight:700;">${statusLabel}</span></td>
+      <td style="font-size:8.5pt;font-weight:600;color:${statusCor};">${fmtD(prox)}</td>
+      <td style="text-align:center;"><span style="background:${statusBg};color:${statusCor};padding:2pt 7pt;border-radius:3pt;font-size:7.5pt;font-weight:700;white-space:nowrap;">${statusLabel}</span></td>
     </tr>`;
   }).join('');
   // Lista consolidada de exames únicos
