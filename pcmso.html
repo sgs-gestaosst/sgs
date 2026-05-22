@@ -196,6 +196,48 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       ℹ️ Estes dados aparecem na capa e rodapé. Não são salvos no banco — preencha antes de imprimir.
     </div>
   </div>
+  <!-- Médico coordenador — persistido no banco -->
+  <div style="max-width:900px;margin:16px auto 0;border-top:1px solid var(--border);padding-top:14px;">
+    <div style="font-size:11px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">🩺 Médico Coordenador — salvo no banco</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 2fr;gap:12px;margin-bottom:10px;">
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Nome completo *</label>
+        <input type="text" id="med-nome" placeholder="Dr(a). Nome Completo" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">CRM *</label>
+        <input type="text" id="med-crm" placeholder="12345" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">UF CRM *</label>
+        <select id="med-uf-crm" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+          ${['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'].map(uf=>`<option value="${uf}">${uf}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Especialidade / RQE</label>
+        <input type="text" id="med-especialidade" placeholder="Medicina do Trabalho" value="Medicina do Trabalho" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:12px;align-items:end;">
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">RQE (opcional)</label>
+        <input type="text" id="med-rqe" placeholder="Nº RQE" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">CNPJ clínica/empresa</label>
+        <input type="text" id="med-cnpj-empresa" placeholder="00.000.000/0000-00" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;">Nome da clínica/empresa médica</label>
+        <input type="text" id="med-empresa" placeholder="Clínica Occupacional Ltda" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;">
+      </div>
+      <div>
+        <button onclick="salvarMedicoCoord()" style="padding:8px 18px;background:var(--accent2);color:#0f1117;font-family:var(--sans);font-size:13px;font-weight:600;border:none;border-radius:var(--radius);cursor:pointer;">💾 Salvar</button>
+      </div>
+    </div>
+    <div id="status-medico" style="font-size:11px;margin-top:6px;color:var(--text3);"></div>
+  </div>
 </div>
 
 <!-- MODAL GERAR CRONOGRAMA -->
@@ -276,6 +318,23 @@ async function carregar(){
       const visto=new Set();
       ultimosAsos=todosAsos.filter(a=>{if(visto.has(a.funcionario_id))return false;visto.add(a.funcionario_id);return true;});
     }
+    // Médico coordenador persistido
+    try{
+      const resMed=await fetch(`${SUPA_URL}/rest/v1/medicos_coordenadores?empresa_id=eq.${empresaId}&ativo=eq.true&order=id.desc&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const medArr=await resMed.json();
+      if(medArr.length){
+        medicoCoord=medArr[0];
+        document.getElementById('med-nome').value=medicoCoord.nome||'';
+        document.getElementById('med-crm').value=medicoCoord.crm||'';
+        document.getElementById('med-uf-crm').value=medicoCoord.uf_crm||'SP';
+        document.getElementById('med-rqe').value=medicoCoord.rqe||'';
+        document.getElementById('med-especialidade').value=medicoCoord.especialidade||'Medicina do Trabalho';
+        document.getElementById('med-empresa').value=medicoCoord.nome_empresa_medica||'';
+        document.getElementById('med-cnpj-empresa').value=medicoCoord.cnpj_empresa_medica||'';
+        elaboradora.responsavel=`${medicoCoord.nome} — CRM ${medicoCoord.uf_crm||''}/${medicoCoord.crm||''}`;
+        document.getElementById('elab-responsavel').value=elaboradora.responsavel;
+      }
+    }catch(e){}
     await carregarAcoesPCMSO();
     try{
       const [rFR,rRiscos,rCats]=await Promise.all([
@@ -302,8 +361,75 @@ function renderDocumento(){
   wrap.appendChild(renderProgramaExames());
   wrap.appendChild(renderMatrizRiscos());
   wrap.appendChild(renderCronograma());
+  wrap.appendChild(renderRelatorioAnual());
   wrap.appendChild(renderCriteriosConduta());
   wrap.appendChild(renderSigiloFinal());
+}
+
+function renderRelatorioAnual(){
+  const pg=document.createElement('div');pg.className='page';
+  const anoAtual=new Date().getFullYear();
+  // Estatísticas dos ASOs
+  const totalFunc=funcionarios.length;
+  const comAso=ultimosAsos.length;
+  const aptos=ultimosAsos.filter(a=>a.resultado&&a.resultado.toLowerCase().includes('apto')).length;
+  const inaptos=ultimosAsos.filter(a=>a.resultado&&a.resultado.toLowerCase().includes('inapto')).length;
+  const semAso=totalFunc-comAso;
+  // Exames em dia / vencidos
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  const emDia=funcionarios.filter(f=>{if(!f.data_prox_aso)return false;return new Date(f.data_prox_aso+'T00:00:00')>=hoje;}).length;
+  const vencidos=funcionarios.filter(f=>{if(!f.data_prox_aso)return false;return new Date(f.data_prox_aso+'T00:00:00')<hoje;}).length;
+  const percEmDia=totalFunc>0?Math.round((emDia/totalFunc)*100):0;
+  // Exames por tipo (ações PCMSO)
+  const acoesData=window.acoesDataPCMSO||[];
+  const concluidas=acoesData.filter(a=>a.status==='Concluída').length;
+  const pendentes=acoesData.filter(a=>a.status==='Pendente').length;
+  const nmEmp=escHtml(empresa.nome_fantasia||empresa.razao_social);
+  pg.innerHTML=`
+  <div class="page-header">
+    <span class="ph-empresa">${nmEmp}</span>
+    <span class="ph-doc">PCMSO — ${anoAtual}</span>
+  </div>
+  <div class="doc-section"><span class="num-secao">7</span>Relatório Anual — NR-07 item 7.6.1</div>
+  <p class="doc-text" style="margin-bottom:10pt;">Relatório do período <strong>${anoAtual}</strong>, elaborado conforme exigência da NR-07, item 7.6.1. Deve ser assinado pelo médico coordenador e arquivado por no mínimo 5 anos.</p>
+
+  <div class="doc-subsection">7.1 Monitoramento dos Exames Ocupacionais</div>
+  <div class="ficha-grid ficha-grid-3">
+    <div class="ficha-item"><div class="ficha-label">Total de trabalhadores cobertos</div><div class="ficha-value" style="font-size:18pt;color:#062018;font-weight:700;">${totalFunc}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Com ASO registrado</div><div class="ficha-value" style="font-size:18pt;color:#166534;font-weight:700;">${comAso}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Sem ASO / Pendentes</div><div class="ficha-value" style="font-size:18pt;color:${semAso>0?'#991b1b':'#166534'};font-weight:700;">${semAso}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Resultado: Aptos</div><div class="ficha-value" style="font-size:18pt;color:#166534;font-weight:700;">${aptos}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Resultado: Inaptos</div><div class="ficha-value" style="font-size:18pt;color:${inaptos>0?'#991b1b':'#166534'};font-weight:700;">${inaptos}</div></div>
+    <div class="ficha-item"><div class="ficha-label">% Exames em dia</div><div class="ficha-value" style="font-size:18pt;color:${percEmDia>=80?'#166534':percEmDia>=50?'#854d0e':'#991b1b'};font-weight:700;">${percEmDia}%</div></div>
+  </div>
+
+  <div class="doc-subsection" style="margin-top:12pt;">7.2 Situação do Cronograma de Exames</div>
+  <div class="ficha-grid">
+    <div class="ficha-item"><div class="ficha-label">Exames em dia (próx. ASO futuro)</div><div class="ficha-value" style="color:#166534;font-weight:600;">${emDia} trabalhador(es)</div></div>
+    <div class="ficha-item"><div class="ficha-label">Exames vencidos</div><div class="ficha-value" style="color:${vencidos>0?'#991b1b':'#166534'};font-weight:600;">${vencidos} trabalhador(es)</div></div>
+    <div class="ficha-item"><div class="ficha-label">Ações PCMSO concluídas</div><div class="ficha-value" style="color:#166534;font-weight:600;">${concluidas}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Ações PCMSO pendentes</div><div class="ficha-value" style="color:${pendentes>0?'#854d0e':'#166534'};font-weight:600;">${pendentes}</div></div>
+  </div>
+
+  <div class="doc-subsection" style="margin-top:12pt;">7.3 Análise e Conclusão</div>
+  <p class="doc-text">Com base nos dados levantados no período, conclui-se que o programa de exames ocupacionais ${percEmDia>=80?'apresentou nível de conformidade adequado':'requer atenção imediata para regularização dos exames vencidos'}. ${vencidos>0?`Há ${vencidos} trabalhador(es) com exame periódico vencido que deve(m) ser convocado(s) com urgência. `:''} As medidas de controle de saúde definidas neste PCMSO foram ${concluidas>0?`implementadas (${concluidas} ação(ões) concluída(s))`:'planejadas conforme cronograma'}, com acompanhamento pelo médico coordenador.</p>
+  <p class="doc-text" style="margin-top:8pt;">Este relatório deve ser complementado com: número de CATs emitidas no período, doenças ocupacionais identificadas, taxa de absenteísmo relacionado à saúde e demais indicadores de vigilância epidemiológica, conforme NR-07 item 7.6.1.</p>
+
+  <div style="margin-top:24pt;display:grid;grid-template-columns:1fr 1fr;gap:30pt;">
+    <div style="text-align:center;"><div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:48pt;">
+      <div style="font-size:9pt;font-weight:500;">${medicoCoord?escHtml(medicoCoord.nome):'___________________________________'}</div>
+      <div style="font-size:8pt;color:#6b7280;">Médico Coordenador${medicoCoord?` — CRM ${medicoCoord.uf_crm}/${medicoCoord.crm}`:''}</div>
+    </div></div>
+    <div style="text-align:center;"><div style="border-top:1pt solid #374151;padding-top:6pt;margin-top:48pt;">
+      <div style="font-size:9pt;font-weight:500;">${escHtml(empresa.razao_social||'—')}</div>
+      <div style="font-size:8pt;color:#6b7280;">Representante legal — Data: ___/___/______</div>
+    </div></div>
+  </div>
+  <div class="page-footer">
+    <span class="pf-label">PCMSO — ${nmEmp}</span>
+    <span class="pf-page"></span>
+  </div>`;
+  return pg;
 }
 
 function renderCapa(){
@@ -450,12 +576,15 @@ function renderBaseLegal(){
     <thead><tr><th style="width:35%;">Norma</th><th>Descrição</th></tr></thead>
     <tbody>
       <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">CLT — Art. 168 e 169</td><td>Obrigatoriedade de exames médicos admissional, periódico, demissional e de retorno ao trabalho</td></tr>
-      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-07 / Portaria 1.031/2018</td><td>Programa de Controle Médico de Saúde Ocupacional — exames, periodicidade, responsabilidades</td></tr>
-      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-09</td><td>Avaliação e controle dos agentes físicos, químicos e biológicos presentes no ambiente de trabalho</td></tr>
-      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-15</td><td>Atividades e operações insalubres — limites de tolerância para agentes nocivos</td></tr>
-      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Portaria MTE 1.031/2018</td><td>Aprova a NR-07 e estabelece as tabelas de exames obrigatórios por agente de risco</td></tr>
-      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">LGPD — Lei 13.709/2018</td><td>Proteção dos dados pessoais sensíveis de saúde dos trabalhadores</td></tr>
-      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Resolução CFM 1.658/2002</td><td>Normatiza a emissão do Atestado de Saúde Ocupacional — ASO</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-07 (Portaria MTP nº 1.419/2023)</td><td>Programa de Controle Médico de Saúde Ocupacional — exames, periodicidade, ASO e responsabilidades do médico coordenador</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-01 2025 (Portaria MTP nº 1.419/2023)</td><td>Gerenciamento de Riscos Ocupacionais — integração PGR × PCMSO e riscos psicossociais (vigência: mai/2025)</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-15 (Portaria MTE nº 3.214/78)</td><td>Atividades e operações insalubres — agentes nocivos, limites de tolerância e exames específicos obrigatórios</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Lei 8.213/91 + Decreto 3.048/99</td><td>Plano de Benefícios da Previdência Social — aposentadoria especial e LTCAT como base para exames periódicos</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Portaria Interministerial 9/2007</td><td>Protocolo de prevenção de acidentes e doenças relacionados ao benzeno — exames semestrais obrigatórios</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Manual eSocial v3.1 — S-2220 / S-2240</td><td>Monitoramento da saúde do trabalhador (ASO) e condições ambientais de trabalho — transmissão obrigatória</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">LGPD — Lei 13.709/2018</td><td>Proteção dos dados pessoais sensíveis de saúde — base legal para tratamento de dados de saúde ocupacional</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Resolução CFM nº 2.314/2022</td><td>Telemedicina — define o que é/não é permitido em avaliações ocupacionais remotas (ASO presencial obrigatório)</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Portaria nº 1.823/2012 (PNST)</td><td>Política Nacional de Saúde do Trabalhador — notificação compulsória ao SINAN para doenças ocupacionais</td></tr>
     </tbody>
   </table>
 
@@ -470,12 +599,17 @@ function renderBaseLegal(){
     <li>Subsidiar o envio dos eventos S-2220 (ASO) e S-2240 (Condições Ambientais) ao eSocial.</li>
   </ul>
 
-  <div class="doc-subsection">3.3 Responsável Técnico</div>
+  <div class="doc-subsection">3.3 Responsável Técnico — Médico Coordenador</div>
   <div class="ficha-grid">
-    <div class="ficha-item"><div class="ficha-label">Médico Coordenador / Responsável Técnico</div><div class="ficha-value elab-responsavel">—</div></div>
-    <div class="ficha-item"><div class="ficha-label">Empresa Elaboradora</div><div class="ficha-value elab-nome-field">—</div></div>
-    <div class="ficha-item"><div class="ficha-label">CNPJ da Elaboradora</div><div class="ficha-value elab-cnpj-field" style="font-family:'IBM Plex Mono',monospace;">—</div></div>
-    <div class="ficha-item"><div class="ficha-label">Data de Elaboração</div><div class="ficha-value">${new Date().toLocaleDateString('pt-BR')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Nome / CRM</div><div class="ficha-value" style="font-size:11pt;">${medicoCoord?escHtml(`${medicoCoord.nome} — CRM ${medicoCoord.uf_crm}/${medicoCoord.crm}`):'<span class="elab-responsavel">—</span>'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Especialidade / RQE</div><div class="ficha-value">${medicoCoord?escHtml(medicoCoord.especialidade||'Medicina do Trabalho'):'—'}${medicoCoord?.rqe?` — RQE ${escHtml(medicoCoord.rqe)}`:''}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Empresa / Clínica</div><div class="ficha-value elab-nome-field">${medicoCoord?.nome_empresa_medica?escHtml(medicoCoord.nome_empresa_medica):'<span class="elab-nome-field">—</span>'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">CNPJ</div><div class="ficha-value elab-cnpj-field" style="font-family:'IBM Plex Mono',monospace;">${medicoCoord?.cnpj_empresa_medica?escHtml(medicoCoord.cnpj_empresa_medica):'—'}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Data de Elaboração</div><div class="ficha-value">${elaboradora.dataElab?new Date(elaboradora.dataElab+'T00:00:00').toLocaleDateString('pt-BR'):new Date().toLocaleDateString('pt-BR')}</div></div>
+    <div class="ficha-item"><div class="ficha-label">Vigência / Próxima revisão</div><div class="ficha-value">${new Date().getFullYear()+1}</div></div>
+  </div>
+  <div class="conclusao-box" style="margin-top:10pt;">
+    <strong>Fundamentação no PGR vigente:</strong> Este PCMSO é elaborado com base no Programa de Gerenciamento de Riscos (PGR) vigente da empresa, conforme exigido pela NR-01 (2025). Os exames definidos nas seções seguintes fundamentam-se nos agentes nocivos e riscos ocupacionais identificados no inventário de riscos do PGR. Alterações no PGR que incluam novos agentes implicam atualização imediata deste PCMSO.
   </div>
 
   <div class="page-footer">
@@ -798,6 +932,7 @@ function renderCronograma(){
 
 
 let elaboradora={nome:'',cnpj:'',responsavel:'',logoUrl:''};
+let medicoCoord=null;
 
 function toggleElaboradora(){
   const p=document.getElementById('painel-elaboradora');
@@ -852,6 +987,38 @@ function carregarLogoEmpresaPCMSO(input){
   reader.readAsDataURL(file);
 }
 
+async function salvarMedicoCoord(){
+  const nome=document.getElementById('med-nome').value.trim();
+  const crm=document.getElementById('med-crm').value.trim();
+  const uf_crm=document.getElementById('med-uf-crm').value;
+  const st=document.getElementById('status-medico');
+  if(!nome||!crm){st.textContent='⚠ Nome e CRM são obrigatórios.';st.style.color='var(--danger)';return;}
+  const payload={
+    empresa_id:parseInt(empresaId),
+    nome,crm,uf_crm,
+    rqe:document.getElementById('med-rqe').value.trim()||null,
+    especialidade:document.getElementById('med-especialidade').value.trim()||'Medicina do Trabalho',
+    nome_empresa_medica:document.getElementById('med-empresa').value.trim()||null,
+    cnpj_empresa_medica:document.getElementById('med-cnpj-empresa').value.trim()||null,
+    ativo:true,atualizado_em:new Date().toISOString()
+  };
+  st.textContent='Salvando...';st.style.color='var(--text2)';
+  try{
+    if(medicoCoord?.id){
+      await fetch(`${SUPA_URL}/rest/v1/medicos_coordenadores?id=eq.${medicoCoord.id}`,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      medicoCoord={...medicoCoord,...payload};
+    }else{
+      const res=await fetch(`${SUPA_URL}/rest/v1/medicos_coordenadores`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(payload)});
+      const arr=await res.json();medicoCoord=arr[0];
+    }
+    elaboradora.responsavel=`${nome} — CRM ${uf_crm}/${crm}`;
+    document.getElementById('elab-responsavel').value=elaboradora.responsavel;
+    st.textContent='✓ Médico coordenador salvo!';st.style.color='var(--success)';
+    setTimeout(()=>st.textContent='',3000);
+    if(empresa)renderDocumento();
+  }catch(e){st.textContent='Erro: '+e.message;st.style.color='var(--danger)';}
+}
+
 function atualizarElaboradora(){
   elaboradora.nome=document.getElementById('elab-nome').value.trim();
   elaboradora.cnpj=document.getElementById('elab-cnpj').value.trim();
@@ -880,7 +1047,8 @@ async function carregarAcoesPCMSO(){
   try{
     const res=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&origem=eq.PCMSO&ativo=eq.true&select=*&order=prazo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     acoesPCMSO=await res.json().catch(()=>[]);
-  }catch(e){acoesPCMSO=[];}
+    window.acoesDataPCMSO=acoesPCMSO;
+  }catch(e){acoesPCMSO=[];window.acoesDataPCMSO=[];}
 }
 
 function calcularProxData(periodicidade){
