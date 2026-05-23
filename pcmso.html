@@ -146,6 +146,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 }
 </style>
 </head>
+<script src="trial_check.js"></script>
 <body>
 <div class="screen-header">
   <a href="index.html" class="header-logo" style="text-decoration:none;">SGS</a>
@@ -275,6 +276,8 @@ const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
 const token=localStorage.getItem('sgs_token');
 if(!token)window.location.href='login.html';
+function getH(){return{'apikey':SUPA_KEY,'Authorization':`Bearer ${localStorage.getItem('sgs_token')}`};}
+function getHJ(){return{...getH(),'Content-Type':'application/json'};}
 const params=new URLSearchParams(window.location.search);
 const empresaId=params.get('empresa_id');
 if(!empresaId)window.location.href='empresas.html';
@@ -290,29 +293,29 @@ function fmtAno(){return new Date().getFullYear();}
 async function carregar(){
   try{
     const [resEmp,resCnaes,resSets,resFuncs,resSE,resFE,resCat]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?empresa_id=eq.${empresaId}&select=*&order=tipo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao,cbo&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/setor_exames?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/funcao_exames?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-      fetch(`${SUPA_URL}/rest/v1/catalogo_exames?ativo=eq.true&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:getH()}),
+      fetch(`${SUPA_URL}/rest/v1/empresa_cnaes?empresa_id=eq.${empresaId}&select=*&order=tipo.asc`,{headers:getH()}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:getH()}),
+      fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao,cbo&order=nome_funcao.asc`,{headers:getH()}),
+      fetch(`${SUPA_URL}/rest/v1/setor_exames?ativo=eq.true&select=*`,{headers:getH()}),
+      fetch(`${SUPA_URL}/rest/v1/funcao_exames?ativo=eq.true&select=*`,{headers:getH()}),
+      fetch(`${SUPA_URL}/rest/v1/catalogo_exames?ativo=eq.true&select=*`,{headers:getH()}),
     ]);
     [empresa,cnaes,setores,funcoes,setor_exames,funcao_exames,catalogo]=await Promise.all([resEmp.json(),resCnaes.json(),resSets.json(),resFuncs.json(),resSE.json(),resFE.json(),resCat.json()]);
     empresa=empresa[0];
     if(setores.length){
       const sIds=setores.map(s=>s.id).join(',');
-      const resFuncSet=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=in.(${sIds})&ativo=eq.true&select=funcao_id,setor_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const resFuncSet=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=in.(${sIds})&ativo=eq.true&select=funcao_id,setor_id`,{headers:getH()});
       window.funcaoSetoresData=await resFuncSet.json();
     }else{window.funcaoSetoresData=[];}
     // Carregar funcionários e últimos ASOs para cronograma real
     const [resFunc]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,funcao_id,setor_id,data_prox_aso,aso_ultima_data,aso_ultimo_resultado,data_nascimento,sexo&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+      fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,funcao_id,setor_id,data_prox_aso,aso_ultima_data,aso_ultimo_resultado,data_nascimento,sexo&order=nome_completo.asc`,{headers:getH()})
     ]);
     funcionarios=await resFunc.json().catch(()=>[]);
     if(funcionarios.length){
       const fIds=funcionarios.map(f=>f.id).join(',');
-      const resAso=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?funcionario_id=in.(${fIds})&status_esocial=neq.Cancelado&select=funcionario_id,data_exame,resultado&order=data_exame.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const resAso=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?funcionario_id=in.(${fIds})&status_esocial=neq.Cancelado&select=funcionario_id,data_exame,resultado&order=data_exame.desc`,{headers:getH()});
       const todosAsos=await resAso.json().catch(()=>[]);
       // Mantém só o mais recente por funcionário
       const visto=new Set();
@@ -320,7 +323,7 @@ async function carregar(){
     }
     // Médico coordenador persistido
     try{
-      const resMed=await fetch(`${SUPA_URL}/rest/v1/medicos_coordenadores?empresa_id=eq.${empresaId}&ativo=eq.true&order=id.desc&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const resMed=await fetch(`${SUPA_URL}/rest/v1/medicos_coordenadores?empresa_id=eq.${empresaId}&ativo=eq.true&order=id.desc&limit=1`,{headers:getH()});
       const medArr=await resMed.json();
       if(medArr.length){
         medicoCoord=medArr[0];
@@ -338,9 +341,9 @@ async function carregar(){
     await carregarAcoesPCMSO();
     try{
       const [rFR,rRiscos,rCats]=await Promise.all([
-        fetch(`${SUPA_URL}/rest/v1/funcao_riscos?ativo=eq.true&select=funcao_id,risco_id&order=funcao_id.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-        fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,categoria_risco_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
-        fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+        fetch(`${SUPA_URL}/rest/v1/funcao_riscos?ativo=eq.true&select=funcao_id,risco_id&order=funcao_id.asc`,{headers:getH()}),
+        fetch(`${SUPA_URL}/rest/v1/riscos?ativo=eq.true&select=id,nome_risco,categoria_risco_id`,{headers:getH()}),
+        fetch(`${SUPA_URL}/rest/v1/categorias_risco?ativo=eq.true&select=id,nome`,{headers:getH()})
       ]);
       funcaoRiscos=await rFR.json().catch(()=>[]);
       todosRiscos=await rRiscos.json().catch(()=>[]);
@@ -1261,10 +1264,10 @@ async function salvarMedicoCoord(){
   st.textContent='Salvando...';st.style.color='var(--text2)';
   try{
     if(medicoCoord?.id){
-      await fetch(`${SUPA_URL}/rest/v1/medicos_coordenadores?id=eq.${medicoCoord.id}`,{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      await fetch(`${SUPA_URL}/rest/v1/medicos_coordenadores?id=eq.${medicoCoord.id}`,{method:'PATCH',headers:{...getH(),'Content-Type':'application/json'},body:JSON.stringify(payload)});
       medicoCoord={...medicoCoord,...payload};
     }else{
-      const res=await fetch(`${SUPA_URL}/rest/v1/medicos_coordenadores`,{method:'POST',headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(payload)});
+      const res=await fetch(`${SUPA_URL}/rest/v1/medicos_coordenadores`,{method:'POST',headers:{...getH(),'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(payload)});
       const arr=await res.json();medicoCoord=arr[0];
     }
     elaboradora.responsavel=`${nome} — CRM ${uf_crm}/${crm}`;
@@ -1301,7 +1304,7 @@ let acoesPCMSO=[];
 
 async function carregarAcoesPCMSO(){
   try{
-    const res=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&origem=eq.PCMSO&ativo=eq.true&select=*&order=prazo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const res=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&origem=eq.PCMSO&ativo=eq.true&select=*&order=prazo.asc`,{headers:getH()});
     acoesPCMSO=await res.json().catch(()=>[]);
     window.acoesDataPCMSO=acoesPCMSO;
   }catch(e){acoesPCMSO=[];window.acoesDataPCMSO=[];}
@@ -1385,10 +1388,10 @@ async function gerarAcoesCronograma(){
       // Verifica se já existe ação PCMSO para esta função+exame
       const existente=acoesPCMSO.find(a=>a.funcao_id===funcaoId&&a.titulo?.includes(exameNome));
       if(existente){
-        await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${existente.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({prazo})});
+        await fetch(`${SUPA_URL}/rest/v1/acoes?id=eq.${existente.id}`,{method:'PATCH',headers:{...getHJ()},body:JSON.stringify({prazo})});
         atualizadas++;
       }else{
-        await fetch(`${SUPA_URL}/rest/v1/acoes`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({empresa_id:parseInt(empresaId),titulo,descricao:`Exame ocupacional obrigatório — ${periodicidade} — NR-07`,origem:'PCMSO',prioridade:'Média',funcao_id:funcaoId,prazo,status:'Pendente',ativo:true})});
+        await fetch(`${SUPA_URL}/rest/v1/acoes`,{method:'POST',headers:{...getHJ()},body:JSON.stringify({empresa_id:parseInt(empresaId),titulo,descricao:`Exame ocupacional obrigatório — ${periodicidade} — NR-07`,origem:'PCMSO',prioridade:'Média',funcao_id:funcaoId,prazo,status:'Pendente',ativo:true})});
         criadas++;
       }
     }
