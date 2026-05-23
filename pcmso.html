@@ -307,7 +307,7 @@ async function carregar(){
     }else{window.funcaoSetoresData=[];}
     // Carregar funcionários e últimos ASOs para cronograma real
     const [resFunc]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,funcao_id,setor_id,data_prox_aso,aso_ultima_data,aso_ultimo_resultado&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
+      fetch(`${SUPA_URL}/rest/v1/funcionarios?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_completo,funcao_id,setor_id,data_prox_aso,aso_ultima_data,aso_ultimo_resultado,data_nascimento,sexo&order=nome_completo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}})
     ]);
     funcionarios=await resFunc.json().catch(()=>[]);
     if(funcionarios.length){
@@ -363,7 +363,10 @@ function renderDocumento(){
   wrap.appendChild(renderCronograma());
   if(setores.some(s=>s.tem_agente_psicossocial))wrap.appendChild(renderSaudeMental());
   wrap.appendChild(renderVacinacao());
+  if(temRiscoBenzeno())wrap.appendChild(renderProtocoloBenzeno());
   wrap.appendChild(renderRelatorioAnual());
+  wrap.appendChild(renderPerfilEpidemiologico());
+  wrap.appendChild(renderNotificacaoSinan());
   wrap.appendChild(renderCriteriosConduta());
   wrap.appendChild(renderSigiloFinal());
 }
@@ -435,6 +438,175 @@ function renderVacinacao(){
   </table>
   <div class="doc-subsection" style="margin-top:12pt;">Controle de cobertura vacinal</div>
   <p class="doc-text">O médico coordenador é responsável por manter o controle de cobertura vacinal dos trabalhadores, verificando carteiras de vacinação nos exames periódicos e admissionais. Trabalhadores não vacinados para as vacinas obrigatórias indicadas devem ser encaminhados para vacinação antes da exposição ao agente de risco. O registro deve constar em prontuário individual.</p>
+  <div class="page-footer"><span class="pf-label">PCMSO — ${nm}</span><span class="pf-page"></span></div>`;
+  return pg;
+}
+
+function temRiscoBenzeno(){
+  const riscosBenzeno=todosRiscos.filter(r=>r.nome_risco&&r.nome_risco.toLowerCase().includes('benzeno'));
+  if(!riscosBenzeno.length)return false;
+  const idsBenzeno=riscosBenzeno.map(r=>r.id);
+  return funcaoRiscos.some(fr=>idsBenzeno.includes(fr.risco_id));
+}
+
+function renderProtocoloBenzeno(){
+  const pg=document.createElement('div');pg.className='page';
+  const nm=escHtml(empresa.nome_fantasia||empresa.razao_social);
+  const funcoesExp=[...new Set(funcaoRiscos.filter(fr=>{
+    const r=todosRiscos.find(x=>x.id===fr.risco_id);
+    return r?.nome_risco?.toLowerCase().includes('benzeno');
+  }).map(fr=>funcoes.find(f=>f.id===fr.funcao_id)?.nome_funcao).filter(Boolean))];
+  pg.innerHTML=`
+  <div class="page-header"><span class="ph-empresa">${nm}</span><span class="ph-doc">PCMSO — ${fmtAno()}</span></div>
+  <div class="doc-section"><span class="num-secao">6-C</span>Protocolo Específico — Benzeno</div>
+  <div class="conclusao-box" style="margin-bottom:12pt;">
+    <strong>Base legal — Portaria Interministerial MTE/MS nº 9/2007:</strong> Esta empresa possui trabalhadores expostos ao benzeno. O PCMSO deve incluir capítulo específico com protocolo de prevenção, monitoramento biológico semestral obrigatório e conduta frente a alterações hematológicas.
+  </div>
+  <div class="doc-subsection">Funções expostas ao benzeno</div>
+  <p class="doc-text">${funcoesExp.length?escHtml(funcoesExp.join(', ')):'Ver inventário de riscos do PGR — funções com benzeno identificado.'}</p>
+  <div class="doc-subsection" style="margin-top:12pt;">Monitoramento biológico obrigatório</div>
+  <table class="doc-table">
+    <thead><tr><th>Exame</th><th>Periodicidade</th><th>Ponto de atenção</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:600;">Hemograma completo</td><td><span class="per-badge per-Semestral">Semestral</span></td><td>Leucócitos &lt; 4.000/mm³ ou &gt; 11.000/mm³; plaquetas &lt; 150.000/mm³</td></tr>
+      <tr><td style="font-weight:600;">Fenol urinário</td><td><span class="per-badge per-Semestral">Semestral</span></td><td>Valor acima de 80 mg/g creatinina → investigação imediata</td></tr>
+      <tr><td style="font-weight:600;">Ácido trans-trans-mucônico (ATMA)</td><td><span class="per-badge per-Semestral">Semestral</span></td><td>Indicador de exposição de baixa intensidade; valor &gt; 0,5 mg/g creat → atenção</td></tr>
+    </tbody>
+  </table>
+  <div class="doc-subsection" style="margin-top:12pt;">Conduta frente a alterações hematológicas</div>
+  <p class="doc-text" style="margin-bottom:8pt;">Qualquer alteração no hemograma obriga:</p>
+  <ul style="margin:0 0 8pt 16pt;font-size:9pt;color:#1f2937;line-height:1.8;">
+    <li><strong>Afastamento imediato</strong> da exposição ao benzeno — sem exceção;</li>
+    <li>Repetição do hemograma em 30 dias após o afastamento;</li>
+    <li>Encaminhamento a hematologista e ao CESAT (Centro de Referência em Saúde do Trabalhador);</li>
+    <li>Notificação obrigatória ao SINAN (ficha de intoxicação por benzeno) e ao INSS;</li>
+    <li>Registro em CAT — Comunicação de Acidente de Trabalho;</li>
+    <li>Investigação das condições de exposição (medição ambiental — NIOSH 1501).</li>
+  </ul>
+  <div class="conclusao-box">
+    <strong>Atenção:</strong> Empresas com concentração de benzeno superior a 0,5 ppm devem constituir CIPA do Benzeno e registrá-la no MTE. O monitoramento ambiental semestral é obrigatório (NHO-03 FUNDACENTRO).
+  </div>
+  <div class="page-footer"><span class="pf-label">PCMSO — ${nm}</span><span class="pf-page"></span></div>`;
+  return pg;
+}
+
+function renderPerfilEpidemiologico(){
+  const pg=document.createElement('div');pg.className='page';
+  const nm=escHtml(empresa.nome_fantasia||empresa.razao_social);
+  const hoje=new Date();hoje.setHours(0,0,0,0);
+  // Faixas etárias
+  const faixas=[['<18',0,18],['18–24',18,25],['25–34',25,35],['35–44',35,45],['45–54',45,55],['55–64',55,65],['65+',65,999]];
+  const porFaixa=faixas.map(([label,min,max])=>{
+    const count=funcionarios.filter(f=>{
+      if(!f.data_nascimento)return false;
+      const idade=Math.floor((hoje-new Date(f.data_nascimento+'T00:00:00'))/(365.25*24*60*60*1000));
+      return idade>=min&&idade<max;
+    }).length;
+    return{label,count};
+  }).filter(f=>f.count>0);
+  const semIdade=funcionarios.filter(f=>!f.data_nascimento).length;
+  // Distribuição por sexo
+  const masc=funcionarios.filter(f=>f.sexo==='M').length;
+  const fem=funcionarios.filter(f=>f.sexo==='F').length;
+  const outro=funcionarios.filter(f=>f.sexo&&f.sexo!=='M'&&f.sexo!=='F').length;
+  const semSexo=funcionarios.filter(f=>!f.sexo).length;
+  // KPIs de conformidade
+  const total=funcionarios.length;
+  const emDia=funcionarios.filter(f=>f.data_prox_aso&&new Date(f.data_prox_aso+'T00:00:00')>=hoje).length;
+  const vencidos=funcionarios.filter(f=>f.data_prox_aso&&new Date(f.data_prox_aso+'T00:00:00')<hoje).length;
+  const semAso=total-funcionarios.filter(f=>f.data_prox_aso).length;
+  const percConf=total>0?Math.round((emDia/total)*100):0;
+  const maxFaixa=porFaixa.length?Math.max(...porFaixa.map(f=>f.count)):1;
+  pg.innerHTML=`
+  <div class="page-header"><span class="ph-empresa">${nm}</span><span class="ph-doc">PCMSO — ${fmtAno()}</span></div>
+  <div class="doc-section"><span class="num-secao">8-A</span>Perfil Epidemiológico dos Trabalhadores</div>
+  <p class="doc-text" style="margin-bottom:12pt;">Análise do perfil demográfico e de saúde ocupacional dos trabalhadores cobertos por este PCMSO, conforme dados registrados no sistema de gestão SST.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16pt;margin-bottom:14pt;">
+    <div>
+      <div class="doc-subsection" style="margin-top:0;">Distribuição por faixa etária</div>
+      ${porFaixa.length?porFaixa.map(f=>{
+        const pct=maxFaixa>0?Math.round((f.count/maxFaixa)*100):0;
+        return`<div style="margin-bottom:5pt;">
+          <div style="display:flex;justify-content:space-between;font-size:8.5pt;margin-bottom:2pt;">
+            <span style="font-weight:500;color:#1f2937;">${f.label} anos</span>
+            <span style="color:#062018;font-weight:700;">${f.count}</span>
+          </div>
+          <div style="background:#e5e7eb;border-radius:3pt;height:8pt;overflow:hidden;">
+            <div style="background:#062018;height:100%;width:${pct}%;border-radius:3pt;"></div>
+          </div>
+        </div>`;
+      }).join(''):`<p style="font-size:9pt;color:#9ca3af;font-style:italic;">Dados de nascimento não cadastrados.</p>`}
+      ${semIdade>0?`<p style="font-size:8pt;color:#9ca3af;margin-top:4pt;">${semIdade} trabalhador(es) sem data de nascimento cadastrada.</p>`:''}
+    </div>
+    <div>
+      <div class="doc-subsection" style="margin-top:0;">Distribuição por sexo</div>
+      ${(masc+fem+outro)>0?`
+      <div style="margin-bottom:6pt;">
+        ${masc>0?`<div style="display:flex;align-items:center;gap:8pt;margin-bottom:5pt;"><div style="width:12pt;height:12pt;background:#3b82f6;border-radius:2pt;flex-shrink:0;"></div><span style="font-size:9pt;">Masculino: <strong>${masc}</strong> (${Math.round(masc/(masc+fem+outro)*100)}%)</span></div>`:''}
+        ${fem>0?`<div style="display:flex;align-items:center;gap:8pt;margin-bottom:5pt;"><div style="width:12pt;height:12pt;background:#ec4899;border-radius:2pt;flex-shrink:0;"></div><span style="font-size:9pt;">Feminino: <strong>${fem}</strong> (${Math.round(fem/(masc+fem+outro)*100)}%)</span></div>`:''}
+        ${outro>0?`<div style="display:flex;align-items:center;gap:8pt;"><div style="width:12pt;height:12pt;background:#8b5cf6;border-radius:2pt;flex-shrink:0;"></div><span style="font-size:9pt;">Outro: <strong>${outro}</strong></span></div>`:''}
+      </div>`:`<p style="font-size:9pt;color:#9ca3af;font-style:italic;">Dados de sexo não cadastrados.</p>`}
+      ${semSexo>0?`<p style="font-size:8pt;color:#9ca3af;margin-top:4pt;">${semSexo} trabalhador(es) sem sexo cadastrado.</p>`:''}
+      <div class="doc-subsection" style="margin-top:12pt;">Conformidade de exames</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6pt;">
+        <div style="background:#dcfce7;border-radius:4pt;padding:6pt 8pt;text-align:center;"><div style="font-size:14pt;font-weight:700;color:#166534;">${emDia}</div><div style="font-size:7.5pt;color:#166534;">Em dia</div></div>
+        <div style="background:#fee2e2;border-radius:4pt;padding:6pt 8pt;text-align:center;"><div style="font-size:14pt;font-weight:700;color:#991b1b;">${vencidos}</div><div style="font-size:7.5pt;color:#991b1b;">Vencidos</div></div>
+        <div style="background:#f3f4f6;border-radius:4pt;padding:6pt 8pt;text-align:center;"><div style="font-size:14pt;font-weight:700;color:#374151;">${semAso}</div><div style="font-size:7.5pt;color:#374151;">Sem ASO</div></div>
+        <div style="background:${percConf>=80?'#dcfce7':percConf>=50?'#fef9c3':'#fee2e2'};border-radius:4pt;padding:6pt 8pt;text-align:center;"><div style="font-size:14pt;font-weight:700;color:${percConf>=80?'#166534':percConf>=50?'#854d0e':'#991b1b'};">${percConf}%</div><div style="font-size:7.5pt;color:#374151;">Conformidade</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="doc-subsection">Indicadores de saúde ocupacional (KPIs)</div>
+  <table class="doc-table">
+    <thead><tr><th>Indicador</th><th style="text-align:center;width:20%;">Valor</th><th>Referência</th></tr></thead>
+    <tbody>
+      <tr><td>Total de trabalhadores cobertos pelo PCMSO</td><td style="text-align:center;font-weight:700;">${total}</td><td style="font-size:8pt;color:#6b7280;">Base do programa</td></tr>
+      <tr><td>Taxa de conformidade de exames (%)</td><td style="text-align:center;font-weight:700;color:${percConf>=80?'#166534':percConf>=50?'#854d0e':'#991b1b'};">${percConf}%</td><td style="font-size:8pt;color:#6b7280;">Meta: ≥80%</td></tr>
+      <tr><td>Trabalhadores com exame vencido</td><td style="text-align:center;font-weight:700;color:${vencidos>0?'#991b1b':'#166534'};">${vencidos}</td><td style="font-size:8pt;color:#6b7280;">Meta: 0</td></tr>
+      <tr><td>Trabalhadores sem ASO cadastrado</td><td style="text-align:center;font-weight:700;color:${semAso>0?'#854d0e':'#166534'};">${semAso}</td><td style="font-size:8pt;color:#6b7280;">Meta: 0</td></tr>
+    </tbody>
+  </table>
+  <p class="doc-text" style="margin-top:10pt;font-style:italic;font-size:8.5pt;color:#6b7280;">* Dados de absenteísmo (CIDs, dias perdidos) e CATs serão incluídos quando integração com sistema de ponto e INSS for implementada. Solicitar ao SESMT os registros de afastamentos do período para complementar este perfil.</p>
+  <div class="page-footer"><span class="pf-label">PCMSO — ${nm}</span><span class="pf-page"></span></div>`;
+  return pg;
+}
+
+function renderNotificacaoSinan(){
+  const pg=document.createElement('div');pg.className='page';
+  const nm=escHtml(empresa.nome_fantasia||empresa.razao_social);
+  pg.innerHTML=`
+  <div class="page-header"><span class="ph-empresa">${nm}</span><span class="ph-doc">PCMSO — ${fmtAno()}</span></div>
+  <div class="doc-section"><span class="num-secao">8-B</span>Notificação Compulsória — SINAN e RENAST</div>
+  <p class="doc-text" style="margin-bottom:10pt;">Conforme a Portaria nº 1.823/2012 (Política Nacional de Saúde do Trabalhador — PNST), o médico coordenador tem <strong>obrigação legal</strong> de notificar os agravos à saúde relacionados ao trabalho ao SINAN (Sistema de Informação de Agravos de Notificação) e à RENAST (Rede Nacional de Atenção Integral à Saúde do Trabalhador).</p>
+  <div class="doc-subsection">Agravos de notificação compulsória (Lista Nacional — SINAN)</div>
+  <table class="doc-table">
+    <thead><tr><th>Agravo</th><th>Código SINAN</th><th style="width:35%;">Situações que obrigam notificação</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:600;">LER/DORT</td><td style="font-family:'IBM Plex Mono',monospace;">B92</td><td style="font-size:8pt;">Diagnóstico confirmado de Lesão por Esforço Repetitivo com nexo causal ao trabalho</td></tr>
+      <tr><td style="font-weight:600;">PAIR (Perda Auditiva)</td><td style="font-family:'IBM Plex Mono',monospace;">H833</td><td style="font-size:8pt;">Perda auditiva induzida por ruído ocupacional confirmada em audiometria</td></tr>
+      <tr><td style="font-weight:600;">Pneumoconioses</td><td style="font-family:'IBM Plex Mono',monospace;">J60-J65</td><td style="font-size:8pt;">Silicose, asbestose, antracose ou outras confirmadas por Rx/TCAR + nexo</td></tr>
+      <tr><td style="font-weight:600;">Intoxicação por benzeno</td><td style="font-family:'IBM Plex Mono',monospace;">T52.1</td><td style="font-size:8pt;">Qualquer alteração hematológica com nexo confirmado a exposição ao benzeno</td></tr>
+      <tr><td style="font-weight:600;">Intoxicação por agrotóxicos</td><td style="font-family:'IBM Plex Mono',monospace;">T60</td><td style="font-size:8pt;">Intoxicação aguda ou crônica confirmada com exposição ocupacional</td></tr>
+      <tr><td style="font-weight:600;">Dermatoses ocupacionais</td><td style="font-family:'IBM Plex Mono',monospace;">L23-L25</td><td style="font-size:8pt;">Dermatite de contato ou outras dermatoses com nexo confirmado ao trabalho</td></tr>
+      <tr><td style="font-weight:600;">Transtornos mentais (CID-F)</td><td style="font-family:'IBM Plex Mono',monospace;">F10-F99</td><td style="font-size:8pt;">Burnout (Z73.0), depressão, ansiedade com NTEP ativo ou nexo causal comprovado</td></tr>
+      <tr><td style="font-weight:600;">Acidente de trabalho grave/fatal</td><td style="font-family:'IBM Plex Mono',monospace;">—</td><td style="font-size:8pt;">Todo acidente com internação, mutilação ou óbito — prazo 24h</td></tr>
+    </tbody>
+  </table>
+  <div class="doc-subsection" style="margin-top:12pt;">Fluxo de notificação</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8pt;">
+    ${[
+      ['1. Identificação','Médico coordenador confirma diagnóstico e estabelece nexo causal com o trabalho'],
+      ['2. Preenchimento','Preenche ficha de notificação SINAN específica para o agravo identificado'],
+      ['3. Encaminhamento','Envia ao CEREST (Centro de Referência em Saúde do Trabalhador) municipal ou estadual'],
+      ['4. CAT + Registro','Emite CAT ao INSS (se for doença profissional ou acidente) e registra em prontuário'],
+    ].map(([t,d])=>`<div style="border:1pt solid #e5e7eb;border-radius:4pt;padding:8pt;background:#f0fdf4;">
+      <div style="font-size:8.5pt;font-weight:700;color:#166534;margin-bottom:4pt;">${escHtml(t)}</div>
+      <div style="font-size:8pt;color:#374151;line-height:1.5;">${escHtml(d)}</div>
+    </div>`).join('')}
+  </div>
+  <div class="conclusao-box" style="margin-top:12pt;">
+    <strong>NTEP — Nexo Técnico Epidemiológico Previdenciário:</strong> Quando há NTEP ativo para o CNAE desta empresa, qualquer afastamento por CID relacionado gera presunção de doença ocupacional pelo INSS. O médico coordenador deve investigar e documentar todos os casos de NTEP ativo, registrando a conclusão (confirmação ou exclusão do nexo) em prontuário.
+  </div>
   <div class="page-footer"><span class="pf-label">PCMSO — ${nm}</span><span class="pf-page"></span></div>`;
   return pg;
 }

@@ -138,6 +138,7 @@
       <div class="tab" data-aba="endereco" onclick="mudarAba('endereco')">Endereço</div>
       <div class="tab" data-aba="historico" onclick="mudarAba('historico')">Histórico</div>
       <div class="tab" data-aba="asos" onclick="mudarAba('asos')">🩺 ASOs</div>
+      <div class="tab" data-aba="grt" onclick="mudarAba('grt')">🔄 Retorno</div>
     </div>
 
     <!-- ABA DADOS PESSOAIS -->
@@ -265,6 +266,90 @@
   </div>
 </div>
 
+<!-- ABA RETORNO AO TRABALHO (GRT) -->
+<div class="tab-content" id="aba-grt">
+  <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;">Gestão de Retorno ao Trabalho — NR-07</div>
+  <div id="grt-aviso-retorno" style="display:none;background:#2a1f05;border:1px solid #4a3a10;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#e0a855;">
+    ⚠️ <strong>Exame de retorno obrigatório!</strong> Este funcionário retornou de afastamento ≥ 30 dias. Realize o exame de retorno ao trabalho (NR-07 item 7.5.3) antes de liberar para as atividades.
+  </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+    <button class="btn btn-edit" onclick="abrirModalGRT()" style="font-size:12px;padding:6px 14px;">+ Registrar afastamento / retorno</button>
+  </div>
+  <div id="lista-grt"></div>
+</div>
+
+<!-- Modal GRT -->
+<div class="modal-overlay" id="modal-grt">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-titulo">
+      <span>📋 Registrar afastamento / retorno</span>
+      <button onclick="document.getElementById('modal-grt').classList.remove('show')" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-field">
+      <label>Tipo *</label>
+      <select id="grt-tipo" onchange="toggleGRTcampos()">
+        <option value="">— Selecione —</option>
+        <option value="Afastamento">Afastamento</option>
+        <option value="Retorno">Retorno ao trabalho</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Data *</label>
+      <input type="date" id="grt-data">
+    </div>
+    <div id="grt-campos-afastamento" style="display:none;">
+      <div class="modal-field">
+        <label>CID (diagnóstico)</label>
+        <input type="text" id="grt-cid" placeholder="Ex: F32.1, M79.3">
+      </div>
+      <div class="modal-field">
+        <label>Motivo do afastamento</label>
+        <select id="grt-motivo">
+          <option value="">— Selecione —</option>
+          <option>Doença comum</option>
+          <option>Doença ocupacional</option>
+          <option>Acidente de trabalho</option>
+          <option>Acidente de trajeto</option>
+          <option>Licença maternidade/paternidade</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>CAT emitida?</label>
+        <select id="grt-cat">
+          <option value="false">Não</option>
+          <option value="true">Sim</option>
+          <option value="na">Não aplicável</option>
+        </select>
+      </div>
+    </div>
+    <div id="grt-campos-retorno" style="display:none;">
+      <div class="modal-field">
+        <label>Resultado do exame de retorno</label>
+        <select id="grt-resultado-retorno">
+          <option value="">— Selecione —</option>
+          <option value="Apto">Apto — liberado para a função</option>
+          <option value="Apto com restrição">Apto com restrição — readaptação necessária</option>
+          <option value="Inapto">Inapto — não liberado</option>
+          <option value="Pendente">Exame de retorno pendente</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Observações</label>
+      <textarea id="grt-obs" placeholder="Anotações do médico coordenador, plano de acompanhamento..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-cancel" onclick="document.getElementById('modal-grt').classList.remove('show')">Cancelar</button>
+      <button class="btn btn-save" onclick="salvarGRT()">
+        <span class="spinner" id="spinner-grt"></span>
+        <span>Salvar</span>
+      </button>
+    </div>
+    <div class="status-bar" id="status-grt" style="margin-top:10px;"></div>
+  </div>
+</div>
+
 <script>
 const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
@@ -300,6 +385,7 @@ function mudarAba(aba){
   document.getElementById(`aba-${aba}`).classList.add('active');
   if(aba==='historico')carregarHistorico();
   if(aba==='asos'){carregarASOs();carregarLaudosClinica();}
+  if(aba==='grt'){carregarGRT();}
 }
 
 // ── RENDER HERO ───────────────────────────────────────
@@ -1041,6 +1127,94 @@ async function cancelarASO(asoId,tipo){
     await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?id=eq.${asoId}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify({status_esocial:'Cancelado'})});
     await carregarASOs();
   }catch(e){alert('Erro: '+e.message);}
+}
+
+// ── GESTÃO DE RETORNO AO TRABALHO (GRT) ──────────────────────
+const H_GRT={'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`};
+
+function toggleGRTcampos(){
+  const tipo=document.getElementById('grt-tipo').value;
+  document.getElementById('grt-campos-afastamento').style.display=tipo==='Afastamento'?'block':'none';
+  document.getElementById('grt-campos-retorno').style.display=tipo==='Retorno'?'block':'none';
+}
+
+function abrirModalGRT(){
+  document.getElementById('grt-tipo').value='';
+  document.getElementById('grt-data').value='';
+  document.getElementById('grt-cid').value='';
+  document.getElementById('grt-obs').value='';
+  document.getElementById('grt-campos-afastamento').style.display='none';
+  document.getElementById('grt-campos-retorno').style.display='none';
+  document.getElementById('status-grt').className='status-bar';
+  document.getElementById('modal-grt').classList.add('show');
+}
+
+async function salvarGRT(){
+  const tipo=document.getElementById('grt-tipo').value;
+  const data=document.getElementById('grt-data').value;
+  if(!tipo||!data){alert('Tipo e data são obrigatórios.');return;}
+  document.getElementById('spinner-grt').className='spinner show';
+  const payload={
+    empresa_id:parseInt(empresaId),
+    funcionario_id:funcId,
+    titulo:`${tipo} — ${document.getElementById('grt-cid')?.value||''}`.trim().replace(/—\s*$/,''),
+    descricao:[
+      tipo==='Afastamento'?`Motivo: ${document.getElementById('grt-motivo')?.value||'—'}`:'',
+      tipo==='Afastamento'?`CAT emitida: ${document.getElementById('grt-cat')?.value==='true'?'Sim':'Não'}`:'',
+      tipo==='Retorno'?`Exame de retorno: ${document.getElementById('grt-resultado-retorno')?.value||'Pendente'}`:'',
+      document.getElementById('grt-obs')?.value||'',
+    ].filter(Boolean).join(' | '),
+    origem:'GRT',
+    prioridade:tipo==='Retorno'?'Alta':'Média',
+    prazo:data,
+    status:tipo==='Retorno'&&document.getElementById('grt-resultado-retorno')?.value==='Apto'?'Concluída':'Pendente',
+    ativo:true,
+  };
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/acoes`,{method:'POST',headers:H_GRT,body:JSON.stringify(payload)});
+    document.getElementById('modal-grt').classList.remove('show');
+    carregarGRT();
+  }catch(e){
+    const st=document.getElementById('status-grt');
+    st.className='status-bar show error';st.textContent='Erro: '+e.message;
+  }finally{document.getElementById('spinner-grt').className='spinner';}
+}
+
+async function carregarGRT(){
+  const lista=document.getElementById('lista-grt');
+  lista.innerHTML='<div style="text-align:center;padding:20px;color:var(--text2);">Carregando...</div>';
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/acoes?empresa_id=eq.${empresaId}&funcionario_id=eq.${funcId}&origem=eq.GRT&ativo=eq.true&select=*&order=prazo.desc`,{headers:H_GRT});
+    const grt=await res.json();
+    // Verifica se há afastamento recente sem retorno (≥30 dias)
+    const afastamentos=grt.filter(a=>a.titulo?.includes('Afastamento'));
+    const retornos=grt.filter(a=>a.titulo?.includes('Retorno'));
+    const aviso=document.getElementById('grt-aviso-retorno');
+    if(afastamentos.length&&afastamentos.length>retornos.length){
+      const ult=new Date(afastamentos[0].prazo+'T00:00:00');
+      const dias=Math.floor((new Date()-ult)/(1000*60*60*24));
+      aviso.style.display=dias>=30?'block':'none';
+    }else{aviso.style.display='none';}
+    if(!grt.length){lista.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">Nenhum registro de afastamento ou retorno.</div>';return;}
+    lista.innerHTML=grt.map(a=>{
+      const isAfastamento=a.titulo?.includes('Afastamento');
+      const cor=isAfastamento?'#854d0e':'#166534';
+      const bg=isAfastamento?'#fffbeb':'#f0fdf4';
+      const icon=isAfastamento?'🏥':'🔄';
+      return`<div style="background:${bg};border:1px solid ${isAfastamento?'#fde68a':'#bbf7d0'};border-radius:8px;padding:12px 16px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div>
+            <div style="font-size:13px;font-weight:500;color:${cor};">${icon} ${escHtml(a.titulo||'—')}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px;">${escHtml(a.descricao||'—')}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:12px;font-weight:600;color:${cor};">${a.prazo?new Date(a.prazo+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</div>
+            <span style="font-size:10px;background:${a.status==='Concluída'?'#dcfce7':'#fef9c3'};color:${a.status==='Concluída'?'#166534':'#854d0e'};padding:1px 6px;border-radius:4px;">${a.status}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){lista.innerHTML=`<div style="color:var(--danger);padding:16px;">Erro: ${e.message}</div>`;}
 }
 </script>
 </body>
