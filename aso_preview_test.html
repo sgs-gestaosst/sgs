@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Teste ASO Preview</title>
+<style>
+  body{font-family:sans-serif;background:#0f1117;color:#e8eaf0;padding:40px;max-width:800px;margin:0 auto;}
+  h2{color:#2dd4a0;margin-bottom:8px;}
+  p{color:#8892a4;font-size:13px;margin-bottom:24px;}
+  button{display:block;width:100%;padding:14px;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;}
+  .btn-a{background:#2dd4a0;color:#0f1117;}
+  .btn-b{background:#4a7cdc;color:#fff;}
+  .btn-c{background:#e0a855;color:#0f1117;}
+  .note{font-size:11px;color:#545e72;margin-top:4px;}
+</style>
+</head>
+<body>
+<h2>Teste — ASO Preview (NR-07)</h2>
+<p>Injeta dados mockados no localStorage e abre o aso_preview.html. Não requer login.</p>
+
+<button class="btn-a" onclick="testarCasoBasico()">
+  Caso 1 — Mesmo médico (padrão) + sem atividades específicas
+</button>
+<div class="note">Valida: CNPJ no cabeçalho · seção 6b com "mesmo médico" · sem seção 7 · 2 assinaturas</div>
+
+<button class="btn-b" onclick="testarMedicosDiferentes()">
+  Caso 2 — Médico PCMSO diferente + com atividades específicas (NR-33, NR-35)
+</button>
+<div class="note">Valida: seção 6b preenchida · seção 7 visível · 3 assinaturas</div>
+
+<button class="btn-c" onclick="testarSemCNPJ()">
+  Caso 3 — Empresa sem CNPJ cadastrado
+</button>
+<div class="note">Valida: cabeçalho sem linha de CNPJ (não quebra)</div>
+
+<script>
+const base = {
+  funcionario: {
+    id: 1,
+    nome_completo: 'João da Silva Santos',
+    cpf: '123.456.789-00',
+    rg: '12.345.678-9',
+    empresa_id: 10,
+    funcoes: { nome_funcao: 'Operador de Máquinas' },
+    setores: { nome_setor: 'Produção' }
+  },
+  tipo_aso: 'Periódico',
+  data_exame: '2026-05-29',
+  resultado_geral: 'Apto',
+  data_prox_aso: '2027-05-29',
+  restricoes: null,
+  medico_nome: 'Dr. Carlos Alberto Ferreira',
+  medico_crm: '54321',
+  medico_uf: 'SP',
+  riscos: ['Ruído acima do limite de tolerância', 'Agente químico — Solventes orgânicos'],
+  exames: [
+    { nome_exame: 'Audiometria Tonal', resultado_exame: 'Normal' },
+    { nome_exame: 'Hemograma Completo', resultado_exame: 'Normal' },
+    { nome_exame: 'Espirometria', resultado_exame: 'Normal' }
+  ],
+  empresa_nome: 'Indústria Exemplo Ltda.',
+  empresa_cnpj: '12345678000195'
+};
+
+function testarCasoBasico(){
+  const dados = { ...base, medico_pcmso_nome: null, medico_pcmso_crm: null, medico_pcmso_uf: null, aptidao_atividades_especificas: null };
+  localStorage.setItem('sgs_aso_preview', JSON.stringify(dados));
+  window.open('aso_preview.html', '_blank');
+}
+
+function testarMedicosDiferentes(){
+  const dados = {
+    ...base,
+    resultado_geral: 'Apto',
+    restricoes: 'Uso obrigatório de protetor auricular tipo plug.',
+    medico_pcmso_nome: 'Dra. Maria Oliveira Costa',
+    medico_pcmso_crm: '98765',
+    medico_pcmso_uf: 'SP',
+    aptidao_atividades_especificas: 'Apto para trabalho em espaço confinado (NR-33). Apto para trabalho em altura até 15m (NR-35).'
+  };
+  localStorage.setItem('sgs_aso_preview', JSON.stringify(dados));
+  window.open('aso_preview.html', '_blank');
+}
+
+function testarSemCNPJ(){
+  const dados = { ...base, empresa_cnpj: '', medico_pcmso_nome: null, aptidao_atividades_especificas: null };
+  localStorage.setItem('sgs_aso_preview', JSON.stringify(dados));
+  window.open('aso_preview.html', '_blank');
+}
+</script>
+</body>
+</html>

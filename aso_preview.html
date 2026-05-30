@@ -64,6 +64,7 @@ const dados=JSON.parse(localStorage.getItem('sgs_aso_preview')||'{}');
 const f=dados.funcionario||{};
 const esc=s=>s===null||s===undefined?'':(s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const fmtD=d=>{if(!d)return'—';const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('pt-BR');};
+const fmtCNPJ=c=>{if(!c)return'';const n=c.replace(/\D/g,'');return n.length===14?n.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):c;};
 
 function renderVia(numVia,labelVia){
   const resultado=dados.resultado_geral||'Apto';
@@ -75,6 +76,7 @@ function renderVia(numVia,labelVia){
     <div class="via-tag">${numVia}ª VIA — ${labelVia}</div>
     <div class="empresa-header">
       <div class="empresa-nome">${esc(dados.empresa_nome||'EMPRESA')}</div>
+      ${dados.empresa_cnpj?`<div class="empresa-sub">CNPJ: ${fmtCNPJ(dados.empresa_cnpj)}</div>`:''}
       <div class="empresa-sub">Programa de Controle Médico de Saúde Ocupacional — NR-07</div>
     </div>
     <div class="doc-titulo">Atestado de Saúde Ocupacional — ASO</div>
@@ -121,26 +123,61 @@ function renderVia(numVia,labelVia){
     </div>
 
     <div class="secao">
-      <div class="secao-titulo">6. Médico Examinador</div>
+      <div class="secao-titulo">6a. Médico Examinador</div>
       <div class="grid3">
         <div class="campo"><div class="campo-label">Nome</div><div class="campo-valor">${esc(dados.medico_nome||'—')}</div></div>
         <div class="campo"><div class="campo-label">CRM / UF</div><div class="campo-valor">${esc(dados.medico_crm||'—')} / ${esc(dados.medico_uf||'—')}</div></div>
-        <div class="campo"><div class="campo-label">Data de emissão</div><div class="campo-valor">${fmtD(dados.data_exame)}</div></div>
+        <div class="campo"><div class="campo-label">Data do exame clínico</div><div class="campo-valor">${fmtD(dados.data_exame)}</div></div>
       </div>
     </div>
 
-    <div class="assinaturas">
-      <div class="assinatura">
-        <div class="assinatura-espaco"></div>
-        <div class="assinatura-nome">${esc(dados.medico_nome||'—')}</div>
-        <div class="assinatura-sub">Médico Examinador — CRM ${esc(dados.medico_crm||'')} / ${esc(dados.medico_uf||'')}</div>
-      </div>
-      <div class="assinatura">
-        <div class="assinatura-espaco"></div>
-        <div class="assinatura-nome">${esc(f.nome_completo||'—')}</div>
-        <div class="assinatura-sub">${numVia===1?'Assinatura do Trabalhador — Recebimento da via':'Assinatura do Responsável pela Empresa'}</div>
-      </div>
+    <div class="secao">
+      <div class="secao-titulo">6b. Médico Responsável pelo PCMSO</div>
+      ${dados.medico_pcmso_nome
+        ?`<div class="grid3">
+            <div class="campo"><div class="campo-label">Nome</div><div class="campo-valor">${esc(dados.medico_pcmso_nome)}</div></div>
+            <div class="campo"><div class="campo-label">CRM / UF</div><div class="campo-valor">${esc(dados.medico_pcmso_crm||'—')} / ${esc(dados.medico_pcmso_uf||'—')}</div></div>
+            <div class="campo"><div class="campo-label">Responsabilidade</div><div class="campo-valor">Coordenador do PCMSO — NR-07</div></div>
+          </div>`
+        :`<div style="font-size:9pt;color:#888;padding:2mm 0;">Mesmo médico examinador — ${esc(dados.medico_nome||'—')} · CRM ${esc(dados.medico_crm||'—')}/${esc(dados.medico_uf||'—')}</div>`}
     </div>
+
+    ${dados.aptidao_atividades_especificas?`
+    <div class="secao">
+      <div class="secao-titulo">7. Aptidão para Atividades Específicas — NR-07 7.5.19.2</div>
+      <div class="restricoes-box">${esc(dados.aptidao_atividades_especificas)}</div>
+    </div>`:''}
+
+    ${dados.medico_pcmso_nome
+      ?`<div class="assinaturas" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="assinatura">
+            <div class="assinatura-espaco"></div>
+            <div class="assinatura-nome">${esc(dados.medico_nome||'—')}</div>
+            <div class="assinatura-sub">Médico Examinador — CRM ${esc(dados.medico_crm||'')}/${esc(dados.medico_uf||'')}</div>
+          </div>
+          <div class="assinatura">
+            <div class="assinatura-espaco"></div>
+            <div class="assinatura-nome">${esc(dados.medico_pcmso_nome)}</div>
+            <div class="assinatura-sub">Resp. PCMSO — CRM ${esc(dados.medico_pcmso_crm||'')}/${esc(dados.medico_pcmso_uf||'')}</div>
+          </div>
+          <div class="assinatura">
+            <div class="assinatura-espaco"></div>
+            <div class="assinatura-nome">${esc(f.nome_completo||'—')}</div>
+            <div class="assinatura-sub">${numVia===1?'Assinatura do Trabalhador — Recebimento da via':'Assinatura do Responsável pela Empresa'}</div>
+          </div>
+        </div>`
+      :`<div class="assinaturas">
+          <div class="assinatura">
+            <div class="assinatura-espaco"></div>
+            <div class="assinatura-nome">${esc(dados.medico_nome||'—')}</div>
+            <div class="assinatura-sub">Médico Examinador — CRM ${esc(dados.medico_crm||'')} / ${esc(dados.medico_uf||'')}</div>
+          </div>
+          <div class="assinatura">
+            <div class="assinatura-espaco"></div>
+            <div class="assinatura-nome">${esc(f.nome_completo||'—')}</div>
+            <div class="assinatura-sub">${numVia===1?'Assinatura do Trabalhador — Recebimento da via':'Assinatura do Responsável pela Empresa'}</div>
+          </div>
+        </div>`}
 
     <div class="rodape">
       Emitido pelo SGS — Sistema de Gestão em SST &nbsp;·&nbsp; NR-07, Portaria MTb 3.214/78 &nbsp;·&nbsp; Documento válido com assinatura do médico examinador
@@ -183,6 +220,8 @@ async function salvarPDFnoSistema(){
       nome_funcao:dados.funcionario.funcoes?.nome_funcao,nome_setor:dados.funcionario.setores?.nome_setor,
       riscos_ocupacionais:dados.riscos,restricoes_recomendacoes:dados.restricoes,observacoes:dados.restricoes,
       nome_medico_examinador:dados.medico_nome,crm_examinador:dados.medico_crm,uf_crm_examinador:dados.medico_uf,
+      nome_medico_coordenador:dados.medico_pcmso_nome||null,crm_coordenador:dados.medico_pcmso_crm||null,uf_crm_coordenador:dados.medico_pcmso_uf||null,
+      cnpj_empresa:dados.empresa_cnpj||null,aptidao_atividades_especificas:dados.aptidao_atividades_especificas||null,
       status_esocial:'Pendente'
     };
     const resS=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220`,{method:'POST',

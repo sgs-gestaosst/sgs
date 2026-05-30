@@ -289,6 +289,54 @@
       </div>
     </div>
 
+    <!-- PASSO 7: Médico responsável pelo PCMSO -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">7 — Médico Responsável pelo PCMSO <span style="font-size:10px;color:var(--text3);text-transform:none;font-weight:400;">(NR-07 7.5.19.1-f)</span></div>
+    <div style="margin-bottom:10px;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text2);">
+        <input type="checkbox" id="aso-pcmso-mesmo" checked onchange="togglePcmsoMesmo()" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;">
+        Mesmo médico examinador informado acima
+      </label>
+    </div>
+    <div id="aso-pcmso-fields" style="display:none;margin-bottom:12px;">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;">
+        <div class="modal-field">
+          <label>Nome completo</label>
+          <input type="text" id="aso-pcmso-nome" placeholder="Dr. Maria Souza" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+        </div>
+        <div class="modal-field">
+          <label>CRM</label>
+          <input type="text" id="aso-pcmso-crm" placeholder="54321" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+        </div>
+        <div class="modal-field">
+          <label>UF</label>
+          <select id="aso-pcmso-uf" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;">
+            <option value="">—</option>
+            <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+            <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+            <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+            <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+            <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+            <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+            <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+            <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+            <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASSO 8: Aptidão para atividades específicas -->
+    <div style="background:var(--surface2);border-radius:6px;padding:10px 14px;margin-bottom:12px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">8 — Aptidão para Atividades Específicas <span style="font-size:10px;color:var(--text3);text-transform:none;font-weight:400;">(NR-07 7.5.19.2)</span></div>
+    <div style="margin-bottom:8px;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text2);">
+        <input type="checkbox" id="aso-tem-atividades" onchange="toggleAtivEspec()" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;">
+        Há aptidão para atividades específicas regulamentadas por NR ou Anexo
+      </label>
+    </div>
+    <div id="aso-ativ-espec-fields" style="display:none;margin-bottom:12px;">
+      <textarea id="aso-ativ-espec" placeholder="Ex: Apto para trabalho em espaço confinado (NR-33). Apto para trabalho em altura (NR-35)." style="width:100%;height:72px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;resize:vertical;"></textarea>
+    </div>
+
     <div class="status-bar" id="status-gerar-aso"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
       <button class="btn btn-cancel" onclick="document.getElementById('modal-gerar-aso').classList.remove('show')">Cancelar</button>
@@ -484,7 +532,7 @@ async function inicializar(){
   document.getElementById('btn-pcmso').href=`pcmso.html?empresa_id=${empresaId}`;
   try{
     const [resEmp,resSets,resFuncs,resExames]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
+      fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social,cnpj`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
       fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=nome_setor.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
       fetch(`${SUPA_URL}/rest/v1/funcoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_funcao&order=nome_funcao.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
       fetch(`${SUPA_URL}/rest/v1/catalogo_exames?ativo=eq.true&select=*&order=categoria.asc,nome.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}}),
@@ -1261,11 +1309,24 @@ inicializar();
 // ── GERAR ASO ─────────────────────────────────────────────────
 let funcionarioASO=null,examesFuncaoASO=[],riscosFuncaoASO=[];
 
+function togglePcmsoMesmo(){
+  const checked=document.getElementById('aso-pcmso-mesmo').checked;
+  document.getElementById('aso-pcmso-fields').style.display=checked?'none':'block';
+}
+function toggleAtivEspec(){
+  const checked=document.getElementById('aso-tem-atividades').checked;
+  document.getElementById('aso-ativ-espec-fields').style.display=checked?'block':'none';
+}
+
 function abrirModalGerarASO(){
   funcionarioASO=null;examesFuncaoASO=[];riscosFuncaoASO=[];
-  ['aso-busca-func','aso-medico-nome','aso-medico-crm','aso-restricoes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['aso-tipo','aso-resultado','aso-medico-uf'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['aso-busca-func','aso-medico-nome','aso-medico-crm','aso-restricoes','aso-pcmso-nome','aso-pcmso-crm','aso-ativ-espec'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['aso-tipo','aso-resultado','aso-medico-uf','aso-pcmso-uf'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['aso-data-exame','aso-data-prox'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const cbPcmso=document.getElementById('aso-pcmso-mesmo');if(cbPcmso)cbPcmso.checked=true;
+  const cbAtiv=document.getElementById('aso-tem-atividades');if(cbAtiv)cbAtiv.checked=false;
+  document.getElementById('aso-pcmso-fields').style.display='none';
+  document.getElementById('aso-ativ-espec-fields').style.display='none';
   document.getElementById('aso-func-info').style.display='none';
   document.getElementById('aso-riscos-list').innerHTML='<span style="color:var(--text3);">Selecione um funcionário...</span>';
   document.getElementById('aso-exames-clinica').innerHTML='<span style="color:var(--text3);">Selecione um funcionário...</span>';
@@ -1450,6 +1511,8 @@ function prepararDadosASO(){
     const resultado=document.getElementById(ex.selectId)?.value||'';
     return{exame_id:ex.exame_id||null,nome_exame:ex.nome_exame,resultado_exame:resultado};
   }).filter(Boolean);
+  const pcmsoMesmo=document.getElementById('aso-pcmso-mesmo')?.checked!==false;
+  const temAtiv=document.getElementById('aso-tem-atividades')?.checked;
   return{
     funcionario:funcionarioASO,
     tipo_aso:document.getElementById('aso-tipo').value,
@@ -1460,9 +1523,14 @@ function prepararDadosASO(){
     medico_nome:document.getElementById('aso-medico-nome').value.trim(),
     medico_crm:document.getElementById('aso-medico-crm').value.trim(),
     medico_uf:document.getElementById('aso-medico-uf').value,
+    medico_pcmso_nome:pcmsoMesmo?null:document.getElementById('aso-pcmso-nome')?.value.trim()||null,
+    medico_pcmso_crm:pcmsoMesmo?null:document.getElementById('aso-pcmso-crm')?.value.trim()||null,
+    medico_pcmso_uf:pcmsoMesmo?null:document.getElementById('aso-pcmso-uf')?.value||null,
+    aptidao_atividades_especificas:temAtiv?document.getElementById('aso-ativ-espec')?.value.trim()||null:null,
     riscos:riscosFuncaoASO.map(r=>r.nome_risco||r.riscos?.nome_risco).filter(Boolean),
     exames:exsSel,
-    empresa_nome:empresa?.nome_fantasia||empresa?.razao_social||''
+    empresa_nome:empresa?.nome_fantasia||empresa?.razao_social||'',
+    empresa_cnpj:empresa?.cnpj||''
   };
 }
 
@@ -1488,7 +1556,7 @@ async function salvarASO(){
   const dados=prepararDadosASO();
   try{
     const resS=await fetch(`${SUPA_URL}/rest/v1/esocial_s2220`,{method:'POST',headers:{...{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},'Prefer':'return=representation'},
-      body:JSON.stringify({funcionario_id:funcionarioASO.id,tipo_aso:dados.tipo_aso,tipo_exame:dados.tipo_aso,data_exame:dados.data_exame,resultado:dados.resultado_geral,resultado_geral:dados.resultado_geral,data_validade_aso:dados.data_prox_aso,data_prox_aso:dados.data_prox_aso,cpf_funcionario:funcionarioASO.cpf,rg_funcionario:funcionarioASO.rg,nome_funcao:funcionarioASO.funcoes?.nome_funcao,nome_setor:funcionarioASO.setores?.nome_setor,riscos_ocupacionais:dados.riscos,restricoes_recomendacoes:dados.restricoes,observacoes:dados.restricoes,nome_medico_examinador:dados.medico_nome,crm_examinador:dados.medico_crm,uf_crm_examinador:dados.medico_uf,status_esocial:'Pendente'})});
+      body:JSON.stringify({funcionario_id:funcionarioASO.id,tipo_aso:dados.tipo_aso,tipo_exame:dados.tipo_aso,data_exame:dados.data_exame,resultado:dados.resultado_geral,resultado_geral:dados.resultado_geral,data_validade_aso:dados.data_prox_aso,data_prox_aso:dados.data_prox_aso,cpf_funcionario:funcionarioASO.cpf,rg_funcionario:funcionarioASO.rg,nome_funcao:funcionarioASO.funcoes?.nome_funcao,nome_setor:funcionarioASO.setores?.nome_setor,riscos_ocupacionais:dados.riscos,restricoes_recomendacoes:dados.restricoes,observacoes:dados.restricoes,nome_medico_examinador:dados.medico_nome,crm_examinador:dados.medico_crm,uf_crm_examinador:dados.medico_uf,nome_medico_coordenador:dados.medico_pcmso_nome||null,crm_coordenador:dados.medico_pcmso_crm||null,uf_crm_coordenador:dados.medico_pcmso_uf||null,cnpj_empresa:dados.empresa_cnpj||null,aptidao_atividades_especificas:dados.aptidao_atividades_especificas||null,status_esocial:'Pendente'})});
     if(!resS.ok){const e=await resS.json();throw new Error(e.message||JSON.stringify(e));}
     const [s2220]=await resS.json();
     for(const ex of dados.exames){
