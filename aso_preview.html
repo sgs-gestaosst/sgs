@@ -4,60 +4,164 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ASO — Atestado de Saúde Ocupacional</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
+:root{
+  --aso-dark:#00420f;--aso-mid:#00642a;--aso-accent:#00833e;--aso-light:#e6f4ea;--aso-muted:#f1f8f4;
+  --text-dark:#0d1f0d;--text-mid:#1f2937;--text-muted:#6b7280;--border:#e5e7eb;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:#e0e0e0;font-family:Arial,sans-serif;color:#000;padding:20px;}
-.screen-bar{text-align:center;margin-bottom:20px;display:flex;gap:10px;justify-content:center;}
-.screen-bar button{padding:10px 24px;border:none;border-radius:6px;font-family:Arial;font-size:14px;cursor:pointer;font-weight:600;}
-.btn-print{background:#1a6b3c;color:#fff;}
-.btn-close{background:#555;color:#fff;}
-.pages{display:flex;flex-direction:column;gap:20px;align-items:center;}
-.page{width:210mm;min-height:297mm;background:#fff;padding:18mm 20mm 20mm;box-shadow:0 2px 12px rgba(0,0,0,.2);page-break-after:always;display:flex;flex-direction:column;font-size:10.5pt;line-height:1.45;}
-.via-tag{text-align:right;font-size:9pt;font-weight:700;color:#555;margin-bottom:6mm;letter-spacing:.08em;}
-.empresa-header{text-align:center;border-bottom:2pt solid #000;padding-bottom:5mm;margin-bottom:5mm;}
-.empresa-nome{font-size:14pt;font-weight:700;margin-bottom:2mm;}
-.empresa-sub{font-size:9pt;color:#444;}
-.doc-titulo{text-align:center;font-size:13pt;font-weight:700;margin:5mm 0;text-transform:uppercase;letter-spacing:.06em;}
-.secao{margin-bottom:6mm;}
-.secao-titulo{font-weight:700;font-size:9.5pt;border-bottom:1pt solid #000;padding-bottom:2mm;margin-bottom:3mm;text-transform:uppercase;letter-spacing:.04em;}
-.linha{display:flex;gap:5mm;margin-bottom:3mm;}
-.campo{flex:1;}
-.campo-label{font-size:8.5pt;font-weight:700;color:#333;margin-bottom:1mm;}
-.campo-valor{font-size:10pt;border-bottom:0.7pt solid #555;padding-bottom:1mm;min-height:5.5mm;}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8mm;margin-bottom:3mm;}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6mm;margin-bottom:3mm;}
-.riscos-box{border:0.7pt solid #ccc;border-radius:3pt;padding:4mm;background:#fafafa;font-size:9.5pt;}
-.risco-item{padding:2mm 0;border-bottom:0.5pt solid #e5e5e5;display:flex;gap:4mm;}
-.exames-table{width:100%;border-collapse:collapse;font-size:9pt;margin-top:2mm;}
-.exames-table th{background:#222;color:#fff;padding:3mm 4mm;text-align:left;font-size:8.5pt;text-transform:uppercase;letter-spacing:.04em;}
-.exames-table td{border:0.7pt solid #ccc;padding:2.5mm 4mm;vertical-align:top;}
-.exames-table tr:nth-child(even) td{background:#f8f8f8;}
-.resultado-box{text-align:center;border:2.5pt solid #000;border-radius:4pt;padding:5mm;margin:4mm 0;font-size:14pt;font-weight:700;letter-spacing:.06em;}
-.resultado-apto{color:#00833e;border-color:#00833e;}
-.resultado-inapto{color:#c0392b;border-color:#c0392b;}
-.restricoes-box{border:0.7pt solid #ccc;border-radius:3pt;padding:4mm;background:#fffbf0;font-size:9.5pt;min-height:12mm;}
-.assinaturas{display:grid;grid-template-columns:1fr 1fr;gap:16mm;margin-top:auto;padding-top:6mm;}
+body{background:#0f1117;color:#e8eaf0;font-family:var(--sans);padding:24px 20px;}
+.screen-bar{display:flex;gap:10px;justify-content:center;margin-bottom:24px;}
+.screen-bar button{padding:10px 24px;border:none;border-radius:6px;font-family:var(--sans);font-size:13px;cursor:pointer;font-weight:600;}
+.btn-print{background:#2dd4a0;color:#0f1117;}
+.btn-save-sys{background:#1a5f6b;color:#fff;}
+.btn-close{background:#374151;color:#e5e7eb;}
+.pages{display:flex;flex-direction:column;gap:24px;align-items:center;}
+
+/* ── PÁGINA A4 ── */
+.page{
+  background:#fff;width:210mm;min-height:297mm;
+  padding:14mm 18mm 28mm 26mm;
+  box-shadow:0 4px 32px rgba(0,0,0,.5);
+  position:relative;
+  color:var(--text-mid);
+  font-family:var(--sans);font-size:10pt;line-height:1.5;
+  display:flex;flex-direction:column;
+  page-break-after:always;
+}
+.page::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:8mm;
+  background:linear-gradient(180deg,#00642a 0%,#00420f 100%);
+}
+
+/* ── PAGE HEADER ── */
+.page-header{
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1.5pt solid var(--border);padding-bottom:7pt;margin-bottom:12pt;
+}
+.ph-empresa{font-size:8.5pt;font-weight:700;color:var(--text-dark);}
+.ph-doc{font-size:8pt;color:var(--text-muted);font-family:var(--mono);}
+
+/* ── PAGE FOOTER ── */
+.page-footer{
+  position:absolute;bottom:10mm;left:26mm;right:18mm;
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1pt solid var(--border);padding-top:5pt;
+}
+.pf-label{font-size:7pt;color:var(--text-muted);}
+.pf-page{font-family:var(--mono);font-size:8pt;color:#4b5563;font-weight:600;}
+
+/* ── VIA TAG ── */
+.via-tag{
+  font-family:var(--mono);font-size:8pt;font-weight:700;
+  color:var(--aso-mid);letter-spacing:.1em;text-transform:uppercase;
+  text-align:right;margin-bottom:10pt;
+}
+
+/* ── EMPRESA HEADER BLOCK ── */
+.empresa-header{
+  background:var(--aso-muted);border-left:4pt solid var(--aso-accent);
+  padding:11pt 16pt;margin-bottom:12pt;border-radius:0 6pt 6pt 0;
+}
+.empresa-nome{font-size:15pt;font-weight:700;color:var(--aso-dark);margin-bottom:2pt;line-height:1.2;}
+.empresa-cnpj{font-size:8.5pt;color:var(--text-muted);font-family:var(--mono);margin-bottom:2pt;}
+.empresa-sub{font-size:8.5pt;color:var(--text-muted);}
+
+/* ── DOC TITLE ── */
+.doc-titulo{
+  text-align:center;font-size:14pt;font-weight:700;color:var(--aso-dark);
+  text-transform:uppercase;letter-spacing:.06em;
+  padding-bottom:8pt;margin-bottom:14pt;
+  border-bottom:2pt solid var(--aso-accent);
+}
+
+/* ── SECTIONS ── */
+.secao{margin-bottom:11pt;}
+.doc-section{
+  font-size:9pt;font-weight:700;color:var(--aso-dark);
+  text-transform:uppercase;letter-spacing:.06em;
+  border-bottom:2pt solid var(--aso-accent);
+  padding-bottom:4pt;margin-bottom:7pt;
+}
+
+/* ── FICHA GRID ── */
+.ficha-grid{
+  border:1pt solid var(--border);border-radius:4pt;overflow:hidden;
+}
+.ficha-row{display:grid;}
+.ficha-row-1{grid-template-columns:1fr;}
+.ficha-row-2{grid-template-columns:1fr 1fr;}
+.ficha-row-3{grid-template-columns:1fr 1fr 1fr;}
+.ficha-row:not(:last-child){border-bottom:1pt solid var(--border);}
+.ficha-item{padding:7pt 10pt;}
+.ficha-item:not(:last-child){border-right:1pt solid var(--border);}
+.ficha-label{font-size:7pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:2pt;font-family:var(--mono);}
+.ficha-value{font-size:10pt;color:var(--aso-dark);font-weight:500;}
+
+/* ── RISCOS ── */
+.riscos-box{border:1pt solid #c3e6cb;border-radius:4pt;background:var(--aso-muted);padding:7pt 10pt;}
+.risco-item{padding:3pt 0;border-bottom:1pt solid #d4edda;display:flex;gap:7pt;font-size:9.5pt;align-items:flex-start;}
+.risco-item:last-child{border-bottom:none;}
+.risco-ico{color:var(--aso-mid);font-size:10pt;flex-shrink:0;line-height:1.5;}
+
+/* ── EXAMES TABLE ── */
+.doc-table{width:100%;border-collapse:collapse;font-size:9pt;}
+.doc-table th{
+  background:var(--aso-dark);color:#fff;
+  padding:6pt 8pt;text-align:left;
+  font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:.04em;
+  font-family:var(--mono);
+}
+.doc-table td{padding:6pt 8pt;border-bottom:1pt solid var(--border);vertical-align:middle;color:var(--text-mid);}
+.doc-table tr:last-child td{border-bottom:none;}
+.doc-table tr:nth-child(even) td{background:#f9fafb;}
+
+/* ── RESULTADO ── */
+.resultado-badge{
+  display:flex;align-items:center;justify-content:center;gap:10pt;
+  padding:10pt 16pt;border-radius:6pt;
+  font-size:16pt;font-weight:700;letter-spacing:.06em;margin:3pt 0 6pt;
+}
+.badge-apto{background:#dcfce7;color:#166534;border:2pt solid #86efac;}
+.badge-inapto{background:#fee2e2;color:#991b1b;border:2pt solid #fca5a5;}
+
+/* ── RESTRIÇÕES / ATIVIDADES ── */
+.restricoes-box{border:1pt solid #fed7aa;border-radius:4pt;padding:8pt 10pt;background:#fffbeb;font-size:9.5pt;line-height:1.5;}
+.atv-box{border:1pt solid #86efac;border-radius:4pt;padding:8pt 10pt;background:#f0fdf4;font-size:9.5pt;line-height:1.5;}
+
+/* ── ASSINATURAS ── */
+.assinaturas{display:grid;grid-template-columns:1fr 1fr;gap:14mm;margin-top:auto;padding-top:8pt;}
 .assinatura{text-align:center;}
-.assinatura-espaco{height:22mm;border-bottom:1pt solid #000;margin-bottom:2mm;}
-.assinatura-nome{font-size:9pt;font-weight:700;}
-.assinatura-sub{font-size:8pt;color:#666;margin-top:1mm;}
-.rodape{font-size:7.5pt;color:#888;text-align:center;margin-top:auto;padding-top:4mm;border-top:0.5pt solid #ccc;}
+.assinatura-linha{height:18mm;border-bottom:1pt solid #374151;margin-bottom:4pt;}
+.assinatura-nome{font-size:9pt;font-weight:700;color:var(--text-dark);}
+.assinatura-sub{font-size:7.5pt;color:var(--text-muted);margin-top:1pt;font-family:var(--mono);}
+
+/* ── PRINT ── */
 @media print{
-  body{background:#fff;padding:0;}
-  .screen-bar{display:none;}
-  .page{box-shadow:none;margin:0;}
-  .pages{gap:0;}
+  body{background:#fff!important;padding:0!important;}
+  .screen-bar,#msg-salvo{display:none!important;}
+  .pages{gap:0!important;}
+  .page{box-shadow:none!important;margin:0!important;}
+  .page::before,.doc-table th,.resultado-badge,.empresa-header,.riscos-box,.restricoes-box,.atv-box{
+    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
+  }
+}
+@media(max-width:230mm){
+  .page{width:100%;padding:12mm 14mm 22mm 18mm;}
+  .page::before{width:5mm;}
 }
 </style>
 </head>
 <body>
 <div class="screen-bar">
   <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
-  <button id="btn-salvar-sistema" onclick="salvarPDFnoSistema()" style="padding:10px 24px;border:none;border-radius:6px;font-family:Arial;font-size:14px;cursor:pointer;font-weight:600;background:#1a6b6b;color:#fff;">💾 Salvar na ficha do funcionário</button>
+  <button id="btn-salvar-sistema" class="btn-save-sys" onclick="salvarPDFnoSistema()">💾 Salvar na ficha do funcionário</button>
   <button class="btn-close" onclick="window.close()">✕ Fechar</button>
 </div>
-<div id="msg-salvo" style="display:none;text-align:center;margin-bottom:10px;padding:12px;background:#0e2820;border:1px solid #1a4a38;border-radius:8px;color:#2dd4a0;font-family:Arial;font-size:14px;"></div>
+<div id="msg-salvo" style="display:none;text-align:center;margin-bottom:10px;padding:12px;background:#0e2820;border:1px solid #1a4a38;border-radius:8px;color:#2dd4a0;font-family:var(--sans);font-size:14px;"></div>
 <div class="pages" id="pages"></div>
 <script>
 const dados=JSON.parse(localStorage.getItem('sgs_aso_preview')||'{}');
@@ -69,124 +173,132 @@ const fmtCNPJ=c=>{if(!c)return'';const n=c.replace(/\D/g,'');return n.length===1
 function renderVia(numVia,labelVia){
   const resultado=dados.resultado_geral||'Apto';
   const isApto=resultado==='Apto';
-  const exames=(dados.exames||[]).map(e=>`<tr><td>${esc(e.nome_exame||'—')}</td><td>${esc(e.resultado_exame||'—')}</td><td>${fmtD(dados.data_exame)}</td></tr>`).join('');
-  const riscos=(dados.riscos||[]).map(r=>`<div class="risco-item"><span>⚠</span><span>${esc(r)}</span></div>`).join('')||'<div style="color:#888;font-size:9pt;">Nenhum risco mapeado no PGR para esta função.</div>';
+
+  const exames=(dados.exames||[]).map(e=>`
+    <tr><td>${esc(e.nome_exame||'—')}</td><td style="white-space:nowrap;width:28mm;">${fmtD(dados.data_exame)}</td></tr>`).join('');
+
+  const riscos=(dados.riscos||[]).map(r=>`
+    <div class="risco-item"><span class="risco-ico">▸</span><span>${esc(r)}</span></div>`).join('')
+    ||'<div style="color:#6b7280;font-size:9pt;padding:3pt 0;">Nenhum risco mapeado no PGR para esta função.</div>';
+
+  const blocoMedicosPcmso=dados.medico_pcmso_nome
+    ?`<div class="ficha-grid">
+        <div class="ficha-row ficha-row-3">
+          <div class="ficha-item"><div class="ficha-label">Nome</div><div class="ficha-value">${esc(dados.medico_pcmso_nome)}</div></div>
+          <div class="ficha-item"><div class="ficha-label">CRM / UF</div><div class="ficha-value">${esc(dados.medico_pcmso_crm||'—')} / ${esc(dados.medico_pcmso_uf||'—')}</div></div>
+          <div class="ficha-item"><div class="ficha-label">Responsabilidade</div><div class="ficha-value">Coordenador do PCMSO</div></div>
+        </div>
+      </div>`
+    :`<div style="font-size:9pt;color:#6b7280;padding:5pt 0;font-family:var(--mono);">Mesmo médico examinador — ${esc(dados.medico_nome||'—')} · CRM ${esc(dados.medico_crm||'—')}/${esc(dados.medico_uf||'—')}</div>`;
+
+  const assinaturas=dados.medico_pcmso_nome
+    ?`<div class="assinaturas" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(dados.medico_nome||'—')}</div><div class="assinatura-sub">Médico Examinador · CRM ${esc(dados.medico_crm||'')}/${esc(dados.medico_uf||'')}</div></div>
+        <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(dados.medico_pcmso_nome)}</div><div class="assinatura-sub">Resp. PCMSO · CRM ${esc(dados.medico_pcmso_crm||'')}/${esc(dados.medico_pcmso_uf||'')}</div></div>
+        <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(f.nome_completo||'—')}</div><div class="assinatura-sub">${numVia===1?'Trabalhador — Recebimento da via':'Responsável pela Empresa'}</div></div>
+      </div>`
+    :`<div class="assinaturas">
+        <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(dados.medico_nome||'—')}</div><div class="assinatura-sub">Médico Examinador · CRM ${esc(dados.medico_crm||'')} / ${esc(dados.medico_uf||'')}</div></div>
+        <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(f.nome_completo||'—')}</div><div class="assinatura-sub">${numVia===1?'Trabalhador — Recebimento da via':'Responsável pela Empresa'}</div></div>
+      </div>`;
 
   return`<div class="page">
+
+    <div class="page-header">
+      <span class="ph-empresa">${esc(dados.empresa_nome||'EMPRESA')}${dados.empresa_cnpj?' · CNPJ '+fmtCNPJ(dados.empresa_cnpj):''}</span>
+      <span class="ph-doc">ASO · NR-07 · ${fmtD(dados.data_exame)}</span>
+    </div>
+
     <div class="via-tag">${numVia}ª VIA — ${labelVia}</div>
+
     <div class="empresa-header">
       <div class="empresa-nome">${esc(dados.empresa_nome||'EMPRESA')}</div>
-      ${dados.empresa_cnpj?`<div class="empresa-sub">CNPJ: ${fmtCNPJ(dados.empresa_cnpj)}</div>`:''}
+      ${dados.empresa_cnpj?`<div class="empresa-cnpj">CNPJ: ${fmtCNPJ(dados.empresa_cnpj)}</div>`:''}
       <div class="empresa-sub">Programa de Controle Médico de Saúde Ocupacional — NR-07</div>
     </div>
+
     <div class="doc-titulo">Atestado de Saúde Ocupacional — ASO</div>
 
     <div class="secao">
-      <div class="secao-titulo">1. Identificação do Trabalhador</div>
-      <div class="linha"><div class="campo"><div class="campo-label">Nome Completo</div><div class="campo-valor">${esc(f.nome_completo||'')}</div></div></div>
-      <div class="grid2">
-        <div class="campo"><div class="campo-label">CPF</div><div class="campo-valor">${esc(f.cpf||'—')}</div></div>
-        <div class="campo"><div class="campo-label">RG</div><div class="campo-valor">${esc(f.rg||'—')}</div></div>
-      </div>
-      <div class="grid2">
-        <div class="campo"><div class="campo-label">Função</div><div class="campo-valor">${esc(f.funcoes?.nome_funcao||'—')}</div></div>
-        <div class="campo"><div class="campo-label">Setor</div><div class="campo-valor">${esc(f.setores?.nome_setor||'—')}</div></div>
-      </div>
-    </div>
-
-    <div class="secao">
-      <div class="secao-titulo">2. Tipo de ASO e Datas</div>
-      <div class="grid3">
-        <div class="campo"><div class="campo-label">Tipo de ASO</div><div class="campo-valor">${esc(dados.tipo_aso||'—')}</div></div>
-        <div class="campo"><div class="campo-label">Data do Exame</div><div class="campo-valor">${fmtD(dados.data_exame)}</div></div>
-        <div class="campo"><div class="campo-label">Próximo ASO</div><div class="campo-valor">${fmtD(dados.data_prox_aso)}</div></div>
+      <div class="doc-section">1. Identificação do Trabalhador</div>
+      <div class="ficha-grid">
+        <div class="ficha-row ficha-row-1">
+          <div class="ficha-item"><div class="ficha-label">Nome Completo</div><div class="ficha-value" style="font-size:11pt;">${esc(f.nome_completo||'—')}</div></div>
+        </div>
+        <div class="ficha-row ficha-row-2">
+          <div class="ficha-item"><div class="ficha-label">CPF</div><div class="ficha-value">${esc(f.cpf||'—')}</div></div>
+          <div class="ficha-item"><div class="ficha-label">RG</div><div class="ficha-value">${esc(f.rg||'—')}</div></div>
+        </div>
+        <div class="ficha-row ficha-row-2">
+          <div class="ficha-item"><div class="ficha-label">Função</div><div class="ficha-value">${esc(f.funcoes?.nome_funcao||'—')}</div></div>
+          <div class="ficha-item"><div class="ficha-label">Setor</div><div class="ficha-value">${esc(f.setores?.nome_setor||'—')}</div></div>
+        </div>
       </div>
     </div>
 
     <div class="secao">
-      <div class="secao-titulo">3. Riscos Ocupacionais da Função (PGR)</div>
+      <div class="doc-section">2. Tipo de ASO e Datas</div>
+      <div class="ficha-grid">
+        <div class="ficha-row ficha-row-3">
+          <div class="ficha-item"><div class="ficha-label">Tipo de ASO</div><div class="ficha-value">${esc(dados.tipo_aso||'—')}</div></div>
+          <div class="ficha-item"><div class="ficha-label">Data do Exame</div><div class="ficha-value">${fmtD(dados.data_exame)}</div></div>
+          <div class="ficha-item"><div class="ficha-label">Próximo ASO</div><div class="ficha-value">${fmtD(dados.data_prox_aso)}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="secao">
+      <div class="doc-section">3. Riscos Ocupacionais da Função (PGR)</div>
       <div class="riscos-box">${riscos}</div>
     </div>
 
     <div class="secao">
-      <div class="secao-titulo">4. Exames Realizados</div>
-      <table class="exames-table">
-        <thead><tr><th>Exame</th><th>Resultado</th><th>Data</th></tr></thead>
-        <tbody>${exames||'<tr><td colspan="3" style="color:#888;">Nenhum exame registrado</td></tr>'}</tbody>
+      <div class="doc-section">4. Exames Realizados</div>
+      <table class="doc-table">
+        <thead><tr><th>Exame</th><th>Data</th></tr></thead>
+        <tbody>${exames||'<tr><td colspan="2" style="color:#6b7280;text-align:center;padding:10pt;">Nenhum exame registrado</td></tr>'}</tbody>
       </table>
     </div>
 
     <div class="secao">
-      <div class="secao-titulo">5. Resultado Geral</div>
-      <div class="resultado-box ${isApto?'resultado-apto':'resultado-inapto'}">${isApto?'✓ APTO':'✗ INAPTO'}</div>
-      ${dados.restricoes?`<div class="secao-titulo" style="margin-top:3mm;">Restrições / Recomendações</div><div class="restricoes-box">${esc(dados.restricoes)}</div>`:''}
+      <div class="doc-section">5. Resultado Geral</div>
+      <div class="resultado-badge ${isApto?'badge-apto':'badge-inapto'}">${isApto?'✓ APTO':'✗ INAPTO'}</div>
+      ${dados.restricoes?`<div style="font-size:8pt;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin:6pt 0 4pt;font-family:var(--mono);">Restrições / Recomendações</div><div class="restricoes-box">${esc(dados.restricoes)}</div>`:''}
     </div>
 
     <div class="secao">
-      <div class="secao-titulo">6a. Médico Examinador</div>
-      <div class="grid3">
-        <div class="campo"><div class="campo-label">Nome</div><div class="campo-valor">${esc(dados.medico_nome||'—')}</div></div>
-        <div class="campo"><div class="campo-label">CRM / UF</div><div class="campo-valor">${esc(dados.medico_crm||'—')} / ${esc(dados.medico_uf||'—')}</div></div>
-        <div class="campo"><div class="campo-label">Data do exame clínico</div><div class="campo-valor">${fmtD(dados.data_exame)}</div></div>
+      <div class="doc-section">6a. Médico Examinador</div>
+      <div class="ficha-grid">
+        <div class="ficha-row ficha-row-3">
+          <div class="ficha-item"><div class="ficha-label">Nome</div><div class="ficha-value">${esc(dados.medico_nome||'—')}</div></div>
+          <div class="ficha-item"><div class="ficha-label">CRM / UF</div><div class="ficha-value">${esc(dados.medico_crm||'—')} / ${esc(dados.medico_uf||'—')}</div></div>
+          <div class="ficha-item"><div class="ficha-label">Data do Exame Clínico</div><div class="ficha-value">${fmtD(dados.data_exame)}</div></div>
+        </div>
       </div>
     </div>
 
     <div class="secao">
-      <div class="secao-titulo">6b. Médico Responsável pelo PCMSO</div>
-      ${dados.medico_pcmso_nome
-        ?`<div class="grid3">
-            <div class="campo"><div class="campo-label">Nome</div><div class="campo-valor">${esc(dados.medico_pcmso_nome)}</div></div>
-            <div class="campo"><div class="campo-label">CRM / UF</div><div class="campo-valor">${esc(dados.medico_pcmso_crm||'—')} / ${esc(dados.medico_pcmso_uf||'—')}</div></div>
-            <div class="campo"><div class="campo-label">Responsabilidade</div><div class="campo-valor">Coordenador do PCMSO — NR-07</div></div>
-          </div>`
-        :`<div style="font-size:9pt;color:#888;padding:2mm 0;">Mesmo médico examinador — ${esc(dados.medico_nome||'—')} · CRM ${esc(dados.medico_crm||'—')}/${esc(dados.medico_uf||'—')}</div>`}
+      <div class="doc-section">6b. Médico Responsável pelo PCMSO</div>
+      ${blocoMedicosPcmso}
     </div>
 
     ${dados.aptidao_atividades_especificas?`
     <div class="secao">
-      <div class="secao-titulo">7. Aptidão para Atividades Específicas — NR-07 7.5.19.2</div>
-      <div class="restricoes-box">${esc(dados.aptidao_atividades_especificas)}</div>
+      <div class="doc-section">7. Aptidão para Atividades Específicas — NR-07 7.5.19.2</div>
+      <div class="atv-box">${esc(dados.aptidao_atividades_especificas)}</div>
     </div>`:''}
 
-    ${dados.medico_pcmso_nome
-      ?`<div class="assinaturas" style="grid-template-columns:1fr 1fr 1fr;">
-          <div class="assinatura">
-            <div class="assinatura-espaco"></div>
-            <div class="assinatura-nome">${esc(dados.medico_nome||'—')}</div>
-            <div class="assinatura-sub">Médico Examinador — CRM ${esc(dados.medico_crm||'')}/${esc(dados.medico_uf||'')}</div>
-          </div>
-          <div class="assinatura">
-            <div class="assinatura-espaco"></div>
-            <div class="assinatura-nome">${esc(dados.medico_pcmso_nome)}</div>
-            <div class="assinatura-sub">Resp. PCMSO — CRM ${esc(dados.medico_pcmso_crm||'')}/${esc(dados.medico_pcmso_uf||'')}</div>
-          </div>
-          <div class="assinatura">
-            <div class="assinatura-espaco"></div>
-            <div class="assinatura-nome">${esc(f.nome_completo||'—')}</div>
-            <div class="assinatura-sub">${numVia===1?'Assinatura do Trabalhador — Recebimento da via':'Assinatura do Responsável pela Empresa'}</div>
-          </div>
-        </div>`
-      :`<div class="assinaturas">
-          <div class="assinatura">
-            <div class="assinatura-espaco"></div>
-            <div class="assinatura-nome">${esc(dados.medico_nome||'—')}</div>
-            <div class="assinatura-sub">Médico Examinador — CRM ${esc(dados.medico_crm||'')} / ${esc(dados.medico_uf||'')}</div>
-          </div>
-          <div class="assinatura">
-            <div class="assinatura-espaco"></div>
-            <div class="assinatura-nome">${esc(f.nome_completo||'—')}</div>
-            <div class="assinatura-sub">${numVia===1?'Assinatura do Trabalhador — Recebimento da via':'Assinatura do Responsável pela Empresa'}</div>
-          </div>
-        </div>`}
+    ${assinaturas}
 
-    <div class="rodape">
-      Emitido pelo SGS — Sistema de Gestão em SST &nbsp;·&nbsp; NR-07, Portaria MTb 3.214/78 &nbsp;·&nbsp; Documento válido com assinatura do médico examinador
+    <div class="page-footer">
+      <span class="pf-label">NR-07, Portaria MTb 3.214/78 · Válido com assinatura do médico examinador</span>
+      <span class="pf-page">SGS · Pág. ${numVia}/2</span>
     </div>
   </div>`;
 }
 
 if(!dados.funcionario){
-  document.getElementById('pages').innerHTML='<div style="padding:40px;text-align:center;color:#888;">Nenhum dado de ASO encontrado. Feche esta janela e gere o ASO novamente.</div>';
+  document.getElementById('pages').innerHTML='<div style="padding:40px;text-align:center;color:#6b7280;">Nenhum dado de ASO encontrado. Feche esta janela e gere o ASO novamente.</div>';
   document.getElementById('btn-salvar-sistema').style.display='none';
 }else{
   document.getElementById('pages').innerHTML=renderVia(1,'FUNCIONÁRIO')+renderVia(2,'EMPRESA');
@@ -209,7 +321,6 @@ async function salvarPDFnoSistema(){
   };
 
   try{
-    // 1. Salvar ASO no banco
     btn.textContent='⏳ Salvando dados...';
     const payloadASO={
       funcionario_id:dados.funcionario.id,
@@ -230,7 +341,6 @@ async function salvarPDFnoSistema(){
     if(!resS.ok){const e=await resS.json().catch(()=>({}));throw new Error(e.message||'Erro ao salvar ASO');}
     const [s2220]=await resS.json();
 
-    // 2. Salvar exames
     for(const ex of (dados.exames||[])){
       if(!ex.exame_id&&!ex.nome_exame)continue;
       await fetch(`${SUPA_URL}/rest/v1/esocial_s2220_exames`,{method:'POST',
@@ -238,21 +348,18 @@ async function salvarPDFnoSistema(){
         body:JSON.stringify({s2220_id:s2220.id,exame_id:ex.exame_id||null,nome_exame:ex.nome_exame,data_exame:dados.data_exame,resultado_exame:ex.resultado_exame,obrigatorio_pela_funcao:ex.obrigatorio||false})});
     }
 
-    // 3. Atualizar data_prox_aso no funcionário
     if(dados.data_prox_aso){
       await fetch(`${SUPA_URL}/rest/v1/funcionarios?id=eq.${dados.funcionario.id}`,{method:'PATCH',
         headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${_token}`},
         body:JSON.stringify({data_prox_aso:dados.data_prox_aso,aso_ultima_data:dados.data_exame,aso_ultimo_resultado:dados.resultado_geral})});
     }
 
-    // 4. Gerar PDF
     btn.textContent='⏳ Gerando PDF...';
     const elemento=document.getElementById('pages');
     const nomeFunc=(dados.funcionario?.nome_completo||'func').replace(/\s+/g,'_');
     const opt={margin:0,filename:`ASO_${nomeFunc}.pdf`,image:{type:'jpeg',quality:0.97},html2canvas:{scale:2,useCORS:true,logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}};
     const pdfBlob=await html2pdf().set(opt).from(elemento).outputPdf('blob');
 
-    // 5. Upload PDF
     btn.textContent='⏳ Salvando PDF...';
     const empresaId=dados.funcionario?.empresa_id;
     const funcId=dados.funcionario?.id;
@@ -261,7 +368,6 @@ async function salvarPDFnoSistema(){
       headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${_token}`,'x-upsert':'true','Content-Type':'application/pdf'},body:pdfBlob});
     if(!resUp.ok){const e=await resUp.json().catch(()=>({}));throw new Error(e.message||'Erro no upload do PDF');}
 
-    // 6. Atualizar URL do PDF no ASO
     await fetch(`${SUPA_URL}/rest/v1/esocial_s2220?id=eq.${s2220.id}`,{method:'PATCH',
       headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${_token}`},
       body:JSON.stringify({arquivo_pdf_url:path})});
@@ -269,7 +375,6 @@ async function salvarPDFnoSistema(){
     msg.style.display='block';msg.style.background='#0e2820';msg.style.color='#2dd4a0';msg.style.borderColor='#1a4a38';
     msg.textContent='✅ ASO salvo com sucesso! Acesse a ficha do funcionário → aba ASOs para visualizar e anexar a versão assinada.';
     btn.textContent='✅ Salvo!';
-    // Atualiza dados com aso_id para próximas operações
     dados.aso_id=s2220.id;
     localStorage.setItem('sgs_aso_preview',JSON.stringify(dados));
   }catch(e){mostrarErro(e.message);}

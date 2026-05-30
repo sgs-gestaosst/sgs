@@ -113,6 +113,7 @@
 </style>
 </head>
 <body>
+<script src="trial_check.js"></script>
 <div class="header">
   <a href="index.html" class="header-logo">SGS</a>
   <div class="header-title">Sistema de Gestão em SST &nbsp;/&nbsp; <span id="header-nome">Avaliação Psicossocial</span></div>
@@ -507,7 +508,7 @@ async function salvarCampanha(){
       await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${campanhaId}`,{method:'DELETE',headers:headers()});
     }else{
       const res=await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial`,{method:'POST',headers:{...headers(),'Prefer':'return=representation'},body:JSON.stringify(payload)});
-      if(!res.ok)throw new Error('Erro ao criar campanha');
+      if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||e.hint||`Erro ao criar campanha (HTTP ${res.status})`);}
       const data=await res.json();
       campanhaId=data[0].id;
     }
