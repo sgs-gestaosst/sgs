@@ -1030,17 +1030,11 @@ async function integrarInventario(){
 async function excluirCampanha(id,titulo){
   if(!confirm(`Excluir a campanha "${titulo}"?\n\nTodas as respostas e resultados serão removidos permanentemente.`))return;
   try{
-    const cfs=campanhas.find(c=>c.id===id)?.funcoes||[];
-    for(const cf of cfs){
-      await fetch(`${SUPA_URL}/rest/v1/respostas_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
-      await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
-      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_respostas?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
-      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
-    }
-    // Remove riscos do PGR gerados por esta campanha
+    // CASCADE cuida de campanha_funcoes → respostas/resultados automaticamente
+    // Remove apenas riscos do PGR antes (sem CASCADE nessa FK)
     await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?origem_campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
-    await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
-    await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{method:'DELETE',headers:headers()});
+    const res=await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{method:'DELETE',headers:headers()});
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||`HTTP ${res.status}`);}
     await carregarCampanhas();
     toast('Campanha excluída com sucesso.');
   }catch(e){alert('Erro ao excluir: '+e.message);}
@@ -1049,20 +1043,18 @@ async function excluirCampanha(id,titulo){
 async function arquivarCampanha(id,titulo){
   if(!confirm(`Arquivar a campanha "${titulo}"?\n\nTodas as respostas serão removidas e os riscos psicossociais gerados serão removidos do PGR.`))return;
   try{
+    // CASCADE cuida de campanha_funcoes → respostas/resultados automaticamente
+    // Remove apenas riscos do PGR antes (sem CASCADE nessa FK)
+    await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?origem_campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
     const cfs=campanhas.find(c=>c.id===id)?.funcoes||[];
     for(const cf of cfs){
-      await fetch(`${SUPA_URL}/rest/v1/respostas_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
-      await fetch(`${SUPA_URL}/rest/v1/resultados_copsoq?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
-      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_respostas?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
-      await fetch(`${SUPA_URL}/rest/v1/checklist_nr01_resultados?campanha_funcao_id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
+      await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?id=eq.${cf.id}`,{method:'DELETE',headers:headers()});
     }
-    // Remove riscos do PGR gerados por esta campanha
-    await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?origem_campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
-    await fetch(`${SUPA_URL}/rest/v1/campanha_funcoes?campanha_id=eq.${id}`,{method:'DELETE',headers:headers()});
-    await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{
+    const res=await fetch(`${SUPA_URL}/rest/v1/campanhas_psicossocial?id=eq.${id}`,{
       method:'PATCH',headers:headers(),
       body:JSON.stringify({ativo:false,atualizado_em:new Date().toISOString()})
     });
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||`HTTP ${res.status}`);}
     await carregarCampanhas();
     toast('Campanha arquivada. Respostas e riscos do PGR removidos.');
   }catch(e){alert('Erro ao arquivar: '+e.message);}
