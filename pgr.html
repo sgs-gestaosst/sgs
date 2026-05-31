@@ -1537,9 +1537,9 @@ function renderAvaliacaoPsicossocial(){
     <div class="doc-subsection">${numSecao}.1 Base Legal</div>
     <p class="doc-text">A avaliação dos riscos psicossociais no trabalho é exigência da <strong>NR-1 — Disposições Gerais e Gerenciamento de Riscos Ocupacionais</strong>, atualizada pela Portaria MTE nº 1.419/2024, que incluiu os fatores psicossociais relacionados ao trabalho como agentes de risco a serem identificados, avaliados e controlados no Programa de Gerenciamento de Riscos (PGR). A referida norma determina que o empregador deve identificar os perigos e avaliar os riscos ocupacionais, incluindo aqueles decorrentes da organização do trabalho, das relações interpessoais e das condições psicossociais do ambiente laboral.</p>
 
-    <div class="doc-subsection" style="margin-top:12pt;">${numSecao}.2 Metodologia Aplicada — COPSOQ III</div>
-    <p class="doc-text">Para a avaliação dos riscos psicossociais foi adotada a metodologia <strong>COPSOQ III — Copenhagen Psychosocial Questionnaire</strong>, terceira versão do questionário desenvolvido pelo National Research Centre for the Working Environment (NRCWE) da Dinamarca, amplamente validado internacionalmente e adaptado para a língua portuguesa.</p>
-    <p class="doc-text" style="margin-top:6pt;">O COPSOQ III é considerado uma das ferramentas mais completas e cientificamente robustas para avaliação de riscos psicossociais no trabalho. Sua versão curta, composta por <strong>23 itens</strong> organizados em <strong>12 dimensões</strong>, permite avaliar aspectos fundamentais da organização do trabalho, das relações sociais e do bem-estar dos trabalhadores, atendendo plenamente às exigências da NR-1 atualizada.</p>
+    <div class="doc-subsection" style="margin-top:12pt;">${numSecao}.2 Metodologia Aplicada — COPSOQ II</div>
+    <p class="doc-text">Para a avaliação dos riscos psicossociais foi adotada a metodologia <strong>COPSOQ II — Copenhagen Psychosocial Questionnaire</strong>, segunda versão do questionário desenvolvido pelo National Research Centre for the Working Environment (NRCWE) da Dinamarca, validado e adaptado para o português brasileiro por Sória et al. (2014).</p>
+    <p class="doc-text" style="margin-top:6pt;">O COPSOQ II é uma das ferramentas mais utilizadas e cientificamente robustas para avaliação de riscos psicossociais no trabalho. Sua versão curta, composta por <strong>23 itens</strong> organizados em <strong>12 dimensões</strong>, permite avaliar aspectos fundamentais da organização do trabalho, das relações sociais e do bem-estar dos trabalhadores, atendendo plenamente às exigências da NR-1 atualizada (Portaria MTE nº 1.419/2024).</p>
 
     <div class="doc-subsection" style="margin-top:12pt;">${numSecao}.3 Dimensões Avaliadas</div>
     <p class="doc-text" style="margin-bottom:8pt;">O instrumento avalia as seguintes dimensões, agrupadas em <strong>demandas</strong> (fatores que podem gerar sobrecarga) e <strong>recursos</strong> (fatores protetores do trabalhador):</p>
@@ -1585,7 +1585,7 @@ function renderAvaliacaoPsicossocial(){
       if(!funcao)return;
       const pg=criarPagina();
       const dataFim=campanha.data_fim?new Date(campanha.data_fim+'T00:00:00').toLocaleDateString('pt-BR'):'—';
-      const isMedia=campanha.metodologia==='COPSOQ-III-Media';
+      const isMedia=campanha.metodologia==='COPSOQ-II-Media';
       const dimsInfo=isMedia?DIMS_MEDIA_INFO:DIMENSOES_INFO;
       const getScore=k=>isMedia?(resultado.resultados_json?.[`score_${k}`]):(resultado[`score_${k}`]);
       const getRisco=k=>isMedia?(resultado.resultados_json?.[`risco_${k}`]):(resultado[`risco_${k}`]);
@@ -1615,7 +1615,7 @@ function renderAvaliacaoPsicossocial(){
 
       pg.innerHTML=`
       ${phHeader()}
-      <div class="doc-section"><span class="num-secao">${numSecao}</span>Avaliação Psicossocial COPSOQ III — Resultados por Função</div>
+      <div class="doc-section"><span class="num-secao">${numSecao}</span>Avaliação Psicossocial COPSOQ II — Resultados por Função</div>
 
       <div style="background:#f0f4ff;border:1pt solid #c7d7f7;border-radius:4pt;padding:10pt;margin-bottom:12pt;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12pt;">
@@ -1625,7 +1625,7 @@ function renderAvaliacaoPsicossocial(){
           </div>
           <div style="text-align:right;font-size:8pt;color:#6b7280;">
             <div>Campanha: ${h(campanha.titulo)}</div>
-            <div>Metodologia: ${h(campanha.metodologia||'COPSOQ-III')}</div>
+            <div>Metodologia: ${h(campanha.metodologia||'COPSOQ-II')}</div>
             <div>Encerrada em: ${dataFim}</div>
             <div>Respondentes: ${resultado.total_respondentes}</div>
           </div>
@@ -2039,7 +2039,7 @@ function renderMatrizRisco(){
           ['Biológico','Probabilidade de contato com agente infeccioso (frequência de exposição)','Gravidade da doença potencial e disponibilidade de tratamento','NR-09, NR-32'],
           ['Ergonômico','Frequência de movimentos, carga e postura forçada por jornada','Risco de LER/DORT, intensidade da sobrecarga musculoesquelética','NR-17, ISO 11228'],
           ['Acidente','Probabilidade de ocorrência do evento indesejado (frequência histórica)','Consequência potencial do acidente — lesão, morte, dano patrimonial','NR-01, FMEA'],
-          ['Psicossocial','Prevalência de fatores de risco avaliados por instrumento validado','Impacto na saúde mental e desempenho organizacional','NR-01 (2025), COPSOQ-III'],
+          ['Psicossocial','Prevalência de fatores de risco avaliados por instrumento validado','Impacto na saúde mental e desempenho organizacional','NR-01 (2025), COPSOQ-II'],
         ].map(([cat,prob,sev,ref],i)=>`<tr style="background:${i%2?'#f8fafc':'#fff'};">
           <td style="padding:7pt 8pt;border:1pt solid #e5e7eb;font-weight:700;color:#0d2040;">${cat}</td>
           <td style="padding:7pt 8pt;border:1pt solid #e5e7eb;color:#1f2937;">${prob}</td>
