@@ -195,7 +195,7 @@ function getSessaoId(){
   return s;
 }
 
-// ── PERGUNTAS COPSOQ-III CURTA (23 itens) ────────────────────
+// ── PERGUNTAS COPSOQ-II CURTA (23 itens) ────────────────────
 const PERGUNTAS_CURTA=[
   {secao:'Demandas de trabalho',campo:'d01_ritmo_intenso',texto:'Com que frequência você tem que trabalhar em ritmo muito intenso?',escala:'frequencia'},
   {secao:'Demandas de trabalho',campo:'d02_tarefas_demais',texto:'Com que frequência você tem tarefas demais para fazer?',escala:'frequencia'},
@@ -222,7 +222,7 @@ const PERGUNTAS_CURTA=[
   {secao:'Bem-estar e esgotamento',campo:'d23_cansaco_emocional',texto:'Com que frequência você se sente emocionalmente exausto(a) pelo trabalho?',escala:'frequencia'},
 ];
 
-// ── PERGUNTAS COPSOQ-III MÉDIA (76 itens) ─────────────────────
+// ── PERGUNTAS COPSOQ-II MÉDIA (76 itens) ─────────────────────
 const PERGUNTAS_MEDIA=[
   // D1 — Exigências quantitativas
   {secao:'Exigências quantitativas',dim:'exig_quantitativas',campo:'q01',texto:'Com que frequência você tem tarefas demais para fazer?',escala:'frequencia'},
@@ -410,7 +410,7 @@ async function inicializar(){
     const camp=camps[0];
     if(!camp||camp.status!=='Ativa'){mostrarTela('invalida');return;}
 
-    metodologiaAtual=camp.metodologia||'COPSOQ-III';
+    metodologiaAtual=camp.metodologia||'COPSOQ-II';
     document.getElementById('q-titulo').textContent=camp.titulo||'Avaliação de Bem-Estar no Trabalho';
     if(camp.instrucoes)document.getElementById('q-instrucoes').textContent=camp.instrucoes;
 
@@ -418,8 +418,8 @@ async function inicializar(){
       document.getElementById('top-titulo').textContent='Checklist de Riscos Psicossociais — NR-01';
       perguntasAtivas=BLOCOS_CHECKLIST.flatMap(b=>b.fatores.map(f=>f.id));
       renderChecklist();
-    }else if(metodologiaAtual==='COPSOQ-III-Media'){
-      document.getElementById('top-titulo').textContent='COPSOQ-III — Avaliação Psicossocial';
+    }else if(metodologiaAtual==='COPSOQ-II-Media'){
+      document.getElementById('top-titulo').textContent='COPSOQ-II — Avaliação Psicossocial';
       perguntasAtivas=PERGUNTAS_MEDIA.map(p=>p.campo);
       renderPerguntas(PERGUNTAS_MEDIA);
     }else{
@@ -557,7 +557,7 @@ async function enviarRespostas(){
         body:JSON.stringify(payload)
       });
       if(!res.ok)throw new Error('Erro ao salvar respostas');
-    }else if(metodologiaAtual==='COPSOQ-III-Media'){
+    }else if(metodologiaAtual==='COPSOQ-II-Media'){
       const respostasJson={};
       PERGUNTAS_MEDIA.forEach(p=>{
         const val=document.querySelector(`input[name="${p.campo}"]:checked`)?.value;
@@ -578,7 +578,7 @@ async function enviarRespostas(){
       });
       if(!res.ok)throw new Error('Erro ao salvar respostas');
     }else{
-      // COPSOQ-III Curta — colunas d01-d23
+      // COPSOQ-II Curta — colunas d01-d23
       const payload={
         campanha_funcao_id:campanhaFuncaoId,
         sessao_id:sessaoId,
