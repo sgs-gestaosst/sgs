@@ -139,11 +139,21 @@ body{background:#0f1117;color:#e8eaf0;font-family:var(--sans);padding:24px 20px;
 
 /* ── PRINT ── */
 @media print{
-  body{background:#fff!important;padding:0!important;}
+  @page{size:A4;margin:0;}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important;}
+  body{background:#fff!important;padding:0!important;margin:0!important;}
   .screen-bar,#msg-salvo{display:none!important;}
-  .pages{gap:0!important;}
-  .page{box-shadow:none!important;margin:0!important;}
-  .page::before,.doc-table th,.resultado-badge,.empresa-header,.riscos-box,.restricoes-box,.atv-box{
+  .pages{gap:0!important;display:block!important;}
+  .page{
+    box-shadow:none!important;margin:0!important;
+    width:210mm!important;height:297mm!important;min-height:unset!important;
+    overflow:hidden!important;
+    padding:10mm 15mm 20mm 22mm!important;
+    page-break-after:always!important;break-after:page!important;
+    position:relative!important;box-sizing:border-box!important;
+  }
+  .page:last-child{page-break-after:auto!important;break-after:auto!important;}
+  .page::before{
     -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
   }
 }
