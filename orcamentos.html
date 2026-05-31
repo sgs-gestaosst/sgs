@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Orçamentos</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+
+/* ── HEADER ── */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:200;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.header-title span{color:var(--text);font-weight:500;}
+.header-actions{display:flex;gap:8px;align-items:center;margin-left:auto;}
+
+/* ── LAYOUT SPLIT ── */
+.layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 57px);}
+.painel-lista{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.painel-editor{overflow-y:auto;padding:24px;}
+
+/* ── LISTA ── */
+.lista-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;}
+.lista-busca{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.lista-busca:focus{border-color:var(--border-focus);}
+.lista-filtro{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:11px;padding:6px 8px;outline:none;}
+.lista-body{flex:1;overflow-y:auto;}
+.lista-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.lista-item:hover{background:var(--surface2);}
+.lista-item.ativo{background:var(--surface2);border-left:3px solid var(--accent);}
+.li-numero{font-size:10px;font-family:var(--mono);color:var(--accent);margin-bottom:3px;}
+.li-nome{font-size:13px;font-weight:500;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.li-bottom{display:flex;justify-content:space-between;align-items:center;}
+.li-valor{font-size:12px;font-family:var(--mono);color:var(--accent2);}
+.status-badge{font-size:10px;padding:2px 7px;border-radius:3px;font-family:var(--mono);font-weight:600;}
+.sb-rascunho{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+.sb-enviado{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.sb-aprovado{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.sb-recusado{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+.lista-novo{padding:12px 16px;border-top:1px solid var(--border);}
+
+/* ── BOTÕES ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+.btn-danger:hover{background:#2a1515;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-print{background:#1a0840;color:#a78bfa;border:1px solid #5a2a90;}
+.btn-print:hover{background:#2a1060;}
+.btn-contrato{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.btn-contrato:hover{background:#1a4a38;}
+.btn-warn{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.btn-warn:hover{background:#3a3010;}
+.btn-full{width:100%;justify-content:center;}
+
+/* ── EDITOR ── */
+.editor-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text3);gap:16px;}
+.editor-empty-icon{font-size:48px;}
+.secao{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;overflow:hidden;}
+.secao-header{padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);display:flex;align-items:center;gap:8px;}
+.secao-body{padding:16px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-grid-3{grid-template-columns:1fr 1fr 1fr;}
+.field{margin-bottom:0;}
+.field.full{grid-column:1/-1;}
+.field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 11px;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--border-focus);}
+.field textarea{resize:vertical;min-height:60px;}
+
+/* ── ESCOPO ── */
+.escopo-toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.escopo-select{flex:1;min-width:200px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.escopo-select:focus{border-color:var(--border-focus);}
+.item-escopo{display:grid;grid-template-columns:24px 1fr 90px 100px 110px 32px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.item-escopo:last-child{border-bottom:none;}
+.item-escopo.desativado{opacity:.45;}
+.ie-check input{accent-color:var(--accent);}
+.ie-nome{font-size:13px;}
+.ie-nome-sub{font-size:10px;color:var(--text3);margin-top:2px;}
+.ie-qtd input,.ie-preco input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 7px;outline:none;text-align:right;}
+.ie-qtd input:focus,.ie-preco input:focus{border-color:var(--border-focus);}
+.ie-subtotal{font-family:var(--mono);font-size:12px;text-align:right;color:var(--accent2);}
+.ie-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;line-height:1;padding:2px;}
+.ie-del:hover{color:var(--danger);}
+.escopo-header-row{display:grid;grid-template-columns:24px 1fr 90px 100px 110px 32px;gap:8px;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px;}
+.ehr-label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;}
+.ehr-label.right{text-align:right;}
+
+/* ── COMPOSIÇÃO ── */
+.comp-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.comp-row:last-child{border-bottom:none;}
+.comp-row.total{font-weight:700;font-size:15px;padding-top:12px;}
+.comp-row.sub{color:var(--text2);font-size:12px;}
+.comp-val{font-family:var(--mono);color:var(--accent2);}
+.comp-row.total .comp-val{color:var(--accent2);font-size:15px;}
+.comp-ajuste{color:var(--warning);}
+.comp-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.comp-mini-field label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;display:block;}
+.comp-mini-field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 8px;outline:none;text-align:right;}
+.comp-mini-field input:focus{border-color:var(--border-focus);}
+.resumo-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px;}
+.resumo-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;}
+.resumo-row.destaque{font-weight:700;font-size:14px;color:var(--accent2);}
+.resumo-divider{border:none;border-top:1px solid var(--border);margin:8px 0;}
+
+/* ── STATUS E AÇÕES ── */
+.acoes-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
+.status-select-wrap{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.status-select-label{font-size:12px;color:var(--text2);}
+
+/* ── STATUS BAR ── */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:8px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── MODAL CONTRATO ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:860px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.modal-titulo button{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;}
+.contrato-editor{width:100%;min-height:500px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:16px;outline:none;resize:vertical;line-height:1.7;}
+.contrato-editor:focus{border-color:var(--border-focus);}
+
+/* ── PRINT ── */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  body{background:#fff!important;}
+  .header,.painel-lista,.painel-editor>*:not(#area-impressao),.acoes-bar,.status-bar,.secao:not(.print-visible){display:none!important;}
+  #area-impressao{display:block!important;}
+  .layout{display:block!important;height:auto!important;}
+  .painel-editor{padding:0!important;overflow:visible!important;}
+  @page{size:A4;margin:0;}
+  .page-a4{
+    background:#fff!important;width:210mm!important;height:297mm!important;
+    padding:14mm 16mm 28mm 22mm!important;
+    border-left:8mm solid #0d3b6e!important;
+    page-break-after:always!important;break-after:page!important;
+    overflow:hidden!important;box-sizing:border-box!important;
+    position:relative!important;
+  }
+  .page-a4:last-child{page-break-after:auto!important;break-after:auto!important;}
+  .doc-footer{
+    position:absolute!important;bottom:8mm!important;left:22mm!important;right:16mm!important;
+    display:flex!important;justify-content:space-between!important;
+    border-top:1pt solid #d1d5db!important;padding-top:5pt!important;
+  }
+  .doc-table tr{break-inside:avoid!important;}
+  .aceite-section{page-break-before:always!important;break-before:page!important;}
+}
+#area-impressao{display:none;}
+
+/* ── DOCUMENTO IMPRIMÍVEL ── */
+.page-a4{background:#fff;width:210mm;min-height:297mm;padding:20mm 20mm 22mm 28mm;position:relative;color:#1a1a2e;font-family:'IBM Plex Sans',sans-serif;font-size:10pt;line-height:1.5;box-shadow:0 4px 32px rgba(0,0,0,.5);margin:0 auto 24px;}
+.page-a4::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8mm;background:linear-gradient(180deg,#0d3b6e 0%,#0a2a54 100%);}
+.doc-capa-topo{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16pt;padding-bottom:12pt;border-bottom:2pt solid #0d3b6e;}
+.doc-capa-titulo{font-size:20pt;font-weight:700;color:#0d3b6e;letter-spacing:.02em;}
+.doc-capa-num{font-family:'IBM Plex Mono',monospace;font-size:10pt;color:#4b5563;margin-top:4pt;}
+.doc-capa-logo{width:60pt;height:60pt;background:#0d3b6e;display:flex;align-items:center;justify-content:center;border-radius:6pt;flex-shrink:0;}
+.doc-capa-logo-txt{font-family:'IBM Plex Mono',monospace;font-size:18pt;font-weight:700;color:#fff;}
+.doc-box{border:1pt solid #e5e7eb;border-radius:4pt;padding:12pt 14pt;margin-bottom:14pt;}
+.doc-box-title{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;margin-bottom:8pt;}
+.doc-ficha{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1pt solid #e5e7eb;border-radius:4pt;overflow:hidden;margin-bottom:14pt;}
+.doc-fi{padding:7pt 10pt;border-right:1pt solid #e5e7eb;border-bottom:1pt solid #e5e7eb;}
+.doc-fi:nth-child(2n){border-right:none;}
+.doc-fi-label{font-size:7pt;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-bottom:2pt;}
+.doc-fi-val{font-size:9.5pt;color:#0d0826;font-weight:500;}
+.doc-section{font-size:11pt;font-weight:700;color:#0d3b6e;text-transform:uppercase;letter-spacing:.06em;border-bottom:2pt solid #0d3b6e;padding-bottom:5pt;margin:16pt 0 10pt;}
+.doc-table{width:100%;border-collapse:collapse;margin:8pt 0;font-size:9pt;}
+.doc-table th{background:#0d3b6e;color:#fff;padding:6pt 8pt;text-align:left;font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.doc-table th.right{text-align:right;}
+.doc-table td{padding:6pt 8pt;border-bottom:1pt solid #e5e7eb;vertical-align:top;color:#1f2937;}
+.doc-table td.right{text-align:right;font-family:'IBM Plex Mono',monospace;}
+.doc-table tr:nth-child(even) td{background:#f9fafb;}
+.doc-table tr:last-child td{border-bottom:none;}
+.doc-preco-box{background:#f0f9ff;border:1.5pt solid #0d3b6e;border-radius:6pt;padding:14pt;margin:14pt 0;}
+.doc-preco-row{display:flex;justify-content:space-between;font-size:10pt;padding:4pt 0;border-bottom:1pt solid #e5e7eb;}
+.doc-preco-row:last-child{border-bottom:none;}
+.doc-preco-row.total{font-weight:700;font-size:13pt;color:#0d3b6e;padding-top:10pt;border-top:2pt solid #0d3b6e;}
+.doc-preco-row.sub{font-size:9pt;color:#4b5563;}
+.doc-preco-val{font-family:'IBM Plex Mono',monospace;font-weight:600;}
+.doc-footer{position:absolute;bottom:8mm;left:28mm;right:20mm;display:flex;justify-content:space-between;align-items:center;border-top:1pt solid #d1d5db;padding-top:5pt;}
+.doc-footer-left{font-size:7.5pt;color:#6b7280;}
+.doc-footer-right{font-size:8pt;color:#4b5563;font-family:'IBM Plex Mono',monospace;}
+.aceite-bloco{margin-top:30pt;border-top:1pt solid #e5e7eb;padding-top:20pt;}
+.aceite-linha{border-bottom:1pt solid #374151;margin-bottom:4pt;height:24pt;}
+.aceite-label{font-size:8pt;color:#6b7280;margin-bottom:16pt;}
+.obs-item{font-size:9pt;color:#374151;margin-bottom:6pt;padding-left:12pt;position:relative;}
+.obs-item::before{content:'•';position:absolute;left:0;color:#0d3b6e;}
+</style>
+<script src="trial_check.js"></script>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">/ <span>Orçamentos</span></div>
+  <div class="header-actions">
+    <a href="orcamento_catalogo.html" class="btn btn-edit btn-sm">⚙ Catálogo</a>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- LISTA -->
+  <div class="painel-lista">
+    <div class="lista-header">
+      <input type="text" class="lista-busca" id="lista-busca" placeholder="🔍 Buscar..." oninput="renderLista()">
+      <select class="lista-filtro" id="lista-filtro-status" onchange="renderLista()">
+        <option value="">Todos</option>
+        <option value="rascunho">Rascunho</option>
+        <option value="enviado">Enviado</option>
+        <option value="aprovado">Aprovado</option>
+        <option value="recusado">Recusado</option>
+      </select>
+    </div>
+    <div class="lista-body" id="lista-body"></div>
+    <div class="lista-novo">
+      <button class="btn btn-primary btn-sm btn-full" onclick="novoOrcamento()">+ Novo Orçamento</button>
+    </div>
+  </div>
+
+  <!-- EDITOR -->
+  <div class="painel-editor" id="painel-editor">
+    <div class="editor-empty" id="editor-empty">
+      <div class="editor-empty-icon">📋</div>
+      <div>Selecione um orçamento ou crie um novo</div>
+      <button class="btn btn-primary" onclick="novoOrcamento()">+ Novo Orçamento</button>
+    </div>
+
+    <div id="editor-form" style="display:none;">
+      <!-- Dados do cliente -->
+      <div class="secao">
+        <div class="secao-header">👤 Dados do Cliente</div>
+        <div class="secao-body">
+          <div class="form-grid">
+            <div class="field full"><label>Razão Social / Nome *</label><input type="text" id="cli-nome" placeholder="Nome da empresa cliente" oninput="marcarAlterado()"></div>
+            <div class="field"><label>CNPJ</label><input type="text" id="cli-cnpj" placeholder="00.000.000/0001-00" oninput="marcarAlterado()"></div>
+            <div class="field"><label>CNAE Principal</label><input type="text" id="cli-cnae" placeholder="Ex: 4711-3/02" oninput="marcarAlterado()"></div>
+            <div class="field full"><label>Município / UF</label><input type="text" id="cli-municipio" placeholder="Ex: São Paulo - SP" oninput="marcarAlterado()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estrutura operacional -->
+      <div class="secao">
+        <div class="secao-header">🏭 Estrutura Operacional</div>
+        <div class="secao-body">
+          <div class="form-grid form-grid-3">
+            <div class="field"><label>Nº de Funcionários</label><input type="number" id="cli-func" min="0" value="0" oninput="marcarAlterado();recalcularDinamicos()"></div>
+            <div class="field"><label>Nº de Funções/Cargos</label><input type="number" id="cli-cargos" min="0" value="0" oninput="marcarAlterado();recalcularDinamicos()"></div>
+            <div class="field"><label>Nº de Estabelecimentos</label><input type="number" id="cli-estab" min="1" value="1" oninput="marcarAlterado();calcularTotais()"></div>
+            <div class="field"><label>Grau de Risco</label>
+              <select id="cli-gr" onchange="marcarAlterado();recalcularDinamicos()">
+                <option value="GR1">GR1 – Mínimo</option>
+                <option value="GR2">GR2 – Médio</option>
+                <option value="GR3">GR3 – Alto</option>
+                <option value="GR4">GR4 – Máximo</option>
+              </select>
+            </div>
+            <div class="field"><label>Urgência</label>
+              <select id="cli-urgencia" onchange="marcarAlterado();calcularTotais()">
+                <option value="Normal (30 dias)">Normal (30 dias)</option>
+                <option value="Urgente (15 dias)">Urgente (15 dias)</option>
+                <option value="Expresso (7 dias)">Expresso (7 dias)</option>
+              </select>
+            </div>
+            <div class="field"><label>Motivo Principal</label>
+              <select id="cli-motivo" onchange="marcarAlterado()">
+                <option value="">Selecione...</option>
+                <option>Fiscalização / eSocial</option>
+                <option>Renovação anual</option>
+                <option>Empresa nova</option>
+                <option>Mudança de atividade</option>
+                <option>Acidente / CAT</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="cli-doc-ant" onchange="marcarAlterado()">
+            <label for="cli-doc-ant" style="font-size:13px;color:var(--text2);">Possui documentação SST anterior</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Escopo de Serviços -->
+      <div class="secao">
+        <div class="secao-header">📋 Escopo de Serviços</div>
+        <div class="secao-body">
+          <div class="escopo-toolbar">
+            <select class="escopo-select" id="select-adicionar-cat" onchange="filtrarServicosAdd()">
+              <option value="">Filtrar por categoria...</option>
+            </select>
+            <select class="escopo-select" id="select-adicionar-srv" style="flex:2;">
+              <option value="">Selecione um serviço para adicionar...</option>
+            </select>
+            <button class="btn btn-edit btn-sm" onclick="adicionarServico()">+ Adicionar</button>
+          </div>
+          <div class="escopo-header-row">
+            <div></div>
+            <div class="ehr-label">Serviço</div>
+            <div class="ehr-label right">Qtd</div>
+            <div class="ehr-label right">Preço unit.</div>
+            <div class="ehr-label right">Subtotal</div>
+            <div></div>
+          </div>
+          <div id="lista-itens"></div>
+          <div id="lista-itens-empty" style="display:none;padding:20px 0;text-align:center;color:var(--text3);font-size:13px;">
+            Nenhum serviço adicionado. Selecione serviços no catálogo acima.
+          </div>
+        </div>
+      </div>
+
+      <!-- Composição do Preço -->
+      <div class="secao">
+        <div class="secao-header">💰 Composição do Preço</div>
+        <div class="secao-body">
+          <div class="comp-inputs">
+            <div class="comp-mini-field"><label>Impostos (%)</label><input type="number" id="cfg-impostos" value="12" min="0" max="100" step="0.1" oninput="marcarAlterado();calcularTotais()"></div>
+            <div class="comp-mini-field"><label>Margem (%)</label><input type="number" id="cfg-margem" value="30" min="0" max="100" step="0.1" oninput="marcarAlterado();calcularTotais()"></div>
+            <div class="comp-mini-field"><label>Deslocamento (R$)</label><input type="number" id="cfg-desloc" value="150" min="0" oninput="marcarAlterado();calcularTotais()"></div>
+          </div>
+          <div id="comp-detalhes">
+            <div class="comp-row sub"><span>Subtotal serviços únicos</span><span class="comp-val" id="cv-unico">R$ 0,00</span></div>
+            <div class="comp-row sub"><span>Subtotal recorrentes (mensal)</span><span class="comp-val" id="cv-mensal">R$ 0,00</span></div>
+            <div class="comp-row sub"><span>Subtotal recorrentes (anual)</span><span class="comp-val" id="cv-anual">R$ 0,00</span></div>
+            <div class="comp-row sub comp-ajuste" id="row-adj-gr" style="display:none;"><span id="lbl-adj-gr">Adicional GR3 (+20%)</span><span class="comp-val" id="cv-adj-gr">R$ 0,00</span></div>
+            <div class="comp-row sub comp-ajuste" id="row-adj-func" style="display:none;"><span id="lbl-adj-func">Adicional funcionários</span><span class="comp-val" id="cv-adj-func">R$ 0,00</span></div>
+            <div class="comp-row sub comp-ajuste" id="row-adj-estab" style="display:none;"><span id="lbl-adj-estab">Adicional estabelecimentos</span><span class="comp-val" id="cv-adj-estab">R$ 0,00</span></div>
+            <div class="comp-row sub comp-ajuste" id="row-adj-urg" style="display:none;"><span>Urgência (+30%)</span><span class="comp-val" id="cv-adj-urg">R$ 0,00</span></div>
+            <div class="comp-row sub"><span>Deslocamento</span><span class="comp-val" id="cv-desloc">R$ 0,00</span></div>
+            <div class="comp-row sub"><span id="lbl-impostos">Impostos (12%)</span><span class="comp-val" id="cv-impostos">R$ 0,00</span></div>
+            <div class="comp-row sub"><span id="lbl-margem">Margem (30%)</span><span class="comp-val" id="cv-margem">R$ 0,00</span></div>
+          </div>
+          <div class="comp-row total"><span>💰 TOTAL</span><span class="comp-val" id="cv-total">R$ 0,00</span></div>
+          <div class="resumo-box">
+            <div class="resumo-row"><span>Investimento inicial (únicos)</span><span id="rv-unico" style="font-family:var(--mono)">R$ 0,00</span></div>
+            <div class="resumo-row"><span>Recorrência mensal</span><span id="rv-mensal" style="font-family:var(--mono)">R$ 0,00/mês</span></div>
+            <div class="resumo-row"><span>Recorrência anual</span><span id="rv-anual" style="font-family:var(--mono)">R$ 0,00/ano</span></div>
+            <hr class="resumo-divider">
+            <div class="resumo-row destaque"><span>Custo total Ano 1</span><span id="rv-ano1" style="font-family:var(--mono)">R$ 0,00</span></div>
+            <div class="resumo-row"><span>Custo total Ano 2+</span><span id="rv-ano2" style="font-family:var(--mono)">R$ 0,00/ano</span></div>
+            <div class="resumo-row"><span>Por funcionário/mês</span><span id="rv-porfunc" style="font-family:var(--mono)">—</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Observações e Validade -->
+      <div class="secao">
+        <div class="secao-header">📝 Observações</div>
+        <div class="secao-body">
+          <div class="form-grid">
+            <div class="field"><label>Validade da proposta (dias)</label><input type="number" id="cli-validade" value="15" min="1" oninput="marcarAlterado()"></div>
+          </div>
+          <div class="field" style="margin-top:10px;"><label>Observações livres</label><textarea id="cli-obs" placeholder="Condições especiais, escopo adicional..." oninput="marcarAlterado()"></textarea></div>
+        </div>
+      </div>
+
+      <div class="status-bar" id="status-editor"></div>
+
+      <!-- Barra de ações -->
+      <div class="acoes-bar">
+        <button class="btn btn-save" id="btn-salvar" onclick="salvarOrcamento()">
+          <span class="spinner" id="spinner-salvar"></span>
+          <span id="label-salvar">Salvar</span>
+        </button>
+        <button class="btn btn-danger btn-sm" id="btn-excluir" onclick="excluirOrcamento()" style="display:none;">Excluir</button>
+        <button class="btn btn-print btn-sm" onclick="imprimirOrcamento()">🖨 Imprimir PDF</button>
+        <button class="btn btn-contrato btn-sm" id="btn-contrato" style="display:none;" onclick="abrirContrato()">📄 Gerar Contrato</button>
+        <div class="status-select-wrap">
+          <span class="status-select-label">Status:</span>
+          <select id="sel-status" class="lista-filtro" onchange="alterarStatus()">
+            <option value="rascunho">Rascunho</option>
+            <option value="enviado">Enviado</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="recusado">Recusado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÁREA DE IMPRESSÃO -->
+    <div id="area-impressao"></div>
+  </div>
+</div>
+
+<!-- Modal Contrato -->
+<div class="modal-overlay" id="modal-contrato" onclick="if(event.target===this)fecharContrato()">
+  <div class="modal" style="max-width:900px;">
+    <div class="modal-titulo">
+      <span>📄 Contrato de Prestação de Serviços</span>
+      <button onclick="fecharContrato()">×</button>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Edite o texto abaixo conforme necessário antes de imprimir.</p>
+    <textarea class="contrato-editor" id="contrato-texto"></textarea>
+    <div class="status-bar" id="status-contrato"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-cancel" onclick="fecharContrato()">Fechar</button>
+      <button class="btn btn-edit btn-sm" onclick="salvarContrato()">💾 Salvar texto</button>
+      <button class="btn btn-print" onclick="imprimirContrato()">🖨 Imprimir Contrato</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const userRaw=localStorage.getItem('sgs_user');
+const user=userRaw?JSON.parse(userRaw):{};
+
+function h2(){return{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'};}
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]}</span><span>${escHtml(msg)}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtBRL(v){return'R$ '+(+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtData(d){if(!d)return'';return new Date(d).toLocaleDateString('pt-BR');}
+
+let empresaId=null,empresaDados={};
+let orcamentos=[],orcamentoAtual=null;
+let catalogo=[],itensEditor=[];
+let alterado=false;
+
+const FAIXAS=[[1,5],[6,10],[11,20],[21,50],[51,Infinity]];
+const IMPLANTACAO_NOMES=['Implantação SST – Cadastro Completo','Migração de Documentação Anterior','PGR – Elaboração','PCMSO – Elaboração'];
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init(){
+  const r=await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${user.id}&select=empresa_id`,{headers:h2()});
+  const u=await r.json();
+  if(!u||!u[0])return;
+  empresaId=u[0].empresa_id;
+  const [rEmp,rOrc,rCat]=await Promise.all([
+    fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:h2()}),
+    fetch(`${SUPA_URL}/rest/v1/orcamentos?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:h2()}),
+    fetch(`${SUPA_URL}/rest/v1/orcamento_catalogo?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=categoria.asc,ordem.asc`,{headers:h2()})
+  ]);
+  empresaDados=(await rEmp.json())[0]||{};
+  orcamentos=await rOrc.json();
+  catalogo=await rCat.json();
+  renderLista();
+  popularSelectsCatalogo();
+}
+
+// ── LISTA ─────────────────────────────────────────────────────────────────────
+function renderLista(){
+  const busca=document.getElementById('lista-busca').value.toLowerCase();
+  const filtStatus=document.getElementById('lista-filtro-status').value;
+  const lista=orcamentos.filter(o=>{
+    const mB=!busca||o.cliente_nome.toLowerCase().includes(busca)||o.numero.toLowerCase().includes(busca);
+    const mS=!filtStatus||o.status===filtStatus;
+    return mB&&mS;
+  });
+  const container=document.getElementById('lista-body');
+  if(!lista.length){container.innerHTML='<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;">Nenhum orçamento encontrado.</div>';return;}
+  container.innerHTML=lista.map(o=>`
+    <div class="lista-item${orcamentoAtual&&orcamentoAtual.id===o.id?' ativo':''}" onclick="carregarOrcamento('${o.id}')">
+      <div class="li-numero">${escHtml(o.numero)}</div>
+      <div class="li-nome">${escHtml(o.cliente_nome)}</div>
+      <div class="li-bottom">
+        <span class="li-valor">${fmtBRL(o.valor_total)}</span>
+        <span class="status-badge sb-${o.status}">${o.status}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ── CATÁLOGO NOS SELECTS ──────────────────────────────────────────────────────
+function popularSelectsCatalogo(){
+  const cats=[...new Set(catalogo.map(x=>x.categoria))].sort();
+  const selCat=document.getElementById('select-adicionar-cat');
+  selCat.innerHTML='<option value="">Filtrar por categoria...</option>'+cats.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+  filtrarServicosAdd();
+}
+
+function filtrarServicosAdd(){
+  const cat=document.getElementById('select-adicionar-cat').value;
+  const itensJa=itensEditor.map(x=>x.catalogo_id).filter(Boolean);
+  const lista=catalogo.filter(x=>(!cat||x.categoria===cat)&&!itensJa.includes(x.id));
+  const sel=document.getElementById('select-adicionar-srv');
+  sel.innerHTML='<option value="">Selecione um serviço...</option>'+lista.map(x=>`<option value="${x.id}">${escHtml(x.nome)} — ${escHtml(x.unidade)}</option>`).join('');
+}
+
+// ── NOVO ORÇAMENTO ────────────────────────────────────────────────────────────
+function novoOrcamento(){
+  orcamentoAtual=null;
+  itensEditor=[];
+  mostrarEditor();
+  limparFormulario();
+  renderItens();
+  calcularTotais();
+  renderLista();
+  document.getElementById('btn-excluir').style.display='none';
+  document.getElementById('btn-contrato').style.display='none';
+  document.getElementById('sel-status').value='rascunho';
+  alterado=false;
+}
+
+function limparFormulario(){
+  ['cli-nome','cli-cnpj','cli-cnae','cli-municipio','cli-obs'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('cli-func').value=0;
+  document.getElementById('cli-cargos').value=0;
+  document.getElementById('cli-estab').value=1;
+  document.getElementById('cli-gr').value='GR1';
+  document.getElementById('cli-urgencia').value='Normal (30 dias)';
+  document.getElementById('cli-motivo').value='';
+  document.getElementById('cli-validade').value=15;
+  document.getElementById('cli-doc-ant').checked=false;
+  document.getElementById('cfg-impostos').value=12;
+  document.getElementById('cfg-margem').value=30;
+  document.getElementById('cfg-desloc').value=150;
+  clearStatus('status-editor');
+}
+
+function mostrarEditor(){
+  document.getElementById('editor-empty').style.display='none';
+  document.getElementById('editor-form').style.display='block';
+}
+
+// ── CARREGAR ORÇAMENTO ────────────────────────────────────────────────────────
+async function carregarOrcamento(id){
+  if(alterado&&!confirm('Há alterações não salvas. Deseja descartar?'))return;
+  const orc=orcamentos.find(x=>x.id===id);
+  if(!orc)return;
+  orcamentoAtual=orc;
+  alterado=false;
+  // Carregar itens
+  const r=await fetch(`${SUPA_URL}/rest/v1/orcamento_itens?orcamento_id=eq.${id}&select=*&order=ordem.asc`,{headers:h2()});
+  itensEditor=await r.json();
+  mostrarEditor();
+  // Preencher campos
+  document.getElementById('cli-nome').value=orc.cliente_nome||'';
+  document.getElementById('cli-cnpj').value=orc.cliente_cnpj||'';
+  document.getElementById('cli-cnae').value=orc.cliente_cnae||'';
+  document.getElementById('cli-municipio').value=orc.cliente_municipio||'';
+  document.getElementById('cli-func').value=orc.num_funcionarios||0;
+  document.getElementById('cli-cargos').value=orc.num_cargos||0;
+  document.getElementById('cli-estab').value=orc.num_estabelecimentos||1;
+  document.getElementById('cli-gr').value=orc.grau_risco||'GR1';
+  document.getElementById('cli-urgencia').value=orc.urgencia||'Normal (30 dias)';
+  document.getElementById('cli-motivo').value=orc.motivo||'';
+  document.getElementById('cli-validade').value=orc.validade_dias||15;
+  document.getElementById('cli-obs').value=orc.observacoes||'';
+  document.getElementById('cli-doc-ant').checked=!!orc.tem_documentacao_anterior;
+  document.getElementById('cfg-impostos').value=((orc.pct_impostos||0.12)*100).toFixed(1);
+  document.getElementById('cfg-margem').value=((orc.pct_margem||0.30)*100).toFixed(1);
+  document.getElementById('cfg-desloc').value=orc.custo_deslocamento||150;
+  document.getElementById('sel-status').value=orc.status||'rascunho';
+  document.getElementById('btn-excluir').style.display='inline-flex';
+  document.getElementById('btn-contrato').style.display=orc.status==='aprovado'?'inline-flex':'none';
+  renderItens();calcularTotais();renderLista();
+  clearStatus('status-editor');
+}
+
+// ── ITENS ─────────────────────────────────────────────────────────────────────
+function adicionarServico(){
+  const sel=document.getElementById('select-adicionar-srv');
+  const catId=sel.value;
+  if(!catId)return;
+  const item=catalogo.find(x=>x.id===catId);
+  if(!item)return;
+  const preco=calcPrecoItem(item);
+  const isImplantacao=IMPLANTACAO_NOMES.some(n=>item.nome.includes(n.split('–')[0].trim()));
+  const novoItem={id:'temp-'+Date.now(),orcamento_id:null,catalogo_id:item.id,servico_nome:item.nome,unidade:item.unidade,tipo:item.tipo,recorrencia:item.recorrencia,incluso:true,quantidade:1,preco_unitario:preco,subtotal:preco,ordem:itensEditor.length*10};
+  itensEditor.push(novoItem);
+  // Auto-incluir Visita Técnica em implantação
+  if(isImplantacao&&!itensEditor.find(x=>x.servico_nome==='Visita Técnica')){
+    const vt=catalogo.find(x=>x.nome==='Visita Técnica');
+    if(vt){itensEditor.push({id:'temp-'+(Date.now()+1),orcamento_id:null,catalogo_id:vt.id,servico_nome:vt.nome,unidade:vt.unidade,tipo:vt.tipo,recorrencia:vt.recorrencia,incluso:true,quantidade:1,preco_unitario:vt.preco_padrao,subtotal:vt.preco_padrao,ordem:itensEditor.length*10});}
+  }
+  marcarAlterado();renderItens();filtrarServicosAdd();calcularTotais();
+}
+
+function calcPrecoItem(item){
+  if(item.tipo==='tabela_dinamica'&&item.precos_json){
+    const gr=document.getElementById('cli-gr').value;
+    const ncargos=parseInt(document.getElementById('cli-cargos').value)||0;
+    const idx=FAIXAS.findIndex(([min,max])=>ncargos>=min&&ncargos<=max);
+    const faixaIdx=idx<0?FAIXAS.length-1:idx;
+    const precos=item.precos_json[gr];
+    return precos?precos[faixaIdx]||precos[0]||0:item.preco_padrao||0;
+  }
+  return item.preco_padrao||0;
+}
+
+function recalcularDinamicos(){
+  itensEditor.forEach(item=>{
+    const cat=catalogo.find(x=>x.id===item.catalogo_id);
+    if(cat&&cat.tipo==='tabela_dinamica'){
+      item.preco_unitario=calcPrecoItem(cat);
+      item.subtotal=item.preco_unitario*item.quantidade;
+    }
+  });
+  renderItens();calcularTotais();
+}
+
+function renderItens(){
+  const container=document.getElementById('lista-itens');
+  const empty=document.getElementById('lista-itens-empty');
+  if(!itensEditor.length){container.innerHTML='';empty.style.display='block';filtrarServicosAdd();return;}
+  empty.style.display='none';
+  container.innerHTML=itensEditor.map((item,idx)=>`
+    <div class="item-escopo${item.incluso?'':' desativado'}" id="ie-${item.id}">
+      <div class="ie-check"><input type="checkbox" ${item.incluso?'checked':''} onchange="toggleItemIncluso('${item.id}',this.checked)"></div>
+      <div>
+        <div class="ie-nome">${escHtml(item.servico_nome)}</div>
+        <div class="ie-nome-sub">${escHtml(item.unidade)} · ${escHtml(item.recorrencia)}</div>
+      </div>
+      <div class="ie-qtd"><input type="number" value="${item.quantidade}" min="0.01" step="0.01" onchange="atualizarItem('${item.id}','quantidade',this.value)"></div>
+      <div class="ie-preco"><input type="number" value="${item.preco_unitario}" min="0" step="0.01" onchange="atualizarItem('${item.id}','preco_unitario',this.value)"></div>
+      <div class="ie-subtotal">${item.incluso?fmtBRL(item.subtotal):'—'}</div>
+      <button class="ie-del" onclick="removerItem('${item.id}')" title="Remover">×</button>
+    </div>`).join('');
+  filtrarServicosAdd();
+}
+
+function toggleItemIncluso(id,incluso){
+  const item=itensEditor.find(x=>x.id===id);
+  if(item){item.incluso=incluso;marcarAlterado();renderItens();calcularTotais();}
+}
+
+function atualizarItem(id,campo,valor){
+  const item=itensEditor.find(x=>x.id===id);
+  if(!item)return;
+  item[campo]=parseFloat(valor)||0;
+  item.subtotal=item.preco_unitario*item.quantidade;
+  marcarAlterado();renderItens();calcularTotais();
+}
+
+function removerItem(id){
+  itensEditor=itensEditor.filter(x=>x.id!==id);
+  marcarAlterado();renderItens();filtrarServicosAdd();calcularTotais();
+}
+
+// ── CÁLCULO ───────────────────────────────────────────────────────────────────
+function calcularTotais(){
+  const gr=document.getElementById('cli-gr').value;
+  const nFunc=parseInt(document.getElementById('cli-func').value)||0;
+  const nEstab=parseInt(document.getElementById('cli-estab').value)||1;
+  const urgencia=document.getElementById('cli-urgencia').value;
+  const pctImp=(parseFloat(document.getElementById('cfg-impostos').value)||12)/100;
+  const pctMarg=(parseFloat(document.getElementById('cfg-margem').value)||30)/100;
+  const desloc=parseFloat(document.getElementById('cfg-desloc').value)||150;
+
+  const inclusos=itensEditor.filter(x=>x.incluso&&x.tipo!=='percentual');
+  const base=inclusos.reduce((s,x)=>s+x.subtotal,0);
+
+  // Ajustes GR (apenas sobre itens de tabela_dinamica)
+  const baseGR=inclusos.filter(x=>x.tipo==='tabela_dinamica').reduce((s,x)=>s+x.subtotal,0);
+  let adjGR=0;
+  if(gr==='GR3')adjGR=baseGR*0.20;
+  else if(gr==='GR4')adjGR=baseGR*0.40;
+
+  // Ajuste funcionários
+  const adjFunc=Math.floor(Math.max(0,nFunc-20)/20)*base*0.15;
+
+  // Ajuste estabelecimentos
+  const adjEstab=Math.max(0,nEstab-1)*base*0.10;
+
+  // Urgência
+  const itemUrg=itensEditor.find(x=>x.tipo==='percentual'&&x.incluso);
+  const adjUrg=(urgencia!=='Normal (30 dias)'&&itemUrg)?(base+adjGR+adjFunc+adjEstab)*itemUrg.preco_unitario:0;
+
+  const subtotalAjustado=base+adjGR+adjFunc+adjEstab+adjUrg;
+  const impostos=subtotalAjustado*pctImp;
+  const margem=(subtotalAjustado+desloc+impostos)*pctMarg;
+  const total=subtotalAjustado+desloc+impostos+margem;
+
+  // Resumo por recorrência
+  const recUnico=inclusos.filter(x=>!['mensal','trimestral','semestral','anual','bienal'].includes(x.recorrencia)).reduce((s,x)=>s+x.subtotal,0);
+  const recMensal=inclusos.filter(x=>x.recorrencia==='mensal').reduce((s,x)=>s+x.subtotal,0);
+  const recAnual=inclusos.filter(x=>['anual','bienal','semestral','trimestral'].includes(x.recorrencia)).reduce((s,x)=>s+x.subtotal,0);
+
+  // Atualizar UI composição
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('cv-unico',fmtBRL(recUnico));
+  set('cv-mensal',recMensal>0?fmtBRL(recMensal)+'/mês':'R$ 0,00');
+  set('cv-anual',recAnual>0?fmtBRL(recAnual)+'/ano':'R$ 0,00');
+  set('cv-desloc',fmtBRL(desloc));
+  document.getElementById('lbl-impostos').textContent=`Impostos (${(pctImp*100).toFixed(1)}%)`;
+  document.getElementById('lbl-margem').textContent=`Margem (${(pctMarg*100).toFixed(1)}%)`;
+  set('cv-impostos',fmtBRL(impostos));
+  set('cv-margem',fmtBRL(margem));
+  set('cv-total',fmtBRL(total));
+
+  const showAdj=(id,show,lbl,val)=>{
+    const row=document.getElementById('row-adj-'+id);
+    if(row)row.style.display=show?'flex':'none';
+    if(lbl&&document.getElementById('lbl-adj-'+id))document.getElementById('lbl-adj-'+id).textContent=lbl;
+    if(show)set('cv-adj-'+id,fmtBRL(val));
+  };
+  showAdj('gr',adjGR>0,gr==='GR3'?'Adicional GR3 (+20%)':'Adicional GR4 (+40%)',adjGR);
+  showAdj('func',adjFunc>0,`Adicional funcionários (+${Math.floor(Math.max(0,nFunc-20)/20)}×15%)`,adjFunc);
+  showAdj('estab',adjEstab>0,`Adicional ${nEstab-1} filiais (+${(nEstab-1)*10}%)`,adjEstab);
+  document.getElementById('row-adj-urg').style.display=adjUrg>0?'flex':'none';
+  if(adjUrg>0)set('cv-adj-urg',fmtBRL(adjUrg));
+
+  // Resumo
+  const ano1=total+(recMensal*12)+recAnual;
+  const ano2=(recMensal*12)+recAnual;
+  set('rv-unico',fmtBRL(total));
+  set('rv-mensal',recMensal>0?fmtBRL(recMensal)+'/mês':'R$ 0,00');
+  set('rv-anual',recAnual>0?fmtBRL(recAnual)+'/ano':'R$ 0,00');
+  set('rv-ano1',fmtBRL(ano1));
+  set('rv-ano2',fmtBRL(ano2)+'/ano');
+  set('rv-porfunc',nFunc>0?fmtBRL(total/nFunc)+'/func.':'—');
+
+  return{base,adjGR,adjFunc,adjEstab,adjUrg,desloc,impostos,margem,total,recUnico,recMensal,recAnual,pctImp,pctMarg};
+}
+
+// ── SALVAR ────────────────────────────────────────────────────────────────────
+async function salvarOrcamento(){
+  const nome=document.getElementById('cli-nome').value.trim();
+  if(!nome){setStatus('status-editor','error','Informe o nome do cliente.');return;}
+  const btn=document.getElementById('btn-salvar');
+  const spinner=document.getElementById('spinner-salvar');
+  const label=document.getElementById('label-salvar');
+  btn.disabled=true;spinner.className='spinner show';label.textContent='Salvando...';
+  try{
+    const totais=calcularTotais();
+    const payload={
+      empresa_id:empresaId,
+      cliente_nome:nome,
+      cliente_cnpj:document.getElementById('cli-cnpj').value.trim()||null,
+      cliente_cnae:document.getElementById('cli-cnae').value.trim()||null,
+      cliente_municipio:document.getElementById('cli-municipio').value.trim()||null,
+      num_funcionarios:parseInt(document.getElementById('cli-func').value)||0,
+      num_cargos:parseInt(document.getElementById('cli-cargos').value)||0,
+      num_estabelecimentos:parseInt(document.getElementById('cli-estab').value)||1,
+      grau_risco:document.getElementById('cli-gr').value,
+      urgencia:document.getElementById('cli-urgencia').value,
+      motivo:document.getElementById('cli-motivo').value||null,
+      tem_documentacao_anterior:document.getElementById('cli-doc-ant').checked,
+      pct_impostos:(parseFloat(document.getElementById('cfg-impostos').value)||12)/100,
+      pct_margem:(parseFloat(document.getElementById('cfg-margem').value)||30)/100,
+      custo_deslocamento:parseFloat(document.getElementById('cfg-desloc').value)||150,
+      valor_base:totais.base,
+      valor_ajustes:totais.adjGR+totais.adjFunc+totais.adjEstab+totais.adjUrg,
+      valor_custos_op:totais.desloc,
+      valor_impostos:totais.impostos,
+      valor_margem:totais.margem,
+      valor_total:totais.total,
+      valor_unico:totais.recUnico,
+      valor_mensal:totais.recMensal,
+      valor_anual:totais.recAnual,
+      status:document.getElementById('sel-status').value,
+      validade_dias:parseInt(document.getElementById('cli-validade').value)||15,
+      observacoes:document.getElementById('cli-obs').value.trim()||null,
+      atualizado_em:new Date().toISOString()
+    };
+
+    let orcId;
+    if(orcamentoAtual){
+      const r=await fetch(`${SUPA_URL}/rest/v1/orcamentos?id=eq.${orcamentoAtual.id}`,{
+        method:'PATCH',headers:{...h2(),'Prefer':'return=representation'},body:JSON.stringify(payload)
+      });
+      const saved=await r.json();
+      orcamentoAtual=saved[0];orcId=orcamentoAtual.id;
+      const idx=orcamentos.findIndex(x=>x.id===orcId);
+      if(idx>=0)orcamentos[idx]=orcamentoAtual;
+    }else{
+      const r=await fetch(`${SUPA_URL}/rest/v1/orcamentos`,{
+        method:'POST',headers:{...h2(),'Prefer':'return=representation'},body:JSON.stringify(payload)
+      });
+      orcamentoAtual=((await r.json())||[])[0];
+      orcId=orcamentoAtual.id;
+      orcamentos.unshift(orcamentoAtual);
+    }
+
+    // Salvar itens: apagar os existentes e reinserir
+    await fetch(`${SUPA_URL}/rest/v1/orcamento_itens?orcamento_id=eq.${orcId}`,{method:'DELETE',headers:h2()});
+    if(itensEditor.length){
+      const itensPayload=itensEditor.map((item,i)=>({
+        orcamento_id:orcId,catalogo_id:item.catalogo_id||null,
+        servico_nome:item.servico_nome,unidade:item.unidade,
+        tipo:item.tipo,recorrencia:item.recorrencia,
+        incluso:item.incluso,quantidade:item.quantidade,
+        preco_unitario:item.preco_unitario,subtotal:item.subtotal,ordem:i*10
+      }));
+      const ri=await fetch(`${SUPA_URL}/rest/v1/orcamento_itens`,{
+        method:'POST',headers:{...h2(),'Prefer':'return=representation'},body:JSON.stringify(itensPayload)
+      });
+      itensEditor=await ri.json();
+    }
+
+    alterado=false;
+    document.getElementById('btn-excluir').style.display='inline-flex';
+    document.getElementById('btn-contrato').style.display=orcamentoAtual.status==='aprovado'?'inline-flex':'none';
+    renderLista();
+    setStatus('status-editor','success','Orçamento salvo — '+orcamentoAtual.numero);
+    setTimeout(()=>clearStatus('status-editor'),4000);
+  }catch(e){setStatus('status-editor','error',e.message);}
+  finally{btn.disabled=false;spinner.className='spinner';label.textContent='Salvar';}
+}
+
+async function alterarStatus(){
+  if(!orcamentoAtual)return;
+  const status=document.getElementById('sel-status').value;
+  await fetch(`${SUPA_URL}/rest/v1/orcamentos?id=eq.${orcamentoAtual.id}`,{
+    method:'PATCH',headers:h2(),body:JSON.stringify({status,atualizado_em:new Date().toISOString()})
+  });
+  orcamentoAtual.status=status;
+  const idx=orcamentos.findIndex(x=>x.id===orcamentoAtual.id);
+  if(idx>=0)orcamentos[idx].status=status;
+  document.getElementById('btn-contrato').style.display=status==='aprovado'?'inline-flex':'none';
+  renderLista();
+}
+
+async function excluirOrcamento(){
+  if(!orcamentoAtual||!confirm(`Excluir orçamento ${orcamentoAtual.numero}? Esta ação não pode ser desfeita.`))return;
+  await fetch(`${SUPA_URL}/rest/v1/orcamentos?id=eq.${orcamentoAtual.id}`,{
+    method:'PATCH',headers:h2(),body:JSON.stringify({ativo:false})
+  });
+  orcamentos=orcamentos.filter(x=>x.id!==orcamentoAtual.id);
+  orcamentoAtual=null;itensEditor=[];
+  document.getElementById('editor-empty').style.display='flex';
+  document.getElementById('editor-form').style.display='none';
+  renderLista();
+}
+
+function marcarAlterado(){alterado=true;}
+
+// ── PDF ───────────────────────────────────────────────────────────────────────
+function imprimirOrcamento(){
+  if(!orcamentoAtual&&!document.getElementById('cli-nome').value.trim()){
+    setStatus('status-editor','error','Preencha os dados do cliente antes de imprimir.');return;
+  }
+  const totais=calcularTotais();
+  const orc=orcamentoAtual||{numero:'PRÉVIA',status:'rascunho'};
+  const nome=document.getElementById('cli-nome').value.trim();
+  const cnpj=document.getElementById('cli-cnpj').value.trim();
+  const municipio=document.getElementById('cli-municipio').value.trim();
+  const gr=document.getElementById('cli-gr').value;
+  const nFunc=document.getElementById('cli-func').value;
+  const nCargos=document.getElementById('cli-cargos').value;
+  const nEstab=document.getElementById('cli-estab').value;
+  const validade=document.getElementById('cli-validade').value;
+  const obs=document.getElementById('cli-obs').value.trim();
+  const dataEmissao=new Date().toLocaleDateString('pt-BR');
+  const dataValidade=new Date(Date.now()+validade*86400000).toLocaleDateString('pt-BR');
+
+  const inclusos=itensEditor.filter(x=>x.incluso&&x.tipo!=='percentual');
+  const unicos=inclusos.filter(x=>!['mensal','trimestral','semestral','anual','bienal'].includes(x.recorrencia));
+  const recorrentes=inclusos.filter(x=>['mensal','trimestral','semestral','anual','bienal'].includes(x.recorrencia));
+
+  const linhaSrv=(item)=>`<tr><td>${escHtml(item.servico_nome)}</td><td class="right">${item.quantidade}</td><td>${escHtml(item.unidade)}</td><td class="right">${fmtBRL(item.preco_unitario)}</td><td class="right">${fmtBRL(item.subtotal)}</td></tr>`;
+
+  const tabela=(titulo,itens)=>itens.length?`
+    <div class="doc-section">${titulo}</div>
+    <table class="doc-table">
+      <thead><tr><th>Serviço</th><th class="right">Qtd</th><th>Unid.</th><th class="right">Unit.</th><th class="right">Subtotal</th></tr></thead>
+      <tbody>${itens.map(linhaSrv).join('')}</tbody>
+    </table>`:'';
+
+  const sigla=(empresaDados.razao_social||'SGS').split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase();
+  const ano1=totais.total+(totais.recMensal*12)+totais.recAnual;
+  const ano2=(totais.recMensal*12)+totais.recAnual;
+
+  const html=`
+  <div class="page-a4">
+    <!-- Capa -->
+    <div class="doc-capa-topo">
+      <div>
+        <div class="doc-capa-titulo">PROPOSTA COMERCIAL</div>
+        <div class="doc-capa-num">${escHtml(orc.numero||'PRÉVIA')} &nbsp;·&nbsp; Emitida em ${dataEmissao}</div>
+      </div>
+      <div class="doc-capa-logo"><span class="doc-capa-logo-txt">${escHtml(sigla)}</span></div>
+    </div>
+
+    <div class="doc-box">
+      <div class="doc-box-title">Para</div>
+      <div style="font-size:14pt;font-weight:700;color:#0d0826;margin-bottom:4pt;">${escHtml(nome)}</div>
+      ${cnpj?`<div style="font-size:9pt;color:#4b5563;font-family:'IBM Plex Mono',monospace;">${escHtml(cnpj)}</div>`:''}
+      ${municipio?`<div style="font-size:9pt;color:#4b5563;margin-top:2pt;">${escHtml(municipio)}</div>`:''}
+    </div>
+
+    <div class="doc-ficha">
+      <div class="doc-fi"><div class="doc-fi-label">Grau de Risco</div><div class="doc-fi-val">${escHtml(gr)}</div></div>
+      <div class="doc-fi"><div class="doc-fi-label">Funcionários</div><div class="doc-fi-val">${escHtml(nFunc)}</div></div>
+      <div class="doc-fi"><div class="doc-fi-label">Funções/Cargos</div><div class="doc-fi-val">${escHtml(nCargos)}</div></div>
+      <div class="doc-fi"><div class="doc-fi-label">Estabelecimentos</div><div class="doc-fi-val">${escHtml(nEstab)}</div></div>
+    </div>
+
+    <div class="doc-preco-box">
+      <div class="doc-preco-row total"><span>VALOR TOTAL DA PROPOSTA</span><span class="doc-preco-val">${fmtBRL(totais.total)}</span></div>
+      ${totais.recMensal>0?`<div class="doc-preco-row sub"><span>Recorrência mensal</span><span class="doc-preco-val">${fmtBRL(totais.recMensal)}/mês</span></div>`:''}
+      ${totais.recAnual>0?`<div class="doc-preco-row sub"><span>Recorrência anual</span><span class="doc-preco-val">${fmtBRL(totais.recAnual)}/ano</span></div>`:''}
+      <div class="doc-preco-row sub"><span>Custo total Ano 1</span><span class="doc-preco-val">${fmtBRL(ano1)}</span></div>
+      ${ano2>0?`<div class="doc-preco-row sub"><span>Custo total Ano 2+</span><span class="doc-preco-val">${fmtBRL(ano2)}/ano</span></div>`:''}
+    </div>
+
+    <div class="doc-footer">
+      <span class="doc-footer-left">${escHtml(empresaDados.razao_social||'')} — Proposta Comercial</span>
+      <span class="doc-footer-right">${escHtml(orc.numero||'PRÉVIA')}</span>
+    </div>
+  </div>
+
+  <div class="page-a4">
+    ${tabela('Serviços — Investimento Inicial',unicos)}
+    ${tabela('Serviços Recorrentes',recorrentes)}
+
+    <div class="doc-section">Composição do Preço</div>
+    <div class="doc-preco-box">
+      <div class="doc-preco-row sub"><span>Base (serviços selecionados)</span><span class="doc-preco-val">${fmtBRL(totais.base)}</span></div>
+      ${totais.adjGR>0?`<div class="doc-preco-row sub"><span>Adicional ${gr}</span><span class="doc-preco-val">${fmtBRL(totais.adjGR)}</span></div>`:''}
+      ${totais.adjFunc>0?`<div class="doc-preco-row sub"><span>Adicional funcionários</span><span class="doc-preco-val">${fmtBRL(totais.adjFunc)}</span></div>`:''}
+      ${totais.adjEstab>0?`<div class="doc-preco-row sub"><span>Adicional estabelecimentos</span><span class="doc-preco-val">${fmtBRL(totais.adjEstab)}</span></div>`:''}
+      <div class="doc-preco-row sub"><span>Deslocamento</span><span class="doc-preco-val">${fmtBRL(totais.desloc)}</span></div>
+      <div class="doc-preco-row sub"><span>Impostos (${(totais.pctImp*100).toFixed(1)}%)</span><span class="doc-preco-val">${fmtBRL(totais.impostos)}</span></div>
+      <div class="doc-preco-row sub"><span>Margem (${(totais.pctMarg*100).toFixed(1)}%)</span><span class="doc-preco-val">${fmtBRL(totais.margem)}</span></div>
+      <div class="doc-preco-row total"><span>TOTAL</span><span class="doc-preco-val">${fmtBRL(totais.total)}</span></div>
+    </div>
+
+    <div class="doc-footer">
+      <span class="doc-footer-left">${escHtml(empresaDados.razao_social||'')} — Proposta Comercial</span>
+      <span class="doc-footer-right">Pg. 2</span>
+    </div>
+  </div>
+
+  <div class="page-a4">
+    <div class="doc-section">Condições Comerciais</div>
+    <div class="obs-item">Validade desta proposta: ${validade} dias a partir de ${dataEmissao} (até ${dataValidade})</div>
+    <div class="obs-item">PCMSO: renovação anual obrigatória conforme NR-07</div>
+    <div class="obs-item">PGR: revisão conforme Grau de Risco — GR3/GR4 anual, GR1/GR2 bienal (NR-01)</div>
+    <div class="obs-item">Documentos assinados por profissional habilitado com emissão de ART/RRT</div>
+    <div class="obs-item">Prazo de entrega: conforme urgência informada</div>
+    ${obs?`<div class="obs-item">${escHtml(obs)}</div>`:''}
+
+    <div class="aceite-bloco">
+      <div class="doc-section">Aceite da Proposta</div>
+      <p style="font-size:9pt;color:#374151;margin-bottom:20pt;">Ao assinar abaixo, o(a) responsável declara ter lido e concordado com todos os termos desta proposta.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:30pt;margin-top:20pt;">
+        <div>
+          <div class="aceite-linha"></div>
+          <div class="aceite-label">Assinatura do Responsável</div>
+          <div class="aceite-linha"></div>
+          <div class="aceite-label">Nome completo</div>
+          <div class="aceite-linha"></div>
+          <div class="aceite-label">Cargo / Função</div>
+          <div class="aceite-linha" style="width:60%;"></div>
+          <div class="aceite-label">Data</div>
+        </div>
+        <div>
+          <div style="font-size:9pt;color:#374151;margin-bottom:10pt;"><strong>${escHtml(empresaDados.razao_social||'Consultoria SST')}</strong></div>
+          <div class="aceite-linha"></div>
+          <div class="aceite-label">Responsável Técnico</div>
+          <div class="aceite-linha"></div>
+          <div class="aceite-label">CREA / CFT / CRM</div>
+          <div class="aceite-linha" style="width:60%;"></div>
+          <div class="aceite-label">Data</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span class="doc-footer-left">${escHtml(empresaDados.razao_social||'')} — Proposta Comercial</span>
+      <span class="doc-footer-right">Pg. 3</span>
+    </div>
+  </div>`;
+
+  document.getElementById('area-impressao').innerHTML=html;
+  setTimeout(()=>window.print(),300);
+}
+
+// ── CONTRATO ──────────────────────────────────────────────────────────────────
+function abrirContrato(){
+  if(!orcamentoAtual)return;
+  const texto=orcamentoAtual.contrato_texto||gerarTextoContrato();
+  document.getElementById('contrato-texto').value=texto;
+  clearStatus('status-contrato');
+  document.getElementById('modal-contrato').classList.add('show');
+}
+
+function fecharContrato(){document.getElementById('modal-contrato').classList.remove('show');}
+
+function gerarTextoContrato(){
+  const nome=document.getElementById('cli-nome').value.trim();
+  const cnpj=document.getElementById('cli-cnpj').value.trim();
+  const municipio=document.getElementById('cli-municipio').value.trim();
+  const total=calcularTotais().total;
+  const validade=document.getElementById('cli-validade').value;
+  const inclusos=itensEditor.filter(x=>x.incluso&&x.tipo!=='percentual');
+  const listaServicos=inclusos.map(x=>`• ${x.servico_nome} (${x.unidade})`).join('\n');
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const consultoria=empresaDados.razao_social||'CONSULTORIA SST';
+  const cnpjConsultoria=empresaDados.cnpj||'';
+
+  return`CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE SST
+Referência: ${orcamentoAtual.numero}
+
+PARTES:
+
+CONTRATANTE:
+Razão Social: ${nome}
+CNPJ: ${cnpj}
+Endereço/Município: ${municipio}
+
+CONTRATADA:
+Razão Social: ${consultoria}
+CNPJ: ${cnpjConsultoria}
+
+CLÁUSULA 1 — DO OBJETO
+A CONTRATADA se compromete a prestar os seguintes serviços de Saúde e Segurança do Trabalho (SST):
+
+${listaServicos}
+
+CLÁUSULA 2 — DO VALOR E PAGAMENTO
+O valor total dos serviços contratados é de ${fmtBRL(total)}.
+Forma de pagamento: [definir forma de pagamento]
+Vencimento: [definir data de vencimento]
+
+CLÁUSULA 3 — DO PRAZO
+Os serviços serão executados no prazo de [definir prazo], contados a partir da assinatura deste contrato.
+Vigência do contrato: [definir período de vigência].
+
+CLÁUSULA 4 — DAS OBRIGAÇÕES DA CONTRATADA
+4.1 Executar os serviços com profissionais habilitados, conforme legislação vigente.
+4.2 Emitir ART/RRT para os serviços que exigem responsabilidade técnica.
+4.3 Manter sigilo sobre as informações da CONTRATANTE.
+4.4 Fornecer documentação completa conforme normas regulamentadoras aplicáveis.
+4.5 Comunicar previamente qualquer impedimento na execução dos serviços.
+
+CLÁUSULA 5 — DAS OBRIGAÇÕES DA CONTRATANTE
+5.1 Fornecer todas as informações e documentações necessárias para a execução dos serviços.
+5.2 Efetuar os pagamentos nas datas acordadas.
+5.3 Permitir o acesso da CONTRATADA às instalações para realização de visitas técnicas.
+5.4 Garantir a participação dos funcionários nas atividades que requeiram sua presença.
+
+CLÁUSULA 6 — DA CONFIDENCIALIDADE
+As partes se comprometem a manter confidencialidade sobre todas as informações técnicas, comerciais e operacionais obtidas durante a execução deste contrato.
+
+CLÁUSULA 7 — DA RESCISÃO
+Este contrato poderá ser rescindido por qualquer das partes mediante aviso prévio de 30 (trinta) dias, sem ônus, salvo em caso de descumprimento das obrigações, quando caberão as penalidades previstas em lei.
+
+CLÁUSULA 8 — DAS PENALIDADES
+O descumprimento das obrigações por qualquer das partes sujeitará ao pagamento de multa de 10% (dez por cento) sobre o valor total do contrato, além de perdas e danos.
+
+CLÁUSULA 9 — DO FORO
+Fica eleito o foro da comarca de [município], para dirimir eventuais conflitos oriundos deste contrato, com renúncia expressa a qualquer outro, por mais privilegiado que seja.
+
+E por estarem justos e contratados, firmam o presente instrumento em 2 (duas) vias de igual teor.
+
+${municipio}, ${hoje}.
+
+_________________________________          _________________________________
+${consultoria}                              ${nome}
+CONTRATADA                                  CONTRATANTE
+
+_________________________________          _________________________________
+Responsável Técnico                         Representante Legal
+CREA/CFT/CRM: _______________              CPF/RG: _______________`;
+}
+
+async function salvarContrato(){
+  if(!orcamentoAtual)return;
+  const texto=document.getElementById('contrato-texto').value;
+  const r=await fetch(`${SUPA_URL}/rest/v1/orcamentos?id=eq.${orcamentoAtual.id}`,{
+    method:'PATCH',headers:h2(),
+    body:JSON.stringify({contrato_texto:texto,contrato_gerado_em:new Date().toISOString()})
+  });
+  if(r.ok){orcamentoAtual.contrato_texto=texto;setStatus('status-contrato','success','Contrato salvo.');setTimeout(()=>clearStatus('status-contrato'),3000);}
+  else setStatus('status-contrato','error','Erro ao salvar contrato.');
+}
+
+function imprimirContrato(){
+  const texto=document.getElementById('contrato-texto').value;
+  const orc=orcamentoAtual||{numero:'CONTRATO'};
+  const sigla=(empresaDados.razao_social||'SGS').split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase();
+  const html=`<div class="page-a4">
+    <div class="doc-capa-topo">
+      <div>
+        <div class="doc-capa-titulo" style="font-size:16pt;">CONTRATO DE PRESTAÇÃO</div>
+        <div class="doc-capa-titulo" style="font-size:16pt;">DE SERVIÇOS DE SST</div>
+        <div class="doc-capa-num">${escHtml(orc.numero)}</div>
+      </div>
+      <div class="doc-capa-logo"><span class="doc-capa-logo-txt">${escHtml(sigla)}</span></div>
+    </div>
+    <div style="white-space:pre-wrap;font-size:9.5pt;line-height:1.7;color:#1f2937;margin-top:14pt;">${escHtml(texto)}</div>
+    <div class="doc-footer">
+      <span class="doc-footer-left">${escHtml(empresaDados.razao_social||'')} — Contrato de Prestação de Serviços</span>
+      <span class="doc-footer-right">${escHtml(orc.numero)}</span>
+    </div>
+  </div>`;
+  document.getElementById('area-impressao').innerHTML=html;
+  fecharContrato();
+  setTimeout(()=>window.print(),300);
+}
+
+init();
+</script>
+</body>
+</html>

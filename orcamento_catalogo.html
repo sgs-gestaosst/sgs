@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Catálogo de Serviços</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2333;--border:#2a3044;--border-focus:#4a7cdc;
+  --accent:#4a7cdc;--accent2:#2dd4a0;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+  --danger:#e05555;--warning:#e0a855;--success:#2dd4a0;
+  --radius:6px;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.header-logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:4px 10px;border-radius:var(--radius);text-decoration:none;}
+.header-title{font-size:13px;color:var(--text2);flex:1;}
+.header-title span{color:var(--text);font-weight:500;}
+.header-actions{display:flex;gap:8px;align-items:center;margin-left:auto;}
+.container{max-width:1100px;margin:0 auto;padding:32px 24px 80px;}
+.voltar{font-size:12px;color:var(--text2);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:20px;}
+.voltar:hover{color:var(--text);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#5a8ce8;}
+.btn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-edit:hover{border-color:var(--border-focus);}
+.btn-save{background:var(--accent2);color:#0f1117;}
+.btn-save:hover{background:#3de8b4;}
+.btn-cancel{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
+.btn-cancel:hover{border-color:var(--danger);color:var(--danger);}
+.btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger);}
+.btn-danger:hover{background:#2a1515;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-warn{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.btn-warn:hover{background:#3a3010;}
+/* Stats */
+.stats-row{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap;}
+.stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:7px 16px;font-size:12px;display:flex;align-items:center;gap:8px;}
+.stat-pill-val{font-weight:700;font-family:var(--mono);color:var(--accent);}
+/* Toolbar */
+.toolbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.toolbar-busca{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;}
+.toolbar-busca:focus{border-color:var(--border-focus);}
+.toolbar-select{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.toolbar-select:focus{border-color:var(--border-focus);}
+/* Accordion categoria */
+.cat-block{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.cat-header{padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .15s;user-select:none;}
+.cat-header:hover{background:var(--surface2);}
+.cat-toggle{font-size:12px;color:var(--text3);transition:transform .2s;flex-shrink:0;}
+.cat-toggle.open{transform:rotate(90deg);}
+.cat-nome{font-size:13px;font-weight:600;flex:1;}
+.cat-count{font-size:11px;color:var(--text3);font-family:var(--mono);}
+.cat-body{display:none;border-top:1px solid var(--border);}
+.cat-body.open{display:block;}
+/* Item linha */
+.item-row{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border);transition:background .1s;}
+.item-row:last-child{border-bottom:none;}
+.item-row:hover{background:var(--surface2);}
+.item-row.inativo{opacity:.5;}
+.item-nome{flex:1;font-size:13px;}
+.item-unidade{font-size:11px;color:var(--text3);font-family:var(--mono);min-width:70px;}
+.item-rec{font-size:10px;padding:2px 7px;border-radius:3px;font-family:var(--mono);white-space:nowrap;}
+.rec-unica{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+.rec-mensal{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.rec-anual{background:#1a2540;color:#7aabf7;border:1px solid #2a4070;}
+.rec-campanha{background:#1e1a40;color:#a78bfa;border:1px solid #3a2a80;}
+.rec-turma{background:#2a2010;color:#e0a855;border:1px solid #4a3a10;}
+.rec-evento{background:#2a1515;color:#ff9f43;border:1px solid #5a3010;}
+.rec-outro{background:#1e2333;color:var(--text2);border:1px solid var(--border);}
+.item-preco{font-size:13px;font-family:var(--mono);font-weight:500;min-width:110px;text-align:right;color:var(--accent2);}
+.item-preco.dinamico{color:var(--warning);font-size:11px;}
+.item-actions{display:flex;gap:6px;flex-shrink:0;}
+/* Toggle ativo */
+.toggle-ativo{position:relative;width:36px;height:20px;flex-shrink:0;}
+.toggle-ativo input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:20px;transition:.2s;}
+.toggle-slider:before{position:absolute;content:"";height:14px;width:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+input:checked + .toggle-slider{background:var(--accent2);}
+input:checked + .toggle-slider:before{transform:translateX(16px);}
+/* Status bar */
+.status-bar{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:12px;align-items:center;gap:8px;}
+.status-bar.show{display:flex;}
+.status-bar.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+.status-bar.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+.status-bar.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.spinner.show{display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:720px;width:100%;margin:auto;}
+.modal-titulo{font-size:16px;font-weight:500;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.modal-titulo button{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-field{margin-bottom:0;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--border-focus);}
+.modal-field textarea{resize:vertical;min-height:70px;}
+/* Tabela dinâmica GR */
+.gr-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:12px;}
+.gr-table th{background:var(--surface2);color:var(--text2);padding:6px 8px;text-align:center;font-size:11px;font-weight:600;border:1px solid var(--border);}
+.gr-table th:first-child{text-align:left;}
+.gr-table td{padding:4px;border:1px solid var(--border);}
+.gr-table td:first-child{padding:6px 8px;color:var(--text2);font-weight:600;font-size:11px;background:var(--surface2);white-space:nowrap;}
+.gr-table input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 7px;outline:none;text-align:right;}
+.gr-table input:focus{border-color:var(--border-focus);}
+.tipo-hint{font-size:11px;color:var(--text3);margin-top:4px;}
+/* Empty */
+.empty{text-align:center;padding:40px;color:var(--text3);}
+</style>
+<script src="trial_check.js"></script>
+</head>
+<body>
+<div class="header">
+  <a href="index.html" class="header-logo">SGS</a>
+  <div class="header-title">Orçamentos &nbsp;/&nbsp; <span>Catálogo de Serviços</span></div>
+  <div class="header-actions">
+    <a href="orcamentos.html" class="btn btn-edit btn-sm">← Orçamentos</a>
+    <button class="btn btn-warn btn-sm" onclick="confirmarRestaurar()">↺ Restaurar padrões</button>
+    <button class="btn btn-primary btn-sm" onclick="abrirModalNovo()">+ Novo serviço</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-row" id="stats-row">
+    <div class="stat-pill">Total <span class="stat-pill-val" id="stat-total">—</span></div>
+    <div class="stat-pill">Ativos <span class="stat-pill-val" id="stat-ativos" style="color:var(--success)">—</span></div>
+    <div class="stat-pill">Inativos <span class="stat-pill-val" id="stat-inativos" style="color:var(--text3)">—</span></div>
+    <div class="stat-pill">Categorias <span class="stat-pill-val" id="stat-cats">—</span></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" class="toolbar-busca" id="busca" placeholder="🔍 Buscar serviço..." oninput="renderCatalogo()">
+    <select class="toolbar-select" id="filtro-cat" onchange="renderCatalogo()">
+      <option value="">Todas as categorias</option>
+    </select>
+    <select class="toolbar-select" id="filtro-status" onchange="renderCatalogo()">
+      <option value="">Todos</option>
+      <option value="ativo">Ativos</option>
+      <option value="inativo">Inativos</option>
+    </select>
+  </div>
+
+  <div id="lista-catalogo"></div>
+  <div class="status-bar" id="status-global"></div>
+</div>
+
+<!-- Modal Novo/Editar -->
+<div class="modal-overlay" id="modal-servico" onclick="if(event.target===this)fecharModal()">
+  <div class="modal">
+    <div class="modal-titulo">
+      <span id="modal-titulo-txt">Novo Serviço</span>
+      <button onclick="fecharModal()">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Categoria *</label>
+        <select id="sv-categoria" onchange="popularCatSelect()">
+          <option value="">Selecione...</option>
+          <option value="Programas e Documentos">Programas e Documentos</option>
+          <option value="Avaliação Psicossocial">Avaliação Psicossocial</option>
+          <option value="Inventários Técnicos">Inventários Técnicos</option>
+          <option value="Medicina do Trabalho">Medicina do Trabalho</option>
+          <option value="eSocial e Previdenciário">eSocial e Previdenciário</option>
+          <option value="ART / RRT">ART / RRT</option>
+          <option value="Treinamentos NR">Treinamentos NR</option>
+          <option value="Medições e Ensaios">Medições e Ensaios</option>
+          <option value="Implantação e Gestão">Implantação e Gestão</option>
+          <option value="Visitas Técnicas e Assessoria">Visitas Técnicas e Assessoria</option>
+          <option value="Despesas de Deslocamento">Despesas de Deslocamento</option>
+          <option value="__nova__">+ Nova categoria...</option>
+        </select>
+      </div>
+      <div class="modal-field full" id="campo-nova-cat" style="display:none;">
+        <label>Nome da nova categoria *</label>
+        <input type="text" id="sv-nova-categoria" placeholder="Ex: Consultoria Ambiental">
+      </div>
+      <div class="modal-field full">
+        <label>Nome do serviço *</label>
+        <input type="text" id="sv-nome" placeholder="Ex: PGR – Elaboração">
+      </div>
+      <div class="modal-field full">
+        <label>Descrição</label>
+        <textarea id="sv-descricao" placeholder="Descrição opcional..."></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Unidade *</label>
+        <select id="sv-unidade">
+          <option value="unidade">unidade</option>
+          <option value="mês">mês</option>
+          <option value="hora">hora</option>
+          <option value="por turma">por turma</option>
+          <option value="por exame">por exame</option>
+          <option value="por func.">por func.</option>
+          <option value="por posto">por posto</option>
+          <option value="por ambiente">por ambiente</option>
+          <option value="por ponto">por ponto</option>
+          <option value="por amostra">por amostra</option>
+          <option value="por coleta">por coleta</option>
+          <option value="por caso">por caso</option>
+          <option value="por evento">por evento</option>
+          <option value="por campanha">por campanha</option>
+          <option value="por visita">por visita</option>
+          <option value="por diária">por diária</option>
+          <option value="por dia">por dia</option>
+          <option value="por km">por km</option>
+          <option value="por trecho">por trecho</option>
+          <option value="%">%</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Recorrência</label>
+        <select id="sv-recorrencia">
+          <option value="unica">Única</option>
+          <option value="mensal">Mensal</option>
+          <option value="trimestral">Trimestral</option>
+          <option value="semestral">Semestral</option>
+          <option value="anual">Anual</option>
+          <option value="bienal">Bienal</option>
+          <option value="por campanha">Por campanha</option>
+          <option value="por turma">Por turma</option>
+          <option value="por exame">Por exame</option>
+          <option value="por evento">Por evento</option>
+          <option value="por func.">Por funcionário</option>
+          <option value="por caso">Por caso</option>
+          <option value="por visita">Por visita</option>
+        </select>
+      </div>
+      <div class="modal-field full">
+        <label>Tipo de preço *</label>
+        <select id="sv-tipo" onchange="atualizarTipoPreco()">
+          <option value="servico">Valor fixo</option>
+          <option value="tabela_dinamica">Tabela dinâmica (GR × funções)</option>
+          <option value="percentual">Percentual sobre total</option>
+          <option value="por_funcionario">Por funcionário</option>
+        </select>
+        <div class="tipo-hint" id="tipo-hint">Preço fixo por unidade.</div>
+      </div>
+      <!-- Preço fixo -->
+      <div class="modal-field" id="campo-preco-fixo">
+        <label>Preço padrão (R$) *</label>
+        <input type="number" id="sv-preco" min="0" step="0.01" placeholder="0,00">
+      </div>
+      <!-- Percentual -->
+      <div class="modal-field" id="campo-percentual" style="display:none;">
+        <label>Percentual (%) *</label>
+        <input type="number" id="sv-percentual" min="0" max="100" step="0.1" placeholder="30">
+      </div>
+      <!-- Tabela dinâmica -->
+      <div class="modal-field full" id="campo-tabela-dinamica" style="display:none;">
+        <label>Tabela de preços por GR × Nº de funções (R$)</label>
+        <table class="gr-table">
+          <thead>
+            <tr>
+              <th>Grau de Risco</th>
+              <th>1–5 funç.</th>
+              <th>6–10</th>
+              <th>11–20</th>
+              <th>21–50</th>
+              <th>51+</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>GR1</td><td><input type="number" id="gr-GR1-0" min="0"></td><td><input type="number" id="gr-GR1-1" min="0"></td><td><input type="number" id="gr-GR1-2" min="0"></td><td><input type="number" id="gr-GR1-3" min="0"></td><td><input type="number" id="gr-GR1-4" min="0"></td></tr>
+            <tr><td>GR2</td><td><input type="number" id="gr-GR2-0" min="0"></td><td><input type="number" id="gr-GR2-1" min="0"></td><td><input type="number" id="gr-GR2-2" min="0"></td><td><input type="number" id="gr-GR2-3" min="0"></td><td><input type="number" id="gr-GR2-4" min="0"></td></tr>
+            <tr><td>GR3</td><td><input type="number" id="gr-GR3-0" min="0"></td><td><input type="number" id="gr-GR3-1" min="0"></td><td><input type="number" id="gr-GR3-2" min="0"></td><td><input type="number" id="gr-GR3-3" min="0"></td><td><input type="number" id="gr-GR3-4" min="0"></td></tr>
+            <tr><td>GR4</td><td><input type="number" id="gr-GR4-0" min="0"></td><td><input type="number" id="gr-GR4-1" min="0"></td><td><input type="number" id="gr-GR4-2" min="0"></td><td><input type="number" id="gr-GR4-3" min="0"></td><td><input type="number" id="gr-GR4-4" min="0"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-field">
+        <label>Ativo</label>
+        <select id="sv-ativo">
+          <option value="true">Sim</option>
+          <option value="false">Não</option>
+        </select>
+      </div>
+    </div>
+    <div class="status-bar" id="status-modal"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-save" id="btn-salvar-sv" onclick="salvarServico()">
+        <span class="spinner" id="spinner-sv"></span>
+        <span id="label-salvar-sv">Salvar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const token=localStorage.getItem('sgs_token');
+if(!token)window.location.href='login.html';
+const userRaw=localStorage.getItem('sgs_user');
+const user=userRaw?JSON.parse(userRaw):{};
+
+function h2(){return{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Content-Type':'application/json'};}
+function escHtml(s){const str=s===null||s===undefined?'':(s+'');return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setStatus(id,tipo,msg){const el=document.getElementById(id);if(!el)return;el.className=`status-bar show ${tipo}`;el.innerHTML=`<span>${{success:'✓',error:'✕',info:'↻'}[tipo]||''}</span><span>${escHtml(msg)}</span>`;}
+function clearStatus(id){const el=document.getElementById(id);if(el)el.className='status-bar';}
+function fmtBRL(v){return'R$ '+(+v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+let empresaId=null;
+let catalogo=[];
+let editandoId=null;
+
+// ── SEED ─────────────────────────────────────────────────────────────────────
+const FAIXAS=['1-5','6-10','11-20','21-50','51+'];
+const GRS=['GR1','GR2','GR3','GR4'];
+const TABELAS_PADRAO={
+  'PGR – Elaboração':{GR1:[600,750,900,1100,1400],GR2:[750,950,1150,1400,1800],GR3:[1000,1300,1600,2000,2600],GR4:[1400,1800,2200,2800,3600]},
+  'PGR – Revisão Anual':{GR1:[300,380,450,550,700],GR2:[380,480,580,700,900],GR3:[500,650,800,1000,1300],GR4:[700,900,1100,1400,1800]},
+  'PCMSO – Elaboração':{GR1:[550,700,850,1050,1350],GR2:[700,880,1080,1300,1700],GR3:[950,1200,1500,1850,2400],GR4:[1300,1650,2050,2550,3300]},
+  'PCMSO – Revisão Anual':{GR1:[280,350,420,520,650],GR2:[350,450,550,680,880],GR3:[480,600,750,950,1250],GR4:[670,850,1050,1350,1750]},
+  'LTCAT':{GR1:[700,900,1100,1350,1700],GR2:[900,1100,1350,1650,2100],GR3:[1200,1500,1800,2200,2800],GR4:[1600,2000,2500,3000,3800]},
+  'AET – Análise Ergonômica do Trabalho':{GR1:[900,1100,1400,1700,2200],GR2:[1100,1350,1700,2100,2700],GR3:[1400,1750,2200,2700,3400],GR4:[1800,2250,2800,3400,4300]},
+  'Laudo de Insalubridade (NR-15)':{GR1:[800,1000,1200,1500,1900],GR2:[1000,1250,1500,1850,2350],GR3:[1300,1600,1950,2400,3050],GR4:[1700,2100,2550,3150,3950]},
+  'Laudo de Periculosidade (NR-16)':{GR1:[800,1000,1200,1500,1900],GR2:[1000,1250,1500,1850,2350],GR3:[1300,1600,1950,2400,3050],GR4:[1700,2100,2550,3150,3950]},
+};
+
+const CATALOGO_SEED=[
+  // 1. Programas e Documentos
+  {categoria:'Programas e Documentos',nome:'PGR – Elaboração',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'unica',preco_padrao:900,ativo:true,ordem:10},
+  {categoria:'Programas e Documentos',nome:'PGR – Revisão Anual',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'anual',preco_padrao:450,ativo:true,ordem:11},
+  {categoria:'Programas e Documentos',nome:'PCMSO – Elaboração',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'unica',preco_padrao:800,ativo:true,ordem:20},
+  {categoria:'Programas e Documentos',nome:'PCMSO – Revisão Anual',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'anual',preco_padrao:400,ativo:true,ordem:21},
+  {categoria:'Programas e Documentos',nome:'Relatório Anual PCMSO (NR-07 item 7.6.1)',unidade:'unidade',tipo:'servico',recorrencia:'anual',preco_padrao:600,ativo:true,ordem:22},
+  {categoria:'Programas e Documentos',nome:'LTCAT',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'unica',preco_padrao:1200,ativo:true,ordem:30},
+  {categoria:'Programas e Documentos',nome:'AET – Análise Ergonômica do Trabalho',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'unica',preco_padrao:1800,ativo:true,ordem:40},
+  {categoria:'Programas e Documentos',nome:'Laudo de Insalubridade (NR-15)',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'unica',preco_padrao:1500,ativo:true,ordem:50},
+  {categoria:'Programas e Documentos',nome:'Laudo de Periculosidade (NR-16)',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'unica',preco_padrao:1500,ativo:true,ordem:51},
+  {categoria:'Programas e Documentos',nome:'Mapa de Risco (NR-05)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:350,ativo:true,ordem:60},
+  {categoria:'Programas e Documentos',nome:'PCA – Programa de Conservação Auditiva',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:600,ativo:true,ordem:70},
+  {categoria:'Programas e Documentos',nome:'PPR – Programa de Proteção Respiratória',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:500,ativo:true,ordem:80},
+  {categoria:'Programas e Documentos',nome:'PAE – Plano de Atendimento a Emergências',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:800,ativo:true,ordem:90},
+  {categoria:'Programas e Documentos',nome:'PPCI – Proj. Prevenção Contra Incêndio',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1500,ativo:false,ordem:100},
+  {categoria:'Programas e Documentos',nome:'PCMAT – Prog. Condições Amb. (NR-18)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1100,ativo:false,ordem:110},
+  {categoria:'Programas e Documentos',nome:'PPRPS – Prensas e Similares (NR-12)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:900,ativo:false,ordem:120},
+  {categoria:'Programas e Documentos',nome:'PGRSS – Resíduos Serviços de Saúde',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:700,ativo:false,ordem:130},
+  // 2. Avaliação Psicossocial
+  {categoria:'Avaliação Psicossocial',nome:'Campanha COPSOQ III Curta (23 itens)',unidade:'por campanha',tipo:'servico',recorrencia:'por campanha',preco_padrao:700,ativo:true,ordem:10},
+  {categoria:'Avaliação Psicossocial',nome:'Campanha COPSOQ III Média (76 itens)',unidade:'por campanha',tipo:'servico',recorrencia:'por campanha',preco_padrao:900,ativo:true,ordem:20},
+  {categoria:'Avaliação Psicossocial',nome:'Avaliação Checklist NR-01 (26 fatores)',unidade:'por campanha',tipo:'servico',recorrencia:'por campanha',preco_padrao:600,ativo:true,ordem:30},
+  // 3. Inventários Técnicos
+  {categoria:'Inventários Técnicos',nome:'Inventário de Extintores e Eq. Combate Incêndio',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:500,ativo:true,ordem:10},
+  {categoria:'Inventários Técnicos',nome:'Inventário de Espaços Confinados (NR-33)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:800,ativo:false,ordem:20},
+  {categoria:'Inventários Técnicos',nome:'Inventário de Produtos Químicos (NR-26)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:700,ativo:false,ordem:30},
+  {categoria:'Inventários Técnicos',nome:'Inventário de Máquinas (NR-12)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:900,ativo:false,ordem:40},
+  {categoria:'Inventários Técnicos',nome:'Inventário de Pontos de Ancoragem (NR-35)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:600,ativo:false,ordem:50},
+  {categoria:'Inventários Técnicos',nome:'Inventário de Áreas Classificadas (NR-10)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:700,ativo:false,ordem:60},
+  {categoria:'Inventários Técnicos',nome:'Atualização Anual de Inventários',unidade:'unidade',tipo:'servico',recorrencia:'anual',preco_padrao:400,ativo:false,ordem:70},
+  // 4. Medicina do Trabalho
+  {categoria:'Medicina do Trabalho',nome:'Honorário Médico Coordenador (PCMSO)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:true,ordem:10},
+  {categoria:'Medicina do Trabalho',nome:'Coordenação de Exame Admissional',unidade:'por exame',tipo:'servico',recorrencia:'por exame',preco_padrao:50,ativo:true,ordem:20},
+  {categoria:'Medicina do Trabalho',nome:'Coordenação de Exame Periódico',unidade:'por exame',tipo:'servico',recorrencia:'por exame',preco_padrao:50,ativo:true,ordem:30},
+  {categoria:'Medicina do Trabalho',nome:'Coordenação de Exame Demissional',unidade:'por exame',tipo:'servico',recorrencia:'por exame',preco_padrao:50,ativo:true,ordem:40},
+  {categoria:'Medicina do Trabalho',nome:'GRT – Gestão de Retorno ao Trabalho',unidade:'por caso',tipo:'servico',recorrencia:'por caso',preco_padrao:800,ativo:true,ordem:50},
+  {categoria:'Medicina do Trabalho',nome:'Programa de Vacinação Ocupacional',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:true,ordem:60},
+  // 5. eSocial e Previdenciário
+  {categoria:'eSocial e Previdenciário',nome:'Envio eSocial S-2220 (ASO)',unidade:'unidade',tipo:'servico',recorrencia:'anual',preco_padrao:200,ativo:true,ordem:10},
+  {categoria:'eSocial e Previdenciário',nome:'Envio eSocial S-2240 (Fatores de Risco)',unidade:'unidade',tipo:'servico',recorrencia:'anual',preco_padrao:300,ativo:true,ordem:20},
+  {categoria:'eSocial e Previdenciário',nome:'Envio eSocial S-2210 (CAT Digital)',unidade:'por evento',tipo:'servico',recorrencia:'por evento',preco_padrao:150,ativo:true,ordem:30},
+  {categoria:'eSocial e Previdenciário',nome:'PPP – Perfil Profissiográfico Previdenciário',unidade:'por func.',tipo:'servico',recorrencia:'por func.',preco_padrao:60,ativo:true,ordem:40},
+  {categoria:'eSocial e Previdenciário',nome:'CAT – Comunicação de Acidente de Trabalho',unidade:'por evento',tipo:'servico',recorrencia:'por evento',preco_padrao:150,ativo:true,ordem:50},
+  // 6. ART / RRT
+  {categoria:'ART / RRT',nome:'ART – Anotação de Resp. Técnica (CREA)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:true,ordem:10},
+  {categoria:'ART / RRT',nome:'RRT – Registro de Resp. Técnica (CFT)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:false,ordem:20},
+  // 7. Treinamentos NR
+  {categoria:'Treinamentos NR',nome:'NR-01 – Gestão de Riscos Ocupacionais',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:600,ativo:true,ordem:10},
+  {categoria:'Treinamentos NR',nome:'NR-05 – CIPA – Treinamento',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:700,ativo:true,ordem:20},
+  {categoria:'Treinamentos NR',nome:'NR-05 – CIPA – Implantação / Eleição',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1200,ativo:true,ordem:21},
+  {categoria:'Treinamentos NR',nome:'NR-06 – EPI (uso, conservação, higienização)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:400,ativo:true,ordem:30},
+  {categoria:'Treinamentos NR',nome:'NR-17 – Ergonomia',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:600,ativo:true,ordem:70},
+  {categoria:'Treinamentos NR',nome:'NR-23 – Proteção Contra Incêndios',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:500,ativo:true,ordem:80},
+  {categoria:'Treinamentos NR',nome:'NR-23 – Brigada de Incêndio (Formação)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:900,ativo:true,ordem:81},
+  {categoria:'Treinamentos NR',nome:'Primeiros Socorros / SBV',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:700,ativo:true,ordem:90},
+  {categoria:'Treinamentos NR',nome:'SIPAT – Semana Interna de Prevenção',unidade:'por evento',tipo:'servico',recorrencia:'por evento',preco_padrao:1500,ativo:true,ordem:100},
+  {categoria:'Treinamentos NR',nome:'SESMT – Dimensionamento e Implantação',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1000,ativo:true,ordem:110},
+  {categoria:'Treinamentos NR',nome:'NR-10 – Segurança em Eletricidade (40h)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:1200,ativo:false,ordem:40},
+  {categoria:'Treinamentos NR',nome:'NR-11 – Movimentação de Cargas',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:500,ativo:false,ordem:50},
+  {categoria:'Treinamentos NR',nome:'NR-12 – Máquinas e Equipamentos',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:700,ativo:false,ordem:60},
+  {categoria:'Treinamentos NR',nome:'NR-18 – Construção Civil',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:600,ativo:false,ordem:82},
+  {categoria:'Treinamentos NR',nome:'NR-20 – Inflamáveis e Combustíveis',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:700,ativo:false,ordem:83},
+  {categoria:'Treinamentos NR',nome:'NR-33 – Esp. Confinados Trabalhador (16h)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:900,ativo:false,ordem:84},
+  {categoria:'Treinamentos NR',nome:'NR-33 – Esp. Confinados Supervisor (40h)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:1400,ativo:false,ordem:85},
+  {categoria:'Treinamentos NR',nome:'NR-35 – Trabalho em Altura (8h)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:800,ativo:false,ordem:86},
+  // 8. Medições e Ensaios
+  {categoria:'Medições e Ensaios',nome:'Dosimetria de Ruído (NR-15 Anexo I)',unidade:'por posto',tipo:'servico',recorrencia:'unica',preco_padrao:300,ativo:true,ordem:10},
+  {categoria:'Medições e Ensaios',nome:'Medição de Iluminância / lux (NR-17)',unidade:'por ambiente',tipo:'servico',recorrencia:'unica',preco_padrao:200,ativo:true,ordem:20},
+  {categoria:'Medições e Ensaios',nome:'Medição de Calor – IBUTG (NR-15 Anexo III)',unidade:'por ponto',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:true,ordem:30},
+  {categoria:'Medições e Ensaios',nome:'Medição de Frio (NR-15 Anexo IX)',unidade:'por ponto',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:true,ordem:40},
+  {categoria:'Medições e Ensaios',nome:'Medição de Umidade e Temperatura (NR-17)',unidade:'por ambiente',tipo:'servico',recorrencia:'unica',preco_padrao:150,ativo:true,ordem:50},
+  {categoria:'Medições e Ensaios',nome:'Medição de Vibração – mão-braço (NR-09)',unidade:'por posto',tipo:'servico',recorrencia:'unica',preco_padrao:350,ativo:true,ordem:60},
+  {categoria:'Medições e Ensaios',nome:'Medição de Vibração – corpo inteiro (NR-09)',unidade:'por posto',tipo:'servico',recorrencia:'unica',preco_padrao:350,ativo:true,ordem:70},
+  {categoria:'Medições e Ensaios',nome:'Medição de Gases e Vapores (NR-09/NR-15)',unidade:'por amostra',tipo:'servico',recorrencia:'unica',preco_padrao:500,ativo:false,ordem:80},
+  {categoria:'Medições e Ensaios',nome:'Avaliação de Poeiras / Mat. Particulado',unidade:'por amostra',tipo:'servico',recorrencia:'unica',preco_padrao:500,ativo:false,ordem:90},
+  {categoria:'Medições e Ensaios',nome:'Biomonitoramento – Amostras Biológicas',unidade:'por coleta',tipo:'servico',recorrencia:'unica',preco_padrao:600,ativo:false,ordem:100},
+  {categoria:'Medições e Ensaios',nome:'Avaliação de Radiações Ionizantes',unidade:'por posto',tipo:'servico',recorrencia:'unica',preco_padrao:800,ativo:false,ordem:110},
+  {categoria:'Medições e Ensaios',nome:'Medição de Campos Eletromagnéticos',unidade:'por ponto',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:false,ordem:120},
+  {categoria:'Medições e Ensaios',nome:'Avaliação de Pressão Hiperbárica',unidade:'por posto',tipo:'servico',recorrencia:'unica',preco_padrao:900,ativo:false,ordem:130},
+  // 9. Implantação e Gestão
+  {categoria:'Implantação e Gestão',nome:'Implantação SST – Cadastro Completo',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1500,ativo:true,ordem:10},
+  {categoria:'Implantação e Gestão',nome:'Migração de Documentação Anterior',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:800,ativo:true,ordem:20},
+  {categoria:'Implantação e Gestão',nome:'Gestão SST Mensal',unidade:'mês',tipo:'servico',recorrencia:'mensal',preco_padrao:500,ativo:true,ordem:30},
+  {categoria:'Implantação e Gestão',nome:'Gestão de Extintores e Eq. de Segurança',unidade:'mês',tipo:'servico',recorrencia:'mensal',preco_padrao:200,ativo:true,ordem:40},
+  {categoria:'Implantação e Gestão',nome:'Relatório de Conformidade Avulso',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:true,ordem:50},
+  // 10. Visitas Técnicas e Assessoria
+  {categoria:'Visitas Técnicas e Assessoria',nome:'Visita Técnica',unidade:'por visita',tipo:'servico',recorrencia:'por visita',preco_padrao:350,ativo:true,ordem:10},
+  {categoria:'Visitas Técnicas e Assessoria',nome:'Assessoria em Fiscalização MTE/DRT',unidade:'hora',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:true,ordem:20},
+  {categoria:'Visitas Técnicas e Assessoria',nome:'Suporte a Perícias Judiciais',unidade:'hora',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:false,ordem:30},
+  // 11. Despesas de Deslocamento
+  {categoria:'Despesas de Deslocamento',nome:'Hospedagem',unidade:'por diária',tipo:'servico',recorrencia:'unica',preco_padrao:150,ativo:true,ordem:10},
+  {categoria:'Despesas de Deslocamento',nome:'Alimentação',unidade:'por dia',tipo:'servico',recorrencia:'unica',preco_padrao:80,ativo:true,ordem:20},
+  {categoria:'Despesas de Deslocamento',nome:'Deslocamento – veículo próprio',unidade:'por km',tipo:'servico',recorrencia:'unica',preco_padrao:1.20,ativo:true,ordem:30},
+  {categoria:'Despesas de Deslocamento',nome:'Deslocamento – aéreo',unidade:'por trecho',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:false,ordem:40},
+  {categoria:'Despesas de Deslocamento',nome:'Aluguel de veículo',unidade:'por diária',tipo:'servico',recorrencia:'unica',preco_padrao:180,ativo:false,ordem:50},
+  {categoria:'Despesas de Deslocamento',nome:'Pedágio / Estacionamento',unidade:'por evento',tipo:'servico',recorrencia:'unica',preco_padrao:50,ativo:true,ordem:60},
+  // Modificador global
+  {categoria:'Modificadores',nome:'Urgência – taxa adicional',unidade:'%',tipo:'percentual',recorrencia:'unica',preco_padrao:0,percentual:0.30,ativo:true,ordem:10},
+];
+
+// ── INICIALIZAÇÃO ─────────────────────────────────────────────────────────────
+async function init(){
+  const userParsed=JSON.parse(localStorage.getItem('sgs_user')||'{}');
+  // Buscar empresa_id do usuário
+  const r=await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${userParsed.id}&select=empresa_id`,{headers:h2()});
+  const u=await r.json();
+  if(!u||!u[0]){setStatus('status-global','error','Usuário sem empresa vinculada.');return;}
+  empresaId=u[0].empresa_id;
+  await carregarCatalogo();
+}
+
+async function carregarCatalogo(){
+  const r=await fetch(`${SUPA_URL}/rest/v1/orcamento_catalogo?empresa_id=eq.${empresaId}&select=*&order=categoria.asc,ordem.asc,nome.asc`,{headers:h2()});
+  catalogo=await r.json();
+  if(!Array.isArray(catalogo)||catalogo.length===0){
+    await executarSeed();
+    return;
+  }
+  renderCatalogo();
+  atualizarStats();
+  popularFiltros();
+}
+
+async function executarSeed(){
+  setStatus('status-global','info','Configurando catálogo padrão...');
+  const payload=CATALOGO_SEED.map((s,i)=>{
+    const obj={...s,empresa_id:empresaId,ordem:s.ordem||i};
+    if(s.tipo==='tabela_dinamica'&&TABELAS_PADRAO[s.nome]){
+      obj.precos_json={faixas:FAIXAS,...TABELAS_PADRAO[s.nome]};
+    }
+    return obj;
+  });
+  const r=await fetch(`${SUPA_URL}/rest/v1/orcamento_catalogo`,{
+    method:'POST',headers:{...h2(),'Prefer':'return=representation'},
+    body:JSON.stringify(payload)
+  });
+  if(!r.ok){const e=await r.text();setStatus('status-global','error','Erro ao criar catálogo: '+e);return;}
+  catalogo=await r.json();
+  clearStatus('status-global');
+  renderCatalogo();atualizarStats();popularFiltros();
+}
+
+function atualizarStats(){
+  const ativos=catalogo.filter(x=>x.ativo).length;
+  document.getElementById('stat-total').textContent=catalogo.length;
+  document.getElementById('stat-ativos').textContent=ativos;
+  document.getElementById('stat-inativos').textContent=catalogo.length-ativos;
+  const cats=[...new Set(catalogo.map(x=>x.categoria))];
+  document.getElementById('stat-cats').textContent=cats.length;
+}
+
+function popularFiltros(){
+  const sel=document.getElementById('filtro-cat');
+  const cats=[...new Set(catalogo.map(x=>x.categoria))].sort();
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Todas as categorias</option>'+cats.map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
+  if(cur)sel.value=cur;
+}
+
+function renderCatalogo(){
+  const busca=document.getElementById('busca').value.toLowerCase();
+  const filtCat=document.getElementById('filtro-cat').value;
+  const filtStatus=document.getElementById('filtro-status').value;
+
+  let itens=catalogo.filter(item=>{
+    const mBusca=!busca||item.nome.toLowerCase().includes(busca)||item.categoria.toLowerCase().includes(busca);
+    const mCat=!filtCat||item.categoria===filtCat;
+    const mStatus=!filtStatus||(filtStatus==='ativo'&&item.ativo)||(filtStatus==='inativo'&&!item.ativo);
+    return mBusca&&mCat&&mStatus;
+  });
+
+  const porCat={};
+  itens.forEach(item=>{
+    if(!porCat[item.categoria])porCat[item.categoria]=[];
+    porCat[item.categoria].push(item);
+  });
+
+  const container=document.getElementById('lista-catalogo');
+  if(Object.keys(porCat).length===0){container.innerHTML='<div class="empty">Nenhum serviço encontrado.</div>';return;}
+
+  container.innerHTML=Object.keys(porCat).sort().map(cat=>{
+    const itensHtml=porCat[cat].map(item=>renderItem(item)).join('');
+    return`<div class="cat-block">
+      <div class="cat-header" onclick="toggleCat(this)">
+        <span class="cat-toggle">▶</span>
+        <span class="cat-nome">${escHtml(cat)}</span>
+        <span class="cat-count">${porCat[cat].length} serviços</span>
+      </div>
+      <div class="cat-body open">${itensHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCat(header){
+  const body=header.nextElementSibling;
+  const tog=header.querySelector('.cat-toggle');
+  body.classList.toggle('open');
+  tog.classList.toggle('open');
+}
+
+function renderItem(item){
+  const recClass={
+    unica:'rec-unica',mensal:'rec-mensal',anual:'rec-anual',bienal:'rec-anual',
+    trimestral:'rec-anual',semestral:'rec-anual',
+    'por campanha':'rec-campanha','por turma':'rec-turma','por evento':'rec-evento'
+  }[item.recorrencia]||'rec-outro';
+
+  const precoTxt=item.tipo==='tabela_dinamica'
+    ?'<span class="item-preco dinamico">tabela GR×func.</span>'
+    :item.tipo==='percentual'
+    ?`<span class="item-preco">${((item.percentual||0)*100).toFixed(0)}%</span>`
+    :`<span class="item-preco">${fmtBRL(item.preco_padrao)}</span>`;
+
+  return`<div class="item-row${item.ativo?'':' inativo'}" id="row-${item.id}">
+    <div class="item-nome">${escHtml(item.nome)}</div>
+    <div class="item-unidade">${escHtml(item.unidade)}</div>
+    <span class="item-rec ${recClass}">${escHtml(item.recorrencia)}</span>
+    ${precoTxt}
+    <label class="toggle-ativo" title="${item.ativo?'Desativar':'Ativar'}">
+      <input type="checkbox" ${item.ativo?'checked':''} onchange="toggleAtivo('${item.id}',this.checked)">
+      <span class="toggle-slider"></span>
+    </label>
+    <div class="item-actions">
+      <button class="btn btn-edit btn-sm" onclick="abrirModalEditar('${item.id}')">Editar</button>
+    </div>
+  </div>`;
+}
+
+// ── TOGGLE ATIVO ──────────────────────────────────────────────────────────────
+async function toggleAtivo(id,ativo){
+  const r=await fetch(`${SUPA_URL}/rest/v1/orcamento_catalogo?id=eq.${id}`,{
+    method:'PATCH',headers:{...h2(),'Prefer':'return=representation'},
+    body:JSON.stringify({ativo,atualizado_em:new Date().toISOString()})
+  });
+  if(!r.ok)return;
+  const idx=catalogo.findIndex(x=>x.id===id);
+  if(idx>=0)catalogo[idx].ativo=ativo;
+  const row=document.getElementById('row-'+id);
+  if(row)row.classList.toggle('inativo',!ativo);
+  atualizarStats();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function abrirModalNovo(){
+  editandoId=null;
+  document.getElementById('modal-titulo-txt').textContent='Novo Serviço';
+  limparModal();
+  document.getElementById('modal-servico').classList.add('show');
+}
+
+function abrirModalEditar(id){
+  const item=catalogo.find(x=>x.id===id);
+  if(!item)return;
+  editandoId=id;
+  document.getElementById('modal-titulo-txt').textContent='Editar Serviço';
+  limparModal();
+  document.getElementById('sv-categoria').value=item.categoria;
+  document.getElementById('sv-nome').value=item.nome;
+  document.getElementById('sv-descricao').value=item.descricao||'';
+  document.getElementById('sv-unidade').value=item.unidade;
+  document.getElementById('sv-recorrencia').value=item.recorrencia;
+  document.getElementById('sv-tipo').value=item.tipo;
+  document.getElementById('sv-ativo').value=String(item.ativo);
+  if(item.tipo==='tabela_dinamica'&&item.precos_json){
+    GRS.forEach(gr=>{
+      (item.precos_json[gr]||[]).forEach((v,i)=>{
+        const el=document.getElementById(`gr-${gr}-${i}`);
+        if(el)el.value=v||'';
+      });
+    });
+  }else if(item.tipo==='percentual'){
+    document.getElementById('sv-percentual').value=((item.percentual||0)*100).toFixed(1);
+  }else{
+    document.getElementById('sv-preco').value=item.preco_padrao||'';
+  }
+  atualizarTipoPreco();
+  document.getElementById('modal-servico').classList.add('show');
+}
+
+function fecharModal(){
+  document.getElementById('modal-servico').classList.remove('show');
+  clearStatus('status-modal');
+}
+
+function limparModal(){
+  ['sv-categoria','sv-nova-categoria','sv-nome','sv-descricao','sv-preco','sv-percentual'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.value='';
+  });
+  document.getElementById('sv-unidade').value='unidade';
+  document.getElementById('sv-recorrencia').value='unica';
+  document.getElementById('sv-tipo').value='servico';
+  document.getElementById('sv-ativo').value='true';
+  GRS.forEach(gr=>[0,1,2,3,4].forEach(i=>{const el=document.getElementById(`gr-${gr}-${i}`);if(el)el.value='';}));
+  atualizarTipoPreco();
+  clearStatus('status-modal');
+}
+
+function popularCatSelect(){
+  const val=document.getElementById('sv-categoria').value;
+  document.getElementById('campo-nova-cat').style.display=val==='__nova__'?'block':'none';
+}
+
+function atualizarTipoPreco(){
+  const tipo=document.getElementById('sv-tipo').value;
+  document.getElementById('campo-preco-fixo').style.display=(tipo==='servico'||tipo==='por_funcionario')?'block':'none';
+  document.getElementById('campo-percentual').style.display=tipo==='percentual'?'block':'none';
+  document.getElementById('campo-tabela-dinamica').style.display=tipo==='tabela_dinamica'?'block':'none';
+  const hints={servico:'Preço fixo por unidade.',tabela_dinamica:'O preço é calculado automaticamente conforme o Grau de Risco e o número de funções do cliente.',percentual:'Calculado como percentual sobre o subtotal do orçamento.',por_funcionario:'Preço por funcionário cadastrado.'};
+  document.getElementById('tipo-hint').textContent=hints[tipo]||'';
+}
+
+// ── SALVAR ────────────────────────────────────────────────────────────────────
+async function salvarServico(){
+  const btn=document.getElementById('btn-salvar-sv');
+  const spinner=document.getElementById('spinner-sv');
+  const label=document.getElementById('label-salvar-sv');
+  btn.disabled=true;spinner.className='spinner show';label.textContent='Salvando...';
+  try{
+    let catVal=document.getElementById('sv-categoria').value;
+    if(catVal==='__nova__')catVal=document.getElementById('sv-nova-categoria').value.trim();
+    const nome=document.getElementById('sv-nome').value.trim();
+    if(!catVal||!nome){setStatus('status-modal','error','Preencha categoria e nome.');return;}
+
+    const tipo=document.getElementById('sv-tipo').value;
+    const payload={
+      empresa_id:empresaId,
+      categoria:catVal,
+      nome,
+      descricao:document.getElementById('sv-descricao').value.trim()||null,
+      unidade:document.getElementById('sv-unidade').value,
+      tipo,
+      recorrencia:document.getElementById('sv-recorrencia').value,
+      ativo:document.getElementById('sv-ativo').value==='true',
+      atualizado_em:new Date().toISOString()
+    };
+
+    if(tipo==='tabela_dinamica'){
+      const pj={faixas:FAIXAS};
+      GRS.forEach(gr=>{pj[gr]=[0,1,2,3,4].map(i=>parseFloat(document.getElementById(`gr-${gr}-${i}`).value)||0);});
+      payload.precos_json=pj;
+      payload.preco_padrao=pj['GR1'][0]||0;
+    }else if(tipo==='percentual'){
+      payload.percentual=parseFloat(document.getElementById('sv-percentual').value)/100||0;
+      payload.preco_padrao=0;
+    }else{
+      payload.preco_padrao=parseFloat(document.getElementById('sv-preco').value)||0;
+    }
+
+    let r;
+    if(editandoId){
+      r=await fetch(`${SUPA_URL}/rest/v1/orcamento_catalogo?id=eq.${editandoId}`,{
+        method:'PATCH',headers:{...h2(),'Prefer':'return=representation'},body:JSON.stringify(payload)
+      });
+    }else{
+      payload.ordem=catalogo.filter(x=>x.categoria===catVal).length*10+10;
+      r=await fetch(`${SUPA_URL}/rest/v1/orcamento_catalogo`,{
+        method:'POST',headers:{...h2(),'Prefer':'return=representation'},body:JSON.stringify(payload)
+      });
+    }
+    if(!r.ok){const e=await r.text();setStatus('status-modal','error','Erro: '+e);return;}
+    const saved=await r.json();
+    if(editandoId){const idx=catalogo.findIndex(x=>x.id===editandoId);if(idx>=0)catalogo[idx]=saved[0]||saved;}
+    else{catalogo.push(saved[0]||saved);}
+    fecharModal();renderCatalogo();atualizarStats();popularFiltros();
+    setStatus('status-global','success','Serviço salvo com sucesso.');
+    setTimeout(()=>clearStatus('status-global'),3000);
+  }catch(e){setStatus('status-modal','error',e.message);}
+  finally{btn.disabled=false;spinner.className='spinner';label.textContent='Salvar';}
+}
+
+// ── RESTAURAR PADRÕES ─────────────────────────────────────────────────────────
+async function confirmarRestaurar(){
+  if(!confirm('Atenção: isso vai APAGAR todo o catálogo atual e restaurar os 77 serviços padrão.\n\nOs orçamentos existentes não serão afetados.\n\nDeseja continuar?'))return;
+  setStatus('status-global','info','Restaurando catálogo...');
+  await fetch(`${SUPA_URL}/rest/v1/orcamento_catalogo?empresa_id=eq.${empresaId}`,{method:'DELETE',headers:h2()});
+  catalogo=[];
+  await executarSeed();
+  setStatus('status-global','success','Catálogo restaurado com sucesso.');
+  setTimeout(()=>clearStatus('status-global'),3000);
+}
+
+init();
+</script>
+</body>
+</html>

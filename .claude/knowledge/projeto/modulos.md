@@ -109,13 +109,29 @@
 | Módulo | Arquivo | Pendência |
 |---|---|---|
 | AET | `aet.html` | Validar conformidade com NR-17 atualizada |
-| LTCAT | `ltcat.html` | Revisar campos obrigatórios |
+| LTCAT | `ltcat.html` | ✅ Completo — redesign completo (2026-05-14): capa PGR, sumário dinâmico, 6 seções (identificação, base legal, processos, medições, medidas, conclusão), ações automáticas |
 | PCMSO | `pcmso.html` | ✅ Completo — 9 seções NR-07, cronograma integrado com ações, matriz riscos×exames |
 | Treinamentos | `treinamentos.html` | Integração e-Social pendente |
 | Checklists | `checklists.html` | Revisar fluxo |
 
+## ✅ Melhorias implementadas (2026-05-15)
+
+### Auto-preenchimento no cadastro de funcionário
+**Arquivo:** `funcionario_detalhe.html`
+- **CPFHub.io** (blur no campo CPF): preenche `nome_completo` + `data_nascimento` via Receita Federal
+  - Resposta aninhada: `d.data.name` e `d.data.birthDate` (DD/MM/YYYY → YYYY-MM-DD)
+  - Plano free 50 consultas/mês — chave `CPFHUB_KEY` no topo do arquivo
+- **ViaCEP** (blur no CEP): preenche logradouro, bairro, cidade, estado — agora sempre sobrescreve (não só campos vazios)
+- Feedback visual: borda verde nos campos preenchidos + status-hero com mensagem
+- CPF é o primeiro campo do formulário (trigger natural do auto-fill)
+
+### Fix renovação de token (trial_check.js)
+- Após renovar o token, faz `window.location.reload()` para que todas as páginas leiam o novo token
+- Flag `sessionStorage.sgs_recarregou` evita loop infinito
+- Flag limpa quando token está válido
+
 ## 📋 Backlog conhecido
-- Restrição de domínio na chave Groq (quando comprar domínio próprio)
+- Restrição de domínio nas chaves Groq e CPFHub (quando comprar domínio próprio)
 - Sugestão de perigos/riscos por função (além do que a IA já faz)
 - Integração IA em `acoes.html`
 - Validação completa do PGR contra NR-01 2025
