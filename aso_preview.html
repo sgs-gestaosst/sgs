@@ -179,16 +179,129 @@ const fmtD=d=>{if(!d)return'—';const dt=new Date(d+'T00:00:00');return dt.toLo
 const fmtCNPJ=c=>{if(!c)return'';const n=c.replace(/\D/g,'');return n.length===14?n.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):c;};
 const fmtCPF=c=>{if(!c)return'—';const n=c.replace(/\D/g,'');return n.length===11?n.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):c;};
 
+// ── CONSTANTES DE PAGINAÇÃO ───────────────────────────────────
+// Área útil por página: 297mm - 10mm top - 20mm bottom = 267mm
+// Rodapé absoluto ocupa ~12mm → conteúdo real ~255mm
+// Limiar p/ decidir split: se blocos 1-4 > 185mm, divide em 2 páginas
+const LIMITE_P1_PX = 185 * 3.7795; // mm → px a 96dpi
+
+// Mede altura real de um bloco HTML injetado num div oculto
+function medirAlturaPx(html){
+  const probe=document.createElement('div');
+  probe.style.cssText='position:absolute;visibility:hidden;top:-9999px;left:0;'+
+    'width:176mm;font-family:IBM Plex Sans,sans-serif;font-size:9.5pt;line-height:1.45;';
+  probe.innerHTML=html;
+  document.body.appendChild(probe);
+  const h=probe.scrollHeight;
+  document.body.removeChild(probe);
+  return h;
+}
+
+function blocoTopo(numVia,labelVia){
+  return`
+    <div class="page-header">
+      <span class="ph-empresa">${esc(dados.empresa_nome||'EMPRESA')}${dados.empresa_cnpj?' · CNPJ '+fmtCNPJ(dados.empresa_cnpj):''}</span>
+      <span class="ph-doc">ASO · NR-07 · ${fmtD(dados.data_exame)}</span>
+    </div>
+    <div class="via-tag">${numVia}ª VIA — ${labelVia}</div>
+    <div class="empresa-header">
+      <div class="empresa-nome">${esc(dados.empresa_nome||'EMPRESA')}</div>
+      ${dados.empresa_cnpj?`<div class="empresa-cnpj">CNPJ: ${fmtCNPJ(dados.empresa_cnpj)}</div>`:''}
+      <div class="empresa-sub">Programa de Controle Médico de Saúde Ocupacional — NR-07</div>
+    </div>
+    <div class="doc-titulo">Atestado de Saúde Ocupacional — ASO</div>`;
+}
+
+function blocoSecoes14(examesHtml, riscosHtml, linhasExtras){
+  return`
+    <div class="secao">
+      <div class="doc-section">1. Identificação do Trabalhador</div>
+      <div class="ficha-grid">
+        <div class="ficha-row ficha-row-1">
+          <div class="ficha-item"><div class="ficha-label">Nome Completo</div><div class="ficha-value" style="font-size:10.5pt;">${esc(f.nome_completo||'—')}</div></div>
+        </div>
+        <div class="ficha-row ficha-row-2">
+          <div class="ficha-item"><div class="ficha-label">CPF</div><div class="ficha-value">${fmtCPF(f.cpf)}</div></div>
+          <div class="ficha-item"><div class="ficha-label">RG</div><div class="ficha-value">${esc(f.rg||'—')}</div></div>
+        </div>
+        <div class="ficha-row ficha-row-2">
+          <div class="ficha-item"><div class="ficha-label">Função</div><div class="ficha-value">${esc(f.funcoes?.nome_funcao||'—')}</div></div>
+          <div class="ficha-item"><div class="ficha-label">Setor</div><div class="ficha-value">${esc(f.setores?.nome_setor||'—')}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="secao">
+      <div class="doc-section">2. Tipo de ASO e Datas</div>
+      <div class="ficha-grid">
+        <div class="ficha-row ficha-row-3">
+          <div class="ficha-item"><div class="ficha-label">Tipo de ASO</div><div class="ficha-value">${esc(dados.tipo_aso||'—')}</div></div>
+          <div class="ficha-item"><div class="ficha-label">Data do Exame</div><div class="ficha-value">${fmtD(dados.data_exame)}</div></div>
+          <div class="ficha-item"><div class="ficha-label">Próximo ASO</div><div class="ficha-value">${fmtD(dados.data_prox_aso)}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="secao">
+      <div class="doc-section">3. Riscos Ocupacionais da Função (PGR)</div>
+      <div class="riscos-box">${riscosHtml}</div>
+    </div>
+    <div class="secao">
+      <div class="doc-section">4. Exames Realizados</div>
+      <table class="doc-table">
+        <thead><tr><th>Exame</th><th>Data</th></tr></thead>
+        <tbody>
+          ${examesHtml||'<tr><td colspan="2" style="color:#6b7280;text-align:center;padding:8pt;">Nenhum exame registrado</td></tr>'}
+          ${linhasExtras}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function blocoSecoes57(isApto, blocoMedico6a, bloco6b){
+  return`
+    <div class="secao">
+      <div class="doc-section">5. Resultado Geral</div>
+      <div class="resultado-badge ${isApto?'badge-apto':'badge-inapto'}">${isApto?'✓ APTO':'✗ INAPTO'}</div>
+      ${dados.restricoes?`<div style="font-size:7.5pt;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin:4pt 0 3pt;font-family:var(--mono);">Restrições / Recomendações</div><div class="restricoes-box">${esc(dados.restricoes)}</div>`:''}
+    </div>
+    <div class="secao">
+      <div class="doc-section">6a. Médico Examinador</div>
+      ${blocoMedico6a}
+    </div>
+    ${bloco6b}
+    ${dados.aptidao_atividades_especificas?`
+    <div class="secao">
+      <div class="doc-section">7. Aptidão para Atividades Específicas — NR-07 7.5.19.2</div>
+      <div class="atv-box">${esc(dados.aptidao_atividades_especificas)}</div>
+    </div>`:''}`;
+}
+
+function montarPagina(conteudo, numVia, totalPags, numPag){
+  return`<div class="page">${conteudo}
+    <div class="page-footer">
+      <span class="pf-label">NR-07, Portaria MTb 3.214/78 · Válido com assinatura do médico examinador</span>
+      <span class="pf-page">Via ${numVia} · Pg. ${numPag}/${totalPags}</span>
+    </div>
+  </div>`;
+}
+
 function renderVia(numVia,labelVia){
   const resultado=dados.resultado_geral||'Apto';
   const isApto=resultado==='Apto';
 
-  const exames=(dados.exames||[]).map(e=>`
+  const examesHtml=(dados.exames||[]).map(e=>`
     <tr><td>${esc(e.nome_exame||'—')}</td><td style="white-space:nowrap;width:26mm;">${fmtD(dados.data_exame)}</td></tr>`).join('');
 
-  const riscos=(dados.riscos||[]).map(r=>`
+  const riscosHtml=(dados.riscos||[]).map(r=>`
     <div class="risco-item"><span class="risco-ico">▸</span><span>${esc(r)}</span></div>`).join('')
     ||'<div style="color:#6b7280;font-size:8.5pt;padding:2pt 0;">Nenhum risco mapeado no PGR para esta função.</div>';
+
+  // Linhas em branco reservadas para exames adicionais
+  const LINHAS_EXTRA=3;
+  const linhasExtras=Array(LINHAS_EXTRA).fill(
+    `<tr style="border-bottom:1pt dashed #d1d5db;">
+       <td style="color:#d1d5db;font-size:8pt;padding:5pt 6pt;">&nbsp;</td>
+       <td style="width:26mm;border-left:1pt solid #e5e7eb;"></td>
+     </tr>`).join('');
 
   const blocoMedico6a=`
     <div class="ficha-grid">
@@ -212,101 +325,38 @@ function renderVia(numVia,labelVia){
       </div>
     </div>`:'';
 
-  const assinaturas=dados.medico_pcmso_nome
-    ?`<div class="assinaturas" style="grid-template-columns:1fr 1fr 1fr;">
+  const assinaturasHtml=dados.medico_pcmso_nome
+    ?`<div class="assinaturas" style="grid-template-columns:1fr 1fr 1fr;margin-top:16pt;">
         <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(dados.medico_nome||'—')}</div><div class="assinatura-sub">Médico Examinador · CRM ${esc(dados.medico_crm||'')}/${esc(dados.medico_uf||'')}</div></div>
         <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(dados.medico_pcmso_nome)}</div><div class="assinatura-sub">Resp. PCMSO · CRM ${esc(dados.medico_pcmso_crm||'')}/${esc(dados.medico_pcmso_uf||'')}</div></div>
         <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(f.nome_completo||'—')}</div><div class="assinatura-sub">${numVia===1?'Trabalhador — Recebimento da via':'Responsável pela Empresa'}</div></div>
       </div>`
-    :`<div class="assinaturas">
+    :`<div class="assinaturas" style="margin-top:16pt;">
         <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(dados.medico_nome||'—')}</div><div class="assinatura-sub">Médico Examinador · CRM ${esc(dados.medico_crm||'')} / ${esc(dados.medico_uf||'')}</div></div>
         <div class="assinatura"><div class="assinatura-linha"></div><div class="assinatura-nome">${esc(f.nome_completo||'—')}</div><div class="assinatura-sub">${numVia===1?'Trabalhador — Recebimento da via':'Responsável pela Empresa'}</div></div>
       </div>`;
 
-  return`<div class="page">
+  const topo   = blocoTopo(numVia, labelVia);
+  const s14    = blocoSecoes14(examesHtml, riscosHtml, linhasExtras);
+  const s57    = blocoSecoes57(isApto, blocoMedico6a, bloco6b);
 
-    <div class="page-header">
-      <span class="ph-empresa">${esc(dados.empresa_nome||'EMPRESA')}${dados.empresa_cnpj?' · CNPJ '+fmtCNPJ(dados.empresa_cnpj):''}</span>
-      <span class="ph-doc">ASO · NR-07 · ${fmtD(dados.data_exame)}</span>
-    </div>
+  // Mede se seções 1-4 + topo cabem dentro do limite
+  const alturaP1 = medirAlturaPx(topo + s14);
 
-    <div class="via-tag">${numVia}ª VIA — ${labelVia}</div>
-
-    <div class="empresa-header">
-      <div class="empresa-nome">${esc(dados.empresa_nome||'EMPRESA')}</div>
-      ${dados.empresa_cnpj?`<div class="empresa-cnpj">CNPJ: ${fmtCNPJ(dados.empresa_cnpj)}</div>`:''}
-      <div class="empresa-sub">Programa de Controle Médico de Saúde Ocupacional — NR-07</div>
-    </div>
-
-    <div class="doc-titulo">Atestado de Saúde Ocupacional — ASO</div>
-
-    <div class="secao">
-      <div class="doc-section">1. Identificação do Trabalhador</div>
-      <div class="ficha-grid">
-        <div class="ficha-row ficha-row-1">
-          <div class="ficha-item"><div class="ficha-label">Nome Completo</div><div class="ficha-value" style="font-size:10.5pt;">${esc(f.nome_completo||'—')}</div></div>
-        </div>
-        <div class="ficha-row ficha-row-2">
-          <div class="ficha-item"><div class="ficha-label">CPF</div><div class="ficha-value">${fmtCPF(f.cpf)}</div></div>
-          <div class="ficha-item"><div class="ficha-label">RG</div><div class="ficha-value">${esc(f.rg||'—')}</div></div>
-        </div>
-        <div class="ficha-row ficha-row-2">
-          <div class="ficha-item"><div class="ficha-label">Função</div><div class="ficha-value">${esc(f.funcoes?.nome_funcao||'—')}</div></div>
-          <div class="ficha-item"><div class="ficha-label">Setor</div><div class="ficha-value">${esc(f.setores?.nome_setor||'—')}</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="secao">
-      <div class="doc-section">2. Tipo de ASO e Datas</div>
-      <div class="ficha-grid">
-        <div class="ficha-row ficha-row-3">
-          <div class="ficha-item"><div class="ficha-label">Tipo de ASO</div><div class="ficha-value">${esc(dados.tipo_aso||'—')}</div></div>
-          <div class="ficha-item"><div class="ficha-label">Data do Exame</div><div class="ficha-value">${fmtD(dados.data_exame)}</div></div>
-          <div class="ficha-item"><div class="ficha-label">Próximo ASO</div><div class="ficha-value">${fmtD(dados.data_prox_aso)}</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="secao">
-      <div class="doc-section">3. Riscos Ocupacionais da Função (PGR)</div>
-      <div class="riscos-box">${riscos}</div>
-    </div>
-
-    <div class="secao">
-      <div class="doc-section">4. Exames Realizados</div>
-      <table class="doc-table">
-        <thead><tr><th>Exame</th><th>Data</th></tr></thead>
-        <tbody>${exames||'<tr><td colspan="2" style="color:#6b7280;text-align:center;padding:8pt;">Nenhum exame registrado</td></tr>'}</tbody>
-      </table>
-    </div>
-
-    <div class="secao">
-      <div class="doc-section">5. Resultado Geral</div>
-      <div class="resultado-badge ${isApto?'badge-apto':'badge-inapto'}">${isApto?'✓ APTO':'✗ INAPTO'}</div>
-      ${dados.restricoes?`<div style="font-size:7.5pt;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin:4pt 0 3pt;font-family:var(--mono);">Restrições / Recomendações</div><div class="restricoes-box">${esc(dados.restricoes)}</div>`:''}
-    </div>
-
-    <div class="secao">
-      <div class="doc-section">6a. Médico Examinador</div>
-      ${blocoMedico6a}
-    </div>
-
-    ${bloco6b}
-
-    ${dados.aptidao_atividades_especificas?`
-    <div class="secao">
-      <div class="doc-section">7. Aptidão para Atividades Específicas — NR-07 7.5.19.2</div>
-      <div class="atv-box">${esc(dados.aptidao_atividades_especificas)}</div>
-    </div>`:''}
-
-    ${assinaturas}
-
-    <div class="page-footer">
-      <span class="pf-label">NR-07, Portaria MTb 3.214/78 · Válido com assinatura do médico examinador</span>
-      <span class="pf-page">Via ${numVia} de 2</span>
-    </div>
-  </div>`;
+  if(alturaP1 > LIMITE_P1_PX){
+    // SPLIT: página 1 = topo + seções 1-4 | página 2 = topo (sem via/empresa) + seções 5-7 + assinaturas
+    const topoPg2=`
+      <div class="page-header">
+        <span class="ph-empresa">${esc(dados.empresa_nome||'EMPRESA')}${dados.empresa_cnpj?' · CNPJ '+fmtCNPJ(dados.empresa_cnpj):''}</span>
+        <span class="ph-doc">ASO · NR-07 · ${fmtD(dados.data_exame)} · ${numVia}ª Via (continuação)</span>
+      </div>`;
+    return montarPagina(topo+s14, numVia, 2, 1)
+          +montarPagina(topoPg2+s57+assinaturasHtml, numVia, 2, 2);
+  }else{
+    // PÁGINA ÚNICA: tudo junto, assinaturas com margin-top:auto
+    const assinaturasUnica=assinaturasHtml.replace('margin-top:16pt','margin-top:auto');
+    return montarPagina(topo+s14+s57+assinaturasUnica, numVia, 1, 1);
+  }
 }
 
 if(!dados.funcionario){
