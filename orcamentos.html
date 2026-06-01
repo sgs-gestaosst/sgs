@@ -260,7 +260,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <div class="secao-header">👤 Dados do Cliente</div>
         <div class="secao-body">
           <div class="form-grid">
-            <div class="field full"><label>Razão Social / Nome *</label><input type="text" id="cli-nome" placeholder="Nome da empresa cliente" oninput="marcarAlterado()"></div>
             <div class="field">
               <label>CNPJ <span id="cnpj-spinner" class="spinner" style="margin-left:4px;"></span></label>
               <input type="text" id="cli-cnpj" placeholder="00.000.000/0001-00" maxlength="18"
@@ -268,6 +267,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
               <div id="cnpj-badge" style="display:none;font-size:11px;margin-top:4px;padding:3px 8px;border-radius:4px;"></div>
             </div>
             <div class="field"><label>CNAE Principal</label><input type="text" id="cli-cnae" placeholder="Ex: 4711-3/02" oninput="marcarAlterado()"></div>
+            <div class="field full"><label>Razão Social / Nome *</label><input type="text" id="cli-nome" placeholder="Preenchido automaticamente pelo CNPJ" oninput="marcarAlterado()"></div>
             <div class="field full"><label>Município / UF</label><input type="text" id="cli-municipio" placeholder="Ex: São Paulo - SP" oninput="marcarAlterado()"></div>
           </div>
         </div>
@@ -487,30 +487,55 @@ async function consultarCNPJ(){
   const spinner=document.getElementById('cnpj-spinner');
   const badge=document.getElementById('cnpj-badge');
   if(spinner)spinner.className='spinner show';
+  if(badge)badge.style.display='none';
   try{
-    const res=await fetch(`https://brasilapi.com.br/api/cnpj/v1/${raw}`);
-    if(!res.ok)throw new Error('CNPJ não encontrado na Receita Federal');
-    const d=await res.json();
-    // Preencher campos
-    if(d.razao_social&&!document.getElementById('cli-nome').value.trim())
-      document.getElementById('cli-nome').value=d.razao_social;
-    if(d.cnae_fiscal){
-      const cnaeF=fmtCNAEapi(d.cnae_fiscal.toString());
+    // Tenta ReceitaWS primeiro, fallback para BrasilAPI
+    let d=null;
+    const res1=await fetch(`https://receitaws.com.br/v1/cnpj/${raw}`,{headers:{'User-Agent':'SGS/1.0'}}).catch(()=>null);
+    if(res1&&res1.ok){
+      const j=await res1.json();
+      if(j.status==='OK') d={
+        razao_social: j.nome,
+        cnae_codigo:  (j.atividade_principal||[])[0]?.code||'',
+        municipio:    j.municipio,
+        uf:           j.uf
+      };
+    }
+    if(!d){
+      const res2=await fetch(`https://brasilapi.com.br/api/cnpj/v1/${raw}`).catch(()=>null);
+      if(res2&&res2.ok){
+        const j=await res2.json();
+        d={
+          razao_social: j.razao_social,
+          cnae_codigo:  j.cnae_fiscal?.toString()||'',
+          municipio:    j.municipio,
+          uf:           j.uf
+        };
+      }
+    }
+    if(!d) throw new Error('CNPJ não encontrado na Receita Federal');
+
+    // Preencher Razão Social
+    if(d.razao_social) document.getElementById('cli-nome').value=d.razao_social;
+
+    // Preencher CNAE e sugerir GR
+    if(d.cnae_codigo){
+      const cnaeF=fmtCNAEapi(d.cnae_codigo);
       document.getElementById('cli-cnae').value=cnaeF;
-      const gr=buscarGR(d.cnae_fiscal.toString());
+      const gr=buscarGR(d.cnae_codigo);
       if(gr){
         const grStr='GR'+gr;
         document.getElementById('cli-gr').value=grStr;
         recalcularDinamicos();
         const grBadge=document.getElementById('gr-badge');
-        if(grBadge){
-          grBadge.textContent=`↑ ${grStr} sugerido pela NR-4 (CNAE ${cnaeF})`;
-          grBadge.style.display='block';
-        }
+        if(grBadge){grBadge.textContent=`↑ ${grStr} sugerido pela NR-4 (CNAE ${cnaeF})`;grBadge.style.display='block';}
       }
     }
+
+    // Preencher Município
     if(d.municipio&&d.uf)
       document.getElementById('cli-municipio').value=`${d.municipio} - ${d.uf}`;
+
     marcarAlterado();
     if(badge){
       badge.textContent='✓ Receita Federal';
@@ -551,6 +576,7 @@ async function seedCatalogo(){
   const TABELAS_PADRAO={'PGR – Elaboração':{GR1:[600,750,900,1100,1400],GR2:[750,950,1150,1400,1800],GR3:[1000,1300,1600,2000,2600],GR4:[1400,1800,2200,2800,3600]},'PGR – Revisão Anual':{GR1:[300,380,450,550,700],GR2:[380,480,580,700,900],GR3:[500,650,800,1000,1300],GR4:[700,900,1100,1400,1800]},'PCMSO – Elaboração':{GR1:[550,700,850,1050,1350],GR2:[700,880,1080,1300,1700],GR3:[950,1200,1500,1850,2400],GR4:[1300,1650,2050,2550,3300]},'PCMSO – Revisão Anual':{GR1:[280,350,420,520,650],GR2:[350,450,550,680,880],GR3:[480,600,750,950,1250],GR4:[670,850,1050,1350,1750]},'LTCAT':{GR1:[700,900,1100,1350,1700],GR2:[900,1100,1350,1650,2100],GR3:[1200,1500,1800,2200,2800],GR4:[1600,2000,2500,3000,3800]},'AET – Análise Ergonômica do Trabalho':{GR1:[900,1100,1400,1700,2200],GR2:[1100,1350,1700,2100,2700],GR3:[1400,1750,2200,2700,3400],GR4:[1800,2250,2800,3400,4300]},'Laudo de Insalubridade (NR-15)':{GR1:[800,1000,1200,1500,1900],GR2:[1000,1250,1500,1850,2350],GR3:[1300,1600,1950,2400,3050],GR4:[1700,2100,2550,3150,3950]},'Laudo de Periculosidade (NR-16)':{GR1:[800,1000,1200,1500,1900],GR2:[1000,1250,1500,1850,2350],GR3:[1300,1600,1950,2400,3050],GR4:[1700,2100,2550,3150,3950]}};
   // Seed compacto — mesmo catálogo de orcamento_catalogo.html
   const S=[
+    // 1. Programas e Documentos
     {categoria:'Programas e Documentos',nome:'PGR – Elaboração',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'unica',preco_padrao:900,ativo:true,ordem:10},
     {categoria:'Programas e Documentos',nome:'PGR – Revisão Anual',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'anual',preco_padrao:450,ativo:true,ordem:11},
     {categoria:'Programas e Documentos',nome:'PCMSO – Elaboração',unidade:'unidade',tipo:'tabela_dinamica',recorrencia:'unica',preco_padrao:800,ativo:true,ordem:20},
@@ -564,30 +590,85 @@ async function seedCatalogo(){
     {categoria:'Programas e Documentos',nome:'PCA – Programa de Conservação Auditiva',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:600,ativo:true,ordem:70},
     {categoria:'Programas e Documentos',nome:'PPR – Programa de Proteção Respiratória',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:500,ativo:true,ordem:80},
     {categoria:'Programas e Documentos',nome:'PAE – Plano de Atendimento a Emergências',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:800,ativo:true,ordem:90},
+    {categoria:'Programas e Documentos',nome:'PPCI – Proj. Prevenção Contra Incêndio',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1500,ativo:false,ordem:100},
+    {categoria:'Programas e Documentos',nome:'PCMAT – Prog. Condições Amb. (NR-18)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1100,ativo:false,ordem:110},
+    {categoria:'Programas e Documentos',nome:'PPRPS – Prensas e Similares (NR-12)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:900,ativo:false,ordem:120},
+    {categoria:'Programas e Documentos',nome:'PGRSS – Resíduos Serviços de Saúde',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:700,ativo:false,ordem:130},
+    // 2. Avaliação Psicossocial
     {categoria:'Avaliação Psicossocial',nome:'Campanha COPSOQ III Curta (23 itens)',unidade:'por campanha',tipo:'servico',recorrencia:'por campanha',preco_padrao:700,ativo:true,ordem:10},
     {categoria:'Avaliação Psicossocial',nome:'Campanha COPSOQ III Média (76 itens)',unidade:'por campanha',tipo:'servico',recorrencia:'por campanha',preco_padrao:900,ativo:true,ordem:20},
     {categoria:'Avaliação Psicossocial',nome:'Avaliação Checklist NR-01 (26 fatores)',unidade:'por campanha',tipo:'servico',recorrencia:'por campanha',preco_padrao:600,ativo:true,ordem:30},
+    // 3. Inventários Técnicos
     {categoria:'Inventários Técnicos',nome:'Inventário de Extintores e Eq. Combate Incêndio',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:500,ativo:true,ordem:10},
+    {categoria:'Inventários Técnicos',nome:'Inventário de Espaços Confinados (NR-33)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:800,ativo:false,ordem:20},
+    {categoria:'Inventários Técnicos',nome:'Inventário de Produtos Químicos (NR-26)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:700,ativo:false,ordem:30},
+    {categoria:'Inventários Técnicos',nome:'Inventário de Máquinas (NR-12)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:900,ativo:false,ordem:40},
+    {categoria:'Inventários Técnicos',nome:'Inventário de Pontos de Ancoragem (NR-35)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:600,ativo:false,ordem:50},
+    {categoria:'Inventários Técnicos',nome:'Inventário de Áreas Classificadas (NR-10)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:700,ativo:false,ordem:60},
+    {categoria:'Inventários Técnicos',nome:'Atualização Anual de Inventários',unidade:'unidade',tipo:'servico',recorrencia:'anual',preco_padrao:400,ativo:false,ordem:70},
+    // 4. Medicina do Trabalho
     {categoria:'Medicina do Trabalho',nome:'Honorário Médico Coordenador (PCMSO)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:true,ordem:10},
     {categoria:'Medicina do Trabalho',nome:'Coordenação de Exame Admissional',unidade:'por exame',tipo:'servico',recorrencia:'por exame',preco_padrao:50,ativo:true,ordem:20},
     {categoria:'Medicina do Trabalho',nome:'Coordenação de Exame Periódico',unidade:'por exame',tipo:'servico',recorrencia:'por exame',preco_padrao:50,ativo:true,ordem:30},
     {categoria:'Medicina do Trabalho',nome:'Coordenação de Exame Demissional',unidade:'por exame',tipo:'servico',recorrencia:'por exame',preco_padrao:50,ativo:true,ordem:40},
+    {categoria:'Medicina do Trabalho',nome:'GRT – Gestão de Retorno ao Trabalho',unidade:'por caso',tipo:'servico',recorrencia:'por caso',preco_padrao:800,ativo:true,ordem:50},
+    {categoria:'Medicina do Trabalho',nome:'Programa de Vacinação Ocupacional',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:true,ordem:60},
+    // 5. eSocial
     {categoria:'eSocial e Previdenciário',nome:'Envio eSocial S-2220 (ASO)',unidade:'unidade',tipo:'servico',recorrencia:'anual',preco_padrao:200,ativo:true,ordem:10},
     {categoria:'eSocial e Previdenciário',nome:'Envio eSocial S-2240 (Fatores de Risco)',unidade:'unidade',tipo:'servico',recorrencia:'anual',preco_padrao:300,ativo:true,ordem:20},
+    {categoria:'eSocial e Previdenciário',nome:'Envio eSocial S-2210 (CAT Digital)',unidade:'por evento',tipo:'servico',recorrencia:'por evento',preco_padrao:150,ativo:true,ordem:30},
+    {categoria:'eSocial e Previdenciário',nome:'PPP – Perfil Profissiográfico Previdenciário',unidade:'por func.',tipo:'servico',recorrencia:'por func.',preco_padrao:60,ativo:true,ordem:40},
+    {categoria:'eSocial e Previdenciário',nome:'CAT – Comunicação de Acidente de Trabalho',unidade:'por evento',tipo:'servico',recorrencia:'por evento',preco_padrao:150,ativo:true,ordem:50},
+    // 6. ART / RRT
     {categoria:'ART / RRT',nome:'ART – Anotação de Resp. Técnica (CREA)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:true,ordem:10},
+    {categoria:'ART / RRT',nome:'RRT – Registro de Resp. Técnica (CFT)',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:false,ordem:20},
+    // 7. Treinamentos NR
+    {categoria:'Treinamentos NR',nome:'NR-01 – Gestão de Riscos Ocupacionais',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:600,ativo:true,ordem:10},
     {categoria:'Treinamentos NR',nome:'NR-05 – CIPA – Treinamento',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:700,ativo:true,ordem:20},
+    {categoria:'Treinamentos NR',nome:'NR-05 – CIPA – Implantação / Eleição',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1200,ativo:true,ordem:21},
     {categoria:'Treinamentos NR',nome:'NR-06 – EPI (uso, conservação, higienização)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:400,ativo:true,ordem:30},
+    {categoria:'Treinamentos NR',nome:'NR-17 – Ergonomia',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:600,ativo:true,ordem:70},
     {categoria:'Treinamentos NR',nome:'NR-23 – Proteção Contra Incêndios',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:500,ativo:true,ordem:80},
+    {categoria:'Treinamentos NR',nome:'NR-23 – Brigada de Incêndio (Formação)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:900,ativo:true,ordem:81},
     {categoria:'Treinamentos NR',nome:'Primeiros Socorros / SBV',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:700,ativo:true,ordem:90},
+    {categoria:'Treinamentos NR',nome:'SIPAT – Semana Interna de Prevenção',unidade:'por evento',tipo:'servico',recorrencia:'por evento',preco_padrao:1500,ativo:true,ordem:100},
+    {categoria:'Treinamentos NR',nome:'SESMT – Dimensionamento e Implantação',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1000,ativo:true,ordem:110},
+    {categoria:'Treinamentos NR',nome:'NR-10 – Segurança em Eletricidade (40h)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:1200,ativo:false,ordem:40},
+    {categoria:'Treinamentos NR',nome:'NR-11 – Movimentação de Cargas',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:500,ativo:false,ordem:50},
+    {categoria:'Treinamentos NR',nome:'NR-12 – Máquinas e Equipamentos',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:700,ativo:false,ordem:60},
+    {categoria:'Treinamentos NR',nome:'NR-18 – Construção Civil',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:600,ativo:false,ordem:82},
+    {categoria:'Treinamentos NR',nome:'NR-20 – Inflamáveis e Combustíveis',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:700,ativo:false,ordem:83},
+    {categoria:'Treinamentos NR',nome:'NR-33 – Esp. Confinados Trabalhador (16h)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:900,ativo:false,ordem:84},
+    {categoria:'Treinamentos NR',nome:'NR-33 – Esp. Confinados Supervisor (40h)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:1400,ativo:false,ordem:85},
+    {categoria:'Treinamentos NR',nome:'NR-35 – Trabalho em Altura (8h)',unidade:'por turma',tipo:'servico',recorrencia:'por turma',preco_padrao:800,ativo:false,ordem:86},
+    // 8. Medições e Ensaios
     {categoria:'Medições e Ensaios',nome:'Dosimetria de Ruído (NR-15 Anexo I)',unidade:'por posto',tipo:'servico',recorrencia:'unica',preco_padrao:300,ativo:true,ordem:10},
     {categoria:'Medições e Ensaios',nome:'Medição de Iluminância / lux (NR-17)',unidade:'por ambiente',tipo:'servico',recorrencia:'unica',preco_padrao:200,ativo:true,ordem:20},
+    {categoria:'Medições e Ensaios',nome:'Medição de Calor – IBUTG (NR-15 Anexo III)',unidade:'por ponto',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:true,ordem:30},
+    {categoria:'Medições e Ensaios',nome:'Medição de Frio (NR-15 Anexo IX)',unidade:'por ponto',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:true,ordem:40},
+    {categoria:'Medições e Ensaios',nome:'Medição de Umidade e Temperatura (NR-17)',unidade:'por ambiente',tipo:'servico',recorrencia:'unica',preco_padrao:150,ativo:true,ordem:50},
+    {categoria:'Medições e Ensaios',nome:'Medição de Vibração – mão-braço (NR-09)',unidade:'por posto',tipo:'servico',recorrencia:'unica',preco_padrao:350,ativo:true,ordem:60},
+    {categoria:'Medições e Ensaios',nome:'Medição de Vibração – corpo inteiro (NR-09)',unidade:'por posto',tipo:'servico',recorrencia:'unica',preco_padrao:350,ativo:true,ordem:70},
+    {categoria:'Medições e Ensaios',nome:'Medição de Gases e Vapores (NR-09/NR-15)',unidade:'por amostra',tipo:'servico',recorrencia:'unica',preco_padrao:500,ativo:false,ordem:80},
+    {categoria:'Medições e Ensaios',nome:'Avaliação de Poeiras / Mat. Particulado',unidade:'por amostra',tipo:'servico',recorrencia:'unica',preco_padrao:500,ativo:false,ordem:90},
+    {categoria:'Medições e Ensaios',nome:'Biomonitoramento – Amostras Biológicas',unidade:'por coleta',tipo:'servico',recorrencia:'unica',preco_padrao:600,ativo:false,ordem:100},
+    // 9. Implantação e Gestão
     {categoria:'Implantação e Gestão',nome:'Implantação SST – Cadastro Completo',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:1500,ativo:true,ordem:10},
     {categoria:'Implantação e Gestão',nome:'Migração de Documentação Anterior',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:800,ativo:true,ordem:20},
     {categoria:'Implantação e Gestão',nome:'Gestão SST Mensal',unidade:'mês',tipo:'servico',recorrencia:'mensal',preco_padrao:500,ativo:true,ordem:30},
+    {categoria:'Implantação e Gestão',nome:'Gestão de Extintores e Eq. de Segurança',unidade:'mês',tipo:'servico',recorrencia:'mensal',preco_padrao:200,ativo:true,ordem:40},
+    {categoria:'Implantação e Gestão',nome:'Relatório de Conformidade Avulso',unidade:'unidade',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:true,ordem:50},
+    // 10. Visitas Técnicas e Assessoria
     {categoria:'Visitas Técnicas e Assessoria',nome:'Visita Técnica',unidade:'por visita',tipo:'servico',recorrencia:'por visita',preco_padrao:350,ativo:true,ordem:10},
+    {categoria:'Visitas Técnicas e Assessoria',nome:'Assessoria em Fiscalização MTE/DRT',unidade:'hora',tipo:'servico',recorrencia:'unica',preco_padrao:250,ativo:true,ordem:20},
+    {categoria:'Visitas Técnicas e Assessoria',nome:'Suporte a Perícias Judiciais',unidade:'hora',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:false,ordem:30},
+    // 11. Despesas de Deslocamento
     {categoria:'Despesas de Deslocamento',nome:'Hospedagem',unidade:'por diária',tipo:'servico',recorrencia:'unica',preco_padrao:150,ativo:true,ordem:10},
     {categoria:'Despesas de Deslocamento',nome:'Alimentação',unidade:'por dia',tipo:'servico',recorrencia:'unica',preco_padrao:80,ativo:true,ordem:20},
     {categoria:'Despesas de Deslocamento',nome:'Deslocamento – veículo próprio',unidade:'por km',tipo:'servico',recorrencia:'unica',preco_padrao:1.20,ativo:true,ordem:30},
+    {categoria:'Despesas de Deslocamento',nome:'Deslocamento – aéreo',unidade:'por trecho',tipo:'servico',recorrencia:'unica',preco_padrao:400,ativo:false,ordem:40},
+    {categoria:'Despesas de Deslocamento',nome:'Pedágio / Estacionamento',unidade:'por evento',tipo:'servico',recorrencia:'unica',preco_padrao:50,ativo:true,ordem:60},
+    // Modificador global
     {categoria:'Modificadores',nome:'Urgência – taxa adicional',unidade:'%',tipo:'percentual',recorrencia:'unica',preco_padrao:0,percentual:0.30,ativo:true,ordem:10},
   ];
   const payload=S.map((s,i)=>{
