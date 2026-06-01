@@ -60,6 +60,7 @@ REGRESSÕES: [checou módulos adjacentes — ok ou problemas]
   - `eval(` → execução insegura
   - **`usuarios?user_id=eq.` → padrão proibido** — o sistema usa RLS via `empresas?ativo=eq.true`, nunca lookup direto na tabela `usuarios` (retorna 400)
   - `empresa_id` hardcodado em vez de vir da RLS
+  - **Batch INSERT sem normalização de chaves** → causa PGRST102. Verificar se o código normaliza o payload antes de inserir arrays com objetos de chaves diferentes (ex: alguns têm `percentual`, outros não)
 
 ### 4. Verificação de integração
 - Testo fluxos ponta-a-ponta que o usuário executaria
@@ -80,6 +81,7 @@ REGRESSÕES: [checou módulos adjacentes — ok ou problemas]
 | TC-07 | Seed não duplica | Segunda chamada não cria duplicatas |
 | TC-08 | Padrão empresa_id correto | `empresas?ativo=eq.true` presente, `usuarios?user_id=eq.` ausente |
 | TC-09 | Seed completo | 75+ itens no seed (todas as 11 categorias) |
+| TC-10 | Seed sem PGRST102 | Todos os objetos do payload têm as mesmas chaves (normalização presente) |
 
 ### ASO
 | TC | Cenário | Critério de aprovação |
