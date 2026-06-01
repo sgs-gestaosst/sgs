@@ -452,13 +452,16 @@ async function carregarCatalogo(){
 
 async function executarSeed(){
   setStatus('status-global','info','Configurando catálogo padrão...');
-  const payload=CATALOGO_SEED.map((s,i)=>{
+  const payloadRaw=CATALOGO_SEED.map((s,i)=>{
     const obj={...s,empresa_id:empresaId,ordem:s.ordem||i};
     if(s.tipo==='tabela_dinamica'&&TABELAS_PADRAO[s.nome]){
       obj.precos_json={faixas:FAIXAS,...TABELAS_PADRAO[s.nome]};
     }
     return obj;
   });
+  // PGRST102: todos os objetos devem ter as mesmas chaves
+  const allKeys=[...new Set(payloadRaw.flatMap(o=>Object.keys(o)))];
+  const payload=payloadRaw.map(o=>{const n={};allKeys.forEach(k=>n[k]=o[k]!==undefined?o[k]:null);return n;});
   const r=await fetch(`${SUPA_URL}/rest/v1/orcamento_catalogo`,{
     method:'POST',headers:{...h2(),'Prefer':'return=representation'},
     body:JSON.stringify(payload)
