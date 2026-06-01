@@ -55,11 +55,16 @@ REGRESSÕES: [checou módulos adjacentes — ok ou problemas]
 ### 3. Verificação de JavaScript
 - Uso `node --check` em arquivo temporário com o JS extraído
 - Verifico presença de funções críticas por nome
-- Verifico ausência de padrões problemáticos (`.innerHTML=` sem escHtml, eval, etc.)
+- Verifico ausência de padrões problemáticos:
+  - `.innerHTML=` sem escHtml → XSS
+  - `eval(` → execução insegura
+  - **`usuarios?user_id=eq.` → padrão proibido** — o sistema usa RLS via `empresas?ativo=eq.true`, nunca lookup direto na tabela `usuarios` (retorna 400)
+  - `empresa_id` hardcodado em vez de vir da RLS
 
 ### 4. Verificação de integração
 - Testo fluxos ponta-a-ponta que o usuário executaria
 - Checo se módulos adjacentes não quebraram (regressão)
+- **Verifico o padrão de obtenção de empresa_id**: deve usar `empresas?ativo=eq.true` (RLS), nunca `usuarios?user_id=eq.{id}` que causa 400
 
 ## Casos de teste padrão por módulo
 
@@ -71,8 +76,10 @@ REGRESSÕES: [checou módulos adjacentes — ok ou problemas]
 | TC-03 | Página carregou | Título "SGS — Orçamentos" presente |
 | TC-04 | JS sintaxe válida | node --check sem erros |
 | TC-05 | Funções críticas presentes | calcularTotais, salvarOrcamento, consultarCNPJ |
-| TC-06 | BrasilAPI acessível | CNPJ de teste retorna 200 |
+| TC-06 | API de CNPJ acessível | ReceitaWS ou BrasilAPI retornam dados |
 | TC-07 | Seed não duplica | Segunda chamada não cria duplicatas |
+| TC-08 | Padrão empresa_id correto | `empresas?ativo=eq.true` presente, `usuarios?user_id=eq.` ausente |
+| TC-09 | Seed completo | 75+ itens no seed (todas as 11 categorias) |
 
 ### ASO
 | TC | Cenário | Critério de aprovação |
