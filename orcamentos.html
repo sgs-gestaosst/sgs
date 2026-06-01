@@ -553,16 +553,20 @@ async function consultarCNPJ(){
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init(){
-  const r=await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${user.id}&select=empresa_id`,{headers:h2()});
-  const u=await r.json();
-  if(!u||!u[0])return;
-  empresaId=u[0].empresa_id;
-  const [rEmp,rOrc,rCat]=await Promise.all([
-    fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=*`,{headers:h2()}),
+  // RLS filtra automaticamente as empresas do usuário logado
+  const rEmp=await fetch(`${SUPA_URL}/rest/v1/empresas?ativo=eq.true&select=*&order=id.asc&limit=1`,{headers:h2()});
+  const emps=await rEmp.json();
+  if(!emps||!emps[0]){
+    setStatus('status-editor','error','Nenhuma empresa encontrada. Cadastre uma empresa primeiro.');
+    return;
+  }
+  empresaDados=emps[0];
+  empresaId=empresaDados.id;
+
+  const [rOrc,rCat]=await Promise.all([
     fetch(`${SUPA_URL}/rest/v1/orcamentos?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:h2()}),
     fetch(`${SUPA_URL}/rest/v1/orcamento_catalogo?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=categoria.asc,ordem.asc`,{headers:h2()})
   ]);
-  empresaDados=(await rEmp.json())[0]||{};
   orcamentos=await rOrc.json();
   catalogo=await rCat.json();
   if(!Array.isArray(catalogo)||catalogo.length===0) await seedCatalogo();

@@ -430,12 +430,11 @@ const CATALOGO_SEED=[
 
 // ── INICIALIZAÇÃO ─────────────────────────────────────────────────────────────
 async function init(){
-  const userParsed=JSON.parse(localStorage.getItem('sgs_user')||'{}');
-  // Buscar empresa_id do usuário
-  const r=await fetch(`${SUPA_URL}/rest/v1/usuarios?user_id=eq.${userParsed.id}&select=empresa_id`,{headers:h2()});
+  // RLS filtra automaticamente as empresas do usuário logado
+  const r=await fetch(`${SUPA_URL}/rest/v1/empresas?ativo=eq.true&select=id&order=id.asc&limit=1`,{headers:h2()});
   const u=await r.json();
-  if(!u||!u[0]){setStatus('status-global','error','Usuário sem empresa vinculada.');return;}
-  empresaId=u[0].empresa_id;
+  if(!u||!u[0]){setStatus('status-global','error','Nenhuma empresa encontrada. Cadastre uma empresa primeiro.');return;}
+  empresaId=u[0].id;
   await carregarCatalogo();
 }
 
