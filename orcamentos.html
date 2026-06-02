@@ -353,6 +353,23 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
             <div class="comp-mini-field"><label>Margem (%)</label><input type="number" id="cfg-margem" value="30" min="0" max="100" step="0.1" oninput="marcarAlterado();calcularTotais()"></div>
             <div class="comp-mini-field"><label>Deslocamento (R$)</label><input type="number" id="cfg-desloc" value="150" min="0" oninput="marcarAlterado();calcularTotais()"></div>
           </div>
+          <!-- Desconto -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;padding:10px 12px;background:var(--bg);border-radius:6px;border:1px solid var(--border);">
+            <div class="comp-mini-field">
+              <label>Tipo de desconto</label>
+              <select id="cfg-desc-tipo" onchange="marcarAlterado();calcularTotais()" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--sans);font-size:12px;padding:6px 8px;outline:none;">
+                <option value="nenhum">Sem desconto</option>
+                <option value="percentual">Percentual (%)</option>
+                <option value="fixo">Valor fixo (R$)</option>
+              </select>
+            </div>
+            <div class="comp-mini-field">
+              <label id="lbl-desc-valor">Valor</label>
+              <input type="number" id="cfg-desc-valor" value="0" min="0" step="0.01"
+                oninput="marcarAlterado();calcularTotais()"
+                style="opacity:0.4;pointer-events:none;">
+            </div>
+          </div>
           <div id="comp-detalhes">
             <div class="comp-row sub"><span>Subtotal serviços únicos</span><span class="comp-val" id="cv-unico">R$ 0,00</span></div>
             <div class="comp-row sub"><span>Subtotal recorrentes (mensal)</span><span class="comp-val" id="cv-mensal">R$ 0,00</span></div>
@@ -362,6 +379,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
             <div class="comp-row sub comp-ajuste" id="row-adj-estab" style="display:none;"><span id="lbl-adj-estab">Adicional estabelecimentos</span><span class="comp-val" id="cv-adj-estab">R$ 0,00</span></div>
             <div class="comp-row sub comp-ajuste" id="row-adj-urg" style="display:none;"><span>Urgência (+30%)</span><span class="comp-val" id="cv-adj-urg">R$ 0,00</span></div>
             <div class="comp-row sub"><span>Deslocamento</span><span class="comp-val" id="cv-desloc">R$ 0,00</span></div>
+            <div class="comp-row sub" id="row-desconto" style="display:none;color:var(--success);"><span id="lbl-desconto">Desconto (—)</span><span class="comp-val" id="cv-desconto" style="color:var(--success);">- R$ 0,00</span></div>
             <div class="comp-row sub"><span id="lbl-impostos">Impostos (12%)</span><span class="comp-val" id="cv-impostos">R$ 0,00</span></div>
             <div class="comp-row sub"><span id="lbl-margem">Margem (30%)</span><span class="comp-val" id="cv-margem">R$ 0,00</span></div>
           </div>
@@ -757,6 +775,8 @@ function limparFormulario(){
   document.getElementById('cfg-impostos').value=12;
   document.getElementById('cfg-margem').value=30;
   document.getElementById('cfg-desloc').value=150;
+  document.getElementById('cfg-desc-tipo').value='nenhum';
+  document.getElementById('cfg-desc-valor').value=0;
   clearStatus('status-editor');
 }
 
@@ -797,6 +817,8 @@ async function carregarOrcamento(id){
   document.getElementById('cfg-impostos').value=((orc.pct_impostos||0.12)*100).toFixed(1);
   document.getElementById('cfg-margem').value=((orc.pct_margem||0.30)*100).toFixed(1);
   document.getElementById('cfg-desloc').value=orc.custo_deslocamento||150;
+  document.getElementById('cfg-desc-tipo').value=orc.desconto_tipo||'nenhum';
+  document.getElementById('cfg-desc-valor').value=orc.desconto_valor||0;
   document.getElementById('sel-status').value=orc.status||'rascunho';
   document.getElementById('btn-excluir').style.display='inline-flex';
   document.getElementById('btn-contrato').style.display=['aprovado','enviado'].includes(orc.status)?'inline-flex':'none';
@@ -916,9 +938,27 @@ function calcularTotais(){
   const adjUrg=(urgencia!=='Normal (30 dias)'&&itemUrg)?(base+adjGR+adjFunc+adjEstab)*itemUrg.preco_unitario:0;
 
   const subtotalAjustado=base+adjGR+adjFunc+adjEstab+adjUrg;
-  const impostos=subtotalAjustado*pctImp;
-  const margem=(subtotalAjustado+desloc+impostos)*pctMarg;
-  const total=subtotalAjustado+desloc+impostos+margem;
+
+  // Desconto — aplicado ANTES do imposto e margem (base tributária menor)
+  const descTipo=document.getElementById('cfg-desc-tipo')?.value||'nenhum';
+  const descValorInput=parseFloat(document.getElementById('cfg-desc-valor')?.value)||0;
+  // Habilitar/desabilitar campo de valor
+  const descCampo=document.getElementById('cfg-desc-valor');
+  const descLabel=document.getElementById('lbl-desc-valor');
+  if(descCampo){
+    const ativo=descTipo!=='nenhum';
+    descCampo.style.opacity=ativo?'1':'0.4';
+    descCampo.style.pointerEvents=ativo?'auto':'none';
+    if(descLabel)descLabel.textContent=descTipo==='percentual'?'Percentual (%)':'Valor fixo (R$)';
+  }
+  let desconto=0;
+  if(descTipo==='percentual') desconto=subtotalAjustado*(descValorInput/100);
+  else if(descTipo==='fixo')  desconto=Math.min(descValorInput,subtotalAjustado);
+  const subtotalComDesconto=subtotalAjustado-desconto;
+
+  const impostos=subtotalComDesconto*pctImp;
+  const margem=(subtotalComDesconto+desloc+impostos)*pctMarg;
+  const total=subtotalComDesconto+desloc+impostos+margem;
 
   // Resumo por recorrência
   const recUnico=inclusos.filter(x=>!['mensal','trimestral','semestral','anual','bienal'].includes(x.recorrencia)).reduce((s,x)=>s+x.subtotal,0);
@@ -931,6 +971,16 @@ function calcularTotais(){
   set('cv-mensal',recMensal>0?fmtBRL(recMensal)+'/mês':'R$ 0,00');
   set('cv-anual',recAnual>0?fmtBRL(recAnual)+'/ano':'R$ 0,00');
   set('cv-desloc',fmtBRL(desloc));
+  // Linha de desconto
+  const rowDesc=document.getElementById('row-desconto');
+  if(rowDesc){
+    rowDesc.style.display=desconto>0?'flex':'none';
+    if(desconto>0){
+      const lbl=descTipo==='percentual'?`Desconto (${descValorInput.toFixed(1)}%)`:`Desconto`;
+      document.getElementById('lbl-desconto').textContent=lbl;
+      set('cv-desconto','- '+fmtBRL(desconto));
+    }
+  }
   document.getElementById('lbl-impostos').textContent=`Impostos (${(pctImp*100).toFixed(1)}%)`;
   document.getElementById('lbl-margem').textContent=`Margem (${(pctMarg*100).toFixed(1)}%)`;
   set('cv-impostos',fmtBRL(impostos));
@@ -959,7 +1009,7 @@ function calcularTotais(){
   set('rv-ano2',fmtBRL(ano2)+'/ano');
   set('rv-porfunc',nFunc>0?fmtBRL(total/nFunc)+'/func.':'—');
 
-  return{base,adjGR,adjFunc,adjEstab,adjUrg,desloc,impostos,margem,total,recUnico,recMensal,recAnual,pctImp,pctMarg};
+  return{base,adjGR,adjFunc,adjEstab,adjUrg,desconto,descTipo,descValorInput,desloc,impostos,margem,total,recUnico,recMensal,recAnual,pctImp,pctMarg};
 }
 
 // ── SALVAR ────────────────────────────────────────────────────────────────────
@@ -1000,6 +1050,8 @@ async function salvarOrcamento(){
       status:document.getElementById('sel-status').value,
       validade_dias:parseInt(document.getElementById('cli-validade').value)||15,
       observacoes:document.getElementById('cli-obs').value.trim()||null,
+      desconto_tipo:document.getElementById('cfg-desc-tipo').value||'nenhum',
+      desconto_valor:parseFloat(document.getElementById('cfg-desc-valor').value)||0,
       atualizado_em:new Date().toISOString()
     };
 
@@ -1173,6 +1225,7 @@ function imprimirOrcamento(){
       ${totais.adjGR>0?`<div class="doc-preco-row sub"><span>Adicional ${gr}</span><span class="doc-preco-val">${fmtBRL(totais.adjGR)}</span></div>`:''}
       ${totais.adjFunc>0?`<div class="doc-preco-row sub"><span>Adicional funcionários</span><span class="doc-preco-val">${fmtBRL(totais.adjFunc)}</span></div>`:''}
       ${totais.adjEstab>0?`<div class="doc-preco-row sub"><span>Adicional estabelecimentos</span><span class="doc-preco-val">${fmtBRL(totais.adjEstab)}</span></div>`:''}
+      ${totais.desconto>0?`<div class="doc-preco-row sub" style="color:#166534;"><span>${totais.descTipo==='percentual'?`Desconto (${totais.descValorInput.toFixed(1)}%)`:'Desconto concedido'}</span><span class="doc-preco-val" style="color:#166534;">- ${fmtBRL(totais.desconto)}</span></div>`:''}
       <div class="doc-preco-row sub"><span>Deslocamento</span><span class="doc-preco-val">${fmtBRL(totais.desloc)}</span></div>
       <div class="doc-preco-row sub"><span>Impostos (${(totais.pctImp*100).toFixed(1)}%)</span><span class="doc-preco-val">${fmtBRL(totais.impostos)}</span></div>
       <div class="doc-preco-row sub"><span>Margem (${(totais.pctMarg*100).toFixed(1)}%)</span><span class="doc-preco-val">${fmtBRL(totais.margem)}</span></div>
