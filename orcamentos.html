@@ -396,6 +396,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         </div>
       </div>
 
+      <!-- Elaborador (consultoria emissora) -->
+      <div class="secao">
+        <div class="secao-header">🏢 Sua Consultoria (Elaborador)</div>
+        <div class="secao-body">
+          <div class="form-grid">
+            <div class="field full"><label>Nome da Consultoria / Empresa *</label><input type="text" id="elab-nome" placeholder="Ex: XYZ Consultoria SST Ltda" oninput="marcarAlterado()"></div>
+            <div class="field"><label>CNPJ da Consultoria</label><input type="text" id="elab-cnpj" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascararCNPJ(this);marcarAlterado()"></div>
+            <div class="field"><label>Responsável Técnico</label><input type="text" id="elab-resp" placeholder="Nome do responsável" oninput="marcarAlterado()"></div>
+            <div class="field full"><label>CREA / CFT / CRM</label><input type="text" id="elab-reg" placeholder="Ex: 12345/PA — Técnico de Segurança" oninput="marcarAlterado()"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px;">Esses dados aparecem no rodapé e na assinatura da proposta. Salvos automaticamente para os próximos orçamentos.</div>
+        </div>
+      </div>
+
       <!-- Observações e Validade -->
       <div class="secao">
         <div class="secao-header">📝 Observações</div>
@@ -777,6 +791,12 @@ function limparFormulario(){
   document.getElementById('cfg-desloc').value=150;
   document.getElementById('cfg-desc-tipo').value='nenhum';
   document.getElementById('cfg-desc-valor').value=0;
+  // Pré-preenche elaborador do localStorage
+  const elab=JSON.parse(localStorage.getItem('sgs_orc_elaborador')||'{}');
+  document.getElementById('elab-nome').value=elab.nome||'';
+  document.getElementById('elab-cnpj').value=elab.cnpj||'';
+  document.getElementById('elab-resp').value=elab.resp||'';
+  document.getElementById('elab-reg').value=elab.reg||'';
   clearStatus('status-editor');
 }
 
@@ -819,6 +839,10 @@ async function carregarOrcamento(id){
   document.getElementById('cfg-desloc').value=orc.custo_deslocamento||150;
   document.getElementById('cfg-desc-tipo').value=orc.desconto_tipo||'nenhum';
   document.getElementById('cfg-desc-valor').value=orc.desconto_valor||0;
+  document.getElementById('elab-nome').value=orc.elaborador_nome||'';
+  document.getElementById('elab-cnpj').value=orc.elaborador_cnpj||'';
+  document.getElementById('elab-resp').value=orc.elaborador_resp||'';
+  document.getElementById('elab-reg').value=orc.elaborador_reg||'';
   document.getElementById('sel-status').value=orc.status||'rascunho';
   document.getElementById('btn-excluir').style.display='inline-flex';
   document.getElementById('btn-contrato').style.display=['aprovado','enviado'].includes(orc.status)?'inline-flex':'none';
@@ -1052,6 +1076,10 @@ async function salvarOrcamento(){
       observacoes:document.getElementById('cli-obs').value.trim()||null,
       desconto_tipo:document.getElementById('cfg-desc-tipo').value||'nenhum',
       desconto_valor:parseFloat(document.getElementById('cfg-desc-valor').value)||0,
+      elaborador_nome:document.getElementById('elab-nome').value.trim()||null,
+      elaborador_cnpj:document.getElementById('elab-cnpj').value.trim()||null,
+      elaborador_resp:document.getElementById('elab-resp').value.trim()||null,
+      elaborador_reg:document.getElementById('elab-reg').value.trim()||null,
       atualizado_em:new Date().toISOString()
     };
 
@@ -1090,6 +1118,13 @@ async function salvarOrcamento(){
     }
 
     alterado=false;
+    // Salvar elaborador no localStorage para reutilizar
+    localStorage.setItem('sgs_orc_elaborador',JSON.stringify({
+      nome:document.getElementById('elab-nome').value.trim(),
+      cnpj:document.getElementById('elab-cnpj').value.trim(),
+      resp:document.getElementById('elab-resp').value.trim(),
+      reg:document.getElementById('elab-reg').value.trim()
+    }));
     document.getElementById('btn-excluir').style.display='inline-flex';
     document.getElementById('btn-contrato').style.display=['aprovado','enviado'].includes(orcamentoAtual.status)?'inline-flex':'none';
     atualizarNumBar();
@@ -1172,7 +1207,11 @@ function imprimirOrcamento(){
       <tbody>${itens.map(linhaSrv).join('')}</tbody>
     </table>`:'';
 
-  const sigla=(empresaDados.razao_social||'SGS').split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase();
+  const elabNome=document.getElementById('elab-nome').value.trim()||empresaDados.razao_social||'Consultoria SST';
+  const elabCnpj=document.getElementById('elab-cnpj').value.trim();
+  const elabResp=document.getElementById('elab-resp').value.trim();
+  const elabReg=document.getElementById('elab-reg').value.trim();
+  const sigla=elabNome.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase();
   const ano1=totais.total+(totais.recMensal*12)+totais.recAnual;
   const ano2=(totais.recMensal*12)+totais.recAnual;
 
@@ -1210,7 +1249,7 @@ function imprimirOrcamento(){
     </div>
 
     <div class="doc-footer">
-      <span class="doc-footer-left">${escHtml(empresaDados.razao_social||'')} — Proposta Comercial</span>
+      <span class="doc-footer-left">${escHtml(elabNome)} — Proposta Comercial</span>
       <span class="doc-footer-right">${escHtml(orc.numero||'PRÉVIA')}</span>
     </div>
   </div>
@@ -1233,7 +1272,7 @@ function imprimirOrcamento(){
     </div>
 
     <div class="doc-footer">
-      <span class="doc-footer-left">${escHtml(empresaDados.razao_social||'')} — Proposta Comercial</span>
+      <span class="doc-footer-left">${escHtml(elabNome)} — Proposta Comercial</span>
       <span class="doc-footer-right">Pg. 2</span>
     </div>
   </div>
@@ -1262,11 +1301,12 @@ function imprimirOrcamento(){
           <div class="aceite-label">Data</div>
         </div>
         <div>
-          <div style="font-size:9pt;color:#374151;margin-bottom:10pt;"><strong>${escHtml(empresaDados.razao_social||'Consultoria SST')}</strong></div>
+          <div style="font-size:9pt;color:#374151;margin-bottom:6pt;"><strong>${escHtml(elabNome)}</strong></div>
+          ${elabCnpj?`<div style="font-size:8pt;color:#6b7280;font-family:'IBM Plex Mono',monospace;margin-bottom:8pt;">${escHtml(elabCnpj)}</div>`:''}
           <div class="aceite-linha"></div>
-          <div class="aceite-label">Responsável Técnico</div>
+          <div class="aceite-label">${elabResp?escHtml(elabResp):'Responsável Técnico'}</div>
           <div class="aceite-linha"></div>
-          <div class="aceite-label">CREA / CFT / CRM</div>
+          <div class="aceite-label">${elabReg?escHtml(elabReg):'CREA / CFT / CRM'}</div>
           <div class="aceite-linha" style="width:60%;"></div>
           <div class="aceite-label">Data</div>
         </div>
@@ -1274,7 +1314,7 @@ function imprimirOrcamento(){
     </div>
 
     <div class="doc-footer">
-      <span class="doc-footer-left">${escHtml(empresaDados.razao_social||'')} — Proposta Comercial</span>
+      <span class="doc-footer-left">${escHtml(elabNome)} — Proposta Comercial</span>
       <span class="doc-footer-right">Pg. 3</span>
     </div>
   </div>`;
@@ -1303,8 +1343,8 @@ function gerarTextoContrato(){
   const inclusos=itensEditor.filter(x=>x.incluso&&x.tipo!=='percentual');
   const listaServicos=inclusos.map(x=>`• ${x.servico_nome} (${x.unidade})`).join('\n');
   const hoje=new Date().toLocaleDateString('pt-BR');
-  const consultoria=empresaDados.razao_social||'CONSULTORIA SST';
-  const cnpjConsultoria=empresaDados.cnpj||'';
+  const consultoria=document.getElementById('elab-nome').value.trim()||empresaDados.razao_social||'CONSULTORIA SST';
+  const cnpjConsultoria=document.getElementById('elab-cnpj').value.trim()||empresaDados.cnpj||'';
 
   return`CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE SST
 Referência: ${orcamentoAtual.numero}
@@ -1386,7 +1426,8 @@ async function salvarContrato(){
 function imprimirContrato(){
   const texto=document.getElementById('contrato-texto').value;
   const orc=orcamentoAtual||{numero:'CONTRATO'};
-  const sigla=(empresaDados.razao_social||'SGS').split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase();
+  const eNome=document.getElementById('elab-nome').value.trim()||empresaDados.razao_social||'Consultoria SST';
+  const sigla=eNome.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase();
   const html=`<div class="page-a4">
     <div class="doc-capa-topo">
       <div>
@@ -1398,7 +1439,7 @@ function imprimirContrato(){
     </div>
     <div style="white-space:pre-wrap;font-size:9.5pt;line-height:1.7;color:#1f2937;margin-top:14pt;">${escHtml(texto)}</div>
     <div class="doc-footer">
-      <span class="doc-footer-left">${escHtml(empresaDados.razao_social||'')} — Contrato de Prestação de Serviços</span>
+      <span class="doc-footer-left">${escHtml(eNome)} — Contrato de Prestação de Serviços</span>
       <span class="doc-footer-right">${escHtml(orc.numero)}</span>
     </div>
   </div>`;
