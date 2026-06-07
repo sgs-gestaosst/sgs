@@ -1,0 +1,19 @@
+name: Manter Supabase Ativo
+
+on:
+  schedule:
+    - cron: '0 6 * * 1,4'   # segundas e quintas às 6h UTC
+  workflow_dispatch:        # permite rodar manualmente pelo GitHub
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping de leitura na API REST do Supabase
+        run: |
+          curl -sf -o /dev/null -w "HTTP %{http_code}\n" \
+            "https://ookqdukeulwcnhilbgbo.supabase.co/rest/v1/empresas?select=id&limit=1" \
+            -H "apikey: sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e" \
+            -H "Authorization: Bearer sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e"
