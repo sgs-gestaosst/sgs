@@ -23,28 +23,27 @@
   document.head.appendChild(style);
 })();
 
-const _GROQ_KEY='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';
-const _GROQ_URL='https://api.groq.com/openai/v1/chat/completions';
+const _IA_PROXY_URL='https://ookqdukeulwcnhilbgbo.supabase.co/functions/v1/ia-proxy';
+const _SUPA_ANON_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
 
 async function _chamarGemini(prompt){
-  const res=await fetch(_GROQ_URL,{
+  const token=localStorage.getItem('sgs_token');
+  const res=await fetch(_IA_PROXY_URL,{
     method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+_GROQ_KEY},
-    body:JSON.stringify({
-      model:'llama-3.1-8b-instant',
-      messages:[{role:'user',content:prompt}],
-      temperature:0.2,
-      max_tokens:512
-    })
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+token,
+      'apikey':_SUPA_ANON_KEY
+    },
+    body:JSON.stringify({prompt})
   });
+  const data=await res.json().catch(()=>({}));
   if(!res.ok){
-    const err=await res.json().catch(()=>({}));
     if(res.status===429)throw new Error('Limite de requisições atingido — aguarde alguns segundos e tente novamente.');
-    if(res.status===401)throw new Error('Chave da IA inválida ou expirada — contate o suporte.');
-    throw new Error(err.error?.message||'Erro HTTP '+res.status);
+    if(res.status===401)throw new Error('Sessão expirada — faça login novamente.');
+    throw new Error(data.error||'Erro HTTP '+res.status);
   }
-  const data=await res.json();
-  let text=data.choices?.[0]?.message?.content||'';
+  let text=data.text||'';
   return text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
 }
 
