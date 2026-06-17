@@ -6,9 +6,9 @@ SaaS de Saúde e Segurança do Trabalho (SST) para técnicos e consultores. Gera
 ## Stack
 - **Frontend:** HTML puro + CSS embutido por página (sem framework, sem build)
 - **Backend:** Supabase (PostgreSQL 17 + Auth + Storage + RLS)
-- **Hospedagem:** GitHub Pages → `sgs-gestaosst.github.io/sgs`
+- **Hospedagem:** GitHub Pages → `sgs.tec5.com.br` (domínio customizado ativo desde 2026-06-13; repo: sgs-gestaosst/sgs)
 - **Pagamento:** Mercado Pago (mp_assinatura_id, mp_payment_id)
-- **IA:** Groq API (llama-3.1-8b-instant) via `ia_copilot.js`
+- **IA:** Groq API (llama-3.1-8b-instant) via `ia_copilot.js` → Edge Function `supabase/functions/ia-proxy` (chave em secret, nunca no JS público)
 
 ## Localização dos arquivos
 - Páginas: `C:\Users\DELL\sgs\*.html` (~30 páginas)

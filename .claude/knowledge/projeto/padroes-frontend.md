@@ -136,5 +136,11 @@ if (!empresaId) window.location.href = 'empresas.html';
 <script src="trial_check.js"></script>
 <script src="plano_utils.js"></script>
 <!-- Se usar IA: -->
-<script src="ia_copilot.js?v=7"></script>
+<script src="ia_copilot.js?v=9"></script>
 ```
+
+## IA Copilot — arquitetura atual (desde 2026-06-13)
+- `ia_copilot.js` chama `supabase/functions/ia-proxy` (Edge Function) em vez do Groq direto
+- A chave do Groq fica em secret no Supabase (`GROQ_API_KEY`) — nunca no JS público
+- Ao adicionar nova página com IA: incluir `ia_copilot.js?vN` e garantir que `sgs_token` esteja no localStorage
+- Cache-bust: incrementar `?vN` em TODAS as páginas que incluem `ia_copilot.js` a cada deploy do script
