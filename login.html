@@ -233,15 +233,12 @@ async function recuperarSenha() {
   document.getElementById('btn-recovery-label').textContent = 'Enviando...';
 
   try {
-    const res = await fetch(`${SUPA_URL}/auth/v1/recover`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
-      body: JSON.stringify({email, redirect_to:'https://sgs.tec5.com.br/resetar_senha.html'})
+    const { createClient } = supabase;
+    const sb = createClient(SUPA_URL, SUPA_KEY);
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://sgs.tec5.com.br/resetar_senha.html'
     });
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error_description || data.msg || 'Erro ao enviar e-mail');
-    }
+    if (error) throw new Error(error.message);
     setStatus('status-recovery','success','Link enviado! Verifique sua caixa de entrada.');
   } catch(e) {
     setStatus('status-recovery','error', e.message);
@@ -260,5 +257,6 @@ document.getElementById('login-email').addEventListener('keydown', e => { if(e.k
 const token = localStorage.getItem('sgs_token');
 if (token) window.location.href = 'index.html';
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </body>
 </html>
