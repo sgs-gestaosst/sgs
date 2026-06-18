@@ -31,6 +31,7 @@
   .status.show{display:flex;}
   .status.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
   .status.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+  .status.info{background:#1a2540;border:1px solid #2a4070;color:#7aabf7;}
   .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
   .spinner.show{display:inline-block;}
   @keyframes spin{to{transform:rotate(360deg);}}
@@ -41,8 +42,28 @@
   <div class="logo">SGS</div>
   <div class="title">Redefinir senha</div>
   <div class="subtitle">Escolha uma nova senha para sua conta.</div>
+  <div id="conteudo">
+    <div class="status show info"><span>↻</span><span>Verificando link...</span></div>
+  </div>
+</div>
 
-  <div id="form-reset">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://ookqdukeulwcnhilbgbo.supabase.co',
+  'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e'
+);
+
+function setStatus(id, tipo, msg) {
+  const el = document.getElementById(id);
+  const icons = {error:'✕', success:'✓', info:'↻'};
+  el.className = 'status show ' + tipo;
+  el.innerHTML = `<span>${icons[tipo]}</span><span>${msg}</span>`;
+}
+
+function mostrarFormulario() {
+  document.getElementById('conteudo').innerHTML = `
     <div class="field">
       <label>Nova senha</label>
       <input type="password" id="nova-senha" placeholder="Mínimo 6 caracteres">
@@ -56,34 +77,27 @@
       <span id="btn-reset-label">Redefinir senha</span>
     </button>
     <div class="status" id="status-reset"></div>
-  </div>
-</div>
-
-<script>
-const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
-const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
-
-function setStatus(id, tipo, msg) {
-  const el = document.getElementById(id);
-  const icons = {error:'✕', success:'✓'};
-  el.className = 'status show ' + tipo;
-  el.innerHTML = `<span>${icons[tipo]}</span><span>${msg}</span>`;
+  `;
 }
 
-// Lê o access_token do hash da URL (#access_token=...&type=recovery)
-function getHashParam(name) {
-  const hash = window.location.hash.substring(1);
-  const params = new URLSearchParams(hash);
-  return params.get(name);
-}
-
-const accessToken = getHashParam('access_token');
-const tokenType   = getHashParam('type');
-
-if (!accessToken || tokenType !== 'recovery') {
-  document.getElementById('form-reset').innerHTML =
+function mostrarErro() {
+  document.getElementById('conteudo').innerHTML =
     '<div class="status show error"><span>✕</span><span>Link inválido ou expirado. <a href="login.html" style="color:inherit;text-decoration:underline">Solicite um novo link.</a></span></div>';
 }
+
+// Timeout de segurança caso o evento nunca dispare
+const timeout = setTimeout(mostrarErro, 5000);
+
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    clearTimeout(timeout);
+    mostrarFormulario();
+  } else if (event === 'SIGNED_IN' && session) {
+    // alguns fluxos disparam SIGNED_IN em vez de PASSWORD_RECOVERY
+    clearTimeout(timeout);
+    mostrarFormulario();
+  }
+});
 
 async function redefinirSenha() {
   const senha  = document.getElementById('nova-senha').value;
@@ -95,28 +109,18 @@ async function redefinirSenha() {
   document.getElementById('spinner-reset').className = 'spinner show';
   document.getElementById('btn-reset-label').textContent = 'Salvando...';
 
-  try {
-    const res = await fetch(`${SUPA_URL}/auth/v1/user`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer ' + accessToken
-      },
-      body: JSON.stringify({password: senha})
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error_description || data.msg || 'Erro ao redefinir senha');
+  const { error } = await sb.auth.updateUser({ password: senha });
 
-    setStatus('status-reset','success','Senha redefinida! Redirecionando para o login...');
-    setTimeout(() => { window.location.href = 'login.html'; }, 2000);
-  } catch(e) {
-    setStatus('status-reset','error', e.message);
-  } finally {
+  if (error) {
+    setStatus('status-reset','error', error.message || 'Erro ao redefinir senha.');
     document.getElementById('btn-reset').disabled = false;
     document.getElementById('spinner-reset').className = 'spinner';
     document.getElementById('btn-reset-label').textContent = 'Redefinir senha';
+    return;
   }
+
+  setStatus('status-reset','success','Senha redefinida! Redirecionando para o login...');
+  setTimeout(() => { window.location.href = 'login.html'; }, 2000);
 }
 </script>
 </body>
