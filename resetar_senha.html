@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGS — Redefinir Senha</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117;--surface:#181c27;--border:#2a3044;--border-focus:#4a7cdc;
+    --accent:#4a7cdc;--text:#e8eaf0;--text2:#8892a4;--text3:#545e72;
+    --danger:#e05555;--success:#2dd4a0;--radius:6px;
+    --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:420px;margin:24px;}
+  .logo{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--accent);letter-spacing:.08em;border:1px solid var(--border-focus);padding:6px 14px;border-radius:var(--radius);display:inline-block;margin-bottom:32px;}
+  .title{font-size:22px;font-weight:500;margin-bottom:6px;}
+  .subtitle{font-size:13px;color:var(--text2);margin-bottom:28px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11px;font-weight:500;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:14px;padding:11px 14px;outline:none;transition:border-color .15s;}
+  input:focus{border-color:var(--border-focus);}
+  input::placeholder{color:var(--text3);}
+  .btn{width:100%;padding:12px;border-radius:var(--radius);font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-primary:hover{background:#5a8ce8;}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+  .status{display:none;padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-top:14px;align-items:center;gap:8px;}
+  .status.show{display:flex;}
+  .status.error{background:#2a1515;border:1px solid #4a2020;color:var(--danger);}
+  .status.success{background:#0e2820;border:1px solid #1a4a38;color:var(--success);}
+  .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+  .spinner.show{display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">SGS</div>
+  <div class="title">Redefinir senha</div>
+  <div class="subtitle">Escolha uma nova senha para sua conta.</div>
+
+  <div id="form-reset">
+    <div class="field">
+      <label>Nova senha</label>
+      <input type="password" id="nova-senha" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="field">
+      <label>Confirmar nova senha</label>
+      <input type="password" id="nova-senha2" placeholder="Repita a nova senha">
+    </div>
+    <button class="btn btn-primary" id="btn-reset" onclick="redefinirSenha()">
+      <span class="spinner" id="spinner-reset"></span>
+      <span id="btn-reset-label">Redefinir senha</span>
+    </button>
+    <div class="status" id="status-reset"></div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+
+function setStatus(id, tipo, msg) {
+  const el = document.getElementById(id);
+  const icons = {error:'✕', success:'✓'};
+  el.className = 'status show ' + tipo;
+  el.innerHTML = `<span>${icons[tipo]}</span><span>${msg}</span>`;
+}
+
+// Lê o access_token do hash da URL (#access_token=...&type=recovery)
+function getHashParam(name) {
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  return params.get(name);
+}
+
+const accessToken = getHashParam('access_token');
+const tokenType   = getHashParam('type');
+
+if (!accessToken || tokenType !== 'recovery') {
+  document.getElementById('form-reset').innerHTML =
+    '<div class="status show error"><span>✕</span><span>Link inválido ou expirado. <a href="login.html" style="color:inherit;text-decoration:underline">Solicite um novo link.</a></span></div>';
+}
+
+async function redefinirSenha() {
+  const senha  = document.getElementById('nova-senha').value;
+  const senha2 = document.getElementById('nova-senha2').value;
+  if (!senha || senha.length < 6) { setStatus('status-reset','error','Senha deve ter no mínimo 6 caracteres.'); return; }
+  if (senha !== senha2) { setStatus('status-reset','error','As senhas não coincidem.'); return; }
+
+  document.getElementById('btn-reset').disabled = true;
+  document.getElementById('spinner-reset').className = 'spinner show';
+  document.getElementById('btn-reset-label').textContent = 'Salvando...';
+
+  try {
+    const res = await fetch(`${SUPA_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + accessToken
+      },
+      body: JSON.stringify({password: senha})
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.msg || 'Erro ao redefinir senha');
+
+    setStatus('status-reset','success','Senha redefinida! Redirecionando para o login...');
+    setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+  } catch(e) {
+    setStatus('status-reset','error', e.message);
+  } finally {
+    document.getElementById('btn-reset').disabled = false;
+    document.getElementById('spinner-reset').className = 'spinner';
+    document.getElementById('btn-reset-label').textContent = 'Redefinir senha';
+  }
+}
+</script>
+</body>
+</html>

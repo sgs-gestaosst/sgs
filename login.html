@@ -46,6 +46,11 @@
   .divider::after{content:'';position:absolute;right:0;top:50%;width:42%;height:1px;background:var(--border);}
   .hint{font-size:11px;color:var(--text3);margin-top:6px;}
   #form-cadastro{display:none;}
+  #form-recovery{display:none;}
+  .link-esqueci{display:block;text-align:right;font-size:12px;color:var(--text3);margin-top:6px;cursor:pointer;text-decoration:none;transition:color .15s;}
+  .link-esqueci:hover{color:var(--accent);}
+  .back-link{font-size:12px;color:var(--text3);cursor:pointer;margin-top:12px;display:inline-block;}
+  .back-link:hover{color:var(--accent);}
 </style>
 </head>
 <body>
@@ -54,7 +59,7 @@
   <div class="title">Bem-vindo</div>
   <div class="subtitle">Sistema de Gestão em Saúde e Segurança do Trabalho</div>
 
-  <div class="tabs">
+  <div class="tabs" id="abas-principais">
     <div class="tab active" id="tab-login" onclick="mudarTab('login')">Entrar</div>
     <div class="tab" id="tab-cadastro" onclick="mudarTab('cadastro')">Criar conta</div>
   </div>
@@ -68,12 +73,27 @@
     <div class="field">
       <label>Senha</label>
       <input type="password" id="login-senha" placeholder="••••••••">
+      <a class="link-esqueci" onclick="mudarTab('recovery')">Esqueci minha senha</a>
     </div>
     <button class="btn btn-primary" id="btn-login" onclick="fazerLogin()">
       <span class="spinner" id="spinner-login"></span>
       <span id="btn-login-label">Entrar</span>
     </button>
     <div class="status" id="status-login"></div>
+  </div>
+
+  <!-- RECUPERAR SENHA -->
+  <div id="form-recovery">
+    <div class="field">
+      <label>E-mail cadastrado</label>
+      <input type="email" id="rec-email" placeholder="seu@email.com">
+    </div>
+    <button class="btn btn-primary" id="btn-recovery" onclick="recuperarSenha()">
+      <span class="spinner" id="spinner-recovery"></span>
+      <span id="btn-recovery-label">Enviar link de recuperação</span>
+    </button>
+    <div class="status" id="status-recovery"></div>
+    <a class="back-link" onclick="mudarTab('login')">← Voltar para o login</a>
   </div>
 
   <!-- CADASTRO -->
@@ -108,10 +128,18 @@ const SUPA_URL = 'https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY = 'sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
 
 function mudarTab(tab) {
+  const isRecovery = tab === 'recovery';
+  document.getElementById('abas-principais').style.display = isRecovery ? 'none' : 'flex';
   document.getElementById('tab-login').classList.toggle('active', tab === 'login');
   document.getElementById('tab-cadastro').classList.toggle('active', tab === 'cadastro');
   document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
   document.getElementById('form-cadastro').style.display = tab === 'cadastro' ? 'block' : 'none';
+  document.getElementById('form-recovery').style.display = isRecovery ? 'block' : 'none';
+  if (isRecovery) {
+    const emailLogin = document.getElementById('login-email').value.trim();
+    if (emailLogin) document.getElementById('rec-email').value = emailLogin;
+    document.getElementById('status-recovery').className = 'status';
+  }
 }
 
 function setStatus(id, tipo, msg) {
@@ -193,6 +221,34 @@ async function fazerCadastro() {
     document.getElementById('btn-cadastro').disabled = false;
     document.getElementById('spinner-cadastro').className = 'spinner';
     document.getElementById('btn-cadastro-label').textContent = 'Criar conta';
+  }
+}
+
+async function recuperarSenha() {
+  const email = document.getElementById('rec-email').value.trim();
+  if (!email) { setStatus('status-recovery','error','Digite seu e-mail.'); return; }
+
+  document.getElementById('btn-recovery').disabled = true;
+  document.getElementById('spinner-recovery').className = 'spinner show';
+  document.getElementById('btn-recovery-label').textContent = 'Enviando...';
+
+  try {
+    const res = await fetch(`${SUPA_URL}/auth/v1/recover`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','apikey':SUPA_KEY},
+      body: JSON.stringify({email, redirect_to:'https://sgs.tec5.com.br/resetar_senha.html'})
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error_description || data.msg || 'Erro ao enviar e-mail');
+    }
+    setStatus('status-recovery','success','Link enviado! Verifique sua caixa de entrada.');
+  } catch(e) {
+    setStatus('status-recovery','error', e.message);
+  } finally {
+    document.getElementById('btn-recovery').disabled = false;
+    document.getElementById('spinner-recovery').className = 'spinner';
+    document.getElementById('btn-recovery-label').textContent = 'Enviar link de recuperação';
   }
 }
 
