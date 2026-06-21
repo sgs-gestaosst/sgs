@@ -408,8 +408,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         </div>
       </div>
       <div class="fg f-row c1">
-        <label>Descrição da tarefa avaliada</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <label style="margin:0;">Descrição da tarefa avaliada</label>
+          <button class="btn-ia" style="font-size:11px;padding:4px 10px;" onclick="ia_aet_sugerirTarefa()" id="btn-ia-tarefa">✨ Sugerir com IA</button>
+        </div>
         <textarea id="met-tarefa" placeholder="Descreva brevemente a tarefa ou ciclo de trabalho avaliado..." style="min-height:55px;resize:vertical;"></textarea>
+        <div class="ia-status" id="ia-status-tarefa"></div>
       </div>
       <div class="status-bar" id="status-met-2"></div>
       <div style="display:flex;justify-content:space-between;margin-top:16px;">
@@ -1770,6 +1774,27 @@ async function imprimirAET(id){
     if(e.target.id===id){if(id==='modal-aet')fecharModalAET();else fecharModalAvaliacao();}
   });
 });
+
+async function ia_aet_sugerirTarefa(){
+  const setorSel=document.getElementById('met-setor');
+  const funcaoSel=document.getElementById('met-funcao');
+  const nomeSetor=setorSel?.options[setorSel.selectedIndex]?.text||'setor';
+  const nomeFuncao=funcaoSel?.options[funcaoSel.selectedIndex]?.text||'função';
+  const metodologia=wizardMet||'ergonômica';
+  const btn=document.getElementById('btn-ia-tarefa');
+  const statusEl=document.getElementById('ia-status-tarefa');
+  if(btn)btn.disabled=true;
+  if(statusEl){statusEl.textContent='✨ Gerando sugestão...';statusEl.style.color='var(--accent)';}
+  try{
+    const texto=await ia_sugerirTarefaAET(nomeFuncao,nomeSetor,metodologia);
+    document.getElementById('met-tarefa').value=texto;
+    if(statusEl){statusEl.textContent='✅ Sugestão aplicada — revise se necessário.';statusEl.style.color='var(--ok)';}
+  }catch(e){
+    if(statusEl){statusEl.textContent='❌ '+e.message;statusEl.style.color='var(--danger)';}
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
 
 async function ia_aet_sugerir(campo){
   const funcaoSel=document.getElementById('aet-funcao');

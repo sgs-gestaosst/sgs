@@ -222,6 +222,14 @@ Use linguagem técnica adequada a laudos SST. Sem títulos, sem tópicos, texto 
   return await _chamarGemini(prompt);
 }
 
+async function ia_sugerirTarefaAET(nomeFuncao,nomeSetor,metodologia){
+  const prompt=`Você é especialista em ergonomia e Saúde e Segurança do Trabalho (SST) no Brasil.
+Elabore a descrição da tarefa/ciclo de trabalho para aplicação da metodologia ${metodologia} na função "${nomeFuncao}" no setor "${nomeSetor}".
+Escreva 2 a 3 frases técnicas em texto corrido, descrevendo: o ciclo de trabalho principal avaliado, os movimentos e posturas envolvidos, e a frequência/cadência da tarefa.
+Use linguagem compatível com laudos ergonômicos. Sem títulos, sem tópicos. Responda SOMENTE com o texto, sem aspas nem markdown.`;
+  return await _chamarGemini(prompt);
+}
+
 async function ia_sugerirPausasAET(nomeFuncao,nomeSetor){
   const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil, com experiência em NR-17 (Ergonomia).
 Sugira as pausas e períodos de descanso recomendados para a função "${nomeFuncao}" no setor "${nomeSetor}", de acordo com a NR-17 e boas práticas ergonômicas.
