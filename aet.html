@@ -1069,14 +1069,16 @@ async function salvarMetodologia(){
 
     // 2) Criar aet_metodologias
     const displayScore=wizardScore;
+    const _tarefa=(document.getElementById('met-tarefa').value.trim()||'').slice(0,299)||null;
+    const _membro=(document.getElementById('met-membro').value.trim()||cfg.membro||'').slice(0,99);
     const metPayload={
       aet_id:novaAet.id,empresa_id:parseInt(empresaId),
       metodologia:wizardMet,
-      membro_avaliado:document.getElementById('met-membro').value.trim()||cfg.membro,
-      tarefa:document.getElementById('met-tarefa').value.trim()||null,
+      membro_avaliado:_membro,
+      tarefa:_tarefa,
       score_total:parseFloat(wizardScore)||null,
-      nivel_risco:wizardResult.nivel,
-      nivel_acao:wizardResult.acao,
+      nivel_risco:(wizardResult.nivel||'').slice(0,29),
+      nivel_acao:(wizardResult.acao||'').slice(0,9),
       dados_json:{...wizardDados,recomendacoes:wizardRecs},
       recomendacoes:wizardRecs.map(r=>`[${r.prior}] ${r.texto}`).join('\n')||null,
       ativo:true,
