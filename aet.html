@@ -1083,7 +1083,12 @@ async function salvarMetodologia(){
     };
     const resMet=await fetch(`${SUPA_URL}/rest/v1/aet_metodologias`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(metPayload)});
     let metId=null;
-    if(resMet.ok){const md=await resMet.json();metId=md[0]?.id;metodologias.unshift({...md[0],aet:novaAet});}
+    if(resMet.ok){
+      const md=await resMet.json();metId=md[0]?.id;metodologias.unshift({...md[0],aet:novaAet});
+    }else{
+      const err=await resMet.json().catch(()=>({}));
+      throw new Error(`Erro ao salvar metodologia: ${err.message||err.hint||resMet.status}`);
+    }
 
     // 3) Transferir para funcao_riscos (se houver função selecionada)
     let transferido=false;
