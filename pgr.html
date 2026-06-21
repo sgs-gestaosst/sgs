@@ -656,7 +656,7 @@ function renderDocumento(){
   const pgContrat=renderSecaoContratadas();
   const pgPartic=renderSecaoParticipacao();
   const pgVersoes=renderSecaoVersoes();
-  const pgAnexosAET=renderAnexosAET();
+  const pgsAnexosAET=renderAnexosAET()||[];
 
   wrap.appendChild(pgCapa);
   wrap.appendChild(pgSumario);
@@ -674,8 +674,8 @@ function renderDocumento(){
   if(pgContrat)wrap.appendChild(pgContrat);
   if(pgPartic)wrap.appendChild(pgPartic);
   if(pgVersoes)wrap.appendChild(pgVersoes);
-  // Anexos AET: só aparece se há avaliações ergonômicas por metodologia
-  if(pgAnexosAET)wrap.appendChild(pgAnexosAET);
+  // Anexos AET: capa + 1 página por avaliação
+  pgsAnexosAET.forEach(pg=>wrap.appendChild(pg));
 
   // Numeração de páginas
   const paginas=Array.from(document.querySelectorAll('#pages-wrap .page'));
@@ -2245,47 +2245,259 @@ function phHeader(){return`<div class="page-header"><span class="ph-empresa">${h
 function renderAnexosAET(){
   const mets=window.aetMetodologias||[];
   if(!mets.length)return null;
-  const pg=criarPagina();
-  const MET_ICON={OCRA:'🔄',RULA:'🧍',JSI:'✋',OWAS:'🏗️',NIOSH:'🏋️'};
-  const COR_NIVEL={verde:'#d1fae5',amarelo:'#fef9c3',laranja:'#ffedd5',vermelho:'#fee2e2'};
-  const COR_TEXT={verde:'#065f46',amarelo:'#78350f',laranja:'#7c2d12',vermelho:'#991b1b'};
-  const clsMap=(n)=>!n?'verde':n.toLowerCase().includes('alt')||n.toLowerCase().includes('perig')?'vermelho':n.toLowerCase().includes('médio')||n.toLowerCase().includes('elev')?'laranja':n.toLowerCase().includes('leve')||n.toLowerCase().includes('moder')?'amarelo':'verde';
-  const linhas=mets.map((m,i)=>{
+
+  /* ─── metadados por metodologia ─── */
+  const MET_META={
+    RULA:{icon:'🧍',cor:'#0d4a3a',nome:'RULA — Rapid Upper Limb Assessment',
+      baseLegal:'NR-17 (Ergonomia) · NR-01 Anexo I · McAtamney & Corlett, Ergonomics 36(7):1993 · ISO 9241-5',
+      desc:'Avalia posturas de membros superiores, pescoço e tronco em ciclos de trabalho repetitivos ou prolongados.',
+      escalas:[{r:'1–2',c:'#22c55e',n:'Aceitável','a':'Sem ação necessária.'},{r:'3–4',c:'#ca8a04',n:'Investigar','a':'Mudanças podem ser necessárias; monitorar.'},{r:'5–6',c:'#ea580c',n:'Mudança em curto prazo','a':'Implementar ações ergonômicas em até 30 dias.'},{r:'≥7',c:'#dc2626',n:'Ação imediata','a':'Risco grave; intervenção imediata obrigatória.'}]},
+    OCRA:{icon:'🔄',cor:'#1e40af',nome:'OCRA Checklist — Occupational Repetitive Action',
+      baseLegal:'NR-17 (Ergonomia) · EN ISO 11228-3:2007 · Colombini, Occhipinti & Grieco (2002)',
+      desc:'Avalia trabalho repetitivo dos membros superiores: frequência de ações, força, postura, fatores adicionais e tempo de recuperação.',
+      escalas:[{r:'≤7.5',c:'#22c55e',n:'Verde — Aceitável','a':'Risco não significativo.'},{r:'7.6–11',c:'#ca8a04',n:'Amarelo — Leve','a':'Melhorias recomendadas a médio prazo.'},{r:'11.1–14',c:'#ea580c',n:'Laranja — Médio','a':'Redesenho da tarefa necessário.'},{r:'>14',c:'#dc2626',n:'Vermelho — Alto','a':'Redesenho imediato obrigatório.'}]},
+    JSI:{icon:'✋',cor:'#7c3aed',nome:'JSI — Job Strain Index',
+      baseLegal:'NR-17 (Ergonomia) · Moore & Garg, American Industrial Hygiene Assoc. J., 56(5):1995',
+      desc:'Quantifica o estresse biomecânico em punho e mão por 6 fatores multiplicativos: intensidade do esforço, duração, esforços por minuto, postura, velocidade e tempo de tarefa por dia.',
+      escalas:[{r:'≤1',c:'#22c55e',n:'Seguro','a':'Tarefa segura.'},{r:'1.1–2.9',c:'#ca8a04',n:'Baixo risco','a':'Monitorar.'},{r:'3–7',c:'#ea580c',n:'Moderado','a':'Investigar e modificar.'},{r:'>7',c:'#dc2626',n:'Perigoso','a':'Modificar imediatamente.'}]},
+    OWAS:{icon:'🏗️',cor:'#b45309',nome:'OWAS — Ovako Working posture Analysis System',
+      baseLegal:'NR-17 (Ergonomia) · Karhu, Kansi & Kuorinka, Applied Ergonomics 8(4):1977',
+      desc:'Classifica posturas de costas, braços, pernas e carga em categorias de 1 a 4 com base em observação sistemática de ciclos de trabalho.',
+      escalas:[{r:'Cat. 1',c:'#22c55e',n:'Normal','a':'Sem ação necessária.'},{r:'Cat. 2',c:'#ca8a04',n:'Atenção','a':'Ação corretiva no futuro próximo.'},{r:'Cat. 3',c:'#ea580c',n:'Prejudicial','a':'Ação corretiva tão logo possível.'},{r:'Cat. 4',c:'#dc2626',n:'Crítico','a':'Ação corretiva imediata.'}]},
+    NIOSH:{icon:'🏋️',cor:'#0369a1',nome:'NIOSH Lifting Equation — Índice de Levantamento',
+      baseLegal:'NR-17 (Ergonomia) · NR-36 (aplicável) · Waters et al., Ergonomics 36(7):1993 · NIOSH Technical Report 94-110',
+      desc:'Calcula o Lifting Index (LI) para tarefas de levantamento manual de cargas, comparando o peso real com o Recommended Weight Limit (RWL).',
+      escalas:[{r:'≤1.0',c:'#22c55e',n:'Aceitável','a':'Tarefa segura para a maioria.'},{r:'1.0–2.0',c:'#ca8a04',n:'Moderado','a':'Revisar e redesenhar.'},{r:'>2.0',c:'#dc2626',n:'Alto','a':'Redesenho imediato — risco de lesão.'}]},
+  };
+  /* ─── rótulos dos campos RULA ─── */
+  const RULA_CAMPOS=[
+    {k:'s_braco',  l:'Braço / Ombro',    opts:{1:'1 — ≤20° (neutro)',2:'2 — 20–45° ou extensão >20°',3:'3 — Flexão 45–90°',4:'4 — Flexão >90°'}},
+    {k:'aj_braco', l:'Ajuste braço',     opts:{0:'0 — Sem ajuste',1:'+1 — Ombro elevado ou abduzido','-1':'-1 — Braço apoiado'}},
+    {k:'s_antebraco',l:'Antebraço',      opts:{1:'1 — Flexão 60–100°',2:'2 — <60° ou >100°'}},
+    {k:'aj_antebraco',l:'Ajuste antebraço',opts:{0:'0 — Sem ajuste',1:'+1 — Cruzando linha média'}},
+    {k:'s_punho',  l:'Punho',            opts:{1:'1 — Neutro',2:'2 — Flex/Ext 0–15°',3:'3 — Flex/Ext >15°'}},
+    {k:'aj_punho', l:'Ajuste punho',     opts:{0:'0 — Sem desvio',1:'+1 — Desvio radial/ulnar'}},
+    {k:'s_torcao', l:'Torção do punho',  opts:{1:'1 — Faixa normal',2:'2 — No limite'}},
+    {k:'musculo_a',l:'Músculo Grupo A',  opts:{0:'0 — Não repetitivo',1:'1 — Repetitivo/estático'}},
+    {k:'forca_a',  l:'Carga Grupo A',    opts:{0:'0 — <2 kg',1:'1 — 2–10 kg intermitente',2:'2 — 2–10 kg estático',3:'3 — >10 kg ou choque'}},
+    {k:'s_pescoco',l:'Pescoço',          opts:{1:'1 — 0–10° flexão',2:'2 — 10–20° flexão',3:'3 — >20° flexão',4:'4 — Extensão'}},
+    {k:'aj_pescoco',l:'Ajuste pescoço',  opts:{0:'0 — Sem ajuste',1:'+1 — Rodado ou inclinado'}},
+    {k:'s_tronco', l:'Tronco',           opts:{1:'1 — Ereto',2:'2 — 0–20° flexão',3:'3 — 20–60° flexão',4:'4 — >60° ou extensão'}},
+    {k:'aj_tronco',l:'Ajuste tronco',    opts:{0:'0 — Sem ajuste',1:'+1 — Rodado ou inclinado'}},
+    {k:'s_pernas', l:'Pernas',           opts:{1:'1 — Apoiadas/equilibradas',2:'2 — Sem apoio/assimétrico'}},
+    {k:'musculo_b',l:'Músculo Grupo B',  opts:{0:'0 — Não repetitivo',1:'1 — Repetitivo/estático'}},
+    {k:'forca_b',  l:'Carga Grupo B',    opts:{0:'0 — <2 kg',1:'1 — 2–10 kg intermitente',2:'2 — 2–10 kg estático',3:'3 — >10 kg ou choque'}},
+  ];
+  /* ─── mapa de nível → classe de cor ─── */
+  const clsMap=(n)=>!n?'verde':n.toLowerCase().includes('alt')||n.toLowerCase().includes('perig')||n.toLowerCase().includes('imed')?'vermelho':n.toLowerCase().includes('médio')||n.toLowerCase().includes('elev')||n.toLowerCase().includes('moder')?'laranja':n.toLowerCase().includes('leve')||n.toLowerCase().includes('incert')||n.toLowerCase().includes('investi')?'amarelo':'verde';
+  const COR_BG={verde:'#d1fae5',amarelo:'#fef9c3',laranja:'#ffedd5',vermelho:'#fee2e2'};
+  const COR_TX={verde:'#065f46',amarelo:'#78350f',laranja:'#7c2d12',vermelho:'#991b1b'};
+  const COR_BD={verde:'#6ee7b7',amarelo:'#fde68a',laranja:'#fed7aa',vermelho:'#fca5a5'};
+
+  /* ─── SVGs de postura RULA (portado do aet.html) ─── */
+  function ptAET(cx,cy,len,deg){const r=deg*Math.PI/180;return{x:+(cx+len*Math.sin(r)).toFixed(1),y:+(cy+len*Math.cos(r)).toFixed(1)};}
+  function svgRULA(d){
+    const C4=['','#22c55e','#ca8a04','#ea580c','#dc2626'],C2=['','#22c55e','#dc2626'];
+    const sb=Math.max(1,Math.min(4,parseInt(d.s_braco)||1));
+    const sp=Math.max(1,Math.min(4,parseInt(d.s_pescoco)||1));
+    const st=Math.max(1,Math.min(4,parseInt(d.s_tronco)||1));
+    const sa=Math.max(1,Math.min(2,parseInt(d.s_antebraco)||1));
+    function box(titulo,svgStr){return`<div style="text-align:center;background:#f9fafb;border:1pt solid #e5e7eb;border-radius:5pt;padding:5pt 3pt;"><div style="font-size:6pt;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:3pt;">${titulo}</div>${svgStr}</div>`;}
+    // Braço
+    const BDEGS=[,10,32,67,100],BLABS=[,'≤20° (neutro)','20–45°','45–90°','>90°'];
+    const bCor=C4[sb],bP=ptAET(50,48,30,BDEGS[sb]);
+    const bracSvg=`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;">
+      <circle cx="50" cy="15" r="7" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+      <line x1="50" y1="22" x2="50" y2="48" stroke="#9ca3af" stroke-width="1.5"/>
+      <line x1="50" y1="48" x2="50" y2="80" stroke="#9ca3af" stroke-width="1.5"/>
+      <line x1="50" y1="48" x2="50" y2="78" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="50" y1="48" x2="${bP.x}" y2="${bP.y}" stroke="${bCor}" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="${bP.x}" cy="${bP.y}" r="3.5" fill="${bCor}"/>
+      <text x="50" y="97" text-anchor="middle" font-size="7" fill="${bCor}" font-family="Arial" font-weight="700">${BLABS[sb]}</text>
+    </svg>`;
+    // Pescoço
+    const PDEGS=[,5,15,30,-20],PLABS=[,'0–10°','10–20°','>20°','Extensão'];
+    const pCor=C4[sp],nRad=PDEGS[sp]*Math.PI/180,nLen=25;
+    const hx=+(50+nLen*Math.sin(nRad)).toFixed(1),hy=+(50-nLen*Math.cos(nRad)).toFixed(1);
+    const pescSvg=`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;">
+      <line x1="50" y1="50" x2="50" y2="82" stroke="#9ca3af" stroke-width="1.5"/>
+      <line x1="50" y1="24" x2="50" y2="50" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="50" y1="50" x2="${hx}" y2="${+(hy+7).toFixed(1)}" stroke="${pCor}" stroke-width="2"/>
+      <circle cx="${hx}" cy="${hy}" r="7" fill="none" stroke="${pCor}" stroke-width="2"/>
+      <text x="50" y="97" text-anchor="middle" font-size="7" fill="${pCor}" font-family="Arial" font-weight="700">${PLABS[sp]}</text>
+    </svg>`;
+    // Tronco
+    const TDEGS=[,2,10,40,72],TLABS=[,'Ereto','0–20°','20–60°','>60°'];
+    const tCor=C4[st],tRad=TDEGS[st]*Math.PI/180,tLen=32,tnLen=8;
+    const ttx=+(50+tLen*Math.sin(tRad)).toFixed(1),tty=+(80-tLen*Math.cos(tRad)).toFixed(1);
+    const thx=+(50+(tLen+tnLen)*Math.sin(tRad)).toFixed(1),thy=+(80-(tLen+tnLen)*Math.cos(tRad)).toFixed(1);
+    const tronSvg=`<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg" style="width:86px;height:80px;">
+      <line x1="50" y1="15" x2="50" y2="80" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,2"/>
+      <line x1="50" y1="80" x2="44" y2="96" stroke="#9ca3af" stroke-width="1.5"/>
+      <line x1="50" y1="80" x2="56" y2="96" stroke="#9ca3af" stroke-width="1.5"/>
+      <line x1="50" y1="80" x2="${ttx}" y2="${tty}" stroke="${tCor}" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="${thx}" cy="${thy}" r="7" fill="none" stroke="${tCor}" stroke-width="2"/>
+      <text x="55" y="97" text-anchor="middle" font-size="7" fill="${tCor}" font-family="Arial" font-weight="700">${TLABS[st]}</text>
+    </svg>`;
+    // Antebraço
+    const ADEGS=[,80,35],ALABS=[,'60–100° (ideal)','Fora da zona'];
+    const aCor=C2[sa],afPt=ptAET(50,58,26,ADEGS[sa]);
+    const anteSvg=`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:80px;height:80px;">
+      <circle cx="50" cy="20" r="7" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+      <line x1="50" y1="27" x2="50" y2="58" stroke="#9ca3af" stroke-width="1.5"/>
+      <circle cx="50" cy="58" r="3" fill="${aCor}"/>
+      ${sa===2?`<line x1="50" y1="58" x2="${ptAET(50,58,26,110).x}" y2="${ptAET(50,58,26,110).y}" stroke="${aCor}" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.6"/>`:''}
+      <line x1="50" y1="58" x2="${afPt.x}" y2="${afPt.y}" stroke="${aCor}" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="${afPt.x}" cy="${afPt.y}" r="3.5" fill="${aCor}"/>
+      <text x="50" y="97" text-anchor="middle" font-size="7" fill="${aCor}" font-family="Arial" font-weight="700">${ALABS[sa]}</text>
+    </svg>`;
+    return`<div style="margin:8pt 0 6pt;"><div style="font-size:7pt;font-weight:700;text-transform:uppercase;color:#0d4a3a;margin-bottom:5pt;border-bottom:1pt solid #d1fae5;padding-bottom:2pt;">Posturas avaliadas — diagrama corporal</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6pt;">
+        ${box('Braço / Ombro',bracSvg)}${box('Pescoço',pescSvg)}${box('Tronco',tronSvg)}${box('Antebraço',anteSvg)}
+      </div>
+    </div>`;
+  }
+
+  /* ─── barra de score ─── */
+  function scoreBar(score,max,cor){
+    const pct=Math.min(100,Math.round((parseFloat(score)||0)/max*100));
+    return`<div style="background:#f3f4f6;border-radius:3pt;height:8pt;margin:4pt 0 2pt;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${cor};border-radius:3pt;"></div></div>`;
+  }
+
+  /* ─── render de cada avaliação ─── */
+  const pages=[];
+  mets.forEach((m,i)=>{
     const aet=m.aet_avaliacoes||{};
     const setor=(setores||[]).find(s=>s.id===aet.setor_id);
     const funcao=(funcoes||[]).find(f=>f.id===aet.funcao_id);
     const cls=clsMap(m.nivel_risco);
+    const meta=MET_META[m.metodologia]||{icon:'⚙️',cor:'#374151',nome:m.metodologia,baseLegal:'NR-17',desc:'',escalas:[]};
     const recs=Array.isArray(m.dados_json?.recomendacoes)?m.dados_json.recomendacoes:[];
-    return`<div style="border:1pt solid #d1fae5;border-left:4pt solid #0d4a3a;border-radius:4pt;padding:8pt 10pt;margin-bottom:8pt;break-inside:avoid;">
-      <div style="display:flex;gap:10pt;align-items:flex-start;flex-wrap:wrap;">
-        <div style="display:flex;flex-direction:column;align-items:center;min-width:44pt;padding:5pt 8pt;background:${COR_NIVEL[cls]};border-radius:4pt;border:1pt solid ${COR_TEXT[cls]};">
-          <span style="font-size:18pt;line-height:1;">${MET_ICON[m.metodologia]||'⚙️'}</span>
-          <span style="font-size:14pt;font-weight:700;color:${COR_TEXT[cls]};font-family:'IBM Plex Mono',monospace;line-height:1.2;">${m.score_total??'—'}</span>
-          <span style="font-size:5pt;color:${COR_TEXT[cls]};font-weight:600;text-transform:uppercase;letter-spacing:.05em;text-align:center;">${h(m.metodologia)}</span>
+    const d=m.dados_json||{};
+    const scoreNum=parseFloat(m.score_total);
+    const maxScore={RULA:8,OCRA:22.5,JSI:56,OWAS:4,NIOSH:3}[m.metodologia]||10;
+    // Tabela de dados coletados
+    let dadosRows='';
+    if(m.metodologia==='RULA'){
+      dadosRows=RULA_CAMPOS.filter(c=>d[c.k]!==undefined&&d[c.k]!==null&&d[c.k]!=='').map(c=>{
+        const val=String(d[c.k]);
+        const label=c.opts[val]||val;
+        return`<tr><td style="padding:2.5pt 6pt;border-bottom:1pt solid #f3f4f6;color:#6b7280;font-size:7.5pt;white-space:nowrap;">${h(c.l)}</td><td style="padding:2.5pt 6pt;border-bottom:1pt solid #f3f4f6;font-size:7.5pt;font-weight:600;">${h(label)}</td></tr>`;
+      }).join('');
+    }else{
+      dadosRows=Object.entries(d).filter(([k])=>k!=='recomendacoes').map(([k,v])=>{
+        if(typeof v==='object')return'';
+        return`<tr><td style="padding:2.5pt 6pt;border-bottom:1pt solid #f3f4f6;color:#6b7280;font-size:7.5pt;">${h(k)}</td><td style="padding:2.5pt 6pt;border-bottom:1pt solid #f3f4f6;font-size:7.5pt;font-weight:600;">${h(String(v))}</td></tr>`;
+      }).filter(Boolean).join('');
+    }
+    const pg=criarPagina();
+    pg.innerHTML=`${phHeader()}
+    <!-- Cabeçalho do Anexo -->
+    <div style="border-left:4pt solid ${meta.cor};padding:6pt 10pt;background:#f8fafc;border-radius:0 4pt 4pt 0;margin-bottom:10pt;">
+      <div style="display:flex;align-items:center;gap:8pt;flex-wrap:wrap;">
+        <span style="font-size:20pt;line-height:1;">${meta.icon}</span>
+        <div style="flex:1;">
+          <div style="font-size:7pt;font-weight:700;text-transform:uppercase;color:#6b7280;letter-spacing:.07em;">ANEXO AET-${String(i+1).padStart(2,'0')}</div>
+          <div style="font-size:11pt;font-weight:700;color:${meta.cor};">${h(meta.nome)}</div>
+          <div style="font-size:7pt;color:#6b7280;margin-top:1pt;"><b>Base legal:</b> ${h(meta.baseLegal)}</div>
         </div>
-        <div style="flex:1;min-width:100pt;">
-          <div style="font-size:8pt;font-weight:700;color:#0d4a3a;margin-bottom:3pt;">ANEXO AET-${String(i+1).padStart(2,'0')} — ${h(m.metodologia)} — ${h(m.membro_avaliado||'Avaliação Ergonômica')}</div>
-          <div style="font-size:8.5pt;font-weight:600;color:${COR_TEXT[cls]};margin-bottom:4pt;">${h(m.nivel_risco||'—')}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2pt 10pt;font-size:7.5pt;color:#374151;">
-            ${setor?`<div><b>Setor:</b> ${h(setor.nome_setor)}</div>`:''}
-            ${funcao?`<div><b>Função:</b> ${h(funcao.nome_funcao)}</div>`:''}
-            ${m.tarefa?`<div style="grid-column:1/-1;"><b>Tarefa:</b> ${h(m.tarefa.slice(0,100))}${m.tarefa.length>100?'…':''}</div>`:''}
-            ${aet.responsavel_tecnico?`<div><b>Responsável:</b> ${h(aet.responsavel_tecnico)}</div>`:''}
-            ${aet.data_avaliacao?`<div><b>Data:</b> ${new Date(aet.data_avaliacao+'T00:00:00').toLocaleDateString('pt-BR')}</div>`:''}
-          </div>
-          ${aet.conclusao_tecnica?`<div style="margin-top:4pt;font-size:7.5pt;color:#1f2937;padding:4pt 6pt;background:#f0fdf4;border-radius:3pt;">${h(aet.conclusao_tecnica.slice(0,200))}${aet.conclusao_tecnica.length>200?'…':''}</div>`:''}
-          ${recs.length?`<div style="margin-top:5pt;"><div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;color:#065f46;margin-bottom:2pt;">Recomendações:</div>${recs.map(r=>`<div style="font-size:7.5pt;color:#374151;margin-bottom:1pt;">• [${h(r.prior||'—')}] ${h(r.texto||'')}${r.prazo?' · Prazo: '+h(r.prazo):''}</div>`).join('')}</div>`:''}
+        <div style="text-align:center;background:${COR_BG[cls]};border:2pt solid ${COR_BD[cls]};border-radius:6pt;padding:6pt 12pt;min-width:60pt;">
+          <div style="font-size:18pt;font-weight:800;color:${COR_TX[cls]};font-family:'IBM Plex Mono',monospace;line-height:1;">${isNaN(scoreNum)?'—':scoreNum}</div>
+          <div style="font-size:6pt;font-weight:700;text-transform:uppercase;color:${COR_TX[cls]};letter-spacing:.05em;">Escore</div>
+          <div style="font-size:7pt;font-weight:700;color:${COR_TX[cls]};margin-top:2pt;">${h(m.nivel_risco||'—')}</div>
         </div>
       </div>
-    </div>`;
-  }).join('');
-  pg.innerHTML=`
-  ${phHeader()}
-  <div class="doc-section" style="margin-top:0;border-left:4pt solid #0d4a3a;padding-left:8pt;"><span class="num-secao" style="background:#0d4a3a;">12</span>Anexos — Avaliações Ergonômicas por Metodologia</div>
-  <p class="doc-text" style="margin-bottom:10pt;">As avaliações ergonômicas a seguir foram realizadas com metodologias quantitativas reconhecidas (OCRA, RULA, JSI, OWAS, NIOSH), em conformidade com a NR-17 e normas ISO referenciadas. Os riscos identificados foram incorporados ao inventário de riscos nos GHEs correspondentes. Este documento compõe o PGR como anexo técnico.</p>
-  ${linhas}
+    </div>
+    <!-- Descrição da metodologia -->
+    <p style="font-size:8pt;color:#374151;font-style:italic;margin:0 0 8pt;line-height:1.5;">${h(meta.desc)}</p>
+    <!-- Grid: Identificação | Escala de referência -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10pt;margin-bottom:8pt;">
+      <!-- Identificação -->
+      <div>
+        <div style="font-size:7pt;font-weight:700;text-transform:uppercase;color:${meta.cor};border-bottom:1pt solid #e5e7eb;padding-bottom:2pt;margin-bottom:5pt;">Identificação</div>
+        <table style="width:100%;border-collapse:collapse;font-size:8pt;">
+          <tr><td style="color:#6b7280;padding:2pt 0;width:40%;">Empresa:</td><td style="font-weight:600;">${h(empresa?.nome_fantasia||empresa?.razao_social||'—')}</td></tr>
+          ${setor?`<tr><td style="color:#6b7280;padding:2pt 0;">Setor:</td><td style="font-weight:600;">${h(setor.nome_setor)}</td></tr>`:''}
+          ${funcao?`<tr><td style="color:#6b7280;padding:2pt 0;">Função:</td><td style="font-weight:600;">${h(funcao.nome_funcao)}</td></tr>`:''}
+          ${m.membro_avaliado?`<tr><td style="color:#6b7280;padding:2pt 0;">Membro avaliado:</td><td style="font-weight:600;">${h(m.membro_avaliado)}</td></tr>`:''}
+          ${aet.responsavel_tecnico?`<tr><td style="color:#6b7280;padding:2pt 0;">Responsável técnico:</td><td style="font-weight:600;">${h(aet.responsavel_tecnico)}</td></tr>`:''}
+          ${aet.data_avaliacao?`<tr><td style="color:#6b7280;padding:2pt 0;">Data:</td><td style="font-weight:600;">${new Date(aet.data_avaliacao+'T00:00:00').toLocaleDateString('pt-BR')}</td></tr>`:''}
+          ${aet.numero_aet?`<tr><td style="color:#6b7280;padding:2pt 0;">Nº AET:</td><td style="font-weight:600;">${h(String(aet.numero_aet))}</td></tr>`:''}
+        </table>
+        ${m.tarefa?`<div style="margin-top:5pt;font-size:7.5pt;color:#374151;background:#f9fafb;border-radius:3pt;padding:4pt 6pt;"><b>Tarefa avaliada:</b> ${h(m.tarefa)}</div>`:''}
+        <!-- Barra de score -->
+        ${!isNaN(scoreNum)?`<div style="margin-top:6pt;"><div style="font-size:7pt;color:#6b7280;font-weight:600;">Escore ${scoreNum} / ${maxScore}</div>${scoreBar(scoreNum,maxScore,COR_TX[cls])}</div>`:''}
+      </div>
+      <!-- Escala de referência -->
+      <div>
+        <div style="font-size:7pt;font-weight:700;text-transform:uppercase;color:${meta.cor};border-bottom:1pt solid #e5e7eb;padding-bottom:2pt;margin-bottom:5pt;">Escala de referência</div>
+        <table style="width:100%;border-collapse:collapse;font-size:7.5pt;">
+          ${meta.escalas.map(e=>`<tr><td style="padding:3pt 5pt;border-bottom:1pt solid #f3f4f6;font-weight:700;color:${e.c};white-space:nowrap;width:28%;">${e.r}</td><td style="padding:3pt 5pt;border-bottom:1pt solid #f3f4f6;font-weight:600;color:${e.c};width:36%;">${h(e.n)}</td><td style="padding:3pt 5pt;border-bottom:1pt solid #f3f4f6;color:#374151;">${h(e.a)}</td></tr>`).join('')}
+        </table>
+      </div>
+    </div>
+    <!-- Posturas RULA -->
+    ${m.metodologia==='RULA'?svgRULA(d):''}
+    <!-- Dados avaliados -->
+    ${dadosRows?`<div style="margin:8pt 0 6pt;">
+      <div style="font-size:7pt;font-weight:700;text-transform:uppercase;color:${meta.cor};border-bottom:1pt solid #e5e7eb;padding-bottom:2pt;margin-bottom:5pt;">Dados avaliados</div>
+      <table style="width:100%;border-collapse:collapse;"><tbody>${dadosRows}</tbody></table>
+    </div>`:''}
+    <!-- Conclusão técnica -->
+    ${aet.conclusao_tecnica?`<div style="margin:8pt 0 6pt;">
+      <div style="font-size:7pt;font-weight:700;text-transform:uppercase;color:${meta.cor};border-bottom:1pt solid #e5e7eb;padding-bottom:2pt;margin-bottom:5pt;">Conclusão técnica</div>
+      <div style="font-size:8pt;color:#1f2937;background:${COR_BG[cls]};border:1pt solid ${COR_BD[cls]};border-radius:4pt;padding:6pt 8pt;line-height:1.55;">${h(aet.conclusao_tecnica)}</div>
+    </div>`:''}
+    <!-- Recomendações -->
+    ${recs.length?`<div style="margin:8pt 0;">
+      <div style="font-size:7pt;font-weight:700;text-transform:uppercase;color:${meta.cor};border-bottom:1pt solid #e5e7eb;padding-bottom:2pt;margin-bottom:5pt;">Medidas recomendadas</div>
+      <table style="width:100%;border-collapse:collapse;font-size:8pt;">
+        <thead><tr>
+          <th style="background:${meta.cor};color:#fff;padding:4pt 6pt;text-align:left;border-radius:3pt 0 0 0;">Medida</th>
+          <th style="background:${meta.cor};color:#fff;padding:4pt 6pt;width:55pt;text-align:center;">Prioridade</th>
+          <th style="background:${meta.cor};color:#fff;padding:4pt 6pt;width:55pt;text-align:center;border-radius:0 3pt 0 0;">Prazo</th>
+        </tr></thead>
+        <tbody>${recs.map((r,ri)=>`<tr style="${ri%2?'background:#f9fafb':''}">
+          <td style="padding:4pt 6pt;border-bottom:1pt solid #f3f4f6;">${h(r.texto||'')}</td>
+          <td style="padding:4pt 6pt;border-bottom:1pt solid #f3f4f6;text-align:center;font-weight:700;color:${r.prior==='Alta'?'#dc2626':r.prior==='Média'?'#ca8a04':'#16a34a'};">${h(r.prior||'—')}</td>
+          <td style="padding:4pt 6pt;border-bottom:1pt solid #f3f4f6;text-align:center;">${h(r.prazo||'—')}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`:''}
+    ${pfFooter()}`;
+    pages.push(pg);
+  });
+
+  // Página de índice das AETs (capa da seção)
+  const pgCapa=criarPagina();
+  pgCapa.innerHTML=`${phHeader()}
+  <div class="doc-section" style="margin-top:0;border-left:4pt solid #0d4a3a;padding-left:8pt;"><span class="num-secao" style="background:#0d4a3a;">12</span>Anexos — Avaliações Ergonômicas por Metodologia (AET)</div>
+  <p class="doc-text">As avaliações a seguir foram realizadas com metodologias quantitativas validadas (RULA, OCRA, JSI, OWAS, NIOSH), em conformidade com a <strong>NR-17 (Ergonomia)</strong>, <strong>NR-01 Anexo I</strong> e normas técnicas internacionais referenciadas em cada anexo. Os riscos ergonômicos identificados foram incorporados ao inventário de riscos nos GHEs correspondentes, conforme §1.5.1 da NR-01.</p>
+  <table style="width:100%;border-collapse:collapse;font-size:9pt;margin-top:12pt;">
+    <thead><tr>
+      <th style="background:#0d4a3a;color:#fff;padding:6pt 8pt;text-align:center;width:40pt;">Anexo</th>
+      <th style="background:#0d4a3a;color:#fff;padding:6pt 8pt;text-align:left;">Metodologia / Membro avaliado</th>
+      <th style="background:#0d4a3a;color:#fff;padding:6pt 8pt;text-align:left;">Setor / Função</th>
+      <th style="background:#0d4a3a;color:#fff;padding:6pt 8pt;text-align:center;width:50pt;">Escore</th>
+      <th style="background:#0d4a3a;color:#fff;padding:6pt 8pt;text-align:center;width:80pt;">Nível de risco</th>
+    </tr></thead>
+    <tbody>${mets.map((m,i)=>{
+      const aet=m.aet_avaliacoes||{};
+      const setor=(setores||[]).find(s=>s.id===aet.setor_id);
+      const funcao=(funcoes||[]).find(f=>f.id===aet.funcao_id);
+      const cls=clsMap(m.nivel_risco);
+      return`<tr style="${i%2?'background:#f9fafb':''}">
+        <td style="padding:5pt 8pt;border-bottom:1pt solid #e5e7eb;text-align:center;font-weight:700;">AET-${String(i+1).padStart(2,'0')}</td>
+        <td style="padding:5pt 8pt;border-bottom:1pt solid #e5e7eb;"><b>${h(m.metodologia)}</b>${m.membro_avaliado?' — '+h(m.membro_avaliado):''}</td>
+        <td style="padding:5pt 8pt;border-bottom:1pt solid #e5e7eb;">${setor?h(setor.nome_setor):'—'}${funcao?' / '+h(funcao.nome_funcao):''}</td>
+        <td style="padding:5pt 8pt;border-bottom:1pt solid #e5e7eb;text-align:center;font-weight:700;font-family:'IBM Plex Mono',monospace;">${m.score_total??'—'}</td>
+        <td style="padding:5pt 8pt;border-bottom:1pt solid #e5e7eb;text-align:center;"><span style="background:${COR_BG[cls]};color:${COR_TX[cls]};border-radius:3pt;padding:2pt 5pt;font-size:8pt;font-weight:700;">${h(m.nivel_risco||'—')}</span></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>
   ${pfFooter()}`;
-  return pg;
+
+  return [pgCapa,...pages];
 }
 
 function pfFooter(){return`<div class="page-footer"><span class="pf-label">Programa de Gerenciamento de Riscos — ${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="pf-page"></span></div>`;}
