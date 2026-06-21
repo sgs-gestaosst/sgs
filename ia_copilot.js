@@ -69,16 +69,24 @@ Critérios para true: fisico=ruído/vibração/calor/frio/radiação; quimico=po
 }
 
 async function ia_sugerirFuncao(nomeFuncao){
-  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil, com experiência em elaboração de PGR, LTCAT e PCMSO.
 Analise a função "${nomeFuncao}" e responda SOMENTE com JSON válido, sem markdown:
 {
-  "descricao": "descrição das atividades principais da função em 2-3 frases objetivas",
+  "descricao": "...",
   "trabalho_altura": false,
   "trabalho_confinado": false,
   "trabalho_eletrico": false,
   "insalubre": false,
   "periculoso": false
 }
+
+Para o campo "descricao", escreva 3 a 4 frases técnicas incluindo obrigatoriamente:
+1. Atividades e tarefas principais executadas no dia a dia
+2. Ferramentas, equipamentos ou materiais utilizados habitualmente
+3. Postura predominante (em pé, sentado, agachado, etc.) e nível de esforço físico envolvido
+4. Ambiente de trabalho (interno/externo, local fechado/aberto, condições relevantes)
+Use linguagem técnica compatível com laudos e documentos SST (PGR, LTCAT, PCMSO). Seja específico para a função — evite descrições genéricas.
+
 Critérios para true: altura=trabalho habitual acima de 2m/NR-35; confinado=espaços confinados/NR-33; eletrico=instalações elétricas energizadas/NR-10; insalubre=exposição a agentes físicos/químicos/biológicos acima dos limites/NR-15; periculoso=inflamáveis/explosivos/alta tensão/radiações ionizantes/NR-16.`;
   const text=await _chamarGemini(prompt);
   try{

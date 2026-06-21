@@ -373,11 +373,28 @@
 const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
 const CBO_API='https://servicodados.ibge.gov.br/api/v2/cbo';
-const token=localStorage.getItem('sgs_token');
+let token=localStorage.getItem('sgs_token');
 if(!token)window.location.href='login.html';
 const params=new URLSearchParams(window.location.search);
 const empresaId=params.get('id');
 if(!empresaId)window.location.href='empresas.html';
+
+async function ensureToken(){
+  const t=localStorage.getItem('sgs_token')||token;
+  try{const p=JSON.parse(atob(t.split('.')[1]));if(Date.now()<p.exp*1000-30*1000){token=t;return token;}}catch(e){}
+  const rt=localStorage.getItem('sgs_refresh_token');
+  if(!rt){window.location.href='login.html';return null;}
+  try{
+    const res=await fetch(`${SUPA_URL}/auth/v1/token?grant_type=refresh_token`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY},body:JSON.stringify({refresh_token:rt})});
+    if(!res.ok){window.location.href='login.html';return null;}
+    const data=await res.json();
+    token=data.access_token;
+    localStorage.setItem('sgs_token',token);
+    if(data.refresh_token)localStorage.setItem('sgs_refresh_token',data.refresh_token);
+    return token;
+  }catch(e){return token;}
+}
+setInterval(ensureToken,4*60*1000);
 
 let empresa=null,cnaes=[],setores=[],funcoes=[],modoEdicao=false;
 let setorEditandoId=null,funcaoEditandoId=null;
@@ -884,7 +901,7 @@ document.addEventListener('click',e=>{
 });
 ['modal-setor','modal-funcao'].forEach(id=>{document.getElementById(id).addEventListener('click',function(e){if(e.target===this){if(id==='modal-setor')fecharModalSetor();else fecharModalFuncao();}});});
 
-carregarEmpresa();
+ensureToken().then(()=>carregarEmpresa());
 
 // ── DASHBOARD VENCIMENTOS DE ASO ──────────────────────────────
 async function carregarDashboardASOs(){
