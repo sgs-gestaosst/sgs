@@ -454,9 +454,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <div class="res-big-ref" id="res-ref">—</div>
       </div>
 
-      <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;">Recomendações</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 8px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">Recomendações</div>
+        <button class="btn-ia" style="font-size:11px;padding:4px 10px;" onclick="ia_aet_sugerirRecomendacoes()" id="btn-ia-recs">✨ Sugerir com IA</button>
+      </div>
       <div id="rec-lista" style="margin-bottom:8px;"></div>
-      <button class="btn btn-edit btn-sm" onclick="addRec()" style="margin-bottom:14px;">+ Adicionar recomendação</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <button class="btn btn-edit btn-sm" onclick="addRec()">+ Adicionar recomendação</button>
+        <div class="ia-status" id="ia-status-recs" style="margin:0;"></div>
+      </div>
 
       <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Exposição ao risco</div>
       <div class="f-row">
@@ -1105,58 +1111,215 @@ async function salvarMetodologia(){
   finally{btn.disabled=false;document.getElementById('spinner-met').className='spinner';}
 }
 
+// ── SVGs de postura para relatório ─────────────────────────
+function gerarSVGsPostura(met,d){
+  if(met==='RULA')return gerarSVGsRULA(d);
+  return '';
+}
+function gerarSVGsRULA(d){
+  const COR=['','#22c55e','#ca8a04','#ea580c','#dc2626'];
+  const COR2=['','#22c55e','#dc2626'];
+  const sb=Math.max(1,Math.min(4,parseInt(d.s_braco)||1));
+  const sp=Math.max(1,Math.min(4,parseInt(d.s_pescoco)||1));
+  const st=Math.max(1,Math.min(4,parseInt(d.s_tronco)||1));
+  const sa=Math.max(1,Math.min(2,parseInt(d.s_antebraco)||1));
+  function box(titulo,svgStr){
+    return`<div style="text-align:center;background:#f9fafb;border:1pt solid #e5e7eb;border-radius:5pt;padding:5pt 3pt;page-break-inside:avoid;"><div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:3pt;">${titulo}</div>${svgStr}</div>`;
+  }
+  function pt(cx,cy,len,deg){const r=deg*Math.PI/180;return{x:+(cx+len*Math.sin(r)).toFixed(1),y:+(cy+len*Math.cos(r)).toFixed(1)};}
+  // ── BRAÇO ──
+  const BDEGS=[,10,32,67,100],BLABS=[,'Neutro ≤20°','20–45° flex','45–90° flex','>90° flex'];
+  const bCor=COR[sb],bP=pt(50,48,30,BDEGS[sb]);
+  const bracSvg=`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:88px;height:88px;">
+    <circle cx="50" cy="15" r="7" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+    <line x1="50" y1="22" x2="50" y2="48" stroke="#9ca3af" stroke-width="1.5"/>
+    <line x1="50" y1="48" x2="50" y2="80" stroke="#9ca3af" stroke-width="1.5"/>
+    <line x1="50" y1="48" x2="50" y2="78" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,2"/>
+    ${sb===2?`<line x1="50" y1="48" x2="${pt(50,48,30,-25).x}" y2="${pt(50,48,30,-25).y}" stroke="${bCor}" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.5"/>`:''}
+    <line x1="50" y1="48" x2="${bP.x}" y2="${bP.y}" stroke="${bCor}" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${bP.x}" cy="${bP.y}" r="3.5" fill="${bCor}"/>
+    <text x="50" y="97" text-anchor="middle" font-size="7.5" fill="${bCor}" font-family="Arial" font-weight="700">${BLABS[sb]}</text>
+  </svg>`;
+  // ── PESCOÇO ──
+  const PDEGS=[,5,15,30,-20],PLABS=[,'0–10° flex','10–20° flex','>20° flex','Extensão'];
+  const pCor=COR[sp],neck=pt(50,50,-25,PDEGS[sp]); // going UP = negative cos direction
+  // neck going upward: x=50+nl*sin(deg), y=50-nl*cos(deg)
+  const neckDeg=PDEGS[sp],nRad=neckDeg*Math.PI/180,nLen=25;
+  const hx=+(50+nLen*Math.sin(nRad)).toFixed(1),hy=+(50-nLen*Math.cos(nRad)).toFixed(1);
+  const pescSvg=`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:88px;height:88px;">
+    <line x1="50" y1="50" x2="50" y2="82" stroke="#9ca3af" stroke-width="1.5"/>
+    <line x1="50" y1="24" x2="50" y2="50" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="50" y1="50" x2="${hx}" y2="${+(hy+7).toFixed(1)}" stroke="${pCor}" stroke-width="2"/>
+    <circle cx="${hx}" cy="${hy}" r="7" fill="none" stroke="${pCor}" stroke-width="2"/>
+    <text x="50" y="97" text-anchor="middle" font-size="7.5" fill="${pCor}" font-family="Arial" font-weight="700">${PLABS[sp]}</text>
+  </svg>`;
+  // ── TRONCO ──
+  const TDEGS=[,2,10,40,72],TLABS=[,'Ereto','0–20° flex','20–60° flex','>60° flex'];
+  const tCor=COR[st],tDeg=TDEGS[st],tRad=tDeg*Math.PI/180,tLen=32,tnLen=8;
+  const ttx=+(50+tLen*Math.sin(tRad)).toFixed(1),tty=+(80-tLen*Math.cos(tRad)).toFixed(1);
+  const thx=+(50+(tLen+tnLen)*Math.sin(tRad)).toFixed(1),thy=+(80-(tLen+tnLen)*Math.cos(tRad)).toFixed(1);
+  const tronSvg=`<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg" style="width:96px;height:88px;">
+    <line x1="50" y1="15" x2="50" y2="80" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3,2"/>
+    <line x1="50" y1="80" x2="44" y2="96" stroke="#9ca3af" stroke-width="1.5"/>
+    <line x1="50" y1="80" x2="56" y2="96" stroke="#9ca3af" stroke-width="1.5"/>
+    <line x1="50" y1="80" x2="${ttx}" y2="${tty}" stroke="${tCor}" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${thx}" cy="${thy}" r="7" fill="none" stroke="${tCor}" stroke-width="2"/>
+    <text x="55" y="97" text-anchor="middle" font-size="7.5" fill="${tCor}" font-family="Arial" font-weight="700">${TLABS[st]}</text>
+  </svg>`;
+  // ── ANTEBRAÇO ──
+  const ADEGS=[,80,35],ALABS=[,'60–100° (ideal)','Fora da zona'];
+  const aCor=COR2[sa],aDeg=ADEGS[sa],aRad=aDeg*Math.PI/180,aLen=26;
+  const afPt=pt(50,58,aLen,aDeg);
+  const anteSvg=`<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:88px;height:88px;">
+    <circle cx="50" cy="20" r="7" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+    <line x1="50" y1="27" x2="50" y2="58" stroke="#9ca3af" stroke-width="1.5"/>
+    <circle cx="50" cy="58" r="3" fill="${aCor}"/>
+    ${sa===2?`<line x1="50" y1="58" x2="${pt(50,58,aLen,110).x}" y2="${pt(50,58,aLen,110).y}" stroke="${aCor}" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.6"/>`:''}
+    <line x1="50" y1="58" x2="${afPt.x}" y2="${afPt.y}" stroke="${aCor}" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${afPt.x}" cy="${afPt.y}" r="3.5" fill="${aCor}"/>
+    <text x="50" y="97" text-anchor="middle" font-size="7.5" fill="${aCor}" font-family="Arial" font-weight="700">${ALABS[sa]}</text>
+  </svg>`;
+  return`<div class="sec">3. Posturas avaliadas — RULA</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8pt;margin-bottom:10pt;">
+    ${box('Braço / Ombro',bracSvg)}${box('Pescoço',pescSvg)}${box('Tronco',tronSvg)}${box('Antebraço / Cotovelo',anteSvg)}
+  </div>`;
+}
+
+// ── Relatório de Metodologia ────────────────────────────────
 function imprimirRelMet(){
   const cfg=MET_CONFIG[wizardMet];
   if(!cfg||!wizardResult)return;
   const setor=setores.find(s=>s.id===parseInt(document.getElementById('met-setor').value));
   const func=funcoes.find(f=>f.id===parseInt(document.getElementById('met-funcao').value));
   const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
-  const resp=document.getElementById('met-responsavel').value.trim();
+  const resp=document.getElementById('met-responsavel').value.trim()||'—';
   const data=document.getElementById('met-data').value||hoje();
   const membro=document.getElementById('met-membro').value.trim()||cfg.membro;
   const tarefa=document.getElementById('met-tarefa').value.trim();
+  const numTrab=document.getElementById('met-num-trab')?.value||'1';
+  const jornada=document.getElementById('met-jornada')?.value.trim()||'—';
+  const conclusao=document.getElementById('met-conclusao')?.value.trim()||'';
   const CLS_BG={verde:'#d1fae5',amarelo:'#fef9c3',laranja:'#ffedd5',vermelho:'#fee2e2'};
-  const CLS_COR={verde:'#065f46',amarelo:'#78350f',laranja:'#7c2d12',vermelho:'#991b1b'};
-  const recHtml=wizardRecs.length?`<table style="width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:10pt;"><thead><tr><th style="background:#0d4a3a;color:#fff;padding:5pt 6pt;text-align:left;">Medida recomendada</th><th style="background:#0d4a3a;color:#fff;padding:5pt 6pt;width:80pt;">Prioridade</th><th style="background:#0d4a3a;color:#fff;padding:5pt 6pt;width:70pt;">Prazo</th></tr></thead><tbody>${wizardRecs.map((r,i)=>`<tr style="${i%2?'background:#f0fdf4':''};"><td style="padding:5pt 6pt;border-bottom:1pt solid #e5e7eb;">${escHtml(r.texto)}</td><td style="padding:5pt 6pt;border-bottom:1pt solid #e5e7eb;">${escHtml(r.prior)}</td><td style="padding:5pt 6pt;border-bottom:1pt solid #e5e7eb;">${escHtml(r.prazo||'—')}</td></tr>`).join('')}</tbody></table>`:'<p style="color:#6b7280;font-size:9pt;">Nenhuma recomendação registrada.</p>';
-  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>AET — ${cfg.nome} — ${nome}</title>
-  <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;font-size:10pt;color:#1a1a2e;}
-  .page{width:210mm;min-height:297mm;padding:15mm 15mm 15mm 20mm;border-left:8mm solid #0d4a3a;position:relative;}
-  .topo{border-bottom:2pt solid #1a7a5e;padding-bottom:8pt;margin-bottom:14pt;display:flex;justify-content:space-between;}
-  .topo-t{font-size:13pt;font-weight:700;color:#0d4a3a;}.topo-s{font-size:9pt;color:#6b7280;margin-top:2pt;}
-  .sec{font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#0d4a3a;border-bottom:1pt solid #a7f3d0;padding-bottom:3pt;margin:12pt 0 7pt;}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;border:1pt solid #d1fae5;border-radius:3pt;overflow:hidden;margin-bottom:10pt;}
-  .campo{padding:5pt 7pt;border-right:1pt solid #d1fae5;border-bottom:1pt solid #d1fae5;}
-  .campo:nth-child(2n){border-right:none;}.campo-full{grid-column:1/-1;border-right:none!important;}
-  .cl{font-size:7pt;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:2pt;}.cv{font-size:9.5pt;}
-  .res-box{background:${CLS_BG[wizardResult.cls]||'#f3f4f6'};border:1pt solid ${CLS_COR[wizardResult.cls]||'#ccc'};border-radius:6pt;padding:14pt;text-align:center;margin:12pt 0;}
-  .res-score{font-size:36pt;font-weight:700;color:${CLS_COR[wizardResult.cls]||'#333'};}
-  .res-nivel{font-size:13pt;font-weight:600;color:${CLS_COR[wizardResult.cls]||'#333'};margin-top:4pt;}
-  .res-ref{font-size:9pt;color:#374151;margin-top:3pt;}
-  .footer{position:absolute;bottom:12mm;left:28mm;right:15mm;display:flex;justify-content:space-between;border-top:1pt solid #a7f3d0;padding-top:5pt;font-size:7.5pt;color:#6b7280;}
-  @media print{@page{size:A4;margin:0;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}}
+  const CLS_COR={verde:'#065f46',amarelo:'#92400e',laranja:'#7c2d12',vermelho:'#991b1b'};
+  const CLS_BD={verde:'#6ee7b7',amarelo:'#fde68a',laranja:'#fed7aa',vermelho:'#fca5a5'};
+  const cor=CLS_COR[wizardResult.cls]||'#374151';
+  const bg=CLS_BG[wizardResult.cls]||'#f3f4f6';
+  const bd=CLS_BD[wizardResult.cls]||'#d1d5db';
+  // Escala de referência por metodologia
+  const ESCALAS={
+    RULA:[{r:'1–2',c:'#22c55e',n:'Nível 1 — Aceitável',a:'Postura aceitável; sem ação necessária neste momento.'},{r:'3–4',c:'#ca8a04',n:'Nível 2 — Investigar',a:'Mudanças podem ser necessárias; investigar e monitorar.'},{r:'5–6',c:'#ea580c',n:'Nível 3 — Mudança necessária',a:'Implementar mudanças ergonômicas em curto prazo.'},{r:'≥7',c:'#dc2626',n:'Nível 4 — Urgente',a:'Investigar e implementar mudanças imediatamente.'}],
+    OCRA:[{r:'≤7.5',c:'#22c55e',n:'Verde — Aceitável',a:'Sem risco significativo.'},{r:'7.6–11',c:'#ca8a04',n:'Amarelo — Leve',a:'Melhorias recomendadas.'},{r:'11.1–14',c:'#ea580c',n:'Laranja — Médio',a:'Redesenhar a tarefa.'},{r:'>14',c:'#dc2626',n:'Vermelho — Alto',a:'Redesenho imediato obrigatório.'}],
+    JSI:[{r:'≤1.0',c:'#22c55e',n:'Seguro',a:'Sem risco significativo.'},{r:'1.1–2.9',c:'#ca8a04',n:'Leve',a:'Monitorar condições.'},{r:'3.0–7.0',c:'#ea580c',n:'Moderado',a:'Investigar e modificar.'},{r:'>7.0',c:'#dc2626',n:'Perigoso',a:'Modificar imediatamente.'}],
+    OWAS:[{r:'Cat 1',c:'#22c55e',n:'Normal',a:'Sem ação necessária.'},{r:'Cat 2',c:'#ca8a04',n:'Atenção',a:'Ação corretiva em futuro próximo.'},{r:'Cat 3',c:'#ea580c',n:'Prejudicial',a:'Ação corretiva assim que possível.'},{r:'Cat 4',c:'#dc2626',n:'Crítico',a:'Ação corretiva imediata.'}],
+    NIOSH:[{r:'≤1.0',c:'#22c55e',n:'Aceitável',a:'Tarefa segura para a maioria dos trabalhadores.'},{r:'1.0–2.0',c:'#ca8a04',n:'Moderado',a:'Revisar e redesenhar a tarefa.'},{r:'>2.0',c:'#dc2626',n:'Alto',a:'Redesenho imediato — risco de lesão.'}],
+  };
+  const escalaHtml=(ESCALAS[wizardMet]||[]).map(e=>`<tr><td style="padding:4pt 6pt;border-bottom:1pt solid #e5e7eb;font-weight:700;color:${e.c};white-space:nowrap;">${e.r}</td><td style="padding:4pt 6pt;border-bottom:1pt solid #e5e7eb;font-weight:600;color:${e.c};">${e.n}</td><td style="padding:4pt 6pt;border-bottom:1pt solid #e5e7eb;color:#374151;">${e.a}</td></tr>`).join('');
+  // Dados da avaliação (campos preenchidos)
+  const dadosHtml=cfg.form.filter(f=>f.type==='select').map(f=>{
+    const v=wizardDados[f.id]||'';
+    const opt=f.opts.find(o=>o.v===v);
+    if(!opt)return'';
+    return`<tr><td style="padding:3pt 6pt;border-bottom:1pt solid #f3f4f6;color:#6b7280;font-size:8.5pt;">${escHtml(f.label)}</td><td style="padding:3pt 6pt;border-bottom:1pt solid #f3f4f6;font-weight:600;font-size:8.5pt;">${escHtml(opt.l)}</td></tr>`;
+  }).filter(Boolean).join('');
+  // Recomendações
+  const recHtml=wizardRecs.length
+    ?`<table style="width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:10pt;">
+      <thead><tr><th style="background:#0d4a3a;color:#fff;padding:5pt 7pt;text-align:left;">Medida recomendada</th><th style="background:#0d4a3a;color:#fff;padding:5pt 7pt;width:75pt;text-align:center;">Prioridade</th><th style="background:#0d4a3a;color:#fff;padding:5pt 7pt;width:65pt;text-align:center;">Prazo</th></tr></thead>
+      <tbody>${wizardRecs.map((r,i)=>`<tr style="${i%2?'background:#f0fdf4':''}"><td style="padding:5pt 7pt;border-bottom:1pt solid #d1fae5;">${escHtml(r.texto)}</td><td style="padding:5pt 7pt;border-bottom:1pt solid #d1fae5;text-align:center;font-weight:600;color:${r.prior==='Alta'?'#dc2626':r.prior==='Média'?'#ca8a04':'#22c55e'};">${escHtml(r.prior)}</td><td style="padding:5pt 7pt;border-bottom:1pt solid #d1fae5;text-align:center;">${escHtml(r.prazo||'—')}</td></tr>`).join('')}</tbody>
+      </table>`
+    :'<p style="color:#6b7280;font-size:9pt;font-style:italic;">Nenhuma recomendação registrada.</p>';
+  // SVGs de postura
+  const posturasSvg=gerarSVGsPostura(wizardMet,wizardDados);
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>AET — ${cfg.nome} — ${escHtml(nome)}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Arial,sans-serif;font-size:10pt;color:#111827;background:#fff;}
+    .page{width:210mm;min-height:297mm;padding:14mm 14mm 20mm 20mm;border-left:8mm solid #0d4a3a;position:relative;}
+    .topo{border-bottom:2pt solid #1a7a5e;padding-bottom:8pt;margin-bottom:12pt;display:flex;justify-content:space-between;align-items:flex-start;}
+    .topo-logo{width:28pt;height:28pt;background:#0d4a3a;border-radius:4pt;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14pt;flex-shrink:0;margin-right:8pt;}
+    .topo-t{font-size:12pt;font-weight:700;color:#0d4a3a;}
+    .topo-s{font-size:8.5pt;color:#6b7280;margin-top:2pt;}
+    .topo-r{text-align:right;font-size:8.5pt;color:#6b7280;}
+    .sec{font-size:8.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#0d4a3a;border-bottom:1.5pt solid #a7f3d0;padding-bottom:3pt;margin:12pt 0 7pt;}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;border:1pt solid #d1fae5;border-radius:4pt;overflow:hidden;margin-bottom:10pt;}
+    .campo{padding:5pt 8pt;border-right:1pt solid #d1fae5;border-bottom:1pt solid #d1fae5;}
+    .campo:nth-child(2n){border-right:none;}.campo-full{grid-column:1/-1;border-right:none!important;}
+    .cl{font-size:6.5pt;font-weight:700;text-transform:uppercase;color:#9ca3af;margin-bottom:2pt;letter-spacing:.04em;}
+    .cv{font-size:9.5pt;color:#111827;}
+    .res-box{background:${bg};border:1.5pt solid ${bd};border-radius:6pt;padding:12pt;text-align:center;margin:10pt 0;}
+    .res-score{font-size:42pt;font-weight:700;color:${cor};line-height:1;}
+    .res-nivel{font-size:13pt;font-weight:700;color:${cor};margin-top:5pt;}
+    .res-ref{font-size:8.5pt;color:#374151;margin-top:4pt;}
+    .res-acao{font-size:9pt;color:${cor};margin-top:6pt;font-style:italic;}
+    .conclusao-box{background:#f0fdf4;border:1pt solid #bbf7d0;border-radius:4pt;padding:8pt 10pt;font-size:9pt;color:#14532d;margin-bottom:10pt;line-height:1.5;}
+    .footer{position:absolute;bottom:10mm;left:28mm;right:14mm;display:flex;justify-content:space-between;border-top:1pt solid #a7f3d0;padding-top:4pt;font-size:7pt;color:#9ca3af;}
+    @media print{@page{size:A4;margin:0;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}}
   </style></head><body><div class="page">
-  <div class="topo"><div><div class="topo-t">AVALIAÇÃO ERGONÔMICA DO TRABALHO — ${cfg.nome}</div><div class="topo-s">NR-17 · ${cfg.refText} · ${escHtml(nome)}</div></div><div style="text-align:right;font-size:9pt;color:#6b7280;"><div>Data: ${fmtData(data)}</div><div>Resp: ${escHtml(resp)}</div></div></div>
+
+  <div class="topo">
+    <div style="display:flex;align-items:flex-start;">
+      <div class="topo-logo">🧍</div>
+      <div>
+        <div class="topo-t">AVALIAÇÃO ERGONÔMICA DO TRABALHO — ${escHtml(cfg.nome)}</div>
+        <div class="topo-s">NR-17 · ${escHtml(cfg.refText)} · ${escHtml(nome)}</div>
+        <div class="topo-s" style="margin-top:1pt;">Segmento avaliado: ${escHtml(membro)}</div>
+      </div>
+    </div>
+    <div class="topo-r"><div><strong>Data:</strong> ${fmtData(data)}</div><div style="margin-top:2pt;"><strong>Resp.:</strong> ${escHtml(resp)}</div><div style="margin-top:2pt;"><strong>Trabalhadores:</strong> ${numTrab}</div></div>
+  </div>
+
   <div class="sec">1. Identificação</div>
-  <div class="grid2"><div class="campo campo-full"><div class="cl">Empresa</div><div class="cv" style="font-weight:700;">${escHtml(nome)}</div></div>
-  <div class="campo"><div class="cl">Setor</div><div class="cv">${escHtml(setor?.nome_setor||'—')}</div></div>
-  <div class="campo"><div class="cl">Função avaliada</div><div class="cv">${escHtml(func?.nome_funcao||'—')}</div></div>
-  <div class="campo"><div class="cl">Membro / Segmento</div><div class="cv">${escHtml(membro)}</div></div>
-  <div class="campo"><div class="cl">Metodologia</div><div class="cv">${cfg.nome}</div></div>
-  ${tarefa?`<div class="campo campo-full"><div class="cl">Tarefa avaliada</div><div class="cv">${escHtml(tarefa)}</div></div>`:''}
+  <div class="grid2">
+    <div class="campo campo-full"><div class="cl">Empresa</div><div class="cv" style="font-weight:700;">${escHtml(nome)}</div></div>
+    <div class="campo"><div class="cl">Setor</div><div class="cv">${escHtml(setor?.nome_setor||'—')}</div></div>
+    <div class="campo"><div class="cl">Função avaliada</div><div class="cv">${escHtml(func?.nome_funcao||'—')}</div></div>
+    <div class="campo"><div class="cl">Jornada</div><div class="cv">${escHtml(jornada)}</div></div>
+    <div class="campo"><div class="cl">Metodologia</div><div class="cv" style="font-weight:600;">${escHtml(cfg.nome)} — ${escHtml(cfg.desc||'')}</div></div>
+    ${tarefa?`<div class="campo campo-full"><div class="cl">Tarefa / ciclo avaliado</div><div class="cv">${escHtml(tarefa)}</div></div>`:''}
   </div>
-  <div class="sec">2. Resultado</div>
-  <div class="res-box"><div class="res-score">${wizardScore}</div><div class="res-nivel">${wizardResult.nivel}</div><div class="res-ref">${cfg.scoreLabel}: ${wizardScore} · ${wizardResult.ref}</div></div>
-  <div class="sec">3. Recomendações</div>
+
+  <div class="sec">2. Metodologia e escala de referência</div>
+  <div style="font-size:8.5pt;color:#374151;margin-bottom:6pt;line-height:1.5;">
+    <strong>${escHtml(cfg.nome)}</strong> — ${escHtml(cfg.refText)}. ${escHtml(cfg.desc||'')}
+    O escore calculado determina o nível de ação conforme a escala abaixo:
+  </div>
+  <table style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:10pt;">
+    <thead><tr><th style="background:#0d4a3a;color:#fff;padding:4pt 7pt;text-align:left;width:80pt;">Escore</th><th style="background:#0d4a3a;color:#fff;padding:4pt 7pt;text-align:left;width:130pt;">Nível de risco</th><th style="background:#0d4a3a;color:#fff;padding:4pt 7pt;text-align:left;">Ação recomendada</th></tr></thead>
+    <tbody>${escalaHtml}</tbody>
+  </table>
+
+  <div class="sec">3. Dados da avaliação</div>
+  <table style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:10pt;">
+    <thead><tr><th style="background:#f3f4f6;color:#374151;padding:4pt 7pt;text-align:left;width:160pt;">Parâmetro avaliado</th><th style="background:#f3f4f6;color:#374151;padding:4pt 7pt;text-align:left;">Condição observada</th></tr></thead>
+    <tbody>${dadosHtml||'<tr><td colspan="2" style="padding:5pt 7pt;color:#9ca3af;">Dados não disponíveis.</td></tr>'}</tbody>
+  </table>
+
+  ${posturasSvg}
+
+  <div class="sec">${posturasSvg?'4':'3'}. Resultado</div>
+  <div class="res-box">
+    <div class="res-score">${wizardScore}</div>
+    <div class="res-nivel">${wizardResult.nivel}</div>
+    <div class="res-ref">${escHtml(cfg.scoreLabel)}: <strong>${wizardScore}</strong> · ${escHtml(wizardResult.ref||'')} · ${escHtml(cfg.refText)}</div>
+    <div class="res-acao">${(ESCALAS[wizardMet]||[]).find(e=>e.n===wizardResult.nivel||wizardResult.nivel?.includes(e.n.split('—')[1]?.trim()))?.a||''}</div>
+  </div>
+
+  <div class="sec">${posturasSvg?'5':'4'}. Recomendações</div>
   ${recHtml}
-  <div class="sec">4. Responsável técnico</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20pt;margin-top:30pt;">
-    <div><div style="border-top:1pt solid #374151;padding-top:5pt;text-align:center;font-size:8pt;color:#374151;">${escHtml(resp)}<br>Responsável pela avaliação<br>Data: ${fmtData(data)}</div></div>
-    <div><div style="border-top:1pt solid #374151;padding-top:5pt;text-align:center;font-size:8pt;color:#374151;">_________________________<br>Representante da empresa</div></div>
+
+  ${conclusao?`<div class="sec">${posturasSvg?'6':'5'}. Conclusão técnica</div><div class="conclusao-box">${escHtml(conclusao)}</div>`:''}
+
+  <div class="sec">${posturasSvg?(conclusao?'7':'6'):(conclusao?'6':'5')}. Responsável técnico</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24pt;margin-top:24pt;margin-bottom:12pt;">
+    <div><div style="border-top:1pt solid #374151;padding-top:5pt;text-align:center;font-size:8pt;color:#374151;">${escHtml(resp)}<br>Responsável pela avaliação ergonômica<br>Data: ${fmtData(data)}</div></div>
+    <div><div style="border-top:1pt solid #374151;padding-top:5pt;text-align:center;font-size:8pt;color:#374151;">___________________________<br>Representante da empresa / SESMT</div></div>
   </div>
-  <div style="margin-top:12pt;font-size:8pt;color:#9ca3af;text-align:center;border-top:1pt solid #a7f3d0;padding-top:5pt;">
-    Validade: 12 meses a partir da emissão · Reavaliação em caso de mudança de processo · Ref: ${cfg.refText} · SGS Sistema de Gestão em SST
+
+  <div style="font-size:7.5pt;color:#9ca3af;text-align:center;border-top:1pt solid #d1fae5;padding-top:5pt;margin-top:8pt;">
+    Validade: 12 meses · Reavaliação obrigatória em caso de mudança de processo, função ou condições · Ref: ${escHtml(cfg.refText)} · SGS Sistema de Gestão em SST
   </div>
-  <div class="footer"><span>AET — ${cfg.nome} — ${escHtml(nome)}</span><span>Página 1 de 1</span></div>
+  <div class="footer"><span>AET — ${escHtml(cfg.nome)} — ${escHtml(func?.nome_funcao||'—')} — ${escHtml(nome)}</span><span>Emitido em ${fmtData(hoje())}</span></div>
   </div></body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();w.onload=()=>w.print();
 }
@@ -1778,6 +1941,27 @@ async function imprimirAET(id){
     if(e.target.id===id){if(id==='modal-aet')fecharModalAET();else fecharModalAvaliacao();}
   });
 });
+
+async function ia_aet_sugerirRecomendacoes(){
+  const setorSel=document.getElementById('met-setor');
+  const funcaoSel=document.getElementById('met-funcao');
+  const nomeSetor=setorSel?.options[setorSel.selectedIndex]?.text||'setor';
+  const nomeFuncao=funcaoSel?.options[funcaoSel.selectedIndex]?.text||'função';
+  const btn=document.getElementById('btn-ia-recs');
+  const statusEl=document.getElementById('ia-status-recs');
+  if(btn)btn.disabled=true;
+  if(statusEl){statusEl.textContent='✨ Gerando recomendações...';statusEl.style.color='var(--accent)';}
+  try{
+    const recs=await ia_sugerirRecomendacoesAET(nomeFuncao,nomeSetor,wizardMet||'ergonômica',wizardResult?.nivel||'—',wizardScore??'—');
+    recs.forEach(r=>wizardRecs.push({texto:r.texto||'',prior:r.prior||'Alta',prazo:r.prazo||'30 dias'}));
+    renderRecLista();
+    if(statusEl){statusEl.textContent=`✅ ${recs.length} recomendações adicionadas.`;statusEl.style.color='var(--ok)';}
+  }catch(e){
+    if(statusEl){statusEl.textContent='❌ '+e.message;statusEl.style.color='var(--danger)';}
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
 
 async function ia_aet_sugerirConclusaoMet(){
   const setorSel=document.getElementById('met-setor');

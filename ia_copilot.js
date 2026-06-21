@@ -47,6 +47,29 @@ async function _chamarGemini(prompt){
   return text.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
 }
 
+async function ia_sugerirRecomendacoesAET(nomeFuncao,nomeSetor,metodologia,nivelRisco,score){
+  const prompt=`Você é especialista em ergonomia e Saúde e Segurança do Trabalho (SST) no Brasil.
+Avaliação ergonômica realizada:
+- Metodologia: ${metodologia}
+- Função: ${nomeFuncao}
+- Setor: ${nomeSetor}
+- Escore obtido: ${score}
+- Nível de risco: ${nivelRisco}
+
+Gere de 3 a 5 recomendações técnicas práticas, específicas para esta função e metodologia, baseadas na NR-17 e normas técnicas aplicáveis.
+Responda SOMENTE com JSON válido, sem markdown:
+{"recomendacoes":[{"texto":"descrição da medida...","prior":"Alta","prazo":"Imediato"}]}
+Valores permitidos para prior: Alta, Média, Baixa.
+Valores permitidos para prazo: Imediato, 30 dias, 60 dias, 90 dias, 6 meses.
+Seja específico — não use linguagem genérica. A medida deve ser aplicável à função e ao risco identificado.`;
+  const text=await _chamarGemini(prompt);
+  try{
+    const parsed=JSON.parse(text);
+    if(!Array.isArray(parsed.recomendacoes))throw new Error();
+    return parsed.recomendacoes;
+  }catch(e){throw new Error('IA retornou resposta inválida para recomendações. Tente novamente.');}
+}
+
 async function ia_sugerirSetor(nomeSetor){
   const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil.
 Analise o setor "${nomeSetor}" de uma empresa e responda SOMENTE com JSON válido, sem markdown:
