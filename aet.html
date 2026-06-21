@@ -245,12 +245,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       </div>
       <div class="sep">Descrição do posto de trabalho</div>
       <div class="modal-field full">
-        <label>Descrição das atividades</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <label style="margin:0;">Descrição das atividades</label>
+          <button class="btn-ia" style="font-size:11px;padding:4px 10px;" onclick="ia_aet_sugerir('descricao')" id="btn-ia-descricao">✨ Sugerir com IA</button>
+        </div>
         <textarea id="aet-descricao" placeholder="Descreva detalhadamente as atividades executadas na função..."></textarea>
+        <div class="ia-status" id="ia-status-descricao"></div>
       </div>
       <div class="modal-field full">
-        <label>Descrição do posto de trabalho</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <label style="margin:0;">Descrição do posto de trabalho</label>
+          <button class="btn-ia" style="font-size:11px;padding:4px 10px;" onclick="ia_aet_sugerir('posto')" id="btn-ia-posto">✨ Sugerir com IA</button>
+        </div>
         <textarea id="aet-posto" placeholder="Descreva o ambiente, equipamentos, layout do posto..."></textarea>
+        <div class="ia-status" id="ia-status-posto"></div>
       </div>
       <div class="modal-field">
         <label>Jornada de trabalho</label>
@@ -261,12 +269,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <input type="text" id="aet-turnos" placeholder="Ex: Turno único, 07h às 17h">
       </div>
       <div class="modal-field full">
-        <label>Pausas e descanso</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <label style="margin:0;">Pausas e descanso</label>
+          <button class="btn-ia" style="font-size:11px;padding:4px 10px;" onclick="ia_aet_sugerir('pausas')" id="btn-ia-pausas">✨ Sugerir com IA</button>
+        </div>
         <textarea id="aet-pausas" placeholder="Descreva as pausas concedidas, intervalos..." style="min-height:50px;"></textarea>
+        <div class="ia-status" id="ia-status-pausas"></div>
       </div>
       <div class="modal-field full">
-        <label>Produção e metas</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <label style="margin:0;">Produção e metas</label>
+          <button class="btn-ia" style="font-size:11px;padding:4px 10px;" onclick="ia_aet_sugerir('metas')" id="btn-ia-metas">✨ Sugerir com IA</button>
+        </div>
         <textarea id="aet-metas" placeholder="Há metas de produção? Ritmo de trabalho?" style="min-height:50px;"></textarea>
+        <div class="ia-status" id="ia-status-metas"></div>
       </div>
       <div class="modal-field full">
         <label>Observações</label>
@@ -1755,7 +1771,33 @@ async function imprimirAET(id){
   });
 });
 
+async function ia_aet_sugerir(campo){
+  const funcaoSel=document.getElementById('aet-funcao');
+  const setorSel=document.getElementById('aet-setor');
+  const nomeFuncao=funcaoSel?.options[funcaoSel.selectedIndex]?.text||'função';
+  const nomeSetor=setorSel?.options[setorSel.selectedIndex]?.text||'setor';
+  const btn=document.getElementById('btn-ia-'+campo);
+  const statusEl=document.getElementById('ia-status-'+campo);
+  if(btn)btn.disabled=true;
+  if(statusEl){statusEl.textContent='✨ Gerando sugestão...';statusEl.style.color='var(--accent)';}
+  try{
+    let texto='';
+    if(campo==='descricao')texto=await ia_sugerirAtividadesAET(nomeFuncao,nomeSetor);
+    else if(campo==='posto')texto=await ia_sugerirPostoAET(nomeFuncao,nomeSetor);
+    else if(campo==='pausas')texto=await ia_sugerirPausasAET(nomeFuncao,nomeSetor);
+    else if(campo==='metas')texto=await ia_sugerirMetasAET(nomeFuncao,nomeSetor);
+    const ta=document.getElementById('aet-'+campo);
+    if(ta)ta.value=texto;
+    if(statusEl){statusEl.textContent='✅ Sugestão aplicada — revise e ajuste se necessário.';statusEl.style.color='var(--ok)';}
+  }catch(e){
+    if(statusEl){statusEl.textContent='❌ '+e.message;statusEl.style.color='var(--danger)';}
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
 inicializar();
 </script>
+<script src="ia_copilot.js?v=10"></script>
 </body>
 </html>

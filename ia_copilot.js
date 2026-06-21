@@ -197,6 +197,47 @@ Escreva 2 a 3 frases técnicas descrevendo: a condição de exposição identifi
   return await _chamarGemini(prompt);
 }
 
+async function ia_sugerirAtividadesAET(nomeFuncao,nomeSetor){
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil, com experiência em elaboração de AET (Análise Ergonômica do Trabalho) conforme NR-17.
+Elabore a descrição das atividades para a função "${nomeFuncao}" no setor "${nomeSetor}".
+Escreva 4 a 6 frases técnicas, em texto corrido, cobrindo obrigatoriamente:
+1. Principais tarefas executadas no ciclo de trabalho
+2. Ferramentas, equipamentos ou materiais manuseados
+3. Postura predominante (em pé, sentado, agachado, etc.) e movimentos mais frequentes (flexão, rotação, extensão)
+4. Esforço físico envolvido (levantamento de cargas, aplicação de força, movimentos repetitivos)
+5. Interações com outros trabalhadores ou sistemas
+Use linguagem técnica adequada a laudos e documentos SST. Sem títulos, sem tópicos, texto corrido. Responda SOMENTE com o texto, sem aspas nem markdown.`;
+  return await _chamarGemini(prompt);
+}
+
+async function ia_sugerirPostoAET(nomeFuncao,nomeSetor){
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil, com experiência em elaboração de AET (Análise Ergonômica do Trabalho) conforme NR-17.
+Elabore a descrição do posto de trabalho para a função "${nomeFuncao}" no setor "${nomeSetor}".
+Escreva 3 a 5 frases técnicas, em texto corrido, cobrindo obrigatoriamente:
+1. Características do ambiente físico (interno/externo, área, layout)
+2. Mobiliário e equipamentos presentes (bancadas, cadeiras, telas, máquinas)
+3. Condições ambientais relevantes (iluminação, temperatura, ruído, vibração, ventilação)
+4. Dimensões e organização do espaço em relação às tarefas executadas
+Use linguagem técnica adequada a laudos SST. Sem títulos, sem tópicos, texto corrido. Responda SOMENTE com o texto, sem aspas nem markdown.`;
+  return await _chamarGemini(prompt);
+}
+
+async function ia_sugerirPausasAET(nomeFuncao,nomeSetor){
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil, com experiência em NR-17 (Ergonomia).
+Sugira as pausas e períodos de descanso recomendados para a função "${nomeFuncao}" no setor "${nomeSetor}", de acordo com a NR-17 e boas práticas ergonômicas.
+Inclua: frequência e duração das pausas, fundamentação na NR-17 (subitem relevante quando aplicável), e recomendações de ginástica laboral se pertinente.
+Escreva 2 a 4 frases técnicas em texto corrido. Sem títulos, sem tópicos. Responda SOMENTE com o texto, sem aspas nem markdown.`;
+  return await _chamarGemini(prompt);
+}
+
+async function ia_sugerirMetasAET(nomeFuncao,nomeSetor){
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil, com experiência em NR-17 (Ergonomia).
+Descreva tecnicamente como as metas de produção e o ritmo de trabalho impactam a função "${nomeFuncao}" no setor "${nomeSetor}", sob a perspectiva ergonômica e da NR-17.
+Aborde: se há metas formais ou informais, o ritmo imposto pelo processo ou máquina, e o impacto sobre a carga física e mental do trabalhador.
+Escreva 2 a 3 frases técnicas em texto corrido. Sem títulos, sem tópicos. Responda SOMENTE com o texto, sem aspas nem markdown.`;
+  return await _chamarGemini(prompt);
+}
+
 async function ia_sugerirMedida(nomeRisco,catRisco,tipoMedida,conclusaoTecnica=''){
   const descTipo={
     elim:'Eliminação — remover completamente a fonte do risco',
