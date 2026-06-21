@@ -826,7 +826,7 @@ async function carregarFuncoesMet(){
   const sel=document.getElementById('met-funcao');
   if(!setorId){sel.innerHTML='<option value="">— Selecione o setor —</option>';return;}
   sel.innerHTML='<option value="">Carregando...</option>';
-  const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&select=funcao_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+  const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&ativo=eq.true&select=funcao_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
   const data=await res.json();
   const ids=data.map(x=>x.funcao_id);
   sel.innerHTML='<option value="">— Selecione —</option>'+funcoes.filter(f=>ids.includes(f.id)).map(f=>`<option value="${f.id}">${escHtml(f.nome_funcao)}</option>`).join('');
@@ -971,7 +971,7 @@ async function salvarMetodologia(){
     avaliacoes.unshift(novaAet);
 
     // 2) Criar aet_metodologias
-    const displayScore=wizardMet==='RULA'?wizardDados.__raw?.grand??wizardScore:wizardMet==='OWAS'?wizardDados.__raw?.cat??wizardScore:wizardScore;
+    const displayScore=wizardScore;
     const metPayload={
       aet_id:novaAet.id,empresa_id:parseInt(empresaId),
       metodologia:wizardMet,
@@ -992,9 +992,7 @@ async function salvarMetodologia(){
     if(funcaoId){
       const pxs=scoreToPxS(wizardMet,wizardScore);
       const metNome=cfg.nome;
-      // Busca risco ergonômico na tabela riscos
-      const resRisco=await fetch(`${SUPA_URL}/rest/v1/riscos?categoria_risco_id=in.(SELECT id FROM categorias_risco WHERE nome=ilike.%ergon%)&ativo=eq.true&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-      // Fallback: busca pelo nome
+      // Busca risco ergonômico pelo nome (PostgREST não suporta subqueries em filtros)
       const resRiscoFB=await fetch(`${SUPA_URL}/rest/v1/riscos?nome_risco=ilike.*ergonom*&ativo=eq.true&limit=5`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
       const riscosFB=await resRiscoFB.json();
       const riscoId=riscosFB?.[0]?.id||null;
@@ -1256,7 +1254,7 @@ async function carregarFuncoes(){
   const sel=document.getElementById('aet-funcao');
   sel.innerHTML='<option value="">— Carregando... —</option>';
   if(!setorId){sel.innerHTML='<option value="">— Selecione o setor —</option>';return;}
-  const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&select=funcao_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+  const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&ativo=eq.true&select=funcao_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
   const data=await res.json();
   const ids=data.map(x=>x.funcao_id);
   const funcoesFiltradas=funcoes.filter(f=>ids.includes(f.id));

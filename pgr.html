@@ -2252,8 +2252,8 @@ function renderAnexosAET(){
   const clsMap=(n)=>!n?'verde':n.toLowerCase().includes('alt')||n.toLowerCase().includes('perig')?'vermelho':n.toLowerCase().includes('médio')||n.toLowerCase().includes('elev')?'laranja':n.toLowerCase().includes('leve')||n.toLowerCase().includes('moder')?'amarelo':'verde';
   const linhas=mets.map((m,i)=>{
     const aet=m.aet_avaliacoes||{};
-    const setor=window.setores?.find(s=>s.id===aet.setor_id);
-    const funcao=window.funcoes?.find(f=>f.id===aet.funcao_id);
+    const setor=(setores||[]).find(s=>s.id===aet.setor_id);
+    const funcao=(funcoes||[]).find(f=>f.id===aet.funcao_id);
     const cls=clsMap(m.nivel_risco);
     const recs=Array.isArray(m.dados_json?.recomendacoes)?m.dados_json.recomendacoes:[];
     return`<div style="border:1pt solid #d1fae5;border-left:4pt solid #0d4a3a;border-radius:4pt;padding:8pt 10pt;margin-bottom:8pt;break-inside:avoid;">
