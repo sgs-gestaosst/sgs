@@ -1086,40 +1086,57 @@ async function salvarMetodologia(){
     if(resMet.ok){const md=await resMet.json();metId=md[0]?.id;metodologias.unshift({...md[0],aet:novaAet});}
 
     // 3) Transferir para funcao_riscos (se houver função selecionada)
+    let transferido=false;
     if(funcaoId){
       const pxs=scoreToPxS(wizardMet,wizardScore);
-      const metNome=cfg.nome;
-      // Busca risco ergonômico pelo nome (PostgREST não suporta subqueries em filtros)
-      const resRiscoFB=await fetch(`${SUPA_URL}/rest/v1/riscos?nome_risco=ilike.*ergonom*&ativo=eq.true&limit=5`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
-      const riscosFB=await resRiscoFB.json();
-      const riscoId=riscosFB?.[0]?.id||null;
+      const h={'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`};
+      // 3a) Busca categoria ergonômica
+      const resCat=await fetch(`${SUPA_URL}/rest/v1/categorias_risco?nome=ilike.*ergon*&ativo=eq.true&limit=1`,{headers:h});
+      const cats=resCat.ok?await resCat.json():[];
+      const catId=cats[0]?.id||null;
+      // 3b) Busca riscos dessa categoria (ou fallback por nome)
+      const urlRisco=catId
+        ?`${SUPA_URL}/rest/v1/riscos?categoria_risco_id=eq.${catId}&ativo=eq.true&limit=20`
+        :`${SUPA_URL}/rest/v1/riscos?nome_risco=ilike.*ergon*&ativo=eq.true&limit=10`;
+      const resRiscos=await fetch(urlRisco,{headers:h});
+      const riscosCat=resRiscos.ok?await resRiscos.json():[];
+      // 3c) Escolhe o risco mais relevante para a metodologia
+      const kws={RULA:['postura','membro','superior'],OCRA:['repetit','membro'],JSI:['repetit','punho'],OWAS:['postura','carga'],NIOSH:['levant','carga','esforço']}[wizardMet]||['ergon'];
+      let riscoId=null;
+      for(const kw of kws){const f=riscosCat.find(r=>r.nome_risco?.toLowerCase().includes(kw));if(f){riscoId=f.id;break;}}
+      if(!riscoId)riscoId=riscosCat[0]?.id||null;
       if(riscoId){
-        // Verifica se já existe funcao_risco para esta função+risco
-        const resExist=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&risco_id=eq.${riscoId}&ativo=eq.true&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+        const resExist=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&risco_id=eq.${riscoId}&ativo=eq.true&limit=1`,{headers:h});
         const existing=await resExist.json();
         const frPayload={
           funcao_id:funcaoId,risco_id:riscoId,empresa_id:parseInt(empresaId),
           probabilidade:pxs.p,severidade:pxs.sv,nivel_risco:pxs.n,
           tipo_avaliacao:'Quantitativa',
-          metodologia_avaliacao_custom:metNome,
+          metodologia_avaliacao_custom:cfg.nome,
           valor_medido:parseFloat(wizardScore)||null,
           unidade_medida:cfg.scoreLabel,
           data_avaliacao:document.getElementById('met-data').value||hoje(),
           responsavel_avaliacao:resp,
           conclusao_qualitativa:wizardResult.nivel,
-          aet_id:novaAet.id,
-          aet_metodologia_id:metId,
+          aet_id:novaAet.id,aet_metodologia_id:metId,
           origem_aet:true,ativo:true,
           num_expostos:parseInt(document.getElementById('met-num-trab').value)||1,
         };
         if(existing.length){
-          await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${existing[0].id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify(frPayload)});
+          await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${existing[0].id}`,{method:'PATCH',headers:{'Content-Type':'application/json',...h},body:JSON.stringify(frPayload)});
         }else{
-          await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify(frPayload)});
+          await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{method:'POST',headers:{'Content-Type':'application/json',...h},body:JSON.stringify(frPayload)});
         }
+        transferido=true;
       }
     }
-    setStatus('status-met-4','success','Avaliação salva e transferida para o inventário de riscos!');
+    if(transferido){
+      setStatus('status-met-4','success','Avaliação salva e risco ergonômico transferido para o inventário!');
+    }else if(funcaoId){
+      setStatus('status-met-4','info','Avaliação salva. Nenhum risco ergonômico encontrado no catálogo — cadastre um em Gestão de Riscos para transferir ao inventário.');
+    }else{
+      setStatus('status-met-4','success','Avaliação salva com sucesso!');
+    }
     renderStats();renderLista();
     setTimeout(()=>fecharWizardMet(),1800);
   }catch(e){setStatus('status-met-4','error',e.message);}
