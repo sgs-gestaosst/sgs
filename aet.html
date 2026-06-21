@@ -469,8 +469,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
           <div class="hint">Obrigatório para LTCAT e eSocial</div>
         </div>
         <div class="fg">
-          <label>Conclusão técnica</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <label style="margin:0;">Conclusão técnica</label>
+            <button class="btn-ia" style="font-size:11px;padding:4px 10px;" onclick="ia_aet_sugerirConclusaoMet()" id="btn-ia-conclusao-met">✨ Sugerir com IA</button>
+          </div>
           <textarea id="met-conclusao" style="min-height:55px;resize:vertical;" placeholder="Descreva o parecer técnico final..."></textarea>
+          <div class="ia-status" id="ia-status-conclusao-met"></div>
         </div>
       </div>
 
@@ -1774,6 +1778,29 @@ async function imprimirAET(id){
     if(e.target.id===id){if(id==='modal-aet')fecharModalAET();else fecharModalAvaliacao();}
   });
 });
+
+async function ia_aet_sugerirConclusaoMet(){
+  const setorSel=document.getElementById('met-setor');
+  const funcaoSel=document.getElementById('met-funcao');
+  const nomeSetor=setorSel?.options[setorSel.selectedIndex]?.text||'setor';
+  const nomeFuncao=funcaoSel?.options[funcaoSel.selectedIndex]?.text||'função';
+  const exposicao=document.getElementById('met-exposicao')?.value==='true';
+  const score=wizardScore??'—';
+  const nivel=wizardResult?.nivel||'—';
+  const btn=document.getElementById('btn-ia-conclusao-met');
+  const statusEl=document.getElementById('ia-status-conclusao-met');
+  if(btn)btn.disabled=true;
+  if(statusEl){statusEl.textContent='✨ Gerando conclusão...';statusEl.style.color='var(--accent)';}
+  try{
+    const texto=await ia_sugerirConclusaoMet(nomeFuncao,nomeSetor,wizardMet||'ergonômica',nivel,score,exposicao);
+    document.getElementById('met-conclusao').value=texto;
+    if(statusEl){statusEl.textContent='✅ Conclusão aplicada — revise antes de salvar.';statusEl.style.color='var(--ok)';}
+  }catch(e){
+    if(statusEl){statusEl.textContent='❌ '+e.message;statusEl.style.color='var(--danger)';}
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
 
 async function ia_aet_sugerirTarefa(){
   const setorSel=document.getElementById('met-setor');

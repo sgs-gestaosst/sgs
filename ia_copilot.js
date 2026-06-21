@@ -222,6 +222,25 @@ Use linguagem técnica adequada a laudos SST. Sem títulos, sem tópicos, texto 
   return await _chamarGemini(prompt);
 }
 
+async function ia_sugerirConclusaoMet(nomeFuncao,nomeSetor,metodologia,nivelRisco,score,exposicao){
+  const prompt=`Você é especialista em Saúde e Segurança do Trabalho (SST) no Brasil, com experiência em ergonomia e elaboração de AET conforme NR-17.
+Elabore a conclusão técnica de uma avaliação ergonômica com os seguintes dados:
+- Função: ${nomeFuncao}
+- Setor: ${nomeSetor}
+- Metodologia aplicada: ${metodologia}
+- Escore obtido: ${score}
+- Nível de risco: ${nivelRisco}
+- Exposição habitual e permanente: ${exposicao?'Sim':'Não'}
+
+Escreva 3 a 5 frases técnicas em texto corrido, incluindo obrigatoriamente:
+1. Síntese do resultado da avaliação (escore e nível de risco identificado)
+2. Principais fatores ergonômicos identificados para esta função/metodologia
+3. Indicação de ação conforme o nível (ex: se nível 1-2: monitorar; se 3-4: investigar e implementar mudanças; se 5-6: mudanças urgentes; se 7+: parar e redesenhar)
+4. Referência à NR-17 ou normativa aplicável
+Use linguagem técnica compatível com laudos SST. Sem títulos, sem tópicos, texto corrido. Responda SOMENTE com o texto, sem aspas nem markdown.`;
+  return await _chamarGemini(prompt);
+}
+
 async function ia_sugerirTarefaAET(nomeFuncao,nomeSetor,metodologia){
   const prompt=`Você é especialista em ergonomia e Saúde e Segurança do Trabalho (SST) no Brasil.
 Elabore a descrição da tarefa/ciclo de trabalho para aplicação da metodologia ${metodologia} na função "${nomeFuncao}" no setor "${nomeSetor}".
