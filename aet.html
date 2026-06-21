@@ -1280,11 +1280,11 @@ function imprimirRelMet(){
     const vNum=parseInt(v)||0;
     const LIMIARES={s_braco:2,s_antebraco:1,s_punho:1,s_pescoco:2,s_tronco:2,s_pernas:1};
     const flag=(f.id in LIMIARES&&vNum>LIMIARES[f.id]);
-    return`<tr><td style="padding:3.5pt 7pt;border-bottom:1pt solid #f3f4f6;color:#6b7280;font-size:8.5pt;">${escHtml(f.label)}</td><td style="padding:3.5pt 7pt;border-bottom:1pt solid #f3f4f6;font-weight:600;font-size:8.5pt;${flag?`color:#dc2626;`:''}">${escHtml(opt.l)}${flag?' ⚠️':''}</td></tr>`;
+    return`<tr><td style="padding:2pt 6pt;border-bottom:1pt solid #f3f4f6;color:#6b7280;font-size:8pt;">${escHtml(f.label)}</td><td style="padding:2pt 6pt;border-bottom:1pt solid #f3f4f6;font-weight:600;font-size:8pt;${flag?`color:#dc2626;`:''}">${escHtml(opt.l)}${flag?' ⚠️':''}</td></tr>`;
   }).filter(Boolean).join('');
 
   // ── Análise intermediária RULA (Tabelas A, B, C) ──
-  let tabelasRULA='';
+  let tabelasRULA='',nFatoresRULA=0;
   if(wizardMet==='RULA'){
     const arm=Math.max(1,Math.min(6,(parseInt(d.s_braco)||1)+(parseInt(d.aj_braco)||0)));
     const fa =Math.max(1,Math.min(3,(parseInt(d.s_antebraco)||1)+(parseInt(d.aj_antebraco)||0)));
@@ -1314,6 +1314,7 @@ function imprimirRelMet(){
     if(legs>=2)fatores.push({seg:'Pernas',val:`Pontuação ${legs}`,prob:'Postura sem apoio ou assimétrica — sobrecarga em membros inferiores e coluna',ref:'NR-17.3'});
     if(musA||musB)fatores.push({seg:'Atividade muscular',val:`A:${musA} B:${musB}`,prob:'Postura estática (>1min) ou repetitiva (>4x/min) — fadiga muscular acelerada',ref:'NR-17.6'});
     if(forcA>=2||forcB>=2)fatores.push({seg:'Carga/Força',val:`A:${forcA} B:${forcB}`,prob:'Força ou carga elevada (≥2–10kg em postura estática) — sobrecarga músculo-esquelética',ref:'NR-17.2'});
+    nFatoresRULA=fatores.length;
     const fatoresHtml=fatores.length?fatores.map((f,i)=>`<tr style="${i%2?'background:#fffbeb':''}">
       <td style="padding:4pt 7pt;border-bottom:1pt solid #fde68a;font-weight:700;color:#92400e;white-space:nowrap;">${escHtml(f.seg)}</td>
       <td style="padding:4pt 7pt;border-bottom:1pt solid #fde68a;font-family:monospace;color:#374151;white-space:nowrap;">${f.val}</td>
@@ -1392,13 +1393,18 @@ function imprimirRelMet(){
   // ── SVGs de postura ──
   const posturasSvg=gerarSVGsPostura(wizardMet,wizardDados);
 
-  // ── Numeração dinâmica de seções ──
-  let secN=5;if(tabelasRULA)secN=wizardMet==='RULA'?6:5;
-  const secPostura=tabelasRULA?(secN++):(secN++);
-  const secResultado=secN++;
-  const secRecs=secN++;
-  const secConclusao=secN++;
-  const secResp=secN++;
+  // ── Numeração dinâmica de seções (só conta seções que serão exibidas) ──
+  let _sn=3;                                        // 1,2,3 fixas na pág.1
+  if(tabelasRULA) _sn++;                            // 4: Tabelas A/B/C
+  if(nFatoresRULA>0) _sn++;                         // 5: Fatores (opcional)
+  const secPostura=posturasSvg?++_sn:0;             // 5 ou 6: Diagrama
+  const secResultado=wizardMet==='RULA'?++_sn:0;   // 6 ou 7: Resultado
+  const secEscala=++_sn;                            // 7 ou 8: Escala
+  const secRecs=++_sn;                              // 8 ou 9: Medidas
+  const secConclusao=conclusao?++_sn:0;            // opcional: Conclusão
+  const secExposicao=++_sn;                         // Exposição
+  const secPGR=++_sn;                               // PGR
+  const secResp=++_sn;                              // Responsável
 
   const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
   <title>Laudo AET — ${escHtml(cfg.nome)} — ${escHtml(nome)}</title>
@@ -1415,13 +1421,13 @@ function imprimirRelMet(){
     .topo-t{font-size:11pt;font-weight:700;color:#0d4a3a;}
     .topo-s{font-size:7.5pt;color:#6b7280;margin-top:2pt;}
     .topo-r{text-align:right;font-size:7.5pt;color:#6b7280;line-height:1.6;}
-    .sec{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#0d4a3a;border-bottom:1.5pt solid #a7f3d0;padding-bottom:3pt;margin:12pt 0 7pt;}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;border:1pt solid #d1fae5;border-radius:4pt;overflow:hidden;margin-bottom:10pt;}
-    .campo{padding:5pt 8pt;border-right:1pt solid #d1fae5;border-bottom:1pt solid #d1fae5;}
+    .sec{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#0d4a3a;border-bottom:1.5pt solid #a7f3d0;padding-bottom:2pt;margin:9pt 0 5pt;}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;border:1pt solid #d1fae5;border-radius:4pt;overflow:hidden;margin-bottom:8pt;}
+    .campo{padding:3pt 6pt;border-right:1pt solid #d1fae5;border-bottom:1pt solid #d1fae5;}
     .campo:nth-child(2n){border-right:none;}.campo-full{grid-column:1/-1;border-right:none!important;}
-    .cl{font-size:6pt;font-weight:700;text-transform:uppercase;color:#9ca3af;margin-bottom:2pt;letter-spacing:.04em;}
-    .cv{font-size:9pt;color:#111827;}
-    .legal-box{background:#f0fdf4;border:1pt solid #a7f3d0;border-radius:4pt;padding:8pt 10pt;font-size:8pt;color:#14532d;margin-bottom:10pt;line-height:1.6;}
+    .cl{font-size:6pt;font-weight:700;text-transform:uppercase;color:#9ca3af;margin-bottom:1pt;letter-spacing:.04em;}
+    .cv{font-size:8.5pt;color:#111827;}
+    .legal-box{background:#f0fdf4;border:1pt solid #a7f3d0;border-radius:4pt;padding:6pt 8pt;font-size:7.5pt;color:#14532d;margin-bottom:8pt;line-height:1.5;}
     .res-box{background:${bg};border:2pt solid ${bd};border-radius:6pt;padding:12pt;text-align:center;margin:10pt 0;display:flex;align-items:center;gap:16pt;justify-content:center;}
     .res-score{font-size:48pt;font-weight:800;color:${cor};line-height:1;font-family:monospace;}
     .res-info{text-align:left;}
@@ -1519,7 +1525,7 @@ function imprimirRelMet(){
     </div>
   </div>`:''}
 
-  <div class="sec">${secResultado+(wizardMet==='RULA'?1:0)}. Escala de referência — ${escHtml(cfg.nome)}</div>
+  <div class="sec">${secEscala}. Escala de referência — ${escHtml(cfg.nome)}</div>
   <table style="width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:10pt;">
     <thead><tr><th style="background:#0d4a3a;color:#fff;padding:4pt 7pt;text-align:left;width:70pt;">Escore</th><th style="background:#0d4a3a;color:#fff;padding:4pt 7pt;text-align:left;width:130pt;">Nível</th><th style="background:#0d4a3a;color:#fff;padding:4pt 7pt;text-align:left;">Critério de ação</th></tr></thead>
     <tbody>${escalaHtml}</tbody>
@@ -1540,7 +1546,7 @@ function imprimirRelMet(){
 
   ${conclusao?`<div class="sec">${secConclusao}. Conclusão técnica</div><div class="conclusao-box">${escHtml(conclusao)}</div>`:''}
 
-  <div class="sec">${secResp}. Classificação da exposição</div>
+  <div class="sec">${secExposicao}. Classificação da exposição</div>
   <div class="exp-box">
     <span style="font-size:18pt;">${exposicao==='habitual'?'🔴':'🟡'}</span>
     <div>
@@ -1554,7 +1560,7 @@ function imprimirRelMet(){
     </div>
   </div>
 
-  <div class="sec">${secResp+1}. Vinculação ao PGR e ao e-Social</div>
+  <div class="sec">${secPGR}. Vinculação ao PGR e ao e-Social</div>
   <div class="pgr-box">
     <div style="font-weight:700;color:#374151;margin-bottom:4pt;">📋 Este laudo deve ser anexado ao Programa de Gerenciamento de Riscos (PGR)</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6pt;font-size:8pt;">
@@ -1570,7 +1576,7 @@ function imprimirRelMet(){
     </div>
   </div>
 
-  <div class="sec">${secResp+2}. Responsável técnico e validade</div>
+  <div class="sec">${secResp}. Responsável técnico e validade</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24pt;margin-top:20pt;margin-bottom:12pt;">
     <div>
       <div style="height:32pt;"></div>
