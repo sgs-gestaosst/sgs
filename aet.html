@@ -98,6 +98,47 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .progresso{height:4px;background:var(--border);border-radius:2px;margin-bottom:16px;overflow:hidden;}
 .progresso-fill{height:100%;background:var(--accent2);border-radius:2px;transition:width .3s;}
 @media(max-width:768px){.stats-grid{grid-template-columns:1fr 1fr;}.modal-grid{grid-template-columns:1fr;}.cond-btns{flex-direction:column;}.aet-item-fields{grid-template-columns:1fr;}.header-title{display:none;}}
+/* ── Wizard Metodologia ─────────────────────────────── */
+.met-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.met-card-opt{border:2px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;transition:all .15s;text-align:center;}
+.met-card-opt:hover{border-color:var(--border-focus);}
+.met-card-opt.selected{border-color:var(--accent);background:rgba(74,124,220,.09);}
+.met-card-opt .mc-icon{font-size:22px;margin-bottom:6px;}
+.met-card-opt .mc-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.met-card-opt .mc-desc{font-size:10px;color:var(--text2);}
+.wiz-bar{display:flex;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.wiz-step{flex:1;text-align:center;padding:8px 4px;font-size:11px;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;}
+.wiz-step.active{color:var(--accent);border-bottom-color:var(--accent);}
+.wiz-step.done{color:var(--success);border-bottom-color:var(--success);}
+.wiz-panel{display:none;}
+.wiz-panel.active{display:block;}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.f-row.c3{grid-template-columns:1fr 1fr 1fr;}
+.f-row.c1{grid-template-columns:1fr;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;}
+.fg input,.fg select,.fg textarea{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;}
+.fg input:focus,.fg select:focus{border-color:var(--border-focus);}
+.fg .hint{font-size:9px;color:var(--text3);margin-top:1px;}
+.calc-panel{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;position:sticky;top:16px;}
+.calc-score{font-size:40px;font-weight:700;font-family:var(--mono);margin:8px 0 4px;}
+.calc-nivel{font-size:13px;font-weight:600;margin-bottom:4px;}
+.calc-ref{font-size:10px;color:var(--text2);}
+.idx-verde{color:#2dd4a0;}.idx-amarelo{color:#e0c855;}.idx-laranja{color:#e07a30;}.idx-vermelho{color:#e05555;}.idx-neutral{color:var(--text3);}
+.res-big{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;margin:12px 0;}
+.res-big-score{font-size:48px;font-weight:700;font-family:var(--mono);}
+.res-big-nivel{font-size:16px;font-weight:600;margin-top:6px;}
+.res-big-ref{font-size:11px;color:var(--text2);margin-top:4px;}
+.rec-add-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;margin-bottom:6px;align-items:center;}
+.rec-add-row input,.rec-add-row select{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:6px 8px;outline:none;}
+.rec-add-row select{font-size:11px;}
+.met-eval-strip{background:rgba(74,124,220,.06);border:1px solid rgba(74,124,220,.2);border-radius:6px;padding:8px 12px;margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.met-eval-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;font-family:var(--mono);}
+.meb-verde{background:#0e2820;color:#2dd4a0;border:1px solid #1a4a38;}
+.meb-amarelo{background:#2a2010;color:#e0c855;border:1px solid #4a3a10;}
+.meb-laranja{background:#2a1a08;color:#e07a30;border:1px solid #4a2a10;}
+.meb-vermelho{background:#2a1515;color:#e05555;border:1px solid #4a2020;}
+@media(max-width:768px){.met-cards{grid-template-columns:1fr 1fr;}.f-row{grid-template-columns:1fr;}.f-row.c3{grid-template-columns:1fr;}.rec-add-row{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -113,7 +154,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <div class="hero-nome" id="hero-nome">Análise Ergonômica do Trabalho</div>
       <div class="hero-sub" id="hero-sub">Carregando...</div>
     </div>
-    <button class="btn btn-primary" onclick="abrirModalNovaAET()">+ Nova AET</button>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-edit" onclick="abrirWizardMet()">⚙️ Nova Avaliação por Metodologia</button>
+      <button class="btn btn-primary" onclick="abrirModalNovaAET()">+ Nova AET (NR-17)</button>
+    </div>
   </div>
   <div class="stats-grid" id="stats-grid"></div>
   <div id="lista-aets"></div>
@@ -261,6 +305,146 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   </div>
 </div>
 
+<!-- MODAL WIZARD — AVALIAÇÃO POR METODOLOGIA -->
+<div class="modal-overlay" id="modal-met">
+  <div class="modal" style="max-width:860px;">
+    <div class="modal-titulo">
+      <span id="met-modal-titulo">Nova Avaliação Ergonômica por Metodologia</span>
+      <button onclick="fecharWizardMet()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <!-- Barra de etapas -->
+    <div class="wiz-bar">
+      <div class="wiz-step active" id="ws-1">1 · Metodologia</div>
+      <div class="wiz-step" id="ws-2">2 · Contexto</div>
+      <div class="wiz-step" id="ws-3">3 · Avaliação</div>
+      <div class="wiz-step" id="ws-4">4 · Resultado</div>
+    </div>
+
+    <!-- Step 1: Seleção da metodologia -->
+    <div class="wiz-panel active" id="wp-1">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px;">Selecione a metodologia de avaliação ergonômica:</div>
+      <div class="met-cards" id="met-cards-grid"></div>
+      <div class="status-bar" id="status-met-1"></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+        <button class="btn btn-primary" onclick="wizStep(2)">Avançar →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Contexto (setor, função) -->
+    <div class="wiz-panel" id="wp-2">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:14px;">Informe o contexto do posto avaliado:</div>
+      <div class="f-row">
+        <div class="fg">
+          <label>Setor <span style="color:var(--accent)">*</span></label>
+          <select id="met-setor" onchange="carregarFuncoesMet()"><option value="">— Selecione —</option></select>
+        </div>
+        <div class="fg">
+          <label>Função avaliada <span style="color:var(--accent)">*</span></label>
+          <select id="met-funcao"><option value="">— Selecione o setor —</option></select>
+        </div>
+      </div>
+      <div class="f-row c3">
+        <div class="fg">
+          <label>Nº trabalhadores</label>
+          <input type="number" id="met-num-trab" value="1" min="1">
+        </div>
+        <div class="fg">
+          <label>Jornada diária</label>
+          <input type="text" id="met-jornada" placeholder="Ex: 8h/dia">
+        </div>
+        <div class="fg">
+          <label>Membro / Segmento avaliado</label>
+          <input type="text" id="met-membro" placeholder="Ex: Membro superior direito">
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="fg">
+          <label>Responsável técnico <span style="color:var(--accent)">*</span></label>
+          <input type="text" id="met-responsavel" placeholder="Nome completo">
+        </div>
+        <div class="fg">
+          <label>Data da avaliação</label>
+          <input type="date" id="met-data">
+        </div>
+      </div>
+      <div class="fg f-row c1">
+        <label>Descrição da tarefa avaliada</label>
+        <textarea id="met-tarefa" placeholder="Descreva brevemente a tarefa ou ciclo de trabalho avaliado..." style="min-height:55px;resize:vertical;"></textarea>
+      </div>
+      <div class="status-bar" id="status-met-2"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:16px;">
+        <button class="btn btn-cancel" onclick="wizStep(1)">← Voltar</button>
+        <button class="btn btn-primary" onclick="wizStep(3)">Avançar →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Formulário + cálculo ao vivo -->
+    <div class="wiz-panel" id="wp-3">
+      <div style="display:grid;grid-template-columns:1fr 240px;gap:20px;align-items:start;">
+        <div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:14px;" id="met-form-desc"></div>
+          <div id="met-form-fields"></div>
+        </div>
+        <div>
+          <div class="calc-panel">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;" id="calc-label">Índice</div>
+            <div class="calc-score idx-neutral" id="calc-score">—</div>
+            <div class="calc-nivel" id="calc-nivel">Aguardando dados</div>
+            <div class="calc-ref" id="calc-ref"></div>
+            <div style="margin-top:12px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);padding-top:10px;" id="calc-extra"></div>
+          </div>
+        </div>
+      </div>
+      <div class="status-bar" id="status-met-3"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:16px;">
+        <button class="btn btn-cancel" onclick="wizStep(2)">← Voltar</button>
+        <button class="btn btn-primary" onclick="wizStep(4)">Ver Resultado →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Resultado + recomendações -->
+    <div class="wiz-panel" id="wp-4">
+      <div class="res-big" id="res-big-box">
+        <div class="res-big-score idx-neutral" id="res-score">—</div>
+        <div class="res-big-nivel" id="res-nivel">—</div>
+        <div class="res-big-ref" id="res-ref">—</div>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;">Recomendações</div>
+      <div id="rec-lista" style="margin-bottom:8px;"></div>
+      <button class="btn btn-edit btn-sm" onclick="addRec()" style="margin-bottom:14px;">+ Adicionar recomendação</button>
+
+      <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Exposição ao risco</div>
+      <div class="f-row">
+        <div class="fg">
+          <label>Exposição habitual e permanente?</label>
+          <select id="met-exposicao">
+            <option value="false">Não — exposição eventual</option>
+            <option value="true">Sim — habitual e permanente</option>
+          </select>
+          <div class="hint">Obrigatório para LTCAT e eSocial</div>
+        </div>
+        <div class="fg">
+          <label>Conclusão técnica</label>
+          <textarea id="met-conclusao" style="min-height:55px;resize:vertical;" placeholder="Descreva o parecer técnico final..."></textarea>
+        </div>
+      </div>
+
+      <div class="status-bar" id="status-met-4"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+        <button class="btn btn-cancel" onclick="wizStep(3)">← Voltar</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-edit" onclick="imprimirRelMet()">🖨️ Imprimir Relatório</button>
+          <button class="btn btn-save" id="btn-salvar-met" onclick="salvarMetodologia()">
+            <span class="spinner" id="spinner-met"></span>
+            <span id="label-met">Salvar e Transferir para Inventário</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
@@ -270,9 +454,638 @@ const params=new URLSearchParams(window.location.search);
 const empresaId=params.get('empresa_id');
 if(!empresaId)window.location.href='empresas.html';
 
-let empresa={},setores=[],funcoes=[],avaliacoes=[];
+let empresa={},setores=[],funcoes=[],avaliacoes=[],metodologias=[];
 let aetEditando=null,aetAvaliando=null;
 let itensAvaliacao={};
+// Wizard state
+let wizardPasso=1,wizardMet=null,wizardScore=null,wizardResult=null,wizardDados={},wizardRecs=[];
+
+// ── CONFIG DAS METODOLOGIAS ────────────────────────────
+const MET_CONFIG={
+  OCRA:{nome:'OCRA Check-List',icon:'🔄',desc:'Movimentos repetitivos de membros superiores (ciclos < 30s)',membro:'Membro superior direito',
+    scoreLabel:'Índice OCRA',refText:'ISO 11228-3 · NR-17',
+    form:[
+      {id:'fr',label:'Fator Recuperação',hint:'Score conforme horas sem pausa adequada no turno',type:'select',opts:[
+        {v:'0',l:'0 — Adequado (pausa ≥5min a cada hora)'},
+        {v:'2',l:'2 — 1h sem recuperação'},
+        {v:'3',l:'3 — 2h sem recuperação'},
+        {v:'4',l:'4 — 3h sem recuperação'},
+        {v:'5',l:'5 — 4h sem recuperação'},
+        {v:'6',l:'6 — 5h sem recuperação'},
+        {v:'10',l:'10 — Somente 1 pausa em turno de 8h'},
+      ]},
+      {id:'ff',label:'Fator Frequência',hint:'Ações técnicas por minuto do membro avaliado',type:'select',opts:[
+        {v:'0',l:'0 — Nenhuma ação repetitiva'},
+        {v:'1',l:'1 — Baixa (< 20 ações/min)'},
+        {v:'2',l:'2 — Moderada (21–40 ações/min)'},
+        {v:'3',l:'3 — Alta (41–60 ações/min)'},
+        {v:'4',l:'4 — Muito alta (61–80 ações/min)'},
+        {v:'6',l:'6 — Extrema (> 80 ações/min)'},
+      ]},
+      {id:'fp',label:'Fator Postura (score pior segmento)',hint:'0 = neutro, 6 = postura extremamente inadequada',type:'select',opts:[
+        {v:'0',l:'0 — Postura totalmente neutra'},
+        {v:'1',l:'1 — Levemente afastada do neutro (<10% do tempo)'},
+        {v:'2',l:'2 — Moderadamente inadequada'},
+        {v:'3',l:'3 — Claramente inadequada'},
+        {v:'4',l:'4 — Muito inadequada (>50% do tempo)'},
+        {v:'6',l:'6 — Extremamente inadequada (quase todo o tempo)'},
+      ]},
+      {id:'fa',label:'Fator Adicional',hint:'Somatório: vibração+2, compressão+2, frio+2, luva inad.+2, precisão+1',type:'number',min:0,max:8,step:1},
+      {id:'cd',label:'Multiplicador de Duração',hint:'Tempo líquido de trabalho repetitivo por turno',type:'select',opts:[
+        {v:'0.5',l:'0.50 — ≤ 1h/turno'},
+        {v:'0.65',l:'0.65 — 1 a 2h/turno'},
+        {v:'0.75',l:'0.75 — 2 a 4h/turno'},
+        {v:'0.85',l:'0.85 — 4 a 6h/turno'},
+        {v:'0.925',l:'0.93 — 6 a 7h/turno'},
+        {v:'1.0',l:'1.00 — > 7h/turno (tarefa pura)'},
+      ]},
+    ],
+    calc:(d)=>{
+      const s=(parseFloat(d.fr)||0)+(parseFloat(d.ff)||0)+(parseFloat(d.fp)||0)+(parseFloat(d.fa)||0);
+      return+((s*(parseFloat(d.cd)||1.0)).toFixed(2));
+    },
+    classify:(s)=>{
+      if(s<=7.5)return{nivel:'Aceitável',acao:'1',cls:'verde',ref:'OCRA ≤ 7.5'};
+      if(s<=11) return{nivel:'Muito Leve',acao:'2',cls:'amarelo',ref:'7.6 – 11.0'};
+      if(s<=14) return{nivel:'Leve',acao:'2',cls:'amarelo',ref:'11.1 – 14.0'};
+      if(s<=22.5)return{nivel:'Médio',acao:'3',cls:'laranja',ref:'14.1 – 22.5'};
+      return{nivel:'Alto',acao:'4',cls:'vermelho',ref:'> 22.5'};
+    },
+  },
+  RULA:{nome:'RULA',icon:'🧍',desc:'Avaliação postural — pescoço, tronco e membros superiores',membro:'Corpo inteiro',
+    scoreLabel:'Escore RULA',refText:'McAtamney & Corlett (1993) · NR-17',
+    form:[
+      {id:'s_braco',label:'Braço (posição do ombro)',hint:'Pontuação de postura do braço — use os ajustes abaixo',type:'select',opts:[
+        {v:'1',l:'1 — 20° flex/ext (neutro)'},
+        {v:'2',l:'2 — Extensão >20° ou flexão 20–45°'},
+        {v:'3',l:'3 — Flexão 45–90°'},
+        {v:'4',l:'4 — Flexão >90°'},
+      ]},
+      {id:'aj_braco',label:'Ajuste braço',hint:'Marque os fatores presentes (score resultante)',type:'select',opts:[
+        {v:'0',l:'0 — Sem ajuste'},
+        {v:'1',l:'+1 — Ombro elevado OU braço abduzido'},
+        {v:'-1',l:'-1 — Braço apoiado / gravitação auxilia'},
+      ]},
+      {id:'s_antebraco',label:'Antebraço',type:'select',opts:[
+        {v:'1',l:'1 — Flexão 60–100°'},
+        {v:'2',l:'2 — Flexão <60° ou >100°'},
+      ]},
+      {id:'aj_antebraco',label:'Ajuste antebraço',type:'select',opts:[
+        {v:'0',l:'0 — Sem ajuste'},
+        {v:'1',l:'+1 — Cruzando linha média / fora da área de trabalho'},
+      ]},
+      {id:'s_punho',label:'Punho (flexão/extensão)',type:'select',opts:[
+        {v:'1',l:'1 — Neutro'},
+        {v:'2',l:'2 — Flexão/extensão 0–15°'},
+        {v:'3',l:'3 — Flexão/extensão >15°'},
+      ]},
+      {id:'aj_punho',label:'Ajuste punho',type:'select',opts:[
+        {v:'0',l:'0 — Sem desvio'},
+        {v:'1',l:'+1 — Desvio radial ou ulnar'},
+      ]},
+      {id:'s_torcao',label:'Torção do punho',type:'select',opts:[
+        {v:'1',l:'1 — Principalmente na faixa normal'},
+        {v:'2',l:'2 — No limite da amplitude'},
+      ]},
+      {id:'musculo_a',label:'Uso muscular — Grupo A',hint:'A postura é estática (>1min) ou repetitiva (>4x/min)?',type:'select',opts:[{v:'0',l:'0 — Não'},{v:'1',l:'1 — Sim'}]},
+      {id:'forca_a',label:'Força/carga — Grupo A',type:'select',opts:[
+        {v:'0',l:'0 — < 2 kg (esforço intermitente)'},
+        {v:'1',l:'1 — 2–10 kg (intermitente)'},
+        {v:'2',l:'2 — 2–10 kg (estático ou repetitivo)'},
+        {v:'3',l:'3 — > 10 kg ou choque/força repentina'},
+      ]},
+      {id:'s_pescoco',label:'Pescoço',hint:'Flexão / extensão',type:'select',opts:[
+        {v:'1',l:'1 — 0–10° flexão'},
+        {v:'2',l:'2 — 10–20° flexão'},
+        {v:'3',l:'3 — > 20° flexão'},
+        {v:'4',l:'4 — Extensão'},
+      ]},
+      {id:'aj_pescoco',label:'Ajuste pescoço',type:'select',opts:[{v:'0',l:'0 — Sem ajuste'},{v:'1',l:'+1 — Rodado e/ou inclinado lateralmente'}]},
+      {id:'s_tronco',label:'Tronco',hint:'Posição do tronco',type:'select',opts:[
+        {v:'1',l:'1 — Sentado ereto'},
+        {v:'2',l:'2 — Flexão 0–20°'},
+        {v:'3',l:'3 — Flexão 20–60°'},
+        {v:'4',l:'4 — Flexão >60° ou extensão'},
+      ]},
+      {id:'aj_tronco',label:'Ajuste tronco',type:'select',opts:[{v:'0',l:'0 — Sem ajuste'},{v:'1',l:'+1 — Rodado e/ou inclinado lateralmente'}]},
+      {id:'s_pernas',label:'Pernas',type:'select',opts:[
+        {v:'1',l:'1 — Apoiadas / postura equilibrada'},
+        {v:'2',l:'2 — Sem apoio / carga assimétrica'},
+      ]},
+      {id:'musculo_b',label:'Uso muscular — Grupo B',type:'select',opts:[{v:'0',l:'0 — Não'},{v:'1',l:'1 — Sim'}]},
+      {id:'forca_b',label:'Força/carga — Grupo B',type:'select',opts:[
+        {v:'0',l:'0 — < 2 kg'},
+        {v:'1',l:'1 — 2–10 kg (intermitente)'},
+        {v:'2',l:'2 — 2–10 kg (estático/repetitivo)'},
+        {v:'3',l:'3 — > 10 kg ou força repentina'},
+      ]},
+    ],
+    calc:(d)=>{
+      // Grupo A: braço ajustado + antebraço ajustado + punho ajustado + torção
+      const braco=Math.max(1,Math.min(6,(parseInt(d.s_braco)||1)+(parseInt(d.aj_braco)||0)));
+      const ante=(parseInt(d.s_antebraco)||1)+(parseInt(d.aj_antebraco)||0);
+      const punho=Math.min(4,(parseInt(d.s_punho)||1)+(parseInt(d.aj_punho)||0));
+      const torcao=(parseInt(d.s_torcao)||1);
+      // Lookup Table A (simplificada por fórmula linear)
+      const posA=Math.min(9,braco+ante+punho+(torcao===2?1:0));
+      const scoreA=Math.min(9,posA+(parseInt(d.musculo_a)||0)+(parseInt(d.forca_a)||0));
+      // Grupo B: pescoço + tronco + pernas
+      const pesc=(parseInt(d.s_pescoco)||1)+(parseInt(d.aj_pescoco)||0);
+      const tronco=(parseInt(d.s_tronco)||1)+(parseInt(d.aj_tronco)||0);
+      const pernas=(parseInt(d.s_pernas)||1);
+      const posB=Math.min(9,pesc+tronco+pernas);
+      const scoreB=Math.min(9,posB+(parseInt(d.musculo_b)||0)+(parseInt(d.forca_b)||0));
+      // Tabela C simplificada
+      const TC=[[1,2,3,3,4,5,5],[2,2,3,4,4,5,5],[3,3,3,4,4,5,6],[3,3,3,4,5,6,6],[4,4,4,5,6,7,7],[4,4,5,6,6,7,7],[5,5,6,6,7,7,7],[5,5,6,7,7,7,7]];
+      const r=TC[Math.min(7,scoreA-1)]?.[Math.min(6,scoreB-1)]||7;
+      return{grand:r,scoreA,scoreB};
+    },
+    classify:(r)=>{
+      const g=typeof r==='object'?r.grand:r;
+      if(g<=2)return{nivel:'Nível 1 — Aceitável',acao:'1',cls:'verde',ref:'Escore 1–2 · Sem ação necessária'};
+      if(g<=4)return{nivel:'Nível 2 — Investigar',acao:'2',cls:'amarelo',ref:'Escore 3–4 · Mudanças podem ser necessárias'};
+      if(g<=6)return{nivel:'Nível 3 — Investigar em breve',acao:'3',cls:'laranja',ref:'Escore 5–6 · Mudanças são necessárias'};
+      return{nivel:'Nível 4 — Mudança imediata',acao:'4',cls:'vermelho',ref:'Escore 7 · Ação imediata necessária'};
+    },
+  },
+  JSI:{nome:'JSI',icon:'✋',desc:'Esforço de mão/punho em tarefas repetitivas (Moore & Garg)',membro:'Mão/punho',
+    scoreLabel:'JSI Score',refText:'Moore & Garg (1995) · NR-17',
+    form:[
+      {id:'ie',label:'Intensidade do esforço (IE)',hint:'Percepção de esforço pelo trabalhador',type:'select',opts:[
+        {v:'1',l:'1 — Muito leve'},
+        {v:'2',l:'2 — Leve'},
+        {v:'3',l:'3 — Moderado'},
+        {v:'4',l:'4 — Alto'},
+        {v:'5',l:'5 — Muito alto'},
+      ]},
+      {id:'de',label:'Duração do esforço por ciclo (DE)',hint:'% do ciclo com esforço',type:'select',opts:[
+        {v:'1',l:'1 — < 10% do ciclo'},
+        {v:'2',l:'2 — 10–29% do ciclo'},
+        {v:'3',l:'3 — 30–49% do ciclo'},
+        {v:'4',l:'4 — 50–79% do ciclo'},
+        {v:'5',l:'5 — ≥ 80% do ciclo'},
+      ]},
+      {id:'epm',label:'Esforços por minuto (EPM)',type:'select',opts:[
+        {v:'1',l:'1 — < 4 esforços/min'},
+        {v:'2',l:'2 — 4–8 esforços/min'},
+        {v:'3',l:'3 — 9–14 esforços/min'},
+        {v:'4',l:'4 — 15–19 esforços/min'},
+        {v:'5',l:'5 — ≥ 20 esforços/min'},
+      ]},
+      {id:'puwr',label:'Postura punho/mão (PUWR)',type:'select',opts:[
+        {v:'1',l:'1 — Muito boa (neutro)'},
+        {v:'2',l:'2 — Boa'},
+        {v:'3',l:'3 — Regular'},
+        {v:'4',l:'4 — Ruim'},
+        {v:'5',l:'5 — Muito ruim'},
+      ]},
+      {id:'sw',label:'Velocidade do trabalho (SW)',type:'select',opts:[
+        {v:'1',l:'1 — Muito lenta'},
+        {v:'2',l:'2 — Lenta'},
+        {v:'3',l:'3 — Regular'},
+        {v:'4',l:'4 — Rápida'},
+        {v:'5',l:'5 — Muito rápida'},
+      ]},
+      {id:'dpd',label:'Duração da tarefa por dia (DPD)',type:'select',opts:[
+        {v:'1',l:'1 — < 1h/dia'},
+        {v:'2',l:'2 — 1–2h/dia'},
+        {v:'3',l:'3 — 2–4h/dia'},
+        {v:'4',l:'4 — 4–8h/dia'},
+        {v:'5',l:'5 — > 8h/dia'},
+      ]},
+    ],
+    calc:(d)=>{
+      const M={ie:{1:.5,2:1,3:3,4:6,5:9},de:{1:.1,2:.5,3:1,4:1.5,5:2},epm:{1:.5,2:1,3:1.5,4:2,5:3},puwr:{1:1,2:1,3:1.5,4:2,5:3},sw:{1:1,2:1,3:1,4:1.5,5:2},dpd:{1:.25,2:.5,3:.75,4:1,5:1.5}};
+      return+((M.ie[d.ie]||1)*(M.de[d.de]||1)*(M.epm[d.epm]||1)*(M.puwr[d.puwr]||1)*(M.sw[d.sw]||1)*(M.dpd[d.dpd]||1)).toFixed(2);
+    },
+    classify:(s)=>{
+      if(s<=3)return{nivel:'Provavelmente Seguro',acao:'1',cls:'verde',ref:'JSI ≤ 3'};
+      if(s<=7)return{nivel:'Incerto — Monitorar',acao:'2',cls:'amarelo',ref:'JSI 3–7'};
+      return{nivel:'Provavelmente Perigoso',acao:'3',cls:'vermelho',ref:'JSI > 7 · Risco de DORT'};
+    },
+  },
+  OWAS:{nome:'OWAS',icon:'🏗️',desc:'Análise de posturas de trabalho por observação sistemática',membro:'Corpo inteiro',
+    scoreLabel:'Código OWAS',refText:'Karhu et al. (1977) · NR-17',
+    form:[
+      {id:'costas',label:'Código Costas',type:'select',opts:[
+        {v:'1',l:'1 — Reta'},
+        {v:'2',l:'2 — Inclinada para frente ou para trás'},
+        {v:'3',l:'3 — Rodada ou inclinada lateralmente'},
+        {v:'4',l:'4 — Inclinada e rodada'},
+      ]},
+      {id:'bracos',label:'Código Braços',type:'select',opts:[
+        {v:'1',l:'1 — Ambos abaixo do nível do ombro'},
+        {v:'2',l:'2 — Um braço no nível ou acima do ombro'},
+        {v:'3',l:'3 — Ambos no nível ou acima do ombro'},
+      ]},
+      {id:'pernas',label:'Código Pernas',type:'select',opts:[
+        {v:'1',l:'1 — Sentado'},
+        {v:'2',l:'2 — Em pé, ambas as pernas retas'},
+        {v:'3',l:'3 — Em pé, peso em uma perna reta'},
+        {v:'4',l:'4 — Em pé, ambos os joelhos dobrados'},
+        {v:'5',l:'5 — Em pé, um joelho dobrado'},
+        {v:'6',l:'6 — Ajoelhado'},
+        {v:'7',l:'7 — Andando'},
+      ]},
+      {id:'carga',label:'Código Carga',type:'select',opts:[
+        {v:'1',l:'1 — < 10 kg'},
+        {v:'2',l:'2 — 10–20 kg'},
+        {v:'3',l:'3 — > 20 kg ou carga repentina'},
+      ]},
+      {id:'pct_tempo',label:'% tempo na postura observada',hint:'Percentual do turno nesta postura',type:'number',min:1,max:100,step:1},
+    ],
+    calc:(d)=>{
+      // Matriz OWAS simplificada: [costas][bracos][pernas] → categoria base
+      const B=parseInt(d.costas)||1,A=parseInt(d.bracos)||1,L=parseInt(d.pernas)||1,C=parseInt(d.carga)||1;
+      const T=[[
+        [1,1,1,2,2,2,1],[1,1,1,2,2,2,1],[1,1,1,2,2,3,1]],[[
+        1,2,2,3,3,3,1],[2,2,2,3,3,3,1],[2,2,3,3,3,3,2]],[[
+        2,2,3,3,3,4,2],[2,3,3,3,4,4,2],[3,3,4,4,4,4,3]],[[
+        2,3,3,4,4,4,3],[3,3,3,4,4,4,3],[3,4,4,4,4,4,4]]];
+      let cat=(T[B-1]?.[A-1]?.[L-1])||2;
+      if(C===3&&cat<4)cat=Math.min(4,cat+1);
+      return{cat,codigo:`${B}-${A}-${L}-${C}`};
+    },
+    classify:(r)=>{
+      const c=typeof r==='object'?r.cat:r;
+      const cats={1:{nivel:'Categoria 1 — Sem ação necessária',acao:'1',cls:'verde',ref:'Postura normal e natural'},
+        2:{nivel:'Categoria 2 — Ação no futuro próximo',acao:'2',cls:'amarelo',ref:'Efeito musculoesquelético presente'},
+        3:{nivel:'Categoria 3 — Ação em breve',acao:'3',cls:'laranja',ref:'Efeito musculoesquelético claro'},
+        4:{nivel:'Categoria 4 — Ação IMEDIATA',acao:'4',cls:'vermelho',ref:'Efeito musculoesquelético muito grave'}};
+      return cats[c]||cats[2];
+    },
+  },
+  NIOSH:{nome:'NIOSH Lifting',icon:'🏋️',desc:'Levantamento e transporte manual de cargas (Waters et al.)',membro:'Coluna lombar',
+    scoreLabel:'Índice de Levantamento (LI)',refText:'NIOSH 1994 · ISO 11228-1 · NR-17',
+    form:[
+      {id:'peso_kg',label:'Peso da carga (kg)',type:'number',min:0.1,max:200,step:0.5},
+      {id:'dist_h',label:'Distância horizontal (cm)',hint:'Distância horizontal entre mãos e tornozelos. Ideal: 25cm',type:'number',min:1,max:80,step:1},
+      {id:'alt_v',label:'Altura vertical das mãos (cm)',hint:'Altura das mãos no início do levantamento. Ideal: 75cm',type:'number',min:0,max:175,step:1},
+      {id:'desl_v',label:'Deslocamento vertical (cm)',hint:'Distância vertical percorrida. Ideal: 25cm',type:'number',min:0,max:175,step:1},
+      {id:'ang_a',label:'Ângulo de assimetria (°)',hint:'Grau de rotação do tronco. Ideal: 0°',type:'number',min:0,max:135,step:5},
+      {id:'freq',label:'Frequência de levantamentos (por min)',type:'number',min:0.1,max:15,step:0.1},
+      {id:'dur',label:'Duração do levantamento',type:'select',opts:[
+        {v:'1',l:'≤ 1 hora'},
+        {v:'2',l:'≤ 2 horas'},
+        {v:'8',l:'≤ 8 horas'},
+      ]},
+      {id:'pega',label:'Qualidade da pega',type:'select',opts:[
+        {v:'boa',l:'Boa — Recipiente ótimo, alças ou pega firme'},
+        {v:'regular',l:'Regular — Recipiente com alça ou pega aceitável'},
+        {v:'ruim',l:'Ruim — Sem alça, volume irregular, bordas cortantes'},
+      ]},
+    ],
+    calc:(d)=>{
+      const peso=parseFloat(d.peso_kg)||0;
+      const H=Math.max(1,parseFloat(d.dist_h)||25);
+      const V=parseFloat(d.alt_v)||75;
+      const D=Math.max(0,parseFloat(d.desl_v)||25);
+      const A=Math.min(135,parseFloat(d.ang_a)||0);
+      const freq=parseFloat(d.freq)||0;
+      const dur=parseInt(d.dur)||8;
+      const pega=d.pega||'boa';
+      const HM=Math.min(1,25/H);
+      const VM=Math.max(0,1-(0.003*Math.abs(V-75)));
+      const DM=D>0?Math.min(1,0.82+(4.5/D)):1;
+      const AM=Math.max(0,1-(0.0032*A));
+      // FM lookup simplificado (NIOSH 1994 Table 5)
+      const fmTbl={0.2:[1,.95,.85],.5:[.97,.92,.81],1:[.94,.88,.75],2:[.91,.84,.65],3:[.88,.79,.55],4:[.84,.72,.45],5:[.8,.6,.35],6:[.75,.5,.27],7:[.7,.42,.22],8:[.6,.35,.18],9:[.52,.3,0],10:[.45,.26,0],11:[.41,.23,0],12:[.37,.21,0],15:[.28,0,0]};
+      const col=dur<=1?0:dur<=2?1:2;
+      const freqKeys=Object.keys(fmTbl).map(Number).sort((a,b)=>a-b);
+      let fk=freqKeys[0];
+      for(const k of freqKeys){if(k<=freq)fk=k;else break;}
+      const FM=fmTbl[fk]?.[col]??0;
+      const CM={boa:1,regular:.95,ruim:.9}[pega]??1;
+      const RWL=+(23*HM*VM*DM*AM*FM*CM).toFixed(2);
+      const LI=RWL>0?+(peso/RWL).toFixed(2):0;
+      return{LI,RWL,HM:+HM.toFixed(3),VM:+VM.toFixed(3),DM:+DM.toFixed(3),AM:+AM.toFixed(3),FM:+FM.toFixed(3),CM};
+    },
+    classify:(r)=>{
+      const li=typeof r==='object'?r.LI:r;
+      if(li<=1)return{nivel:'Aceitável',acao:'1',cls:'verde',ref:'LI ≤ 1.0 — Tarefa segura para a maioria'};
+      if(li<=2)return{nivel:'Risco Moderado',acao:'2',cls:'amarelo',ref:'LI 1.0–2.0 — Alguns trabalhadores sob risco'};
+      if(li<=3)return{nivel:'Risco Elevado',acao:'3',cls:'laranja',ref:'LI 2.0–3.0 — Maioria sob risco'};
+      return{nivel:'Risco Muito Alto',acao:'4',cls:'vermelho',ref:`LI > 3.0 — Redesenho imediato da tarefa`};
+    },
+  },
+};
+
+// ── WIZARD METODOLOGIA ────────────────────────────────
+function abrirWizardMet(){
+  wizardPasso=1;wizardMet=null;wizardScore=null;wizardResult=null;wizardDados={};wizardRecs=[];
+  renderMetCards();
+  renderWizStep(1);
+  document.getElementById('met-data').value=hoje();
+  document.getElementById('met-setor').innerHTML='<option value="">— Selecione —</option>';
+  setores.forEach(s=>document.getElementById('met-setor').innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+  document.getElementById('modal-met').classList.add('show');
+}
+function fecharWizardMet(){document.getElementById('modal-met').classList.remove('show');}
+function renderMetCards(){
+  const g=document.getElementById('met-cards-grid');
+  g.innerHTML=Object.entries(MET_CONFIG).map(([k,c])=>`
+    <div class="met-card-opt ${wizardMet===k?'selected':''}" onclick="selectMet('${k}')">
+      <div class="mc-icon">${c.icon}</div>
+      <div class="mc-name">${c.nome}</div>
+      <div class="mc-desc">${c.desc}</div>
+    </div>`).join('');
+}
+function selectMet(key){
+  wizardMet=key;
+  renderMetCards();
+  document.getElementById('met-membro').value=MET_CONFIG[key].membro||'';
+}
+function wizStep(n){
+  // Validar antes de avançar
+  if(n===2&&!wizardMet){setStatus('status-met-1','error','Selecione uma metodologia para continuar.');return;}
+  if(n===3){
+    const setor=document.getElementById('met-setor').value;
+    const resp=document.getElementById('met-responsavel').value.trim();
+    if(!setor){setStatus('status-met-2','error','Selecione o setor.');return;}
+    if(!resp){setStatus('status-met-2','error','Informe o responsável técnico.');return;}
+  }
+  if(n===4){
+    if(wizardScore===null){setStatus('status-met-3','error','Preencha todos os campos para calcular o índice.');return;}
+  }
+  wizardPasso=n;
+  renderWizStep(n);
+  if(n===3)renderFormMet();
+  if(n===4)renderResultado();
+}
+function renderWizStep(n){
+  for(let i=1;i<=4;i++){
+    const s=document.getElementById(`ws-${i}`);
+    const p=document.getElementById(`wp-${i}`);
+    if(s)s.className='wiz-step'+(i===n?' active':i<n?' done':'');
+    if(p)p.className='wiz-panel'+(i===n?' active':'');
+  }
+  document.getElementById('met-modal-titulo').textContent=`Nova Avaliação — ${wizardMet?MET_CONFIG[wizardMet].nome:'Metodologia'} — Passo ${n}/4`;
+}
+async function carregarFuncoesMet(){
+  const setorId=parseInt(document.getElementById('met-setor').value);
+  const sel=document.getElementById('met-funcao');
+  if(!setorId){sel.innerHTML='<option value="">— Selecione o setor —</option>';return;}
+  sel.innerHTML='<option value="">Carregando...</option>';
+  const res=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&select=funcao_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+  const data=await res.json();
+  const ids=data.map(x=>x.funcao_id);
+  sel.innerHTML='<option value="">— Selecione —</option>'+funcoes.filter(f=>ids.includes(f.id)).map(f=>`<option value="${f.id}">${escHtml(f.nome_funcao)}</option>`).join('');
+}
+function renderFormMet(){
+  const cfg=MET_CONFIG[wizardMet];
+  if(!cfg)return;
+  document.getElementById('met-form-desc').textContent=`Metodologia: ${cfg.nome} — ${cfg.refText}`;
+  const fields=document.getElementById('met-form-fields');
+  // Agrupar em pares para layout 2 colunas
+  const items=cfg.form;
+  let html='';
+  for(let i=0;i<items.length;i+=2){
+    const a=items[i],b=items[i+1];
+    html+=`<div class="f-row">`;
+    html+=renderField(a);
+    if(b)html+=renderField(b);
+    html+=`</div>`;
+  }
+  fields.innerHTML=html;
+  // Atualiza painel vivo
+  document.getElementById('calc-label').textContent=cfg.scoreLabel;
+  document.getElementById('calc-ref').textContent=cfg.refText;
+  // Listeners
+  cfg.form.forEach(f=>{
+    const el=document.getElementById(`mf-${f.id}`);
+    if(el)el.addEventListener('input',calcularLive);
+  });
+}
+function renderField(f){
+  if(f.type==='select'){
+    return`<div class="fg"><label>${escHtml(f.label)}</label><select id="mf-${f.id}" onchange="calcularLive()"><option value="">— selecione —</option>${f.opts.map(o=>`<option value="${o.v}">${escHtml(o.l)}</option>`).join('')}</select>${f.hint?`<div class="hint">${escHtml(f.hint)}</div>`:''}</div>`;
+  }
+  return`<div class="fg"><label>${escHtml(f.label)}</label><input type="number" id="mf-${f.id}" min="${f.min??0}" max="${f.max??9999}" step="${f.step??1}" oninput="calcularLive()">${f.hint?`<div class="hint">${escHtml(f.hint)}</div>`:''}</div>`;
+}
+function calcularLive(){
+  const cfg=MET_CONFIG[wizardMet];
+  if(!cfg)return;
+  const dados={};
+  cfg.form.forEach(f=>{const el=document.getElementById(`mf-${f.id}`);if(el)dados[f.id]=el.value;});
+  try{
+    const raw=cfg.calc(dados);
+    let displayScore,extra='';
+    if(wizardMet==='NIOSH'){
+      displayScore=raw.LI;
+      extra=`RWL calculado: <strong>${raw.RWL} kg</strong><br>HM×VM×DM×AM×FM×CM = ${raw.HM}×${raw.VM}×${raw.DM}×${raw.AM}×${raw.FM}×${raw.CM}`;
+    }else if(wizardMet==='RULA'){
+      displayScore=raw.grand;
+      extra=`Score A: ${raw.scoreA} · Score B: ${raw.scoreB}`;
+    }else if(wizardMet==='OWAS'){
+      displayScore=raw.cat;
+      extra=`Código OWAS: ${raw.codigo}`;
+    }else{
+      displayScore=raw;
+    }
+    const result=cfg.classify(raw);
+    wizardScore=displayScore;
+    wizardResult=result;
+    wizardDados={...dados};
+    // Atualiza painel
+    document.getElementById('calc-score').textContent=displayScore;
+    document.getElementById('calc-score').className=`calc-score idx-${result.cls}`;
+    document.getElementById('calc-nivel').textContent=result.nivel;
+    document.getElementById('calc-ref').textContent=result.ref;
+    document.getElementById('calc-extra').innerHTML=extra;
+  }catch(e){/* campos incompletos */}
+}
+function renderResultado(){
+  const cfg=MET_CONFIG[wizardMet];
+  if(!cfg||!wizardResult)return;
+  document.getElementById('res-score').textContent=wizardScore;
+  document.getElementById('res-score').className=`res-big-score idx-${wizardResult.cls}`;
+  document.getElementById('res-nivel').textContent=wizardResult.nivel;
+  document.getElementById('res-ref').textContent=`${cfg.scoreLabel}: ${wizardScore} · ${wizardResult.ref} · ${cfg.refText}`;
+  renderRecLista();
+}
+// Recomendações
+function addRec(texto='',prior='Alta'){
+  wizardRecs.push({texto,prior});
+  renderRecLista();
+}
+function renderRecLista(){
+  const el=document.getElementById('rec-lista');
+  if(!wizardRecs.length){el.innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:8px;">Nenhuma recomendação. Clique em "+ Adicionar recomendação" para incluir.</div>';return;}
+  el.innerHTML=wizardRecs.map((r,i)=>`
+    <div class="rec-add-row">
+      <input type="text" value="${escHtml(r.texto)}" placeholder="Descreva a medida recomendada..." oninput="wizardRecs[${i}].texto=this.value">
+      <select onchange="wizardRecs[${i}].prior=this.value" style="width:90px;">
+        <option ${r.prior==='Alta'?'selected':''}>Alta</option>
+        <option ${r.prior==='Média'?'selected':''}>Média</option>
+        <option ${r.prior==='Baixa'?'selected':''}>Baixa</option>
+      </select>
+      <select onchange="wizardRecs[${i}].prazo=this.value" style="width:100px;">
+        <option>Imediato</option>
+        <option>30 dias</option>
+        <option>60 dias</option>
+        <option>90 dias</option>
+        <option>6 meses</option>
+      </select>
+      <button onclick="wizardRecs.splice(${i},1);renderRecLista();" style="background:transparent;border:1px solid var(--danger);color:var(--danger);border-radius:4px;cursor:pointer;padding:4px 8px;font-size:12px;">✕</button>
+    </div>`).join('');
+}
+// Score para P×S (mapeamento para funcao_riscos)
+function scoreToPxS(met,score,rawResult){
+  const maps={
+    OCRA:(s)=>s<=7.5?{p:1,sv:1,n:'Baixo'}:s<=11?{p:2,sv:2,n:'Baixo'}:s<=14?{p:3,sv:3,n:'Médio'}:s<=22.5?{p:4,sv:4,n:'Alto'}:{p:5,sv:5,n:'Muito Alto'},
+    RULA:(s)=>s<=2?{p:1,sv:1,n:'Baixo'}:s<=4?{p:2,sv:2,n:'Médio'}:s<=6?{p:4,sv:4,n:'Alto'}:{p:5,sv:5,n:'Muito Alto'},
+    JSI:(s)=>s<=3?{p:1,sv:1,n:'Baixo'}:s<=7?{p:3,sv:3,n:'Médio'}:{p:4,sv:4,n:'Alto'},
+    OWAS:(s)=>{const v=typeof s==='object'?s.cat:s;return v<=1?{p:1,sv:1,n:'Baixo'}:v<=2?{p:2,sv:2,n:'Médio'}:v<=3?{p:4,sv:4,n:'Alto'}:{p:5,sv:5,n:'Muito Alto'};},
+    NIOSH:(s)=>{const li=typeof s==='object'?s.LI:s;return li<=1?{p:1,sv:1,n:'Baixo'}:li<=2?{p:3,sv:3,n:'Médio'}:li<=3?{p:4,sv:4,n:'Alto'}:{p:5,sv:5,n:'Muito Alto'};}
+  };
+  return(maps[met]||maps.OCRA)(score);
+}
+
+async function salvarMetodologia(){
+  const cfg=MET_CONFIG[wizardMet];
+  if(!cfg||wizardScore===null){alert('Preencha todos os campos e calcule o índice antes de salvar.');return;}
+  const funcaoId=parseInt(document.getElementById('met-funcao').value)||null;
+  const setorId=parseInt(document.getElementById('met-setor').value);
+  const resp=document.getElementById('met-responsavel').value.trim();
+  const btn=document.getElementById('btn-salvar-met');
+  btn.disabled=true;
+  document.getElementById('spinner-met').className='spinner show';
+  try{
+    const aetNum=`AET-MET-${new Date().getFullYear()}-${String(avaliacoes.length+1).padStart(3,'0')}`;
+    // 1) Criar aet_avaliacoes com tipo_aet = Metodologia Quantitativa
+    const aetPayload={
+      empresa_id:parseInt(empresaId),setor_id:setorId,funcao_id:funcaoId,
+      numero_aet:aetNum,data_avaliacao:document.getElementById('met-data').value||hoje(),
+      responsavel_tecnico:resp,
+      num_trabalhadores_avaliados:parseInt(document.getElementById('met-num-trab').value)||1,
+      jornada_trabalho:document.getElementById('met-jornada').value.trim()||null,
+      conclusao_tecnica:document.getElementById('met-conclusao').value.trim()||null,
+      status:'Concluída',tipo_aet:'Metodologia Quantitativa',ativo:true,
+      nivel_risco_geral:wizardResult.nivel,
+      exposicao_habitual_permanente:document.getElementById('met-exposicao').value==='true',
+    };
+    const resAet=await fetch(`${SUPA_URL}/rest/v1/aet_avaliacoes`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(aetPayload)});
+    if(!resAet.ok){const e=await resAet.json();throw new Error(e.message);}
+    const aetData=await resAet.json();
+    const novaAet=aetData[0];
+    avaliacoes.unshift(novaAet);
+
+    // 2) Criar aet_metodologias
+    const displayScore=wizardMet==='RULA'?wizardDados.__raw?.grand??wizardScore:wizardMet==='OWAS'?wizardDados.__raw?.cat??wizardScore:wizardScore;
+    const metPayload={
+      aet_id:novaAet.id,empresa_id:parseInt(empresaId),
+      metodologia:wizardMet,
+      membro_avaliado:document.getElementById('met-membro').value.trim()||cfg.membro,
+      tarefa:document.getElementById('met-tarefa').value.trim()||null,
+      score_total:parseFloat(wizardScore)||null,
+      nivel_risco:wizardResult.nivel,
+      nivel_acao:wizardResult.acao,
+      dados_json:{...wizardDados,recomendacoes:wizardRecs},
+      recomendacoes:wizardRecs.map(r=>`[${r.prior}] ${r.texto}`).join('\n')||null,
+      ativo:true,
+    };
+    const resMet=await fetch(`${SUPA_URL}/rest/v1/aet_metodologias`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},body:JSON.stringify(metPayload)});
+    let metId=null;
+    if(resMet.ok){const md=await resMet.json();metId=md[0]?.id;metodologias.unshift({...md[0],aet:novaAet});}
+
+    // 3) Transferir para funcao_riscos (se houver função selecionada)
+    if(funcaoId){
+      const pxs=scoreToPxS(wizardMet,wizardScore);
+      const metNome=cfg.nome;
+      // Busca risco ergonômico na tabela riscos
+      const resRisco=await fetch(`${SUPA_URL}/rest/v1/riscos?categoria_risco_id=in.(SELECT id FROM categorias_risco WHERE nome=ilike.%ergon%)&ativo=eq.true&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      // Fallback: busca pelo nome
+      const resRiscoFB=await fetch(`${SUPA_URL}/rest/v1/riscos?nome_risco=ilike.*ergonom*&ativo=eq.true&limit=5`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      const riscosFB=await resRiscoFB.json();
+      const riscoId=riscosFB?.[0]?.id||null;
+      if(riscoId){
+        // Verifica se já existe funcao_risco para esta função+risco
+        const resExist=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&risco_id=eq.${riscoId}&ativo=eq.true&limit=1`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+        const existing=await resExist.json();
+        const frPayload={
+          funcao_id:funcaoId,risco_id:riscoId,empresa_id:parseInt(empresaId),
+          probabilidade:pxs.p,severidade:pxs.sv,nivel_risco:pxs.n,
+          tipo_avaliacao:'Quantitativa',
+          metodologia_avaliacao_custom:metNome,
+          valor_medido:parseFloat(wizardScore)||null,
+          unidade_medida:cfg.scoreLabel,
+          data_avaliacao:document.getElementById('met-data').value||hoje(),
+          responsavel_avaliacao:resp,
+          conclusao_qualitativa:wizardResult.nivel,
+          aet_id:novaAet.id,
+          aet_metodologia_id:metId,
+          origem_aet:true,ativo:true,
+          num_expostos:parseInt(document.getElementById('met-num-trab').value)||1,
+        };
+        if(existing.length){
+          await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${existing[0].id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify(frPayload)});
+        }else{
+          await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`},body:JSON.stringify(frPayload)});
+        }
+      }
+    }
+    setStatus('status-met-4','success','Avaliação salva e transferida para o inventário de riscos!');
+    renderStats();renderLista();
+    setTimeout(()=>fecharWizardMet(),1800);
+  }catch(e){setStatus('status-met-4','error',e.message);}
+  finally{btn.disabled=false;document.getElementById('spinner-met').className='spinner';}
+}
+
+function imprimirRelMet(){
+  const cfg=MET_CONFIG[wizardMet];
+  if(!cfg||!wizardResult)return;
+  const setor=setores.find(s=>s.id===parseInt(document.getElementById('met-setor').value));
+  const func=funcoes.find(f=>f.id===parseInt(document.getElementById('met-funcao').value));
+  const nome=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+  const resp=document.getElementById('met-responsavel').value.trim();
+  const data=document.getElementById('met-data').value||hoje();
+  const membro=document.getElementById('met-membro').value.trim()||cfg.membro;
+  const tarefa=document.getElementById('met-tarefa').value.trim();
+  const CLS_BG={verde:'#d1fae5',amarelo:'#fef9c3',laranja:'#ffedd5',vermelho:'#fee2e2'};
+  const CLS_COR={verde:'#065f46',amarelo:'#78350f',laranja:'#7c2d12',vermelho:'#991b1b'};
+  const recHtml=wizardRecs.length?`<table style="width:100%;border-collapse:collapse;font-size:9pt;margin-bottom:10pt;"><thead><tr><th style="background:#0d4a3a;color:#fff;padding:5pt 6pt;text-align:left;">Medida recomendada</th><th style="background:#0d4a3a;color:#fff;padding:5pt 6pt;width:80pt;">Prioridade</th><th style="background:#0d4a3a;color:#fff;padding:5pt 6pt;width:70pt;">Prazo</th></tr></thead><tbody>${wizardRecs.map((r,i)=>`<tr style="${i%2?'background:#f0fdf4':''};"><td style="padding:5pt 6pt;border-bottom:1pt solid #e5e7eb;">${escHtml(r.texto)}</td><td style="padding:5pt 6pt;border-bottom:1pt solid #e5e7eb;">${escHtml(r.prior)}</td><td style="padding:5pt 6pt;border-bottom:1pt solid #e5e7eb;">${escHtml(r.prazo||'—')}</td></tr>`).join('')}</tbody></table>`:'<p style="color:#6b7280;font-size:9pt;">Nenhuma recomendação registrada.</p>';
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>AET — ${cfg.nome} — ${nome}</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Arial,sans-serif;font-size:10pt;color:#1a1a2e;}
+  .page{width:210mm;min-height:297mm;padding:15mm 15mm 15mm 20mm;border-left:8mm solid #0d4a3a;position:relative;}
+  .topo{border-bottom:2pt solid #1a7a5e;padding-bottom:8pt;margin-bottom:14pt;display:flex;justify-content:space-between;}
+  .topo-t{font-size:13pt;font-weight:700;color:#0d4a3a;}.topo-s{font-size:9pt;color:#6b7280;margin-top:2pt;}
+  .sec{font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#0d4a3a;border-bottom:1pt solid #a7f3d0;padding-bottom:3pt;margin:12pt 0 7pt;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;border:1pt solid #d1fae5;border-radius:3pt;overflow:hidden;margin-bottom:10pt;}
+  .campo{padding:5pt 7pt;border-right:1pt solid #d1fae5;border-bottom:1pt solid #d1fae5;}
+  .campo:nth-child(2n){border-right:none;}.campo-full{grid-column:1/-1;border-right:none!important;}
+  .cl{font-size:7pt;font-weight:700;text-transform:uppercase;color:#6b7280;margin-bottom:2pt;}.cv{font-size:9.5pt;}
+  .res-box{background:${CLS_BG[wizardResult.cls]||'#f3f4f6'};border:1pt solid ${CLS_COR[wizardResult.cls]||'#ccc'};border-radius:6pt;padding:14pt;text-align:center;margin:12pt 0;}
+  .res-score{font-size:36pt;font-weight:700;color:${CLS_COR[wizardResult.cls]||'#333'};}
+  .res-nivel{font-size:13pt;font-weight:600;color:${CLS_COR[wizardResult.cls]||'#333'};margin-top:4pt;}
+  .res-ref{font-size:9pt;color:#374151;margin-top:3pt;}
+  .footer{position:absolute;bottom:12mm;left:28mm;right:15mm;display:flex;justify-content:space-between;border-top:1pt solid #a7f3d0;padding-top:5pt;font-size:7.5pt;color:#6b7280;}
+  @media print{@page{size:A4;margin:0;}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}}
+  </style></head><body><div class="page">
+  <div class="topo"><div><div class="topo-t">AVALIAÇÃO ERGONÔMICA DO TRABALHO — ${cfg.nome}</div><div class="topo-s">NR-17 · ${cfg.refText} · ${escHtml(nome)}</div></div><div style="text-align:right;font-size:9pt;color:#6b7280;"><div>Data: ${fmtData(data)}</div><div>Resp: ${escHtml(resp)}</div></div></div>
+  <div class="sec">1. Identificação</div>
+  <div class="grid2"><div class="campo campo-full"><div class="cl">Empresa</div><div class="cv" style="font-weight:700;">${escHtml(nome)}</div></div>
+  <div class="campo"><div class="cl">Setor</div><div class="cv">${escHtml(setor?.nome_setor||'—')}</div></div>
+  <div class="campo"><div class="cl">Função avaliada</div><div class="cv">${escHtml(func?.nome_funcao||'—')}</div></div>
+  <div class="campo"><div class="cl">Membro / Segmento</div><div class="cv">${escHtml(membro)}</div></div>
+  <div class="campo"><div class="cl">Metodologia</div><div class="cv">${cfg.nome}</div></div>
+  ${tarefa?`<div class="campo campo-full"><div class="cl">Tarefa avaliada</div><div class="cv">${escHtml(tarefa)}</div></div>`:''}
+  </div>
+  <div class="sec">2. Resultado</div>
+  <div class="res-box"><div class="res-score">${wizardScore}</div><div class="res-nivel">${wizardResult.nivel}</div><div class="res-ref">${cfg.scoreLabel}: ${wizardScore} · ${wizardResult.ref}</div></div>
+  <div class="sec">3. Recomendações</div>
+  ${recHtml}
+  <div class="sec">4. Responsável técnico</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20pt;margin-top:30pt;">
+    <div><div style="border-top:1pt solid #374151;padding-top:5pt;text-align:center;font-size:8pt;color:#374151;">${escHtml(resp)}<br>Responsável pela avaliação<br>Data: ${fmtData(data)}</div></div>
+    <div><div style="border-top:1pt solid #374151;padding-top:5pt;text-align:center;font-size:8pt;color:#374151;">_________________________<br>Representante da empresa</div></div>
+  </div>
+  <div style="margin-top:12pt;font-size:8pt;color:#9ca3af;text-align:center;border-top:1pt solid #a7f3d0;padding-top:5pt;">
+    Validade: 12 meses a partir da emissão · Reavaliação em caso de mudança de processo · Ref: ${cfg.refText} · SGS Sistema de Gestão em SST
+  </div>
+  <div class="footer"><span>AET — ${cfg.nome} — ${escHtml(nome)}</span><span>Página 1 de 1</span></div>
+  </div></body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();w.onload=()=>w.print();
+}
 
 // Itens por categoria NR-17
 const ITENS_AET=[
@@ -351,6 +1164,11 @@ async function inicializar(){
     document.getElementById('header-nome').textContent=nome;
     const selSet=document.getElementById('aet-setor');
     setores.forEach(s=>selSet.innerHTML+=`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`);
+    // Carrega avaliações por metodologia (tabela criada na migration)
+    try{
+      const resMets=await fetch(`${SUPA_URL}/rest/v1/aet_metodologias?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=criado_em.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      if(resMets.ok)metodologias=await resMets.json();
+    }catch(_){}
     renderStats();renderLista();
   }catch(e){console.error(e);}
 }
@@ -359,22 +1177,54 @@ function renderStats(){
   const total=avaliacoes.length;
   const concluidas=avaliacoes.filter(a=>a.status==='Concluída').length;
   const rascunhos=avaliacoes.filter(a=>a.status==='Rascunho').length;
-  const totalItens=ITENS_AET.reduce((a,c)=>a+c.itens.length,0);
+  const totalMet=metodologias.length;
   document.getElementById('stats-grid').innerHTML=`
-    <div class="stat-card"><div class="stat-label">Total AETs</div><div class="stat-value" style="color:var(--text);">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">AETs (NR-17)</div><div class="stat-value" style="color:var(--text);">${total}</div></div>
     <div class="stat-card"><div class="stat-label">Concluídas</div><div class="stat-value" style="color:var(--success);">${concluidas}</div></div>
-    <div class="stat-card"><div class="stat-label">Rascunhos</div><div class="stat-value" style="color:var(--warning);">${rascunhos}</div></div>
-    <div class="stat-card"><div class="stat-label">Itens por avaliação</div><div class="stat-value" style="color:var(--accent);">${totalItens}</div></div>`;
-  document.getElementById('hero-sub').textContent=`${total} avaliações · ${concluidas} concluídas · ${ITENS_AET.length} categorias NR-17`;
+    <div class="stat-card"><div class="stat-label">Aval. Metodologia</div><div class="stat-value" style="color:var(--accent2);">${totalMet}</div></div>
+    <div class="stat-card"><div class="stat-label">Rascunhos</div><div class="stat-value" style="color:var(--warning);">${rascunhos}</div></div>`;
+  document.getElementById('hero-sub').textContent=`${total} AETs NR-17 · ${totalMet} avaliações por metodologia`;
 }
 
+const MEB_CLS={verde:'meb-verde',amarelo:'meb-amarelo',laranja:'meb-laranja',vermelho:'meb-vermelho'};
 function renderLista(){
   const el=document.getElementById('lista-aets');
-  if(!avaliacoes.length){el.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:12px;">🪑</div>Nenhuma AET cadastrada. Clique em "+ Nova AET" para começar.</div>`;return;}
-  el.innerHTML=avaliacoes.map(a=>{
+  const totalItens=avaliacoes.length+metodologias.length;
+  if(!totalItens){el.innerHTML=`<div class="empty"><div style="font-size:32px;margin-bottom:12px;">🪑</div>Nenhuma avaliação ergonômica cadastrada. Use os botões acima para iniciar.</div>`;return;}
+  // Avaliações por metodologia
+  const metCards=metodologias.map(m=>{
+    const aet=avaliacoes.find(a=>a.id===m.aet_id)||{};
+    const setor=setores.find(s=>s.id===aet.setor_id);
+    const funcao=funcoes.find(f=>f.id===aet.funcao_id);
+    const cfg=MET_CONFIG[m.metodologia]||{nome:m.metodologia,icon:'⚙️'};
+    const cls=MEB_CLS[m.nivel_risco?.includes('Alto')?'vermelho':m.nivel_risco?.includes('Médio')?'laranja':m.nivel_risco?.includes('Leve')?'amarelo':m.nivel_risco?.includes('Aceitável')?'verde':'verde']||'meb-verde';
+    return`<div class="aet-card">
+      <div style="width:42px;height:42px;border-radius:10px;background:#0e2820;border:1px solid #1a4a38;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${cfg.icon}</div>
+      <div class="aet-info">
+        <div class="aet-num" style="color:var(--accent2);">${m.metodologia} · ${escHtml(m.membro_avaliado||'—')}</div>
+        <div class="aet-titulo">${setor?escHtml(setor.nome_setor):'—'}${funcao?' — '+escHtml(funcao.nome_funcao):''}</div>
+        <div class="aet-meta">
+          <span class="met-eval-badge ${cls}">${m.nivel_risco||'—'}</span>
+          <span style="font-family:var(--mono);font-size:11px;">${cfg.scoreLabel||'Score'}: <strong>${m.score_total??'—'}</strong></span>
+          <span>📅 ${fmtData(aet.data_avaliacao)}</span>
+          ${aet.responsavel_tecnico?`<span>👤 ${escHtml(aet.responsavel_tecnico)}</span>`:''}
+        </div>
+        ${m.recomendacoes?`<div style="font-size:11px;color:var(--text2);margin-top:5px;">${escHtml(m.recomendacoes.split('\n')[0]?.slice(0,120)||'')}${m.recomendacoes.length>120?'…':''}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+        <span class="mini-badge mb-ok" style="text-align:center;">Metodologia</span>
+        <button class="btn btn-sm btn-edit" onclick="alert('Edição de avaliações por metodologia em breve.')">✏️ Editar</button>
+      </div>
+    </div>`;
+  }).join('');
+  // AETs NR-17
+  const aetCards=avaliacoes.filter(a=>!a.tipo_aet||a.tipo_aet==='Checklist NR-17').map(a=>{
     const setor=setores.find(s=>s.id===a.setor_id);
     const funcao=funcoes.find(f=>f.id===a.funcao_id);
     const stCls=a.status==='Concluída'?'mb-ok':a.status==='Rascunho'?'mb-warn':'mb-info';
+    // Avaliações de metodologia vinculadas a esta AET
+    const metsVinc=metodologias.filter(m=>m.aet_id===a.id);
+    const metsHtml=metsVinc.length?`<div class="met-eval-strip">${metsVinc.map(m=>{const c=MEB_CLS[m.nivel_risco?.includes('Alto')?'vermelho':m.nivel_risco?.includes('Médio')?'laranja':m.nivel_risco?.includes('Leve')?'amarelo':'verde']||'meb-verde';return`<span class="met-eval-badge ${c}">${m.metodologia}: ${m.score_total}</span><span style="font-size:11px;color:var(--text2);">${escHtml(m.nivel_risco||'')}</span>`;}).join('<span style="color:var(--border);">·</span>')}</div>`:'';
     return`<div class="aet-card">
       <div style="width:42px;height:42px;border-radius:10px;background:#1a2030;border:1px solid #3a5070;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🪑</div>
       <div class="aet-info">
@@ -386,6 +1236,7 @@ function renderLista(){
           ${a.responsavel_tecnico?`<span>👤 ${escHtml(a.responsavel_tecnico)}</span>`:''}
           ${a.num_trabalhadores_avaliados?`<span>👷 ${a.num_trabalhadores_avaliados} trabalhador(es)</span>`:''}
         </div>
+        ${metsHtml}
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
         <button class="btn btn-sm btn-primary" onclick="abrirAvaliacao(${a.id})">📊 Avaliar</button>
@@ -394,6 +1245,9 @@ function renderLista(){
       </div>
     </div>`;
   }).join('');
+  // Seção de metodologias separada
+  el.innerHTML=(metodologias.length?`<div style="font-size:11px;font-weight:600;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">⚙️ Avaliações por Metodologia</div>${metCards}<div style="border-top:1px solid var(--border);margin:18px 0 14px;"></div>`:'')
+    +(avaliacoes.filter(a=>!a.tipo_aet||a.tipo_aet==='Checklist NR-17').length?`<div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">🪑 Checklist NR-17</div>${aetCards}`:'');
 }
 
 // ── MODAL AET ─────────────────────────────────────────
@@ -829,7 +1683,7 @@ async function imprimirAET(id){
   win.onload=()=>win.print();
 }
 
-['modal-aet','modal-avaliacao'].forEach(id=>{
+['modal-aet','modal-avaliacao','modal-met'].forEach(id=>{
   document.getElementById(id)?.addEventListener('click',e=>{
     if(e.target.id===id){if(id==='modal-aet')fecharModalAET();else fecharModalAvaliacao();}
   });

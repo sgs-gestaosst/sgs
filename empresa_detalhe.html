@@ -167,6 +167,7 @@
           <button onclick="toggleModulos()" class="btn btn-edit" id="btn-modulos" style="display:none;">🧭 Módulos ▾</button>
           <div id="dropdown-modulos" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;min-width:220px;z-index:999;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.6);">
             <a id="btn-riscos"       href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">⚠️ Riscos</a>
+            <a id="btn-aet"          href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🪑 AET — Ergonomia</a>
             <a id="btn-psicossocial" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🧠 Avaliação Psicossocial</a>
             <a id="btn-exames"       href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🩺 Exames</a>
             <a id="btn-treinamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🎓 Treinamentos</a>
@@ -175,7 +176,6 @@
             <a id="btn-equipamentos" href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🧯 Equipamentos</a>
             <a id="btn-pt"           href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">📋 Permissões de Trabalho</a>
             <a id="btn-inventarios"  href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🗂️ Inventários Técnicos</a>
-            <a id="btn-aet"          href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🪑 AET — Ergonomia</a>
             <a id="btn-checklists"   href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🔍 Checklists</a>
             <a id="btn-acoes"        href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">⚡ Ações</a>
             <a id="btn-contratadas"  href="#" style="display:none;align-items:center;gap:10px;padding:11px 14px;font-size:13px;color:var(--text);text-decoration:none;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">🏗️ Empresas Contratadas</a>
@@ -622,6 +622,7 @@ async function carregarEmpresa(){
     renderHero();renderCampos();renderCNAEs();carregarDashboardASOs();
     const modulos=[
       {id:'btn-riscos',       href:`riscos.html?empresa_id=${empresaId}`},
+      {id:'btn-aet',          href:`aet.html?empresa_id=${empresaId}`},
       {id:'btn-psicossocial', href:`psicossocial_campanhas.html?empresa_id=${empresaId}`},
       {id:'btn-exames',       href:`exames.html?empresa_id=${empresaId}`},
       {id:'btn-treinamentos', href:`treinamentos.html?empresa_id=${empresaId}`},
@@ -630,7 +631,6 @@ async function carregarEmpresa(){
       {id:'btn-equipamentos', href:`equipamentos_seg.html?empresa_id=${empresaId}`},
       {id:'btn-pt',           href:`permissoes_trabalho.html?empresa_id=${empresaId}`},
       {id:'btn-inventarios',  href:`inventarios.html?empresa_id=${empresaId}`},
-      {id:'btn-aet',          href:`aet.html?empresa_id=${empresaId}`},
       {id:'btn-checklists',   href:`checklists.html?empresa_id=${empresaId}`},
       {id:'btn-acoes',        href:`acoes.html?empresa_id=${empresaId}`},
       {id:'btn-contratadas',  href:`empresa_contratadas.html?empresa_id=${empresaId}`},

@@ -247,6 +247,13 @@ async function carregar(){
       const resSR=await fetch(`${SUPA_URL}/rest/v1/setor_riscos?setor_id=in.(${setorIds})&ativo=eq.true&select=*`,{headers:H});
       setorRiscos=await resSR.json();
     }else{setorRiscos=[];}
+    // Avaliações ergonômicas (AET) para seção complementar
+    try{
+      const resAetMets=await fetch(`${SUPA_URL}/rest/v1/aet_metodologias?empresa_id=eq.${empresaId}&ativo=eq.true&select=*,aet_avaliacoes(numero_aet,data_avaliacao,responsavel_tecnico,setor_id,funcao_id,conclusao_tecnica)&order=criado_em.desc`,{headers:H});
+      window.ltcatAetMets=resAetMets.ok?await resAetMets.json():[];
+      const resAets=await fetch(`${SUPA_URL}/rest/v1/aet_avaliacoes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=data_avaliacao.desc`,{headers:H});
+      window.ltcatAets=resAets.ok?await resAets.json():[];
+    }catch(_){window.ltcatAetMets=[];window.ltcatAets=[];}
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro: ${escHtml(e.message)}</div>`;
@@ -666,6 +673,32 @@ function renderConclusao(){
     <div class="ficha-item"><div class="ficha-label">Acima do limite</div><div class="ficha-value" style="font-size:16pt;color:${acima.length?'#991b1b':'#1a0840'};">${acima.length}</div></div>
     <div class="ficha-item"><div class="ficha-label">Gera insalubridade</div><div class="ficha-value" style="font-size:16pt;color:${insalubres.length?'#854d0e':'#1a0840'};">${insalubres.length}</div></div>
   </div>
+  ${(()=>{
+    const mets=window.ltcatAetMets||[];
+    if(!mets.length)return'';
+    const MET_ICON={OCRA:'🔄',RULA:'🧍',JSI:'✋',OWAS:'🏗️',NIOSH:'🏋️'};
+    const linhas=mets.map(m=>{
+      const aet=m.aet_avaliacoes||{};
+      const setor=setores.find(s=>s.id===aet.setor_id);
+      const funcoes_var=window.funcoes||[];
+      const func=funcoes_var.find(f=>f.id===aet.funcao_id);
+      return`<tr>
+        <td style="font-size:8pt;"><strong>${MET_ICON[m.metodologia]||'⚙️'} ${escHtml(m.metodologia)}</strong></td>
+        <td style="font-size:8pt;">${escHtml(setor?.nome_setor||'—')}</td>
+        <td style="font-size:8pt;">${escHtml(func?.nome_funcao||'—')}</td>
+        <td style="font-size:8pt;">${escHtml(m.membro_avaliado||'—')}</td>
+        <td style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:8pt;font-weight:700;">${m.score_total??'—'}</td>
+        <td style="font-size:7.5pt;">${escHtml(m.nivel_risco||'—')}</td>
+        <td style="font-size:7.5pt;">${aet.data_avaliacao?new Date(aet.data_avaliacao+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</td>
+      </tr>`;
+    }).join('');
+    return`<div class="doc-subsection" style="margin-top:12pt;">Riscos Ergonômicos — Avaliações por Metodologia</div>
+    <p class="doc-text" style="margin-bottom:8pt;">As avaliações ergonômicas quantitativas a seguir foram realizadas em conformidade com a NR-17 e normas técnicas referenciadas. Os riscos ergonômicos identificados são classificados conforme critérios da metodologia aplicada e integrados ao inventário de riscos do PGR. Para LTCAT e eSocial, os riscos ergonômicos não geram enquadramento para aposentadoria especial, salvo quando configurados no inventário como agentes físicos (ex.: vibração avaliada pela norma técnica correspondente).</p>
+    <table class="doc-table">
+      <thead><tr><th>Metodologia</th><th>Setor</th><th>Função</th><th>Membro / Segmento</th><th style="text-align:center;">Score</th><th>Nível de risco</th><th>Data</th></tr></thead>
+      <tbody>${linhas}</tbody>
+    </table>`;
+  })()}
   <div class="doc-subsection" style="margin-top:12pt;">Validade e revisão</div>
   <p class="doc-text">Este LTCAT deverá ser revisado sempre que ocorrerem alterações nos processos produtivos, equipamentos ou condições ambientais que possam modificar a exposição dos trabalhadores, conforme IN INSS/PRES nº 77/2015, art. 261, § 1º, e Decreto nº 3.048/99.</p>
   <div style="margin-top:28pt;display:grid;grid-template-columns:1fr 1fr;gap:30pt;">

@@ -349,6 +349,11 @@ async function carregar(){
       todosRiscos=await rRiscos.json().catch(()=>[]);
       categoriasRisco=await rCats.json().catch(()=>[]);
     }catch(e){funcaoRiscos=[];todosRiscos=[];categoriasRisco=[];}
+    // Avaliações ergonômicas (AET) para protocolo específico
+    try{
+      const resAetMets=await fetch(`${SUPA_URL}/rest/v1/aet_metodologias?empresa_id=eq.${empresaId}&ativo=eq.true&select=*,aet_avaliacoes(numero_aet,data_avaliacao,responsavel_tecnico,setor_id,funcao_id,conclusao_tecnica)&order=criado_em.desc`,{headers:getH()});
+      window.pcmsoAetMets=resAetMets.ok?await resAetMets.json():[];
+    }catch(_){window.pcmsoAetMets=[];}
     renderDocumento();
   }catch(e){
     document.getElementById('pages-wrap').innerHTML=`<div style="color:#e05555;text-align:center;padding:40px;">Erro: ${e.message}</div>`;
@@ -366,6 +371,7 @@ function renderDocumento(){
   wrap.appendChild(renderCronograma());
   if(setores.some(s=>s.tem_agente_psicossocial))wrap.appendChild(renderSaudeMental());
   wrap.appendChild(renderVacinacao());
+  if(temRiscoErgonomico())wrap.appendChild(renderProtocoloErgonomico());
   if(temRiscoBenzeno())wrap.appendChild(renderProtocoloBenzeno());
   wrap.appendChild(renderRelatorioAnual());
   wrap.appendChild(renderPerfilEpidemiologico());
@@ -441,6 +447,78 @@ function renderVacinacao(){
   </table>
   <div class="doc-subsection" style="margin-top:12pt;">Controle de cobertura vacinal</div>
   <p class="doc-text">O médico coordenador é responsável por manter o controle de cobertura vacinal dos trabalhadores, verificando carteiras de vacinação nos exames periódicos e admissionais. Trabalhadores não vacinados para as vacinas obrigatórias indicadas devem ser encaminhados para vacinação antes da exposição ao agente de risco. O registro deve constar em prontuário individual.</p>
+  <div class="page-footer"><span class="pf-label">PCMSO — ${nm}</span><span class="pf-page"></span></div>`;
+  return pg;
+}
+
+function temRiscoErgonomico(){
+  if((window.pcmsoAetMets||[]).length>0)return true;
+  const catErgo=categoriasRisco.find(c=>c.nome?.toLowerCase().includes('ergon'));
+  if(!catErgo)return setores.some(s=>s.tem_agente_ergonomico);
+  const riscosErgo=todosRiscos.filter(r=>r.categoria_risco_id===catErgo.id).map(r=>r.id);
+  return riscosErgo.length&&funcaoRiscos.some(fr=>riscosErgo.includes(fr.risco_id));
+}
+
+function renderProtocoloErgonomico(){
+  const pg=document.createElement('div');pg.className='page';
+  const nm=escHtml(empresa.nome_fantasia||empresa.razao_social);
+  const mets=window.pcmsoAetMets||[];
+  const MET_ICON={OCRA:'🔄',RULA:'🧍',JSI:'✋',OWAS:'🏗️',NIOSH:'🏋️'};
+  // Funções com risco ergonômico
+  const catErgo=categoriasRisco.find(c=>c.nome?.toLowerCase().includes('ergon'));
+  const riscosErgoIds=catErgo?todosRiscos.filter(r=>r.categoria_risco_id===catErgo.id).map(r=>r.id):[];
+  const funcaoIdsErgo=[...new Set([
+    ...funcaoRiscos.filter(fr=>riscosErgoIds.includes(fr.risco_id)).map(fr=>fr.funcao_id),
+    ...mets.map(m=>m.aet_avaliacoes?.funcao_id).filter(Boolean),
+  ])];
+  const funcoesExp=funcaoIdsErgo.map(fid=>funcoes.find(f=>f.id===fid)?.nome_funcao).filter(Boolean);
+  const metHtml=mets.length?`<div class="doc-subsection" style="margin-top:12pt;">Avaliações ergonômicas realizadas</div>
+  <table class="doc-table">
+    <thead><tr><th>Metodologia</th><th>Membro / Segmento</th><th style="text-align:center;">Score</th><th>Nível de risco</th><th>Setor / Função</th><th>Data</th></tr></thead>
+    <tbody>${mets.map(m=>{
+      const aet=m.aet_avaliacoes||{};
+      const setor=setores.find(s=>s.id===aet.setor_id);
+      const func=funcoes.find(f=>f.id===aet.funcao_id);
+      return`<tr>
+        <td style="font-weight:600;">${MET_ICON[m.metodologia]||'⚙️'} ${escHtml(m.metodologia)}</td>
+        <td style="font-size:8pt;">${escHtml(m.membro_avaliado||'—')}</td>
+        <td style="text-align:center;font-family:'IBM Plex Mono',monospace;font-weight:700;">${m.score_total??'—'}</td>
+        <td style="font-size:8pt;">${escHtml(m.nivel_risco||'—')}</td>
+        <td style="font-size:8pt;">${escHtml(setor?.nome_setor||'—')}${func?' / '+escHtml(func.nome_funcao):''}</td>
+        <td style="font-size:8pt;">${aet.data_avaliacao?new Date(aet.data_avaliacao+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`:'';
+  pg.innerHTML=`
+  <div class="page-header"><span class="ph-empresa">${nm}</span><span class="ph-doc">PCMSO — ${fmtAno()}</span></div>
+  <div class="doc-section"><span class="num-secao">6-E</span>Protocolo Específico — Riscos Ergonômicos</div>
+  <div class="conclusao-box" style="margin-bottom:12pt;">
+    <strong>Base legal — NR-17 (Ergonomia) · NR-07 (PCMSO) · Portaria MTb nº 3.751/1990:</strong> Esta empresa possui trabalhadores expostos a riscos ergonômicos identificados no inventário de riscos (PGR). O PCMSO deve incluir protocolo de vigilância de distúrbios osteomusculares e fadiga muscular para os expostos.
+  </div>
+  <div class="doc-subsection">Funções expostas a riscos ergonômicos</div>
+  <p class="doc-text">${funcoesExp.length?escHtml(funcoesExp.join(' · ')):'Ver inventário de riscos do PGR — funções com risco ergonômico identificado.'}</p>
+  ${metHtml}
+  <div class="doc-subsection" style="margin-top:12pt;">Protocolo de vigilância — exames recomendados</div>
+  <table class="doc-table">
+    <thead><tr><th style="width:20%;">Instrumento</th><th style="width:35%;">O que avalia</th><th style="width:20%;text-align:center;">Periodicidade</th><th>Observação</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:600;">Questionário Nórdico</td><td>Distúrbios músculo-esqueléticos por região corporal (pescoço, ombros, costas superior/inferior, punhos, joelhos)</td><td style="text-align:center;">Anual</td><td>Aplicar a todos os trabalhadores expostos a risco ergonômico</td></tr>
+      <tr><td style="font-weight:600;">DORT / LER — avaliação médica</td><td>Diagnóstico clínico de tendinites, epicondilites, síndrome do túnel do carpo, cervicalgia ocupacional</td><td style="text-align:center;">Quando indicado</td><td>Encaminhamento ao ortopedista ou fisiatra quando Nórdico positivo</td></tr>
+      <tr><td style="font-weight:600;">Audiometria</td><td>Perda auditiva associada a ruído + esforço muscular (se exposição concomitante)</td><td style="text-align:center;">Anual</td><td>Se houver também agente físico (ruído)</td></tr>
+      <tr><td style="font-weight:600;">Espirometria</td><td>Complementar quando postura forçada afeta volume respiratório</td><td style="text-align:center;">Conforme AET</td><td>Indicado pelo médico coordenador quando relevante</td></tr>
+    </tbody>
+  </table>
+  <div class="doc-subsection" style="margin-top:12pt;">Ações de promoção à saúde</div>
+  <ul style="margin:0 0 8pt 16pt;font-size:9pt;color:#1f2937;line-height:1.8;">
+    <li><strong>Ginástica laboral:</strong> programa de alongamento e exercícios de pausas — mínimo 10 min, 2× ao dia para funções com escore elevado na AET;</li>
+    <li><strong>Rodízio de tarefas</strong> para funções com OCRA/JSI/RULA de nível 3 ou 4;</li>
+    <li><strong>Adequação ergonômica do posto de trabalho</strong> conforme recomendações do laudo AET;</li>
+    <li><strong>Treinamento de posto:</strong> postura correta, uso de auxílios mecânicos, reconhecimento de sintomas precoces;</li>
+    <li><strong>Comunicação de CAT</strong> em caso de DORT confirmada com nexo causal estabelecido.</li>
+  </ul>
+  <div class="conclusao-box">
+    <strong>Atenção:</strong> O médico coordenador deve definir os exames individuais com base no risco específico de cada função. As avaliações ergonômicas (AET) devem ser revisadas anualmente ou quando houver mudança de processo, conforme NR-17 item 17.2.3.
+  </div>
   <div class="page-footer"><span class="pf-label">PCMSO — ${nm}</span><span class="pf-page"></span></div>`;
   return pg;
 }
@@ -830,6 +908,7 @@ function renderBaseLegal(){
       <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-01 2025 (Portaria MTP nº 1.419/2023)</td><td>Gerenciamento de Riscos Ocupacionais — integração PGR × PCMSO e riscos psicossociais (vigência: mai/2025)</td></tr>
       <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-15 (Portaria MTE nº 3.214/78)</td><td>Atividades e operações insalubres — agentes nocivos, limites de tolerância e exames específicos obrigatórios</td></tr>
       <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Lei 8.213/91 + Decreto 3.048/99</td><td>Plano de Benefícios da Previdência Social — aposentadoria especial e LTCAT como base para exames periódicos</td></tr>
+      <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">NR-17 (Portaria MTb nº 3.751/1990)</td><td>Ergonomia — adaptação das condições de trabalho às características psicofisiológicas dos trabalhadores; obriga AET quando indicado</td></tr>
       <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Portaria Interministerial 9/2007</td><td>Protocolo de prevenção de acidentes e doenças relacionados ao benzeno — exames semestrais obrigatórios</td></tr>
       <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">Manual eSocial v3.1 — S-2220 / S-2240</td><td>Monitoramento da saúde do trabalhador (ASO) e condições ambientais de trabalho — transmissão obrigatória</td></tr>
       <tr><td style="font-weight:500;font-family:'IBM Plex Mono',monospace;">LGPD — Lei 13.709/2018</td><td>Proteção dos dados pessoais sensíveis de saúde — base legal para tratamento de dados de saúde ocupacional</td></tr>

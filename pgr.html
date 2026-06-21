@@ -608,13 +608,14 @@ async function carregar(){
     }else{window.campanhaFuncoesPsi=[];window.resultadosPsi=[];window.resultadosNr01=[];}
 
 
-    // Contratadas, Participação e Versões
-    const [resContrat, resPartic, resVersoes, resGheNomes, resAcidentes] = await Promise.all([
+    // Contratadas, Participação, Versões e AET
+    const [resContrat, resPartic, resVersoes, resGheNomes, resAcidentes, resAetMets] = await Promise.all([
       fetch(`${SUPA_URL}/rest/v1/empresa_contratadas?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=razao_social.asc`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/pgr_participacao?empresa_id=eq.${empresaId}&select=*&limit=1`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/pgr_versoes?empresa_id=eq.${empresaId}&select=*&order=criado_em.asc`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/ghe_nomes?empresa_id=eq.${empresaId}&select=codigo,nome`,{headers:headers()}),
       fetch(`${SUPA_URL}/rest/v1/empresa_historico_acidentes?empresa_id=eq.${empresaId}&ativo=eq.true&select=*&order=data_ocorrencia.desc`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/aet_metodologias?empresa_id=eq.${empresaId}&ativo=eq.true&select=*,aet_avaliacoes(numero_aet,data_avaliacao,responsavel_tecnico,setor_id,funcao_id,conclusao_tecnica)&order=criado_em.desc`,{headers:headers()}).catch(()=>({json:()=>[]})),
     ]);
     const rawContrat = await resContrat.json();
     window.contratadas = Array.isArray(rawContrat) ? rawContrat : [];
@@ -629,6 +630,7 @@ async function carregar(){
     window.gheNomes={};
     (Array.isArray(rawGheNomes)?rawGheNomes:[]).forEach(g=>{window.gheNomes[g.codigo]=g.nome||'';});
     window.historicoAcidentes=await resAcidentes.json().catch(()=>[]);
+    window.aetMetodologias=await resAetMets.json().catch(()=>[]);
 
     renderDocumento();
   }catch(e){
@@ -654,6 +656,7 @@ function renderDocumento(){
   const pgContrat=renderSecaoContratadas();
   const pgPartic=renderSecaoParticipacao();
   const pgVersoes=renderSecaoVersoes();
+  const pgAnexosAET=renderAnexosAET();
 
   wrap.appendChild(pgCapa);
   wrap.appendChild(pgSumario);
@@ -671,6 +674,8 @@ function renderDocumento(){
   if(pgContrat)wrap.appendChild(pgContrat);
   if(pgPartic)wrap.appendChild(pgPartic);
   if(pgVersoes)wrap.appendChild(pgVersoes);
+  // Anexos AET: só aparece se há avaliações ergonômicas por metodologia
+  if(pgAnexosAET)wrap.appendChild(pgAnexosAET);
 
   // Numeração de páginas
   const paginas=Array.from(document.querySelectorAll('#pages-wrap .page'));
@@ -787,6 +792,7 @@ function renderSumario(){
         ['9','Empresas Contratadas / Terceirizadas','sumario-9'],
         ['10','Participação e Consulta dos Trabalhadores','sumario-10'],
         ['11','Histórico de Revisões','sumario-11'],
+        ...((window.aetMetodologias||[]).length?[['12','Anexos — Avaliações Ergonômicas (AET)','sumario-12']]:[]),
       ].map(([n,t,id])=>`<tr>
         <td style="width:30pt;"><span class="num-secao">${n}</span></td>
         <td style="color:#1a1a2e;">${t}</td>
@@ -1266,11 +1272,31 @@ function renderInventarioRiscos(){
     const tecnicoHtml=tecnicoPartes.length?`<div class="risco-tecnico">${tecnicoPartes.join(' &nbsp;·&nbsp; ')}</div>`:'';
     const conclusaoHtml=fr.conclusao_qualitativa?`<div style="margin-top:5pt;padding:6pt 8pt;background:#faf5ff;border-left:2pt solid #7c3aed;border-radius:0 4pt 4pt 0;"><div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#7c3aed;margin-bottom:3pt;">💬 Conclusão técnica</div><div style="font-size:8.5pt;color:#1f2937;line-height:1.5;">${h(fr.conclusao_qualitativa)}</div></div>`:'';
 
+    // Bloco AET: quando o risco veio de avaliação por metodologia (origem_aet=true)
+    const aetMet=(window.aetMetodologias||[]).find(m=>m.id===fr.aet_metodologia_id||m.aet_id===fr.aet_id);
+    const COR_NIVEL={verde:'#d1fae5',amarelo:'#fef9c3',laranja:'#ffedd5',vermelho:'#fee2e2'};
+    const COR_TEXT={verde:'#065f46',amarelo:'#78350f',laranja:'#7c2d12',vermelho:'#991b1b'};
+    const clsMap=(n)=>!n?'verde':n.toLowerCase().includes('alt')||n.toLowerCase().includes('perig')?'vermelho':n.toLowerCase().includes('médio')||n.toLowerCase().includes('elev')?'laranja':n.toLowerCase().includes('leve')||n.toLowerCase().includes('moder')?'amarelo':'verde';
+    const aetHtml=fr.origem_aet&&aetMet?`<div style="margin-top:6pt;padding:6pt 8pt;background:#ecfdf5;border:1pt solid #6ee7b7;border-radius:4pt;display:flex;gap:10pt;align-items:center;flex-wrap:wrap;">
+      <div style="display:flex;flex-direction:column;align-items:center;min-width:40pt;padding:4pt 8pt;background:${COR_NIVEL[clsMap(aetMet.nivel_risco)]};border-radius:4pt;border:1pt solid ${COR_TEXT[clsMap(aetMet.nivel_risco)]};">
+        <span style="font-size:16pt;font-weight:700;color:${COR_TEXT[clsMap(aetMet.nivel_risco)]};font-family:'IBM Plex Mono',monospace;">${aetMet.score_total??'—'}</span>
+        <span style="font-size:5.5pt;color:${COR_TEXT[clsMap(aetMet.nivel_risco)]};font-weight:600;text-transform:uppercase;letter-spacing:.05em;">${h(aetMet.metodologia)}</span>
+      </div>
+      <div style="flex:1;min-width:80pt;">
+        <div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#065f46;margin-bottom:2pt;">🔬 Avaliação Ergonômica — ${h(aetMet.metodologia)}</div>
+        <div style="font-size:8pt;color:#1f2937;font-weight:600;">${h(aetMet.nivel_risco||'—')}</div>
+        <div style="font-size:7.5pt;color:#374151;">${aetMet.membro_avaliado?'Membro: '+h(aetMet.membro_avaliado):''}${aetMet.tarefa?' · Tarefa: '+h(aetMet.tarefa.slice(0,60))+(aetMet.tarefa.length>60?'…':''):''}</div>
+        ${aetMet.aet_avaliacoes?.responsavel_tecnico?`<div style="font-size:7pt;color:#6b7280;">Resp: ${h(aetMet.aet_avaliacoes.responsavel_tecnico)} · ${aetMet.aet_avaliacoes.data_avaliacao?new Date(aetMet.aet_avaliacoes.data_avaliacao+'T00:00:00').toLocaleDateString('pt-BR'):'—'}</div>`:''}
+      </div>
+      <div style="font-size:7pt;color:#065f46;background:#d1fae5;padding:2pt 6pt;border-radius:3pt;align-self:flex-start;">📋 Anexo AET</div>
+    </div>`:fr.origem_aet?`<div style="margin-top:4pt;font-size:7pt;color:#065f46;background:#ecfdf5;border:1pt solid #6ee7b7;border-radius:3pt;padding:3pt 6pt;display:inline-block;">🔬 Risco proveniente de Avaliação Ergonômica (AET)</div>`:'';
+
     return`<div class="risco-funcao">
       <!-- Linha 1: contexto -->
       <div class="risco-ctx">
         <span class="risco-cat-pill" style="background:${catCor.bg};color:${catCor.color};">${catNome}</span>
         ${perigo?`<span class="risco-perigo-pill">⚠ Perigo: ${h(perigo.nome)}</span>`:''}
+        ${fr.origem_aet?`<span style="font-size:7pt;background:#d1fae5;color:#065f46;border-radius:3pt;padding:1pt 5pt;font-weight:600;">⚙️ AET</span>`:''}
       </div>
       <!-- Linha 2: protagonista -->
       <div class="risco-principal">
@@ -1284,6 +1310,8 @@ function renderInventarioRiscos(){
       ${tecnicoHtml}
       <!-- Linha 5: conclusão técnica -->
       ${conclusaoHtml}
+      <!-- Linha 5b: bloco AET (quando risco vem de avaliação por metodologia) -->
+      ${aetHtml}
       <!-- Linha 6: danos -->
       ${risco.danos_saude?`<div class="risco-danos-texto"><div class="risco-danos-label">🩺 Danos à saúde potenciais</div>${h(risco.danos_saude)}</div>`:''}
       <!-- Linha 6: medidas -->
@@ -2213,6 +2241,53 @@ function renderPlanoAcao(){
 // ── HELPERS ───────────────────────────────────────────────────
 function criarPagina(){const pg=document.createElement('div');pg.className='page';return pg;}
 function phHeader(){return`<div class="page-header"><span class="ph-empresa">${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="ph-doc">PGR — ${fmtAno()}</span></div>`;}
+// ── SEÇÃO: ANEXOS AET ────────────────────────────────────────
+function renderAnexosAET(){
+  const mets=window.aetMetodologias||[];
+  if(!mets.length)return null;
+  const pg=criarPagina();
+  const MET_ICON={OCRA:'🔄',RULA:'🧍',JSI:'✋',OWAS:'🏗️',NIOSH:'🏋️'};
+  const COR_NIVEL={verde:'#d1fae5',amarelo:'#fef9c3',laranja:'#ffedd5',vermelho:'#fee2e2'};
+  const COR_TEXT={verde:'#065f46',amarelo:'#78350f',laranja:'#7c2d12',vermelho:'#991b1b'};
+  const clsMap=(n)=>!n?'verde':n.toLowerCase().includes('alt')||n.toLowerCase().includes('perig')?'vermelho':n.toLowerCase().includes('médio')||n.toLowerCase().includes('elev')?'laranja':n.toLowerCase().includes('leve')||n.toLowerCase().includes('moder')?'amarelo':'verde';
+  const linhas=mets.map((m,i)=>{
+    const aet=m.aet_avaliacoes||{};
+    const setor=window.setores?.find(s=>s.id===aet.setor_id);
+    const funcao=window.funcoes?.find(f=>f.id===aet.funcao_id);
+    const cls=clsMap(m.nivel_risco);
+    const recs=Array.isArray(m.dados_json?.recomendacoes)?m.dados_json.recomendacoes:[];
+    return`<div style="border:1pt solid #d1fae5;border-left:4pt solid #0d4a3a;border-radius:4pt;padding:8pt 10pt;margin-bottom:8pt;break-inside:avoid;">
+      <div style="display:flex;gap:10pt;align-items:flex-start;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;align-items:center;min-width:44pt;padding:5pt 8pt;background:${COR_NIVEL[cls]};border-radius:4pt;border:1pt solid ${COR_TEXT[cls]};">
+          <span style="font-size:18pt;line-height:1;">${MET_ICON[m.metodologia]||'⚙️'}</span>
+          <span style="font-size:14pt;font-weight:700;color:${COR_TEXT[cls]};font-family:'IBM Plex Mono',monospace;line-height:1.2;">${m.score_total??'—'}</span>
+          <span style="font-size:5pt;color:${COR_TEXT[cls]};font-weight:600;text-transform:uppercase;letter-spacing:.05em;text-align:center;">${h(m.metodologia)}</span>
+        </div>
+        <div style="flex:1;min-width:100pt;">
+          <div style="font-size:8pt;font-weight:700;color:#0d4a3a;margin-bottom:3pt;">ANEXO AET-${String(i+1).padStart(2,'0')} — ${h(m.metodologia)} — ${h(m.membro_avaliado||'Avaliação Ergonômica')}</div>
+          <div style="font-size:8.5pt;font-weight:600;color:${COR_TEXT[cls]};margin-bottom:4pt;">${h(m.nivel_risco||'—')}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:2pt 10pt;font-size:7.5pt;color:#374151;">
+            ${setor?`<div><b>Setor:</b> ${h(setor.nome_setor)}</div>`:''}
+            ${funcao?`<div><b>Função:</b> ${h(funcao.nome_funcao)}</div>`:''}
+            ${m.tarefa?`<div style="grid-column:1/-1;"><b>Tarefa:</b> ${h(m.tarefa.slice(0,100))}${m.tarefa.length>100?'…':''}</div>`:''}
+            ${aet.responsavel_tecnico?`<div><b>Responsável:</b> ${h(aet.responsavel_tecnico)}</div>`:''}
+            ${aet.data_avaliacao?`<div><b>Data:</b> ${new Date(aet.data_avaliacao+'T00:00:00').toLocaleDateString('pt-BR')}</div>`:''}
+          </div>
+          ${aet.conclusao_tecnica?`<div style="margin-top:4pt;font-size:7.5pt;color:#1f2937;padding:4pt 6pt;background:#f0fdf4;border-radius:3pt;">${h(aet.conclusao_tecnica.slice(0,200))}${aet.conclusao_tecnica.length>200?'…':''}</div>`:''}
+          ${recs.length?`<div style="margin-top:5pt;"><div style="font-size:6.5pt;font-weight:700;text-transform:uppercase;color:#065f46;margin-bottom:2pt;">Recomendações:</div>${recs.map(r=>`<div style="font-size:7.5pt;color:#374151;margin-bottom:1pt;">• [${h(r.prior||'—')}] ${h(r.texto||'')}${r.prazo?' · Prazo: '+h(r.prazo):''}</div>`).join('')}</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  pg.innerHTML=`
+  ${phHeader()}
+  <div class="doc-section" style="margin-top:0;border-left:4pt solid #0d4a3a;padding-left:8pt;"><span class="num-secao" style="background:#0d4a3a;">12</span>Anexos — Avaliações Ergonômicas por Metodologia</div>
+  <p class="doc-text" style="margin-bottom:10pt;">As avaliações ergonômicas a seguir foram realizadas com metodologias quantitativas reconhecidas (OCRA, RULA, JSI, OWAS, NIOSH), em conformidade com a NR-17 e normas ISO referenciadas. Os riscos identificados foram incorporados ao inventário de riscos nos GHEs correspondentes. Este documento compõe o PGR como anexo técnico.</p>
+  ${linhas}
+  ${pfFooter()}`;
+  return pg;
+}
+
 function pfFooter(){return`<div class="page-footer"><span class="pf-label">Programa de Gerenciamento de Riscos — ${h(empresa?.nome_fantasia||empresa?.razao_social||'')}</span><span class="pf-page"></span></div>`;}
 
 // ── ELABORADORA ───────────────────────────────────────────────
