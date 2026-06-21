@@ -1106,28 +1106,31 @@ async function salvarMetodologia(){
       for(const kw of kws){const f=riscosCat.find(r=>r.nome_risco?.toLowerCase().includes(kw));if(f){riscoId=f.id;break;}}
       if(!riscoId)riscoId=riscosCat[0]?.id||null;
       if(riscoId){
-        const resExist=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&risco_id=eq.${riscoId}&ativo=eq.true&limit=1`,{headers:h});
+        const resExist=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?funcao_id=eq.${funcaoId}&risco_id=eq.${riscoId}&limit=1`,{headers:h});
         const existing=await resExist.json();
+        // Apenas colunas que existem na tabela funcao_riscos
         const frPayload={
-          funcao_id:funcaoId,risco_id:riscoId,empresa_id:parseInt(empresaId),
-          probabilidade:pxs.p,severidade:pxs.sv,nivel_risco:pxs.n,
-          tipo_avaliacao:'Quantitativa',
-          metodologia_avaliacao_custom:cfg.nome,
-          valor_medido:parseFloat(wizardScore)||null,
-          unidade_medida:cfg.scoreLabel,
-          data_avaliacao:document.getElementById('met-data').value||hoje(),
-          responsavel_avaliacao:resp,
-          conclusao_qualitativa:wizardResult.nivel,
-          aet_id:novaAet.id,aet_metodologia_id:metId,
-          origem_aet:true,ativo:true,
+          funcao_id:funcaoId,
+          risco_id:riscoId,
+          probabilidade:pxs.p,
+          severidade:pxs.sv,
+          nivel_risco:pxs.n,
           num_expostos:parseInt(document.getElementById('met-num-trab').value)||1,
+          observacao:`${cfg.nome} — Escore: ${wizardScore} — ${wizardResult.nivel}`,
+          aet_id:novaAet.id,
+          aet_metodologia_id:metId,
+          origem_aet:true,
+          propagado_do_setor:false,
+          ativo:true,
         };
+        let resF;
         if(existing.length){
-          await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${existing[0].id}`,{method:'PATCH',headers:{'Content-Type':'application/json',...h},body:JSON.stringify(frPayload)});
+          resF=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos?id=eq.${existing[0].id}`,{method:'PATCH',headers:{'Content-Type':'application/json',...h},body:JSON.stringify(frPayload)});
         }else{
-          await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{method:'POST',headers:{'Content-Type':'application/json',...h},body:JSON.stringify(frPayload)});
+          resF=await fetch(`${SUPA_URL}/rest/v1/funcao_riscos`,{method:'POST',headers:{'Content-Type':'application/json',...h,'Prefer':'return=representation'},body:JSON.stringify(frPayload)});
         }
-        transferido=true;
+        if(resF.ok)transferido=true;
+        else{const err=await resF.json().catch(()=>({}));console.error('funcao_riscos insert/patch falhou:',err);}
       }
     }
     if(transferido){
