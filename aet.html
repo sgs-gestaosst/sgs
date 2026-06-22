@@ -1577,17 +1577,19 @@ function imprimirRelMet(){
   </div>
 
   <div class="sec">${secResp}. Responsável técnico e validade</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24pt;margin-top:20pt;margin-bottom:12pt;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32pt;margin-top:20pt;margin-bottom:12pt;">
     <div>
-      <div style="height:32pt;"></div>
-      <div style="border-top:1pt solid #374151;padding-top:5pt;text-align:center;font-size:8pt;color:#374151;">
-        ${escHtml(resp)}<br>Responsável pela avaliação ergonômica<br>Data: ${fmtData(data)}
+      <div style="height:36pt;"></div>
+      <div style="border-top:1pt solid #374151;padding-top:6pt;text-align:center;font-size:8pt;color:#374151;line-height:1.7;">
+        <strong>${escHtml(resp)}</strong><br>Responsável pela avaliação ergonômica<br>Data: ${fmtData(data)}
       </div>
     </div>
     <div>
-      <div style="height:32pt;"></div>
-      <div style="border-top:1pt solid #374151;padding-top:5pt;text-align:center;font-size:8pt;color:#374151;">
-        ___________________________<br>Representante da empresa / SESMT<br>Cargo: _______________________
+      <div style="height:36pt;"></div>
+      <div style="border-top:1pt solid #374151;padding-top:6pt;text-align:center;font-size:8pt;color:#374151;line-height:1.7;">
+        <strong>Representante da empresa / SESMT</strong><br>
+        Nome: <span style="display:inline-block;border-bottom:1pt solid #9ca3af;width:100pt;vertical-align:bottom;"></span><br>
+        Cargo: <span style="display:inline-block;border-bottom:1pt solid #9ca3af;width:95pt;vertical-align:bottom;"></span>
       </div>
     </div>
   </div>
