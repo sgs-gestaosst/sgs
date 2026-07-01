@@ -346,19 +346,19 @@ function renderCampanhas(){
     const fim=c.data_fim?new Date(c.data_fim+'T00:00:00').toLocaleDateString('pt-BR'):'—';
     const totalResp=(c.setores||[]).reduce((acc,s)=>acc+s.total_respondentes,0);
     const totalMeta=(c.setores||[]).reduce((acc,s)=>acc+s.meta_respondentes,0);
-    const pct=totalMeta>0?Math.round(totalResp/totalMeta*100):0;
+    const pct=totalMeta>0?Math.round(totalResp/totalMeta*100):null;
 
     const setoresHtml=(c.setores||[]).map(cs=>{
       const setor=setores.find(s=>s.id===cs.setor_id);
-      const pctS=cs.meta_respondentes>0?Math.round(cs.total_respondentes/cs.meta_respondentes*100):0;
+      const pctS=cs.meta_respondentes>0?Math.round(cs.total_respondentes/cs.meta_respondentes*100):null;
       const linkUrl=`${responderBase}?token=${cs.token}`;
       const linkManual=`${responderBase}?token=${cs.token}&modo=manual`;
       return`<div class="setor-progress">
         <div class="setor-progress-nome">${h(setor?.nome_setor||'Setor')}</div>
-        <div class="progress-bar-wrap"><div class="progress-bar" style="width:${Math.min(pctS,100)}%;"></div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar" style="width:${pctS!=null?Math.min(pctS,100):0}%;"></div></div>
         <div class="setor-progress-meta">
           <span>${cs.total_respondentes} respondentes</span>
-          <span>${pctS}%</span>
+          <span>${pctS!=null?pctS+'%':'sem meta'}</span>
         </div>
         ${c.status==='Ativa'?`<div class="setor-link" onclick="copiarLink('${linkUrl}')">📋 Copiar link</div>`:''}
         ${c.status==='Ativa'?`<div class="setor-link" onclick="window.open('${linkManual}','_blank')">✏️ Lançar manual</div>`:''}
@@ -377,7 +377,7 @@ function renderCampanhas(){
           <div class="campanha-meta">
             <span>📅 ${inicio} → ${fim}</span>
             <span>⏱ Prazo mínimo: ${c.prazo_minimo_dias} dias</span>
-            <span>👥 ${totalResp}/${totalMeta} respondentes (${pct}%)</span>
+            <span>👥 ${totalResp}${totalMeta>0?'/'+totalMeta:''} respondentes${pct!=null?' ('+pct+'%)':''}</span>
             <span>🏢 ${(c.setores||[]).length} setor(es)</span>
             ${c.aplicador_nome?`<span>👤 ${h(c.aplicador_nome)}</span>`:''}
           </div>
@@ -481,9 +481,9 @@ async function salvarCampanha(){
     }
 
     for(const setorId of setoresSel){
-      const resFuncs=await fetch(`${SUPA_URL}/rest/v1/funcionarios?setor_id=eq.${setorId}&ativo=eq.true&select=id`,{headers:headers()});
-      const funcs=await resFuncs.json();
-      const meta=funcs.length;
+      const resFuncSets=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&select=num_funcionarios_previsto`,{headers:headers()});
+      const funcSets=await resFuncSets.json();
+      const meta=funcSets.reduce((acc,fs)=>acc+(fs.num_funcionarios_previsto||0),0);
       await fetch(`${SUPA_URL}/rest/v1/campanha_setores`,{
         method:'POST',headers:headers(),
         body:JSON.stringify({campanha_id:campanhaId,setor_id:setorId,token:gerarToken(),meta_respondentes:meta,status:'Aguardando',ativo:true})
