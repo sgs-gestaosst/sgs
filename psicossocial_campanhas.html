@@ -277,9 +277,55 @@ const MAPA_PSI={
   dom20:{codigo:'PSI-003',perigo:'Sobrecarga quantitativa de trabalho'},
 };
 
+const O_QUE_MEDE={
+  dom01:'Excesso de volume de trabalho',
+  dom02:'Exigência mental e decisões difíceis',
+  dom03:'Desgaste emocional no trabalho',
+  dom04:'Autonomia e controle sobre as tarefas',
+  dom05:'Crescimento e aprendizado no trabalho',
+  dom06:'Significado e propósito no trabalho',
+  dom07:'Clareza das responsabilidades do cargo',
+  dom08:'Ordens contraditórias e tarefas conflitantes',
+  dom09:'Comunicação prévia sobre mudanças',
+  dom10:'Valorização e reconhecimento profissional',
+  dom11:'Suporte e apoio da liderança',
+  dom12:'Cooperação e apoio entre colegas',
+  dom13:'Retorno sobre a qualidade do trabalho',
+  dom14:'Gestão participativa e comunicação da chefia',
+  dom15:'Tratamento justo e igualitário',
+  dom16:'Engajamento e pertencimento à empresa',
+  dom17:'Medo de perder o emprego ou posição',
+  dom18:'Interferência do trabalho na vida pessoal',
+  dom19:'Estado de saúde e esgotamento geral',
+  dom20:'Trabalho realizado com saúde comprometida',
+};
+
+const PLANO_ACAO={
+  dom01:{acao:'Adequar volume de trabalho à capacidade da equipe; revisar prazos e distribuir tarefas.',recursos:'Análise de carga de trabalho e reuniões de gestão',indicador:'Redução de retrabalho (%) e cumprimento de prazos (%)',prazo:180},
+  dom02:{acao:'Padronizar processos; reduzir retrabalhos; oferecer treinamentos técnicos periódicos.',recursos:'Treinamento e padronização de processos',indicador:'Nº de erros/retrabalho e treinamentos realizados',prazo:360},
+  dom03:{acao:'Disponibilizar apoio psicológico; promover ambiente respeitoso e empático.',recursos:'Campanhas de respeito e rodas de conversa',indicador:'Nº de reuniões realizadas e redução de queixas',prazo:90},
+  dom04:{acao:'Estimular participação nas decisões; permitir autonomia na organização das tarefas.',recursos:'Reuniões participativas com a equipe',indicador:'Mensurar sugestões e satisfação da equipe',prazo:90},
+  dom05:{acao:'Implementar capacitação contínua com critérios claros de progressão e feedback.',recursos:'Capacitações de competências por matriz',indicador:'Nº de trabalhadores capacitados',prazo:90},
+  dom06:{acao:'Fortalecer comunicação dos objetivos organizacionais; reconhecer contribuições individuais.',recursos:'Reuniões de alinhamento',indicador:'Pesquisa interna de satisfação',prazo:60},
+  dom07:{acao:'Definir responsabilidades formalmente; atualizar descrições de cargos quando necessário.',recursos:'Organograma e descrições de cargo atualizados',indicador:'Redução de dúvidas reportadas em pesquisa interna',prazo:60},
+  dom08:{acao:'Evitar ordens contraditórias; estabelecer fluxos claros de comunicação.',recursos:'Definição de fluxos de comunicação interna',indicador:'Nº de ordens contraditórias reportadas',prazo:60},
+  dom09:{acao:'Informar trabalhadores com antecedência sobre mudanças; aumentar previsibilidade.',recursos:'Reuniões semanais e programação de atividades',indicador:'% de mudanças comunicadas com antecedência mínima de 48h',prazo:30},
+  dom10:{acao:'Reconhecer esforços e resultados; adotar critérios justos de valorização profissional.',recursos:'Política de reconhecimento e feedback formal',indicador:'Índice de satisfação com reconhecimento (pesquisa)',prazo:90},
+  dom11:{acao:'Incentivar liderança acessível e participativa; promover diálogo aberto chefia–equipe.',recursos:'Treinamento de liderança',indicador:'Mínimo de 80% das reuniões planejadas realizadas',prazo:60},
+  dom12:{acao:'Estimular trabalho em equipe e cooperação; prevenir conflitos interpessoais.',recursos:'Dinâmicas integrativas padronizadas',indicador:'Percepção de cooperação (pesquisa)',prazo:180},
+  dom13:{acao:'Fornecer feedbacks regulares e construtivos; orientar sobre melhorias e pontos positivos.',recursos:'Implementar reuniões mensais de feedback',indicador:'Nº de feedbacks registrados formalmente',prazo:90},
+  dom14:{acao:'Capacitar lideranças para gestão participativa com comunicação clara e prevenção de assédio.',recursos:'Treinamento de comunicação e gestão',indicador:'Redução de queixas sobre chefias',prazo:90},
+  dom15:{acao:'Aplicar regras e decisões de forma transparente; garantir tratamento igualitário.',recursos:'Implementar políticas claras e transparentes',indicador:'Pesquisa de percepção de justiça',prazo:90},
+  dom16:{acao:'Fortalecer engajamento e pertencimento; valorizar participação dos colaboradores.',recursos:'Campanhas de pertencimento',indicador:'Índice de engajamento',prazo:90},
+  dom17:{acao:'Comunicar estabilidade e perspectivas da empresa; evitar mudanças bruscas sem explicação.',recursos:'Comunicação oficial por meio de políticas internas',indicador:'Redução de boatos e melhora na percepção de estabilidade',prazo:60},
+  dom18:{acao:'Incentivar equilíbrio vida pessoal/profissional; avaliar flexibilidade de horários.',recursos:'Campanhas de equilíbrio e flexibilização de horários',indicador:'Adesão a pausas e redução de queixas',prazo:360},
+  dom19:{acao:'Promover ações de qualidade de vida; incentivar pausas, ergonomia e hábitos saudáveis.',recursos:'Campanhas de saúde e ginástica laboral',indicador:'Redução de afastamentos e participação mínima de 80%',prazo:60},
+  dom20:{acao:'Orientar sobre importância do repouso ao adoecer; monitorar sobrecarga e esgotamento.',recursos:'Monitoramento de fadiga e apoio médico',indicador:'Redução de casos de presenteísmo identificados',prazo:60},
+};
+
 function scoreCalc(avg,tipo){
   if(avg==null)return null;
-  return tipo==='inverso'?Math.round((5-avg)/3*1000)/10:Math.round((avg-1)/3*1000)/10;
+  return tipo==='inverso'?Math.round((4-avg)/3*1000)/10:Math.round((avg-1)/3*1000)/10;
 }
 function classificar(score){
   if(score==null)return null;
@@ -816,62 +862,384 @@ function montarRelatorio(campanha,emp,resultadosMap){
   const dataFim=campanha.data_fim?new Date(campanha.data_fim+'T00:00:00').toLocaleDateString('pt-BR'):'—';
   const hoje=new Date().toLocaleDateString('pt-BR');
   const totalResp=(campanha.setores||[]).reduce((acc,cs)=>acc+(cs.total_respondentes||0),0);
+  const scoreCap=s=>s==null?null:Math.min(Math.round(s),100);
 
   function corRisco(r){
-    if(r==='ALTO')return{bg:'#fef2f2',border:'#fca5a5',text:'#991b1b',label:'Alto Risco'};
-    if(r==='MODERADO')return{bg:'#fffbeb',border:'#fde68a',text:'#92400e',label:'Risco Moderado'};
-    return{bg:'#f0fdf4',border:'#86efac',text:'#166534',label:'Baixo Risco'};
+    if(r==='ALTO')return{bg:'#fef2f2',border:'#fca5a5',text:'#991b1b',label:'Alto Risco',barColor:'#dc2626'};
+    if(r==='MODERADO')return{bg:'#fffbeb',border:'#fde68a',text:'#92400e',label:'Risco Moderado',barColor:'#d97706'};
+    return{bg:'#f0fdf4',border:'#86efac',text:'#166534',label:'Baixo Risco',barColor:'#16a34a'};
   }
+  function labelCategoria(tipo){return tipo==='inverso'?'Pressão':'Apoio';}
 
-  const css=`*{box-sizing:border-box;margin:0;padding:0;}body{background:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;color:#1f2937;}.no-print{background:#1e2333;padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}.btn-print{background:#4a7cdc;color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:13px;cursor:pointer;font-weight:500;}.page{width:21cm;min-height:29.7cm;margin:24px auto;padding:2cm;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.15);position:relative;}.header-bar{border-bottom:2pt solid #1e3a5f;padding-bottom:8pt;margin-bottom:18pt;display:flex;justify-content:space-between;align-items:flex-end;}.header-consultoria{font-size:11pt;font-weight:700;color:#1e3a5f;}.header-doc{font-size:8pt;color:#6b7280;text-transform:uppercase;}.capa-body{display:flex;flex-direction:column;min-height:22cm;}.capa-centro{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24pt 0;}.capa-titulo{font-size:22pt;font-weight:700;color:#1e3a5f;line-height:1.3;margin-bottom:8pt;}.capa-sub{font-size:14pt;color:#374151;margin-bottom:6pt;}.capa-met{display:inline-block;background:#eff6ff;color:#1e40af;border:1pt solid #bfdbfe;border-radius:4pt;padding:4pt 14pt;font-size:10pt;font-weight:600;}.info-box{border:1pt solid #d1d5db;border-radius:5pt;padding:12pt 14pt;margin-bottom:10pt;}.info-titulo{font-size:7.5pt;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:7pt;}.info-row{display:flex;gap:8pt;margin-bottom:4pt;font-size:9pt;}.info-label{color:#6b7280;min-width:100pt;flex-shrink:0;}.info-val{color:#1f2937;font-weight:500;}.footer{position:absolute;bottom:1.5cm;left:2cm;right:2cm;border-top:1pt solid #e5e7eb;padding-top:5pt;display:flex;justify-content:space-between;font-size:7pt;color:#9ca3af;}.sec-titulo{font-size:13pt;font-weight:700;color:#1e3a5f;border-bottom:2pt solid #1e3a5f;padding-bottom:5pt;margin-bottom:12pt;}.sub-titulo{font-size:10pt;font-weight:600;color:#374151;margin:12pt 0 5pt;}.texto{font-size:9pt;color:#374151;line-height:1.6;margin-bottom:5pt;}table{width:100%;border-collapse:collapse;margin-bottom:8pt;}th{background:#1e3a5f;color:#fff;font-size:8pt;padding:5pt 7pt;text-align:left;font-weight:600;}td{font-size:8.5pt;padding:4.5pt 7pt;border-bottom:1pt solid #e5e7eb;color:#374151;}tr:nth-child(even) td{background:#f9fafb;}.badge{display:inline-block;padding:1pt 5pt;border-radius:3pt;font-size:7.5pt;font-weight:600;border-width:1pt;border-style:solid;}.setor-header{background:#eff6ff;border:1pt solid #bfdbfe;border-radius:4pt;padding:10pt;margin-bottom:10pt;}.setor-nome{font-size:12pt;font-weight:700;color:#1e3a5f;}.assinatura-linha{border-top:1pt solid #374151;width:150pt;margin:0 auto 4pt;}@media print{body{background:#fff;}.no-print{display:none!important;}.page{margin:0;box-shadow:none;width:100%;padding:1.5cm;}.page:not(:last-child){page-break-after:always;}@page{size:A4;margin:0;}}`;
+  const css=`
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#e8eaf0;font-family:'Segoe UI',Arial,sans-serif;font-size:10pt;color:#1f2937;}
+.no-print{background:#1e2333;padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.btn-print{background:#4a7cdc;color:#fff;border:none;border-radius:6px;padding:8px 20px;font-size:13px;cursor:pointer;font-weight:500;}
+.page{width:21cm;min-height:29.7cm;margin:24px auto;padding:1.8cm 2cm;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.15);position:relative;}
+.hbar{border-bottom:2pt solid #1e3a5f;padding-bottom:7pt;margin-bottom:16pt;display:flex;justify-content:space-between;align-items:flex-end;}
+.hbar-nome{font-size:11pt;font-weight:700;color:#1e3a5f;}
+.hbar-doc{font-size:7.5pt;color:#6b7280;text-transform:uppercase;}
+.footer{position:absolute;bottom:1.2cm;left:2cm;right:2cm;border-top:1pt solid #e5e7eb;padding-top:4pt;display:flex;justify-content:space-between;font-size:7pt;color:#9ca3af;}
+.sec{font-size:13pt;font-weight:700;color:#1e3a5f;border-bottom:2pt solid #1e3a5f;padding-bottom:5pt;margin-bottom:12pt;}
+.sub{font-size:10pt;font-weight:600;color:#1e3a5f;margin:12pt 0 5pt;}
+.txt{font-size:9pt;color:#374151;line-height:1.6;margin-bottom:6pt;}
+.ibox{border:1pt solid #d1d5db;border-radius:5pt;padding:10pt 13pt;margin-bottom:9pt;}
+.ibox-t{font-size:7pt;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6pt;}
+.irow{display:flex;gap:8pt;margin-bottom:3pt;font-size:9pt;}
+.ilabel{color:#6b7280;min-width:95pt;flex-shrink:0;}
+.ival{color:#1f2937;font-weight:500;}
+table{width:100%;border-collapse:collapse;margin-bottom:8pt;}
+th{background:#1e3a5f;color:#fff;font-size:8pt;padding:5pt 7pt;text-align:left;font-weight:600;}
+td{font-size:8.5pt;padding:4pt 7pt;border-bottom:1pt solid #e5e7eb;color:#374151;}
+tr:nth-child(even) td{background:#f9fafb;}
+.badge{display:inline-block;padding:1.5pt 6pt;border-radius:3pt;font-size:7.5pt;font-weight:600;border-width:1pt;border-style:solid;}
+.assinatura-linha{border-top:1pt solid #374151;width:150pt;margin:0 auto 4pt;}
+.semaforo{display:flex;gap:12pt;margin-top:8pt;}
+.sem-item{display:flex;align-items:center;gap:5pt;font-size:9pt;}
+.sem-dot{width:12pt;height:12pt;border-radius:50%;flex-shrink:0;}
+/* Capa */
+.capa-body{display:flex;flex-direction:column;min-height:22cm;}
+.capa-centro{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20pt 0;}
+.capa-titulo{font-size:22pt;font-weight:700;color:#1e3a5f;line-height:1.25;margin-bottom:8pt;}
+.capa-sub{font-size:14pt;color:#374151;margin-bottom:8pt;}
+.capa-met{display:inline-block;background:#eff6ff;color:#1e40af;border:1pt solid #bfdbfe;border-radius:4pt;padding:4pt 14pt;font-size:10pt;font-weight:600;}
+/* Como ler */
+.cl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12pt;margin:10pt 0;}
+.cl-card{border-radius:6pt;padding:12pt;border-width:1.5pt;border-style:solid;}
+.cl-card-pressao{background:#fef2f2;border-color:#fca5a5;}
+.cl-card-apoio{background:#f0fdf4;border-color:#86efac;}
+.cl-card-t{font-size:10pt;font-weight:700;margin-bottom:5pt;}
+.cl-card-t-p{color:#991b1b;}
+.cl-card-t-a{color:#166534;}
+.cl-card-ex{font-size:8pt;color:#374151;margin-top:4pt;font-style:italic;}
+.nivel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8pt;margin:8pt 0;}
+.nivel-card{border-radius:5pt;padding:9pt;text-align:center;border-width:1pt;border-style:solid;}
+.nivel-n{font-size:9.5pt;font-weight:700;margin-bottom:3pt;}
+.nivel-s{font-size:8pt;margin-bottom:4pt;}
+.nivel-d{font-size:7.5pt;color:#374151;}
+.lgpd-box{background:#f9fafb;border:1pt solid #d1d5db;border-radius:5pt;padding:9pt 12pt;margin-top:10pt;font-size:8pt;color:#374151;line-height:1.5;}
+/* Memorial de Cálculo */
+.formula-box{background:#f8f8f8;border:1pt solid #d1d5db;border-radius:5pt;padding:9pt 12pt;font-family:monospace;font-size:8.5pt;margin:6pt 0;}
+.formula-row{margin:3pt 0;color:#1e3a5f;}
+.formula-ex{color:#374151;font-style:italic;}
+.tip-box{background:#eff6ff;border:1pt solid #bfdbfe;border-radius:5pt;padding:8pt 12pt;font-size:8.5pt;color:#1e40af;margin:6pt 0;}
+/* Barras */
+.dom-grid{display:grid;grid-template-columns:1fr 1fr;gap:8pt;margin-bottom:10pt;}
+.dom-item{border:1pt solid #e5e7eb;border-radius:5pt;padding:8pt 10pt;background:#fff;}
+.dom-item-nome{font-size:8pt;font-weight:600;color:#1f2937;margin-bottom:1pt;}
+.dom-item-desc{font-size:7pt;color:#6b7280;margin-bottom:5pt;}
+.bar-wrap{height:10pt;background:#e5e7eb;border-radius:3pt;overflow:hidden;margin-bottom:4pt;}
+.bar-fill{height:100%;border-radius:3pt;}
+.bar-meta{display:flex;justify-content:space-between;font-size:7pt;}
+.bar-score{font-weight:700;}
+.bar-badge{padding:1pt 5pt;border-radius:3pt;font-size:7pt;font-weight:600;border-width:1pt;border-style:solid;}
+.cat-tag{font-size:6.5pt;padding:1pt 4pt;border-radius:2pt;font-weight:600;display:inline-block;margin-top:2pt;}
+.cat-pressao{background:#fef2f2;color:#991b1b;border:1pt solid #fca5a5;}
+.cat-apoio{background:#f0fdf4;color:#166534;border:1pt solid #86efac;}
+/* Plano de ação */
+.plano-bloco{border-radius:5pt;padding:9pt 11pt;margin-top:7pt;border-width:1.5pt;border-style:solid;}
+.plano-bloco-alto{background:#fef9f9;border-color:#fca5a5;}
+.plano-bloco-moderado{background:#fffdf5;border-color:#fde68a;}
+.plano-titulo{font-size:8.5pt;font-weight:700;margin-bottom:6pt;display:flex;align-items:center;gap:5pt;}
+.plano-acao{font-size:8.5pt;color:#1f2937;margin-bottom:5pt;line-height:1.5;}
+.plano-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6pt;margin-top:5pt;}
+.plano-campo{font-size:7.5pt;}
+.plano-campo-t{font-size:6.5pt;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:2pt;}
+.plano-campo-v{color:#1f2937;}
+.plano-linha{border-bottom:1pt dashed #d1d5db;height:10pt;margin-top:2pt;}
+/* Painel executivo */
+.painel-setor-row{display:flex;align-items:center;gap:8pt;padding:5pt 0;border-bottom:1pt solid #e5e7eb;}
+.painel-setor-nome{font-size:9pt;flex:1;color:#1f2937;}
+.painel-setor-bar{flex:2;}
+.painel-setor-num{font-size:8.5pt;font-weight:700;min-width:30pt;text-align:right;}
+.painel-setor-badge{min-width:80pt;text-align:center;}
+/* Síntese consolidada */
+.consol-row{display:flex;align-items:start;gap:8pt;padding:8pt 0;border-bottom:1pt solid #e5e7eb;}
+.consol-num{font-size:8pt;color:#9ca3af;min-width:14pt;}
+.consol-body{flex:1;}
+.consol-dominio{font-size:8.5pt;font-weight:600;color:#1f2937;}
+.consol-setor{font-size:7.5pt;color:#6b7280;}
+.consol-acao{font-size:8pt;color:#374151;margin-top:2pt;line-height:1.4;}
+.consol-prazo{font-size:7.5pt;font-weight:600;min-width:50pt;text-align:right;align-self:center;}
+@media print{
+  body{background:#fff;}
+  .no-print{display:none!important;}
+  .page{margin:0;box-shadow:none;width:100%;padding:1.5cm 1.8cm;}
+  .page:not(:last-child){page-break-after:always;}
+  @page{size:A4;margin:0;}
+}`;
 
+  // ── Semáforo geral (capa)
+  const totalSetores=(campanha.setores||[]).length;
+  let semAlto=0,semMod=0,semBaixo=0;
+  (campanha.setores||[]).forEach(cs=>{
+    const r=resultadosMap[cs.id];
+    if(!r)return;
+    const cl=r.resultados_json?.classificacao;
+    if(cl==='ALTO')semAlto++;else if(cl==='MODERADO')semMod++;else semBaixo++;
+  });
+
+  // ── Pág 1: Capa
   const paginaCapa=`<div class="page">
-  <div class="header-bar"><div class="header-consultoria">${e(nomeConsultoria)}</div><div class="header-doc">Relatório de Avaliação Psicossocial</div></div>
+  <div class="hbar"><div class="hbar-nome">${e(nomeConsultoria)}</div><div class="hbar-doc">Relatório de Avaliação Psicossocial</div></div>
   <div class="capa-body">
     <div class="capa-centro">
-      <div class="capa-titulo">RELATÓRIO DE AVALIAÇÃO<br>DE RISCOS PSICOSSOCIAIS</div>
-      <div class="capa-sub" style="margin-bottom:12pt;">${e(campanha.titulo)}</div>
+      <div style="font-size:9pt;color:#6b7280;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10pt;">Avaliação de Riscos Psicossociais</div>
+      <div class="capa-titulo">RELATÓRIO INTEGRADO<br>DE RISCOS PSICOSSOCIAIS</div>
+      <div class="capa-sub">${e(campanha.titulo)}</div>
       <div class="capa-met">COPSOQ-II — 40 itens / 20 domínios</div>
+      <div class="semaforo" style="margin-top:16pt;justify-content:center;">
+        ${semAlto>0?`<div class="sem-item"><div class="sem-dot" style="background:#dc2626;"></div><span><strong>${semAlto}</strong> setor${semAlto>1?'es':''} em alto risco</span></div>`:''}
+        ${semMod>0?`<div class="sem-item"><div class="sem-dot" style="background:#d97706;"></div><span><strong>${semMod}</strong> setor${semMod>1?'es':''} em risco moderado</span></div>`:''}
+        ${semBaixo>0?`<div class="sem-item"><div class="sem-dot" style="background:#16a34a;"></div><span><strong>${semBaixo}</strong> setor${semBaixo>1?'es':''} com baixo risco</span></div>`:''}
+      </div>
     </div>
-    <div class="info-box"><div class="info-titulo">Empresa</div>
-      <div class="info-row"><span class="info-label">Razão Social:</span><span class="info-val">${e(emp.razao_social||'—')}</span></div>
-      ${emp.nome_fantasia&&emp.nome_fantasia!==emp.razao_social?`<div class="info-row"><span class="info-label">Nome Fantasia:</span><span class="info-val">${e(emp.nome_fantasia)}</span></div>`:''}
-      <div class="info-row"><span class="info-label">CNPJ (raiz):</span><span class="info-val">${e(emp.cnpj_raiz||'—')}</span></div>
-      ${emp.cidade?`<div class="info-row"><span class="info-label">Localidade:</span><span class="info-val">${e([emp.cidade,emp.estado].filter(Boolean).join(' — '))}</span></div>`:''}
+    <div class="ibox"><div class="ibox-t">Empresa</div>
+      <div class="irow"><span class="ilabel">Razão Social:</span><span class="ival">${e(emp.razao_social||'—')}</span></div>
+      ${emp.nome_fantasia&&emp.nome_fantasia!==emp.razao_social?`<div class="irow"><span class="ilabel">Nome Fantasia:</span><span class="ival">${e(emp.nome_fantasia)}</span></div>`:''}
+      <div class="irow"><span class="ilabel">CNPJ (raiz):</span><span class="ival">${e(emp.cnpj_raiz||'—')}</span></div>
+      ${emp.cidade?`<div class="irow"><span class="ilabel">Localidade:</span><span class="ival">${e([emp.cidade,emp.estado].filter(Boolean).join(' — '))}</span></div>`:''}
     </div>
-    <div class="info-box"><div class="info-titulo">Campanha</div>
-      <div class="info-row"><span class="info-label">Período:</span><span class="info-val">${dataInicio} a ${dataFim}</span></div>
-      <div class="info-row"><span class="info-label">Total respondentes:</span><span class="info-val">${totalResp}</span></div>
-      <div class="info-row"><span class="info-label">Setores avaliados:</span><span class="info-val">${(campanha.setores||[]).length}</span></div>
-      ${campanha.aplicador_nome?`<div class="info-row"><span class="info-label">Aplicador:</span><span class="info-val">${e(campanha.aplicador_nome)}${campanha.aplicador_registro?' — '+e(campanha.aplicador_registro):''}${campanha.aplicador_tipo?' ('+e(campanha.aplicador_tipo)+')':''}</span></div>`:''}
-      <div class="info-row"><span class="info-label">Emissão:</span><span class="info-val">${hoje}</span></div>
+    <div class="ibox"><div class="ibox-t">Campanha</div>
+      <div class="irow"><span class="ilabel">Período:</span><span class="ival">${dataInicio} a ${dataFim}</span></div>
+      <div class="irow"><span class="ilabel">Total respondentes:</span><span class="ival">${totalResp}</span></div>
+      <div class="irow"><span class="ilabel">Setores avaliados:</span><span class="ival">${totalSetores}</span></div>
+      ${campanha.aplicador_nome?`<div class="irow"><span class="ilabel">Aplicador:</span><span class="ival">${e(campanha.aplicador_nome)}${campanha.aplicador_registro?' — '+e(campanha.aplicador_registro):''}${campanha.aplicador_tipo?' ('+e(campanha.aplicador_tipo)+')':''}</span></div>`:''}
+      <div class="irow"><span class="ilabel">Emissão:</span><span class="ival">${hoje}</span></div>
     </div>
   </div>
   <div class="footer"><span>${e(nomeConsultoria)}</span><span>Avaliação Psicossocial — COPSOQ-II</span></div>
 </div>`;
 
-  const paginaMetodologia=`<div class="page">
-  <div class="header-bar"><div class="header-consultoria">${e(nomeConsultoria)}</div><div class="header-doc">${e(nomeEmp)} — Avaliação Psicossocial</div></div>
-  <div class="sec-titulo">1. Base Legal e Metodologia</div>
-  <div class="sub-titulo">1.1 Base Legal</div>
-  <p class="texto">A avaliação dos riscos psicossociais é exigência da <strong>NR-01 (Portaria MTE nº 1.419/2024)</strong>, subitem 1.5.4.4, que determina a identificação e avaliação de riscos decorrentes de fatores psicossociais relacionados à organização do trabalho, relações interpessoais e condições do ambiente laboral.</p>
-  <div class="sub-titulo">1.2 Instrumento — COPSOQ-II (40 itens / 20 domínios)</div>
-  <p class="texto">O COPSOQ-II (Copenhagen Psychosocial Questionnaire) é um instrumento internacionalmente validado para avaliação de riscos psicossociais no trabalho. Esta versão contém <strong>40 questões</strong> agrupadas em <strong>20 domínios</strong>, com escala de resposta de 1 a 4 (Nunca/Quase nunca → Sempre/Quase sempre). Resultados normalizados de 0 a 100% com thresholds calibrados por tipo de domínio.</p>
-  ${campanha.aplicador_nome?`<p class="texto"><strong>Aplicador:</strong> ${e(campanha.aplicador_nome)}${campanha.aplicador_registro?' — '+e(campanha.aplicador_registro):''}${campanha.aplicador_tipo?' ('+e(campanha.aplicador_tipo)+')':''}.</p>`:''}
-  <div class="sub-titulo">1.3 Domínios Avaliados</div>
-  <table><thead><tr><th style="width:5%;">#</th><th>Domínio</th><th style="width:20%;text-align:center;">Tipo</th></tr></thead><tbody>
-    ${DOMINIOS.map((d,i)=>`<tr><td>${i+1}</td><td>${e(d.nome)}</td><td style="text-align:center;"><span class="badge" style="${d.tipo==='inverso'?'background:#fef2f2;color:#991b1b;border-color:#fca5a5':'background:#f0fdf4;color:#166534;border-color:#86efac'}">${d.tipo==='inverso'?'Demanda':'Recurso'}</span></td></tr>`).join('')}
+  // ── Pág 2: Como ler este relatório
+  const paginaComoLer=`<div class="page">
+  <div class="hbar"><div class="hbar-nome">${e(nomeConsultoria)}</div><div class="hbar-doc">${e(nomeEmp)} — Como ler este relatório</div></div>
+  <div class="sec">Como ler este relatório</div>
+  <p class="txt">Este documento apresenta os resultados da avaliação de riscos psicossociais realizada com os trabalhadores da empresa. Ele foi elaborado para ser compreendido por gestores, profissionais de RH e equipes de SST — sem necessidade de formação técnica específica.</p>
+
+  <div class="sub" style="margin-top:10pt;">O que o COPSOQ-II avalia?</div>
+  <p class="txt">O <strong>COPSOQ-II</strong> (Copenhagen Psychosocial Questionnaire) é um questionário internacionalmente validado que mede as condições psicossociais do ambiente de trabalho. Os trabalhadores respondem 40 perguntas sobre sua rotina. As respostas são tratadas de forma anônima e os resultados são sempre apresentados por setor — nunca individualmente.</p>
+  <p class="txt">O instrumento avalia dois tipos de fatores que influenciam a saúde no trabalho:</p>
+
+  <div class="cl-grid">
+    <div class="cl-card cl-card-pressao">
+      <div class="cl-card-t cl-card-t-p">Pressões do trabalho</div>
+      <p style="font-size:8.5pt;color:#374151;line-height:1.5;">São os fatores que <strong>pesam</strong> sobre o trabalhador. Quando estão em excesso, aumentam o risco de adoecimento.</p>
+      <p class="cl-card-ex">Exemplos: excesso de trabalho, desgaste emocional, medo de perder o emprego, ordens contraditórias.</p>
+      <p style="font-size:8pt;margin-top:6pt;color:#991b1b;font-weight:600;">⚠ Score baixo = situação preocupante (mais pressão do que o adequado)</p>
+    </div>
+    <div class="cl-card cl-card-apoio">
+      <div class="cl-card-t cl-card-t-a">Apoios do trabalho</div>
+      <p style="font-size:8.5pt;color:#374151;line-height:1.5;">São os fatores que <strong>sustentam</strong> o trabalhador. Quando estão presentes, protegem contra o adoecimento.</p>
+      <p class="cl-card-ex">Exemplos: autonomia, suporte da chefia, reconhecimento, clareza das responsabilidades.</p>
+      <p style="font-size:8pt;margin-top:6pt;color:#166534;font-weight:600;">✓ Score alto = situação adequada (apoio presente e funcionando)</p>
+    </div>
+  </div>
+
+  <div class="sub">Como interpretar o score (%)</div>
+  <p class="txt">Cada domínio recebe uma pontuação de 0% a 100%. A leitura é sempre a mesma, independentemente do tipo:</p>
+  <div class="nivel-grid">
+    <div class="nivel-card" style="background:#fef2f2;border-color:#fca5a5;">
+      <div class="nivel-n" style="color:#991b1b;">Alto Risco</div>
+      <div class="nivel-s" style="color:#991b1b;">Score abaixo de 50%</div>
+      <div class="nivel-d">Ação imediata necessária. O fator está impactando negativamente a saúde da equipe.</div>
+    </div>
+    <div class="nivel-card" style="background:#fffbeb;border-color:#fde68a;">
+      <div class="nivel-n" style="color:#92400e;">Risco Moderado</div>
+      <div class="nivel-s" style="color:#92400e;">Score entre 50% e 74%</div>
+      <div class="nivel-d">Atenção recomendada. O fator precisa de melhoria a médio prazo.</div>
+    </div>
+    <div class="nivel-card" style="background:#f0fdf4;border-color:#86efac;">
+      <div class="nivel-n" style="color:#166534;">Baixo Risco</div>
+      <div class="nivel-s" style="color:#166534;">Score 75% ou acima</div>
+      <div class="nivel-d">Situação adequada. Manter as práticas atuais e monitorar periodicamente.</div>
+    </div>
+  </div>
+
+  <div class="sub">Como está organizado este relatório</div>
+  <table><thead><tr><th>Seção</th><th>O que encontrar</th></tr></thead><tbody>
+    <tr><td>Base Legal e Metodologia</td><td>Fundamentação jurídica, instrumento utilizado e memorial de cálculo</td></tr>
+    <tr><td>Resultados por Setor</td><td>Barras visuais com score de cada domínio + plano de ação para os domínios em risco</td></tr>
+    <tr><td>Plano de Ação Consolidado</td><td>Tabela com todas as ações, prazos e indicadores para acompanhamento</td></tr>
+    <tr><td>Assinaturas e Próximos Passos</td><td>Responsáveis, data de revisão e encaminhamentos</td></tr>
   </tbody></table>
-  <div class="sub-titulo">1.4 Classificação</div>
-  <table><thead><tr><th>Nível</th><th>Score</th><th>Ação recomendada</th></tr></thead><tbody>
-    <tr><td><span class="badge" style="background:#f0fdf4;color:#166534;border-color:#86efac;">Baixo Risco</span></td><td>≥ 75%</td><td>Manter e monitorar periodicamente</td></tr>
-    <tr><td><span class="badge" style="background:#fffbeb;color:#92400e;border-color:#fde68a;">Risco Moderado</span></td><td>50–74%</td><td>Implementar melhorias a médio prazo</td></tr>
-    <tr><td><span class="badge" style="background:#fef2f2;color:#991b1b;border-color:#fca5a5;">Alto Risco</span></td><td>&lt; 50%</td><td>Intervenção imediata prioritária</td></tr>
-  </tbody></table>
-  <div class="footer"><span>${e(nomeConsultoria)}</span><span>${e(nomeEmp)} — COPSOQ-II</span></div>
+
+  <div class="lgpd-box"><strong>Sigilo e LGPD:</strong> Este relatório não contém dados individuais. Todas as respostas foram tratadas de forma anônima e os resultados refletem percepções coletivas por setor. O processamento dos dados atende à Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018), Art. 11, referente a dados sensíveis de saúde tratados para fins de medicina do trabalho e segurança ocupacional.</div>
+  <div class="footer"><span>${e(nomeConsultoria)}</span><span>${e(nomeEmp)} — Como ler este relatório</span></div>
 </div>`;
 
-  let paginasSetor='',sinteseRows='';
+  // ── Pág 3–4: Base Legal e Metodologia + Memorial de Cálculo
+  const paginaMetodologia=`<div class="page">
+  <div class="hbar"><div class="hbar-nome">${e(nomeConsultoria)}</div><div class="hbar-doc">${e(nomeEmp)} — Base Legal e Metodologia</div></div>
+  <div class="sec">1. Base Legal e Metodologia</div>
+
+  <div class="sub">1.1 Base Legal</div>
+  <p class="txt">A avaliação dos riscos psicossociais é exigência da <strong>NR-01 (Portaria MTE nº 1.419/2024)</strong>, item 1.5, que determina a identificação e avaliação de riscos decorrentes de fatores psicossociais relacionados à organização do trabalho, relações interpessoais e condições do ambiente laboral. O não atendimento sujeita o empregador a notificação e interdição parcial (NR-03).</p>
+
+  <div class="sub">1.2 Instrumento — COPSOQ-II</div>
+  <p class="txt">O <strong>COPSOQ-II</strong> (Copenhagen Psychosocial Questionnaire, versão II) é um instrumento científico desenvolvido pelo Instituto Nacional de Saúde Ocupacional da Dinamarca e validado em mais de 30 países. Esta aplicação utilizou a versão de <strong>40 itens</strong> agrupados em <strong>20 domínios</strong>, com escala de resposta de 1 a 4 pontos.</p>
+  ${campanha.aplicador_nome?`<p class="txt"><strong>Responsável pela aplicação:</strong> ${e(campanha.aplicador_nome)}${campanha.aplicador_registro?' — Registro: '+e(campanha.aplicador_registro):''}${campanha.aplicador_tipo?' ('+e(campanha.aplicador_tipo)+')':''}.</p>`:''}
+
+  <div class="sub">1.3 Domínios Avaliados e o que cada um mede</div>
+  <table><thead><tr><th style="width:4%;">#</th><th style="width:28%;">Domínio</th><th>O que mede na prática</th><th style="width:14%;text-align:center;">Categoria</th></tr></thead><tbody>
+    ${DOMINIOS.map((d,i)=>`<tr><td>${i+1}</td><td>${e(d.nome)}</td><td style="font-size:8pt;">${e(O_QUE_MEDE[d.id]||'')}</td><td style="text-align:center;"><span class="${d.tipo==='inverso'?'cat-pressao':'cat-apoio'} cat-tag">${labelCategoria(d.tipo)}</span></td></tr>`).join('')}
+  </tbody></table>
+
+  <div class="sub" style="margin-top:10pt;">1.4 Classificação do Nível de Risco</div>
+  <table><thead><tr><th>Nível</th><th>Score</th><th>Significado</th><th>Ação recomendada</th></tr></thead><tbody>
+    <tr><td><span class="badge" style="background:#fef2f2;color:#991b1b;border-color:#fca5a5;">Alto Risco</span></td><td style="text-align:center;">0 – 49%</td><td>Fator comprometido ou excessivo</td><td>Intervenção imediata prioritária</td></tr>
+    <tr><td><span class="badge" style="background:#fffbeb;color:#92400e;border-color:#fde68a;">Risco Moderado</span></td><td style="text-align:center;">50 – 74%</td><td>Fator com oportunidade de melhoria</td><td>Implementar melhorias a médio prazo</td></tr>
+    <tr><td><span class="badge" style="background:#f0fdf4;color:#166534;border-color:#86efac;">Baixo Risco</span></td><td style="text-align:center;">75 – 100%</td><td>Fator adequado</td><td>Manter e monitorar periodicamente</td></tr>
+  </tbody></table>
+  <div class="footer"><span>${e(nomeConsultoria)}</span><span>${e(nomeEmp)} — Base Legal e Metodologia</span></div>
+</div>
+<div class="page">
+  <div class="hbar"><div class="hbar-nome">${e(nomeConsultoria)}</div><div class="hbar-doc">${e(nomeEmp)} — Memorial de Cálculo</div></div>
+  <div class="sec">1.5 Memorial de Cálculo</div>
+  <p class="txt">Esta seção descreve o método de transformação das respostas brutas em scores percentuais e a forma de classificação do nível de risco. Destina-se à conferência técnica e auditoria.</p>
+
+  <div class="sub">Escala de resposta</div>
+  <p class="txt">Cada questão apresenta 4 opções, numeradas de 1 a 4. O valor 1 representa sempre a menor intensidade (ex.: "Nunca" ou "Discordo totalmente") e o valor 4 a maior (ex.: "Sempre" ou "Concordo totalmente").</p>
+
+  <div class="sub">Cálculo do score por domínio</div>
+  <p class="txt">Cada domínio é composto por 2 questões. O <strong>score bruto</strong> é a média aritmética das respostas válidas. O <strong>score normalizado</strong> (0–100%) é obtido conforme a categoria do domínio:</p>
+  <div class="formula-box">
+    <div class="formula-row">Domínios de <strong>Pressão</strong> (inverso — ex.: sobrecarga, insegurança):</div>
+    <div class="formula-row" style="padding-left:12pt;">Score (%) = (4 − média) ÷ 3 × 100</div>
+    <div class="formula-ex" style="padding-left:12pt;">→ Quanto maior a pressão relatada (média alta), menor o score, maior o risco.</div>
+    <div class="formula-row" style="margin-top:7pt;">Domínios de <strong>Apoio</strong> (direto — ex.: autonomia, suporte, reconhecimento):</div>
+    <div class="formula-row" style="padding-left:12pt;">Score (%) = (média − 1) ÷ 3 × 100</div>
+    <div class="formula-ex" style="padding-left:12pt;">→ Quanto maior o apoio percebido (média alta), maior o score, menor o risco.</div>
+  </div>
+
+  <div class="sub">Exemplo numérico</div>
+  <p class="txt"><strong>Domínio: Demandas Quantitativas</strong> (Pressão) — questões Q01 e Q02</p>
+  <div class="formula-box">
+    <div class="formula-row">Respostas coletadas: Q01 → [3, 4, 3, 4, 3] · Q02 → [4, 4, 3, 4, 4]</div>
+    <div class="formula-row">Média Q01 = (3+4+3+4+3) ÷ 5 = 3,4 · Média Q02 = (4+4+3+4+4) ÷ 5 = 3,8</div>
+    <div class="formula-row">Média do domínio = (3,4 + 3,8) ÷ 2 = 3,6</div>
+    <div class="formula-row">Score = (4 − 3,6) ÷ 3 × 100 = <strong>13%</strong> → Classificação: <strong>Alto Risco</strong></div>
+    <div class="formula-ex">Interpretação: a equipe relata quase sempre excesso de trabalho e ritmo acelerado.</div>
+  </div>
+
+  <div class="tip-box">Os scores são arredondados para o número inteiro mais próximo. Scores são limitados ao intervalo 0–100%. A classificação geral do setor é obtida pela média dos scores de todos os 20 domínios, aplicando os mesmos critérios de corte.</div>
+
+  <div class="sub">Sobre os pontos de corte</div>
+  <p class="txt">Os critérios de classificação adotados (75%/50%) são baseados em referência adaptada para uso em contexto de GRO/PGR, conforme orientação técnica da literatura de saúde ocupacional brasileira. A ausência de normativa nacional validada para o COPSOQ-II deve ser considerada na interpretação: os resultados indicam tendências e prioridades de intervenção, não diagnósticos absolutos.</p>
+
+  <div class="sub">Sigilo estatístico</div>
+  <p class="txt">Setores com menos de 5 respondentes têm seus resultados sinalizados como estatisticamente limitados. Os resultados devem ser interpretados com cautela em grupos reduzidos, pois podem não representar a percepção coletiva real do setor.</p>
+  <div class="footer"><span>${e(nomeConsultoria)}</span><span>${e(nomeEmp)} — Memorial de Cálculo</span></div>
+</div>`;
+
+  // ── Páginas por setor + coleta de dados para consolidado
+  let paginasSetor='';
+  const acoesConsolidadas=[];
+
+  (campanha.setores||[]).forEach(cs=>{
+    const setor=setores.find(s=>s.id===cs.setor_id);
+    if(!setor)return;
+    const resultado=resultadosMap[cs.id];
+    if(!resultado)return;
+    const rj=resultado.resultados_json||{};
+    const mediaGeral=rj.media_geral!=null?scoreCap(rj.media_geral):null;
+    const classGeral=rj.classificacao||'BAIXO';
+    const cg=corRisco(classGeral);
+    const nResp=resultado.total_respondentes||0;
+    const alertaN=nResp<5?`<div style="background:#fffbeb;border:1pt solid #fde68a;border-radius:4pt;padding:7pt 10pt;font-size:8pt;color:#92400e;margin-bottom:8pt;">⚠ <strong>Grupo reduzido (${nResp} respondente${nResp!==1?'s':''}).</strong> Resultados podem não ser representativos. Interprete com cautela.</div>`:'';
+
+    // Barras dos 20 domínios em grade 2 colunas
+    const domBarras=DOMINIOS.map(d=>{
+      const sc=scoreCap(rj[`${d.id}_score`]);
+      const risco=rj[`${d.id}_risco`]||'BAIXO';
+      const c=corRisco(risco);
+      const pct=sc!=null?sc:0;
+      return`<div class="dom-item">
+        <div class="dom-item-nome">${e(d.nome)}</div>
+        <div class="dom-item-desc">${e(O_QUE_MEDE[d.id]||'')}</div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${c.barColor};"></div></div>
+        <div class="bar-meta">
+          <span><span class="cat-tag ${d.tipo==='inverso'?'cat-pressao':'cat-apoio'}">${labelCategoria(d.tipo)}</span></span>
+          <span><span class="bar-score" style="color:${c.barColor};">${sc!=null?sc+'%':'—'}</span>&nbsp;<span class="bar-badge" style="background:${c.bg};color:${c.text};border-color:${c.border};">${c.label}</span></span>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Blocos de plano de ação inline (só Alto e Moderado)
+    const domsEmRisco=DOMINIOS.filter(d=>['ALTO','MODERADO'].includes(rj[`${d.id}_risco`]));
+    let planosHtml='';
+    domsEmRisco.forEach(d=>{
+      const risco=rj[`${d.id}_risco`];
+      const sc=scoreCap(rj[`${d.id}_score`]);
+      const c=corRisco(risco);
+      const pl=PLANO_ACAO[d.id];
+      if(!pl)return;
+      acoesConsolidadas.push({setor:setor.nome_setor,dominio:d.nome,risco,score:sc,pl});
+      const icone=risco==='ALTO'?'⚠':'↗';
+      planosHtml+=`<div class="plano-bloco plano-bloco-${risco.toLowerCase()}">
+        <div class="plano-titulo"><span style="color:${c.text};">${icone}</span><span style="color:${c.text};">Plano de Ação — ${e(d.nome)}</span><span class="bar-badge" style="background:${c.bg};color:${c.text};border-color:${c.border};margin-left:auto;">${c.label} · ${sc!=null?sc+'%':'—'}</span></div>
+        <div class="plano-acao"><strong>O que precisa mudar:</strong> ${e(O_QUE_MEDE[d.id]||'')} está comprometido neste setor.<br><strong>Ação:</strong> ${e(pl.acao)}</div>
+        <div class="plano-grid">
+          <div class="plano-campo"><div class="plano-campo-t">Recursos necessários</div><div class="plano-campo-v">${e(pl.recursos)}</div></div>
+          <div class="plano-campo"><div class="plano-campo-t">Indicador de acompanhamento</div><div class="plano-campo-v">${e(pl.indicador)}</div></div>
+          <div class="plano-campo"><div class="plano-campo-t">Prazo recomendado</div><div class="plano-campo-v">${pl.prazo} dias</div><div class="plano-campo-t" style="margin-top:5pt;">Responsável</div><div class="plano-linha"></div></div>
+        </div>
+      </div>`;
+    });
+
+    paginasSetor+=`<div class="page">
+  <div class="hbar"><div class="hbar-nome">${e(nomeConsultoria)}</div><div class="hbar-doc">${e(nomeEmp)} — Resultados por Setor</div></div>
+  <div class="sec">2. Resultados — ${e(setor.nome_setor)}</div>
+  ${alertaN}
+  <div style="display:flex;align-items:center;gap:14pt;background:#f9fafb;border:1pt solid #e5e7eb;border-radius:5pt;padding:9pt 12pt;margin-bottom:10pt;">
+    <div>
+      <div style="font-size:8pt;color:#6b7280;">Respondentes</div>
+      <div style="font-size:16pt;font-weight:700;color:#1e3a5f;">${nResp}</div>
+    </div>
+    <div>
+      <div style="font-size:8pt;color:#6b7280;">Média Geral do Setor</div>
+      <div style="font-size:16pt;font-weight:700;color:${cg.barColor};">${mediaGeral!=null?mediaGeral+'%':'—'}</div>
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:8pt;color:#6b7280;margin-bottom:3pt;">Classificação Geral</div>
+      <span class="badge" style="font-size:9pt;padding:3pt 10pt;background:${cg.bg};color:${cg.text};border-color:${cg.border};">${cg.label}</span>
+    </div>
+    <div style="font-size:8pt;color:#6b7280;text-align:right;">Encerrado em:<br>${dataFim}</div>
+  </div>
+  <p class="txt" style="margin-bottom:8pt;">As barras abaixo mostram o score de cada domínio. <strong>Barras verdes</strong> indicam situação adequada. <strong>Barras laranjas ou vermelhas</strong> sinalizam necessidade de atenção. O plano de ação aparece logo abaixo dos domínios em risco.</p>
+  <div class="dom-grid">${domBarras}</div>
+  ${domsEmRisco.length?`<div class="sub" style="margin-top:10pt;">Planos de Ação — Domínios em Risco</div>${planosHtml}`:`<div style="background:#f0fdf4;border:1pt solid #86efac;border-radius:5pt;padding:9pt 12pt;font-size:8.5pt;color:#166534;margin-top:8pt;"><strong>✓ Todos os domínios dentro de parâmetros adequados.</strong> Recomenda-se manutenção das práticas atuais e reavaliação em 12 meses.</div>`}
+  <div class="footer"><span>${e(nomeConsultoria)}</span><span>${e(nomeEmp)} — ${e(setor.nome_setor)}</span></div>
+</div>`;
+  });
+
+  // ── Plano de Ação Consolidado
+  let consolRows='';
+  acoesConsolidadas.forEach((a,i)=>{
+    const c=corRisco(a.risco);
+    consolRows+=`<div class="consol-row">
+      <div class="consol-num">${i+1}</div>
+      <div class="consol-body">
+        <div class="consol-dominio">${e(a.dominio)} <span class="bar-badge" style="font-size:7pt;background:${c.bg};color:${c.text};border-color:${c.border};">${c.label} · ${a.score!=null?a.score+'%':'—'}</span></div>
+        <div class="consol-setor">Setor: ${e(a.setor)}</div>
+        <div class="consol-acao">${e(a.pl.acao)}</div>
+        <div style="font-size:7.5pt;color:#6b7280;margin-top:2pt;">Indicador: ${e(a.pl.indicador)}</div>
+      </div>
+      <div class="consol-prazo" style="color:${c.text};">${a.pl.prazo} dias</div>
+    </div>`;
+  });
+
+  const paginaConsolidado=acoesConsolidadas.length?`<div class="page">
+  <div class="hbar"><div class="hbar-nome">${e(nomeConsultoria)}</div><div class="hbar-doc">${e(nomeEmp)} — Plano de Ação Consolidado</div></div>
+  <div class="sec">3. Plano de Ação Consolidado</div>
+  <p class="txt">Esta tabela reúne todas as ações de todos os setores em um único documento de gestão. Use-a para acompanhar o andamento das melhorias, definir responsáveis e registrar datas de conclusão.</p>
+  ${consolRows}
+  <div class="footer"><span>${e(nomeConsultoria)}</span><span>${e(nomeEmp)} — Plano de Ação Consolidado</span></div>
+</div>`:'' ;
+
+  // ── Síntese geral por setor
+  let sinteseRows='';
   (campanha.setores||[]).forEach(cs=>{
     const setor=setores.find(s=>s.id===cs.setor_id);
     if(!setor)return;
@@ -879,57 +1247,53 @@ function montarRelatorio(campanha,emp,resultadosMap){
     if(!resultado)return;
     const rj=resultado.resultados_json||{};
     const altos=DOMINIOS.filter(d=>rj[`${d.id}_risco`]==='ALTO').length;
-    const moderados=DOMINIOS.filter(d=>rj[`${d.id}_risco`]==='MODERADO').length;
+    const mods=DOMINIOS.filter(d=>rj[`${d.id}_risco`]==='MODERADO').length;
     const classGeral=rj.classificacao||'BAIXO';
     const cg=corRisco(classGeral);
-    sinteseRows+=`<tr><td>${e(setor.nome_setor)}</td><td style="text-align:center;">${resultado.total_respondentes||0}</td><td style="text-align:center;">${altos}</td><td style="text-align:center;">${moderados}</td><td style="text-align:center;">${rj.media_geral!=null?rj.media_geral.toFixed(0)+'%':'—'}</td><td style="text-align:center;"><span class="badge" style="background:${cg.bg};color:${cg.text};border-color:${cg.border};">${cg.label}</span></td></tr>`;
-    const dimHtml=DOMINIOS.map(d=>{
-      const score=rj[`${d.id}_score`];
-      const risco=rj[`${d.id}_risco`]||'BAIXO';
-      const c=corRisco(risco);
-      return`<tr><td>${e(d.nome)}</td><td style="text-align:center;"><span class="badge" style="${d.tipo==='inverso'?'background:#fef2f2;color:#991b1b;border-color:#fca5a5':'background:#f0fdf4;color:#166534;border-color:#86efac'}">${d.tipo==='inverso'?'Demanda':'Recurso'}</span></td><td style="text-align:center;">${score!=null?Math.round(score)+'%':'—'}</td><td style="text-align:center;"><span class="badge" style="background:${c.bg};color:${c.text};border-color:${c.border};">${c.label}</span></td></tr>`;
-    }).join('');
-    const domAltos=DOMINIOS.filter(d=>rj[`${d.id}_risco`]==='ALTO');
-    const domModerados=DOMINIOS.filter(d=>rj[`${d.id}_risco`]==='MODERADO');
-    paginasSetor+=`<div class="page">
-  <div class="header-bar"><div class="header-consultoria">${e(nomeConsultoria)}</div><div class="header-doc">${e(nomeEmp)} — Avaliação Psicossocial</div></div>
-  <div class="sec-titulo">2. Resultados por Setor</div>
-  <div class="setor-header"><div class="setor-nome">🏢 ${e(setor.nome_setor)}</div><div style="font-size:8pt;color:#6b7280;margin-top:2pt;">Respondentes: ${resultado.total_respondentes||0} · Encerrado em: ${dataFim} · Média geral: ${rj.media_geral!=null?rj.media_geral.toFixed(0)+'%':'—'}</div></div>
-  <table><thead><tr><th style="width:38%;">Domínio</th><th style="width:15%;text-align:center;">Tipo</th><th style="width:15%;text-align:center;">Score</th><th style="text-align:center;">Nível de Risco</th></tr></thead><tbody>${dimHtml}</tbody></table>
-  ${domAltos.length||domModerados.length?`<div class="sub-titulo">Síntese</div>
-  ${domAltos.length?`<p class="texto"><strong style="color:#991b1b;">Domínios em alto risco:</strong> ${domAltos.map(d=>e(d.nome)).join(', ')}.</p>`:''}
-  ${domModerados.length?`<p class="texto"><strong style="color:#92400e;">Domínios em risco moderado:</strong> ${domModerados.map(d=>e(d.nome)).join(', ')}.</p>`:''}
-  <p class="texto">Recomenda-se a implementação de medidas de controle organizacionais nos domínios identificados, incluindo revisão da organização do trabalho, capacitação de lideranças e acompanhamento periódico.</p>`
-  :`<p class="texto" style="margin-top:8pt;"><strong style="color:#166534;">✓</strong> Todos os domínios dentro de parâmetros adequados. Recomenda-se monitoramento periódico.</p>`}
-  <div class="footer"><span>${e(nomeConsultoria)}</span><span>${e(nomeEmp)} — ${e(setor.nome_setor)}</span></div>
-</div>`;
+    const mg=scoreCap(rj.media_geral);
+    sinteseRows+=`<tr><td>${e(setor.nome_setor)}</td><td style="text-align:center;">${resultado.total_respondentes||0}</td><td style="text-align:center;color:#dc2626;font-weight:600;">${altos}</td><td style="text-align:center;color:#d97706;font-weight:600;">${mods}</td><td style="text-align:center;">${mg!=null?mg+'%':'—'}</td><td style="text-align:center;"><span class="badge" style="background:${cg.bg};color:${cg.text};border-color:${cg.border};">${cg.label}</span></td></tr>`;
   });
 
-  const paginaSintese=`<div class="page">
-  <div class="header-bar"><div class="header-consultoria">${e(nomeConsultoria)}</div><div class="header-doc">${e(nomeEmp)} — Avaliação Psicossocial</div></div>
-  <div class="sec-titulo">3. Síntese Geral por Setor</div>
+  // ── Página final: Síntese + Assinaturas
+  const paginaFinal=`<div class="page">
+  <div class="hbar"><div class="hbar-nome">${e(nomeConsultoria)}</div><div class="hbar-doc">${e(nomeEmp)} — Síntese e Próximos Passos</div></div>
+  <div class="sec">4. Síntese Geral por Setor</div>
   <table><thead><tr><th>Setor</th><th style="text-align:center;">Respondentes</th><th style="text-align:center;">Dom. alto risco</th><th style="text-align:center;">Dom. moderado</th><th style="text-align:center;">Média geral</th><th style="text-align:center;">Classificação</th></tr></thead><tbody>${sinteseRows}</tbody></table>
-  <div class="sub-titulo" style="margin-top:14pt;">Orientações Gerais</div>
-  <p class="texto">• Implementar medidas de controle nos setores com domínios em risco alto ou moderado.</p>
-  <p class="texto">• Comunicar os resultados coletivos aos trabalhadores, preservando o sigilo individual.</p>
-  <p class="texto">• Reavaliar em até 12 meses ou após a implementação das medidas de controle (NR-01, item 1.5.4.4.4).</p>
-  <p class="texto">• Integrar os riscos psicossociais identificados ao inventário de riscos do PGR.</p>
-  <div style="margin-top:28pt;display:flex;justify-content:space-around;gap:20pt;">
-    <div style="text-align:center;flex:1;"><div class="assinatura-linha"></div>
+
+  <div class="sub" style="margin-top:12pt;">5. Próximos Passos</div>
+  <p class="txt">Com base nos resultados desta avaliação, a empresa deve adotar as seguintes providências:</p>
+  <p class="txt"><strong>1.</strong> Reunir os gestores dos setores com domínios em alto risco e definir responsáveis pelas ações previstas no Plano de Ação Consolidado (seção 3) até <strong>${new Date(new Date().getTime()+30*24*60*60*1000).toLocaleDateString('pt-BR')}</strong> (30 dias a partir desta data).</p>
+  <p class="txt"><strong>2.</strong> Comunicar os resultados coletivos aos trabalhadores de cada setor, de forma transparente e sem exposição individual, conforme exige a NR-01.</p>
+  <p class="txt"><strong>3.</strong> Integrar os riscos psicossociais identificados ao inventário de riscos do PGR, com registro das medidas de controle adotadas.</p>
+  <p class="txt"><strong>4.</strong> Reavaliar os setores em risco alto ou moderado em <strong>até 6 meses</strong>. Para os demais setores, reavaliar em até 12 meses ou após mudanças organizacionais significativas.</p>
+
+  <div style="margin-top:24pt;display:flex;justify-content:space-around;gap:20pt;">
+    <div style="text-align:center;flex:1;">
+      <div class="assinatura-linha"></div>
       <div style="font-size:8.5pt;font-weight:600;">${e(campanha.aplicador_nome||'Aplicador responsável')}</div>
       ${campanha.aplicador_registro?`<div style="font-size:7.5pt;color:#6b7280;">${e(campanha.aplicador_registro)}${campanha.aplicador_tipo?' — '+e(campanha.aplicador_tipo):''}</div>`:''}
     </div>
-    <div style="text-align:center;flex:1;"><div class="assinatura-linha"></div>
+    <div style="text-align:center;flex:1;">
+      <div class="assinatura-linha"></div>
+      <div style="font-size:8.5pt;font-weight:600;">Responsável de RH / SST</div>
+      <div style="font-size:7.5pt;color:#6b7280;">${e(nomeEmp)}</div>
+    </div>
+    <div style="text-align:center;flex:1;">
+      <div class="assinatura-linha"></div>
       <div style="font-size:8.5pt;font-weight:600;">Representante da Empresa</div>
       <div style="font-size:7.5pt;color:#6b7280;">${e(nomeEmp)}</div>
     </div>
   </div>
-  <div class="footer"><span>${e(nomeConsultoria)}</span><span>Emitido em ${hoje}</span></div>
+  <div class="footer"><span>${e(nomeConsultoria)}</span><span>Emitido em ${hoje} — Avaliação Psicossocial COPSOQ-II</span></div>
 </div>`;
 
   return`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Psicossocial — ${e(campanha.titulo)}</title><style>${css}</style></head><body>
-<div class="no-print"><button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button><button onclick="window.close()" style="background:transparent;color:#8892a4;border:1px solid #2a3044;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;margin-left:8px;">✕ Fechar</button><span style="color:#8892a4;font-size:12px;margin-left:12px;">Para salvar como PDF: Imprimir → Destino → Salvar como PDF</span></div>
-${paginaCapa}${paginaMetodologia}${paginasSetor}${paginaSintese}
+<div class="no-print">
+  <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  <button onclick="window.close()" style="background:transparent;color:#8892a4;border:1px solid #2a3044;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;margin-left:8px;">✕ Fechar</button>
+  <span style="color:#8892a4;font-size:12px;margin-left:12px;">Para salvar como PDF: Imprimir → Destino → Salvar como PDF</span>
+</div>
+${paginaCapa}${paginaComoLer}${paginaMetodologia}${paginasSetor}${paginaConsolidado}${paginaFinal}
 </body></html>`;
 }
 
