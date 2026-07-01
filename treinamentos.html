@@ -958,6 +958,16 @@ function emitirCertificado(id){
   const func=funcionarios.find(f=>f.id===r.funcionario_id);
   const funcao=funcoes.find(f=>f.id===func?.funcao_id);
   const nomeEmpresa=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+
+  // Monta itens do conteúdo programático (split por "; " seguido de número ou fim)
+  const texto=cat?.conteudo_programatico||'';
+  const itens=texto?texto.split(/;\s*/).map(s=>s.trim()).filter(Boolean):[];
+  const conteudoHtml=itens.length
+    ?`<div style="column-count:2;column-gap:8mm;column-rule:1px solid #e8d89a;font-size:8.5pt;color:#333;line-height:1.55;">${
+        itens.map(item=>`<div style="break-inside:avoid;padding:1.5mm 0;border-bottom:1px solid #f5f0e8;">${escHtml(item)}</div>`).join('')
+      }</div>`
+    :`<div style="text-align:center;color:#aaa;padding:10mm;font-size:9pt;font-style:italic;">Conteúdo programático não cadastrado para este treinamento.</div>`;
+
   const win=window.open('','_blank');
   win.document.write(`<!DOCTYPE html>
 <html lang="pt-BR">
@@ -968,7 +978,8 @@ function emitirCertificado(id){
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Georgia',serif;background:#fff;color:#1a1a1a;}
 @page{size:A4 landscape;margin:0;}
-.page{width:297mm;min-height:210mm;margin:0 auto;padding:14mm 18mm;border:10px solid #1a3a6b;display:flex;flex-direction:column;justify-content:space-between;}
+.page{width:297mm;min-height:210mm;margin:0 auto;padding:14mm 18mm;border:10px solid #1a3a6b;display:flex;flex-direction:column;justify-content:space-between;page-break-after:always;}
+.page.verso{page-break-after:auto;}
 .inner{border:2px solid #c8a94a;padding:10mm 16mm;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
 .header{text-align:center;border-bottom:1px solid #e8d89a;padding-bottom:6mm;}
 .empresa{font-size:11pt;font-weight:bold;color:#1a3a6b;letter-spacing:3px;text-transform:uppercase;}
@@ -994,6 +1005,8 @@ body{font-family:'Georgia',serif;background:#fff;color:#1a1a1a;}
 </style>
 </head>
 <body>
+
+<!-- FRENTE -->
 <div class="page">
   <div class="inner">
     <div class="header">
@@ -1035,6 +1048,32 @@ body{font-family:'Georgia',serif;background:#fff;color:#1a1a1a;}
     </div>
   </div>
 </div>
+
+<!-- VERSO — Conteúdo Programático -->
+<div class="page verso">
+  <div class="inner">
+    <div class="header">
+      <div class="empresa">${escHtml(nomeEmpresa)}</div>
+      <div style="font-size:18pt;font-weight:bold;color:#1a3a6b;letter-spacing:3px;margin:3mm 0 2mm;">Conteúdo Programático</div>
+      <div style="font-size:11pt;font-weight:bold;color:#333;">${escHtml(cat?.nome||'—')}</div>
+      <div style="display:flex;justify-content:center;gap:8mm;margin-top:3mm;font-size:8pt;color:#888;flex-wrap:wrap;">
+        ${cat?.nr_relacionada?`<span>📋 ${escHtml(cat.nr_relacionada)}</span>`:''}
+        ${cat?.carga_horaria_inicial?`<span>⏱ Inicial: ${cat.carga_horaria_inicial}h</span>`:''}
+        ${cat?.carga_horaria_reciclagem?`<span>⏱ Reciclagem: ${cat.carga_horaria_reciclagem}h</span>`:''}
+        ${cat?.periodicidade_reciclagem?`<span>🔄 ${escHtml(cat.periodicidade_reciclagem)}</span>`:''}
+      </div>
+    </div>
+    <div style="flex:1;padding:5mm 0;overflow:hidden;">
+      ${conteudoHtml}
+    </div>
+    <div style="border-top:1px solid #e8d89a;padding-top:4mm;display:flex;justify-content:space-between;align-items:center;font-size:7.5pt;color:#aaa;">
+      <span>Funcionário: <strong style="color:#333;">${escHtml(func?.nome_completo||'—')}</strong></span>
+      <span>Realizado em: <strong style="color:#333;">${fmtData(r.data_realizacao)}</strong></span>
+      ${r.numero_certificado?`<span>Certificado nº <strong style="color:#333;">${escHtml(r.numero_certificado)}</strong></span>`:'<span></span>'}
+    </div>
+  </div>
+</div>
+
 <script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>
 </body>
 </html>`);
