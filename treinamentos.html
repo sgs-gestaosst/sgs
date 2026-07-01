@@ -449,6 +449,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   </div>
 </div>
 
+<!-- MODAL DETALHES DO REGISTRO -->
+<div class="modal-overlay" id="modal-detalhes">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-titulo">
+      <span id="det-titulo">Detalhes do treinamento</span>
+      <button onclick="fecharModalDetalhes()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div id="det-conteudo"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+      <button class="btn btn-edit" onclick="fecharModalDetalhes()">Fechar</button>
+      <button class="btn btn-primary" onclick="emitirCertificadoAtual()">📄 Emitir certificado</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
 const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
@@ -597,7 +612,7 @@ function renderRegistroItem(r){
   const cat=catalogo.find(c=>c.id===r.treinamento_id);
   const sv=calcularStatusVencimento(r.data_vencimento);
   const corStatus={Válido:'var(--success)',Vencido:'var(--danger)','A vencer':'var(--warning)'}[sv.status]||'var(--text3)';
-  return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);" onclick="abrirDetalhesRegistro(${r.id})" style="cursor:pointer;">
+  return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="abrirDetalhesRegistro(${r.id})">
     <div style="flex:1;">
       <div style="font-size:12px;font-weight:500;">${escHtml(cat?.nome||'—')}</div>
       <div style="font-size:10px;color:var(--text3);margin-top:2px;">
@@ -611,6 +626,7 @@ function renderRegistroItem(r){
       ${r.data_vencimento?`<div style="font-size:10px;color:var(--text3);">Vence: ${fmtData(r.data_vencimento)}</div>`:''}
     </div>
     ${r.evidencia_url?`<a href="${r.evidencia_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:18px;text-decoration:none;" title="Ver evidência">📎</a>`:''}
+    <button onclick="event.stopPropagation();emitirCertificado(${r.id})" style="background:none;border:1px solid var(--border);border-radius:4px;color:var(--accent);cursor:pointer;font-size:12px;padding:3px 8px;" title="Emitir certificado">📄</button>
   </div>`;
 }
 
@@ -682,6 +698,7 @@ function renderVencimentos(){
             <span style="color:${cor};">Vence: ${fmtData(r.data_vencimento)} ${sv.dias!==null?`(${sv.dias>0?'+':''}${sv.dias}d)`:''}</span>
           </div>
         </div>
+        <button class="btn btn-edit btn-sm" onclick="event.stopPropagation();emitirCertificado(${r.id})">📄 Certificado</button>
         <button class="btn btn-edit btn-sm" onclick="event.stopPropagation();renovarTreinamento(${r.id})">↻ Renovar</button>
       </div>`;
     }).join('')}`;
@@ -883,15 +900,145 @@ function renovarTreinamento(registroId){
   },100);
 }
 
+let registroAtualId=null;
+
 function abrirDetalhesRegistro(id){
+  const r=registros.find(x=>x.id===id);
+  if(!r)return;
+  registroAtualId=id;
+  const cat=catalogo.find(c=>c.id===r.treinamento_id);
+  const func=funcionarios.find(f=>f.id===r.funcionario_id);
+  const funcao=funcoes.find(f=>f.id===func?.funcao_id);
+  const sv=calcularStatusVencimento(r.data_vencimento);
+  const corStatus={Válido:'var(--success)',Vencido:'var(--danger)','A vencer':'var(--warning)'}[sv.status]||'var(--text2)';
+  document.getElementById('det-titulo').textContent=cat?.nome||'Treinamento';
+  document.getElementById('det-conteudo').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div style="padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Funcionário</div>
+        <div style="font-size:14px;font-weight:500;">${escHtml(func?.nome_completo||'—')}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;">${escHtml(funcao?.nome_funcao||'—')}</div>
+      </div>
+      <div style="padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;">Status</div>
+        <div style="font-size:14px;font-weight:500;color:${corStatus};">${sv.status}</div>
+        ${sv.dias!==null?`<div style="font-size:11px;color:var(--text2);margin-top:2px;">${sv.dias>0?`Vence em ${sv.dias} dias`:`Vencido há ${Math.abs(sv.dias)} dias`}</div>`:''}
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      ${_detLinha('Tipo',r.tipo)}
+      ${_detLinha('Realizado em',fmtData(r.data_realizacao))}
+      ${r.data_vencimento?_detLinha('Vencimento',fmtData(r.data_vencimento)):''}
+      ${r.carga_horaria?_detLinha('Carga horária',r.carga_horaria+'h'):''}
+      ${r.instrutor?_detLinha('Instrutor',r.instrutor):''}
+      ${r.local_realizacao?_detLinha('Local',r.local_realizacao):''}
+      ${r.numero_certificado?_detLinha('Nº certificado',r.numero_certificado):''}
+      ${cat?.nr_relacionada?_detLinha('NR relacionada',cat.nr_relacionada):''}
+    </div>
+    ${r.observacao?`<div style="margin-top:10px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text2);">${escHtml(r.observacao)}</div>`:''}
+    ${r.evidencia_url?`<div style="margin-top:10px;"><a href="${r.evidencia_url}" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none;">📎 Ver evidência anexada</a></div>`:''}
+  `;
+  document.getElementById('modal-detalhes').classList.add('show');
+}
+
+function _detLinha(label,valor){
+  return`<div style="padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;">
+    <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">${label}</div>
+    <div style="font-size:13px;">${escHtml(String(valor||'—'))}</div>
+  </div>`;
+}
+
+function fecharModalDetalhes(){document.getElementById('modal-detalhes').classList.remove('show');}
+function emitirCertificadoAtual(){emitirCertificado(registroAtualId);}
+
+function emitirCertificado(id){
   const r=registros.find(x=>x.id===id);
   if(!r)return;
   const cat=catalogo.find(c=>c.id===r.treinamento_id);
   const func=funcionarios.find(f=>f.id===r.funcionario_id);
-  const sv=calcularStatusVencimento(r.data_vencimento);
-  const corStatus={Válido:'var(--success)',Vencido:'var(--danger)','A vencer':'var(--warning)'}[sv.status];
-  alert(`${cat?.nome||'—'}\nFuncionário: ${func?.nome_completo||'—'}\nData: ${fmtData(r.data_realizacao)}\nVencimento: ${fmtData(r.data_vencimento)}\nStatus: ${sv.status}\nInstrutor: ${r.instrutor||'—'}\nCertificado: ${r.numero_certificado||'—'}`);
-  // Futuramente: modal de detalhes completo
+  const funcao=funcoes.find(f=>f.id===func?.funcao_id);
+  const nomeEmpresa=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Certificado — ${escHtml(cat?.nome||'Treinamento')}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Georgia',serif;background:#fff;color:#1a1a1a;}
+@page{size:A4 landscape;margin:0;}
+.page{width:297mm;min-height:210mm;margin:0 auto;padding:14mm 18mm;border:10px solid #1a3a6b;display:flex;flex-direction:column;justify-content:space-between;}
+.inner{border:2px solid #c8a94a;padding:10mm 16mm;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+.header{text-align:center;border-bottom:1px solid #e8d89a;padding-bottom:6mm;}
+.empresa{font-size:11pt;font-weight:bold;color:#1a3a6b;letter-spacing:3px;text-transform:uppercase;}
+.title{font-size:38pt;font-weight:bold;color:#c8a94a;letter-spacing:6px;text-transform:uppercase;margin:3mm 0 2mm;line-height:1;}
+.subtitle{font-size:9pt;color:#888;letter-spacing:3px;text-transform:uppercase;}
+.body{text-align:center;padding:5mm 0;}
+.certifica{font-size:11pt;color:#666;font-style:italic;margin-bottom:3mm;}
+.nome{font-size:22pt;font-weight:bold;color:#1a3a6b;border-bottom:1.5px solid #c8a94a;padding-bottom:2mm;display:inline-block;min-width:50%;}
+.cargo{font-size:9pt;color:#777;margin-top:2mm;}
+.trei-label{font-size:10pt;color:#555;margin:4mm 0 2mm;}
+.trei-nome{font-size:16pt;font-weight:bold;color:#1a3a6b;}
+.info-grid{display:flex;justify-content:center;gap:8mm;margin:4mm 0;flex-wrap:wrap;}
+.info-item{text-align:center;min-width:30mm;}
+.info-label{font-size:7pt;color:#aaa;text-transform:uppercase;letter-spacing:1px;}
+.info-value{font-size:9pt;font-weight:bold;color:#333;margin-top:1mm;}
+.footer{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid #e8d89a;padding-top:5mm;}
+.assin{text-align:center;min-width:55mm;}
+.assin-linha{width:55mm;border-top:1px solid #555;margin:0 auto 2mm;}
+.assin-nome{font-size:9pt;font-weight:bold;}
+.assin-cargo{font-size:7pt;color:#999;margin-top:1mm;}
+.meta{font-size:7pt;color:#bbb;text-align:center;line-height:1.7;}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="inner">
+    <div class="header">
+      <div class="empresa">${escHtml(nomeEmpresa)}</div>
+      <div class="title">Certificado</div>
+      <div class="subtitle">de conclusão de treinamento em Saúde e Segurança do Trabalho</div>
+    </div>
+    <div class="body">
+      <div class="certifica">Certificamos que</div>
+      <div class="nome">${escHtml(func?.nome_completo||'—')}</div>
+      ${funcao?`<div class="cargo">${escHtml(funcao.nome_funcao)}</div>`:''}
+      <div class="trei-label">participou e concluiu com aproveitamento o treinamento</div>
+      <div class="trei-nome">${escHtml(cat?.nome||'—')}</div>
+      <div class="info-grid">
+        <div class="info-item"><div class="info-label">Realizado em</div><div class="info-value">${fmtData(r.data_realizacao)}</div></div>
+        ${r.carga_horaria?`<div class="info-item"><div class="info-label">Carga horária</div><div class="info-value">${r.carga_horaria}h</div></div>`:''}
+        ${cat?.nr_relacionada?`<div class="info-item"><div class="info-label">Norma</div><div class="info-value">${escHtml(cat.nr_relacionada)}</div></div>`:''}
+        ${r.tipo?`<div class="info-item"><div class="info-label">Modalidade</div><div class="info-value">${escHtml(r.tipo)}</div></div>`:''}
+        ${r.data_vencimento?`<div class="info-item"><div class="info-label">Válido até</div><div class="info-value">${fmtData(r.data_vencimento)}</div></div>`:''}
+        ${r.local_realizacao?`<div class="info-item"><div class="info-label">Local</div><div class="info-value">${escHtml(r.local_realizacao)}</div></div>`:''}
+      </div>
+    </div>
+    <div class="footer">
+      <div class="assin">
+        <div class="assin-linha"></div>
+        <div class="assin-nome">${escHtml(r.instrutor||'Instrutor')}</div>
+        <div class="assin-cargo">Instrutor responsável</div>
+      </div>
+      <div class="meta">
+        ${r.numero_certificado?`Certificado nº ${escHtml(r.numero_certificado)}<br>`:''}
+        Emitido em ${new Date().toLocaleDateString('pt-BR')}<br>
+        ${escHtml(nomeEmpresa)}
+      </div>
+      <div class="assin">
+        <div class="assin-linha"></div>
+        <div class="assin-nome">Responsável SST</div>
+        <div class="assin-cargo">${escHtml(nomeEmpresa)}</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>
+</body>
+</html>`);
+  win.document.close();
 }
 
 // ── CATÁLOGO ──────────────────────────────────────────
@@ -1012,7 +1159,7 @@ async function removerVinculoFuncao(id){
 }
 
 // Fecha modais ao clicar fora
-['modal-registro','modal-catalogo','modal-novo-trei','modal-funcao-trei'].forEach(id=>{
+['modal-registro','modal-catalogo','modal-novo-trei','modal-funcao-trei','modal-detalhes','modal-turma'].forEach(id=>{
   document.getElementById(id)?.addEventListener('click',e=>{
     if(e.target.id===id)document.getElementById(id).classList.remove('show');
   });
