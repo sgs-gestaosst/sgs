@@ -309,7 +309,7 @@ async function inicializar(){
   try{
     const [resEmp,resSets]=await Promise.all([
       fetch(`${SUPA_URL}/rest/v1/empresas?id=eq.${empresaId}&select=id,nome_fantasia,razao_social,cnpj_raiz,endereco,cidade,estado,nome_consultoria`,{headers:headers()}),
-      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor&order=nome_setor.asc`,{headers:headers()}),
+      fetch(`${SUPA_URL}/rest/v1/setores?empresa_id=eq.${empresaId}&ativo=eq.true&select=id,nome_setor,num_funcionarios_previsto&order=nome_setor.asc`,{headers:headers()}),
     ]);
     empresa=(await resEmp.json())[0];
     setores=await resSets.json();
@@ -481,9 +481,8 @@ async function salvarCampanha(){
     }
 
     for(const setorId of setoresSel){
-      const resFuncSets=await fetch(`${SUPA_URL}/rest/v1/funcao_setores?setor_id=eq.${setorId}&select=num_funcionarios_previsto`,{headers:headers()});
-      const funcSets=await resFuncSets.json();
-      const meta=funcSets.reduce((acc,fs)=>acc+(fs.num_funcionarios_previsto||0),0);
+      const setor=setores.find(s=>s.id===setorId);
+      const meta=setor?.num_funcionarios_previsto||0;
       await fetch(`${SUPA_URL}/rest/v1/campanha_setores`,{
         method:'POST',headers:headers(),
         body:JSON.stringify({campanha_id:campanhaId,setor_id:setorId,token:gerarToken(),meta_respondentes:meta,status:'Aguardando',ativo:true})
