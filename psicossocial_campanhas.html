@@ -362,6 +362,7 @@ function renderCampanhas(){
         </div>
         ${c.status==='Ativa'?`<div class="setor-link" onclick="copiarLink('${linkUrl}')">📋 Copiar link</div>`:''}
         ${c.status==='Ativa'?`<div class="setor-link" onclick="window.open('${linkManual}','_blank')">✏️ Lançar manual</div>`:''}
+        ${c.status==='Ativa'?`<div class="setor-link" onclick="imprimirChecklist(${c.id},${cs.setor_id})">🖨️ Imprimir checklist</div>`:''}
         ${c.status==='Encerrada'?`<div class="setor-link" onclick="verResultados(${cs.id})">📊 Ver resultados</div>`:''}
       </div>`;
     }).join('');
@@ -930,6 +931,205 @@ function montarRelatorio(campanha,emp,resultadosMap){
 <div class="no-print"><button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button><button onclick="window.close()" style="background:transparent;color:#8892a4;border:1px solid #2a3044;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;margin-left:8px;">✕ Fechar</button><span style="color:#8892a4;font-size:12px;margin-left:12px;">Para salvar como PDF: Imprimir → Destino → Salvar como PDF</span></div>
 ${paginaCapa}${paginaMetodologia}${paginasSetor}${paginaSintese}
 </body></html>`;
+}
+
+// ── CHECKLIST IMPRESSO ────────────────────────────────────────
+function imprimirChecklist(campanhaId, setorId){
+  const campanha=campanhas.find(c=>c.id===campanhaId);
+  const setor=setores.find(s=>s.id===setorId);
+  const nomeEmp=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
+  const nomeSetor=setor?.nome_setor||'Setor';
+  const nomeConsultoria=empresa?.nome_consultoria||'SGS — Gestão em SST';
+  const hoje=new Date().toLocaleDateString('pt-BR');
+  const e=s=>(s===null||s===undefined?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const F=['Nunca ou quase nunca','Raramente','Frequentemente','Sempre ou quase sempre'];
+  const D=['Não, nunca','Raramente','Algumas vezes','Sim, sempre'];
+  const A=['Discordo totalmente','Discordo','Concordo','Concordo totalmente'];
+  const S=['Péssima','Ruim','Boa','Ótima'];
+
+  const PERGUNTAS_IMP=[
+    {sec:'1. Demandas de Trabalho',instrucao:'Com que frequência as situações abaixo ocorrem no seu trabalho?',pergs:[
+      {n:1,txt:'Você não tem tempo suficiente para concluir todas as suas tarefas?',esc:F},
+      {n:2,txt:'Você precisa trabalhar muito rapidamente?',esc:F},
+      {n:3,txt:'Seu trabalho exige que você tome decisões difíceis?',esc:F},
+      {n:4,txt:'Seu trabalho exige atenção constante e concentração?',esc:F},
+      {n:5,txt:'Seu trabalho exige que você esconda seus sentimentos?',esc:F},
+      {n:6,txt:'Seu trabalho é emocionalmente desgastante?',esc:F},
+    ]},
+    {sec:'2. Autonomia e Desenvolvimento',instrucao:'Em que medida as afirmativas abaixo se aplicam ao seu trabalho?',pergs:[
+      {n:7,txt:'Você tem influência sobre a maneira como executa seu trabalho?',esc:D},
+      {n:8,txt:'Você pode influenciar a quantidade de trabalho atribuída a você?',esc:D},
+      {n:9,txt:'Seu trabalho oferece oportunidade de aprender coisas novas?',esc:D},
+      {n:10,txt:'Seu trabalho permite que você desenvolva suas habilidades profissionais?',esc:D},
+      {n:11,txt:'Seu trabalho tem sentido para você?',esc:D},
+      {n:12,txt:'Você sente que contribui para algo importante com o seu trabalho?',esc:D},
+    ]},
+    {sec:'3. Organização e Papel',instrucao:'Responda com base na sua experiência atual no trabalho.',pergs:[
+      {n:13,txt:'Você sabe exatamente quais são as suas responsabilidades no trabalho?',esc:D},
+      {n:14,txt:'Você sabe exatamente o que se espera de você no trabalho?',esc:D},
+      {n:15,txt:'Você é obrigado(a) a fazer coisas que considera desnecessárias?',esc:F},
+      {n:16,txt:'Você recebe tarefas conflitantes que são difíceis de conciliar?',esc:F},
+      {n:17,txt:'Você recebe com antecedência suficiente informações sobre mudanças importantes?',esc:D},
+      {n:18,txt:'Você conhece os planos e objetivos futuros da organização?',esc:D},
+    ]},
+    {sec:'4. Reconhecimento e Apoio',instrucao:'Avalie o reconhecimento e o apoio que você recebe no trabalho.',pergs:[
+      {n:19,txt:'Seu trabalho é reconhecido e apreciado pela chefia?',esc:D},
+      {n:20,txt:'Você é tratado(a) de forma justa no trabalho?',esc:A},
+      {n:21,txt:'Sua chefia está disposta a ajudá-lo(a) quando necessário?',esc:D},
+      {n:22,txt:'Sua chefia valoriza o seu trabalho?',esc:D},
+      {n:23,txt:'Seus colegas se dispõem a ajudá-lo(a) quando você precisa?',esc:D},
+      {n:24,txt:'Você se sente parte de uma equipe unida?',esc:A},
+      {n:25,txt:'Sua chefia fornece feedback sobre a qualidade do seu trabalho?',esc:D},
+      {n:26,txt:'Você recebe informações sobre se o seu trabalho está sendo bem realizado?',esc:D},
+    ]},
+    {sec:'5. Liderança e Organização',instrucao:'Avalie a qualidade da liderança e a justiça nas relações de trabalho.',pergs:[
+      {n:27,txt:'Sua chefia planeja bem as atividades do setor?',esc:A},
+      {n:28,txt:'A chefia resolve os conflitos de trabalho de forma satisfatória?',esc:A},
+      {n:29,txt:'A organização distribui o trabalho de forma justa entre os colaboradores?',esc:A},
+      {n:30,txt:'Eventuais conflitos no trabalho são resolvidos de maneira justa?',esc:A},
+      {n:31,txt:'Você se sente comprometido(a) com esta empresa?',esc:A},
+      {n:32,txt:'Você recomendaria esta empresa como um bom lugar para trabalhar?',esc:A},
+    ]},
+    {sec:'6. Bem-estar e Saúde',instrucao:'Responda com base em como você tem se sentido nos últimos meses.',pergs:[
+      {n:33,txt:'Com que frequência você está preocupado(a) com a possibilidade de perder o emprego?',esc:F},
+      {n:34,txt:'Com que frequência você está preocupado(a) que mudanças no trabalho prejudiquem sua posição?',esc:F},
+      {n:35,txt:'As exigências do trabalho interferem na sua vida pessoal ou familiar?',esc:F},
+      {n:36,txt:'Você pensa em assuntos de trabalho fora do horário de expediente?',esc:F},
+      {n:37,txt:'Como você avalia a sua saúde de forma geral?',esc:S,obs:'(1 = Péssima → 4 = Ótima)'},
+      {n:38,txt:'Com que frequência você se sente esgotado(a)?',esc:F},
+      {n:39,txt:'Com que frequência você vai ao trabalho mesmo não se sentindo bem?',esc:F},
+      {n:40,txt:'Com que frequência sua capacidade de trabalho fica reduzida por problemas de saúde?',esc:F},
+    ]},
+  ];
+
+  const css=`
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI',Arial,sans-serif;font-size:9.5pt;color:#1f2937;background:#e8eaf0;}
+    .no-print{background:#1e2333;padding:10px 20px;display:flex;gap:10px;position:sticky;top:0;z-index:100;}
+    .btn-print{background:#4a7cdc;color:#fff;border:none;border-radius:6px;padding:7px 18px;font-size:13px;cursor:pointer;font-weight:500;}
+    .page{width:21cm;min-height:29.7cm;margin:20px auto;padding:1.6cm 1.8cm;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.15);position:relative;}
+    .topo{border-bottom:2pt solid #1e3a5f;padding-bottom:7pt;margin-bottom:12pt;display:flex;justify-content:space-between;align-items:flex-end;}
+    .topo-empresa{font-size:11pt;font-weight:700;color:#1e3a5f;}
+    .topo-doc{font-size:7.5pt;color:#6b7280;text-transform:uppercase;}
+    .titulo-checklist{font-size:14pt;font-weight:700;color:#1e3a5f;margin-bottom:3pt;}
+    .subtitulo{font-size:9pt;color:#6b7280;margin-bottom:10pt;}
+    .aviso{background:#eff6ff;border:1pt solid #bfdbfe;border-radius:4pt;padding:7pt 10pt;font-size:8.5pt;color:#1e40af;margin-bottom:10pt;line-height:1.5;}
+    .demo-box{border:1pt solid #d1d5db;border-radius:4pt;padding:8pt 10pt;margin-bottom:10pt;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6pt;}
+    .demo-item label{font-size:7.5pt;font-weight:700;color:#6b7280;text-transform:uppercase;display:block;margin-bottom:3pt;}
+    .demo-opts{display:flex;gap:8pt;flex-wrap:wrap;}
+    .demo-opt{display:flex;align-items:center;gap:3pt;font-size:8pt;}
+    .demo-opt input{width:11pt;height:11pt;margin:0;}
+    .sec-titulo{font-size:10pt;font-weight:700;color:#1e3a5f;background:#eff6ff;border-left:3pt solid #1e3a5f;padding:4pt 8pt;margin:8pt 0 4pt;}
+    .sec-instrucao{font-size:8pt;color:#6b7280;font-style:italic;margin-bottom:5pt;}
+    table{width:100%;border-collapse:collapse;margin-bottom:4pt;}
+    .col-num{width:5%;}
+    .col-perg{width:47%;}
+    .col-opt{width:12%;text-align:center;}
+    th{font-size:8pt;font-weight:700;color:#1e3a5f;border-bottom:1.5pt solid #1e3a5f;padding:4pt 3pt;text-align:center;}
+    th.th-perg{text-align:left;}
+    td{font-size:8.5pt;padding:4pt 3pt;border-bottom:0.5pt solid #e5e7eb;vertical-align:middle;}
+    td.td-num{color:#9ca3af;text-align:center;font-size:8pt;}
+    td.td-check{text-align:center;}
+    td.td-check input{width:12pt;height:12pt;cursor:pointer;}
+    tr:nth-child(even) td{background:#f9fafb;}
+    .obs{font-size:7pt;color:#6b7280;font-style:italic;}
+    .rodape{position:absolute;bottom:1.2cm;left:1.8cm;right:1.8cm;border-top:0.5pt solid #e5e7eb;padding-top:4pt;display:flex;justify-content:space-between;font-size:7pt;color:#9ca3af;}
+    @media print{
+      body{background:#fff;}
+      .no-print{display:none!important;}
+      .page{margin:0;box-shadow:none;width:100%;padding:1.4cm 1.6cm;}
+      .page:not(:last-child){page-break-after:always;}
+      @page{size:A4;margin:0;}
+    }`;
+
+  const pergRows=(pergs)=>pergs.map(p=>`<tr>
+    <td class="td-num">${p.n}</td>
+    <td>${e(p.txt)}${p.obs?`<br><span class="obs">${e(p.obs)}</span>`:''}</td>
+    ${p.esc.map((_,i)=>`<td class="td-check"><input type="checkbox"></td>`).join('')}
+  </tr>`).join('');
+
+  const cabecalhoTabela=(esc)=>`<thead><tr>
+    <th class="col-num">#</th>
+    <th class="th-perg col-perg">Afirmativa / Pergunta</th>
+    ${esc.map(l=>`<th class="col-opt">${e(l)}</th>`).join('')}
+  </tr></thead>`;
+
+  let paginas='';
+
+  // PÁGINA 1: capa + demograficos + seções 1 e 2
+  paginas+=`<div class="page">
+  <div class="topo"><div class="topo-empresa">${e(nomeConsultoria)}</div><div class="topo-doc">Avaliação Psicossocial — COPSOQ-II</div></div>
+  <div class="titulo-checklist">QUESTIONÁRIO DE AVALIAÇÃO PSICOSSOCIAL</div>
+  <div class="subtitulo">Empresa: ${e(nomeEmp)} &nbsp;|&nbsp; Setor: ${e(nomeSetor)} &nbsp;|&nbsp; Campanha: ${e(campanha?.titulo||'—')} &nbsp;|&nbsp; Data aplicação: ___/___/______</div>
+  <div class="aviso">📋 <strong>Instruções:</strong> Leia cada afirmativa com atenção e marque apenas <strong>UMA</strong> opção por questão. Não há respostas certas ou erradas — responda com sinceridade. Suas respostas são <strong>anônimas</strong> e serão analisadas somente de forma coletiva por setor. Após preencher, entregue ao aplicador responsável.</div>
+  <div class="demo-box">
+    <div class="demo-item">
+      <label>Faixa etária</label>
+      <div class="demo-opts">
+        ${['18–24','25–34','35–44','45–54','55+'].map(l=>`<div class="demo-opt"><input type="checkbox"> <span>${l}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="demo-item">
+      <label>Tempo na empresa</label>
+      <div class="demo-opts">
+        ${['< 1 ano','1–3 anos','3–5 anos','5–10 anos','> 10 anos'].map(l=>`<div class="demo-opt"><input type="checkbox"> <span>${l}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="demo-item">
+      <label>Gênero (opcional)</label>
+      <div class="demo-opts">
+        ${['Masculino','Feminino','Outro','Prefiro não informar'].map(l=>`<div class="demo-opt"><input type="checkbox"> <span>${l}</span></div>`).join('')}
+      </div>
+    </div>
+  </div>
+  ${PERGUNTAS_IMP.slice(0,2).map(sec=>`
+  <div class="sec-titulo">${e(sec.sec)}</div>
+  <div class="sec-instrucao">${e(sec.instrucao)}</div>
+  <table>${cabecalhoTabela(sec.pergs[0].esc)}<tbody>${pergRows(sec.pergs)}</tbody></table>`).join('')}
+  <div class="rodape"><span>${e(nomeEmp)} — ${e(nomeSetor)}</span><span>COPSOQ-II — 40 itens / 20 domínios</span><span>Pág. 1/3</span></div>
+</div>`;
+
+  // PÁGINA 2: seções 3, 4
+  paginas+=`<div class="page">
+  <div class="topo"><div class="topo-empresa">${e(nomeConsultoria)}</div><div class="topo-doc">${e(nomeEmp)} — ${e(nomeSetor)}</div></div>
+  ${PERGUNTAS_IMP.slice(2,4).map(sec=>`
+  <div class="sec-titulo">${e(sec.sec)}</div>
+  <div class="sec-instrucao">${e(sec.instrucao)}</div>
+  <table>${cabecalhoTabela(sec.pergs[0].esc)}<tbody>${pergRows(sec.pergs)}</tbody></table>`).join('')}
+  <div class="rodape"><span>${e(nomeEmp)} — ${e(nomeSetor)}</span><span>COPSOQ-II — 40 itens / 20 domínios</span><span>Pág. 2/3</span></div>
+</div>`;
+
+  // PÁGINA 3: seções 5 e 6 + assinatura
+  paginas+=`<div class="page">
+  <div class="topo"><div class="topo-empresa">${e(nomeConsultoria)}</div><div class="topo-doc">${e(nomeEmp)} — ${e(nomeSetor)}</div></div>
+  ${PERGUNTAS_IMP.slice(4,6).map(sec=>`
+  <div class="sec-titulo">${e(sec.sec)}</div>
+  <div class="sec-instrucao">${e(sec.instrucao)}</div>
+  <table>${cabecalhoTabela(sec.pergs[0].esc)}<tbody>${pergRows(sec.pergs)}</tbody></table>`).join('')}
+  <div style="margin-top:14pt;border:1pt solid #e5e7eb;border-radius:4pt;padding:8pt 10pt;">
+    <div style="font-size:8pt;color:#6b7280;margin-bottom:6pt;">Para uso do aplicador:</div>
+    <div style="display:flex;gap:20pt;">
+      <div style="flex:1;border-top:1pt solid #374151;padding-top:4pt;font-size:8pt;text-align:center;">Assinatura do aplicador<br><span style="color:#6b7280;">${e(campanha?.aplicador_nome||'___________________________')}</span></div>
+      <div style="flex:1;border-top:1pt solid #374151;padding-top:4pt;font-size:8pt;text-align:center;">Data do lançamento no sistema<br><span style="color:#6b7280;">___/___/______</span></div>
+      <div style="flex:1;border-top:1pt solid #374151;padding-top:4pt;font-size:8pt;text-align:center;">Nº do formulário<br><span style="color:#6b7280;">______</span></div>
+    </div>
+  </div>
+  <div class="rodape"><span>${e(nomeEmp)} — ${e(nomeSetor)}</span><span>Emitido em ${hoje}</span><span>Pág. 3/3</span></div>
+</div>`;
+
+  const w=window.open('','_blank');
+  if(!w){alert('Permita pop-ups para imprimir o checklist.');return;}
+  w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Checklist Psicossocial — ${e(nomeSetor)}</title><style>${css}</style></head><body>
+<div class="no-print">
+  <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+  <button onclick="window.close()" style="background:transparent;color:#8892a4;border:1px solid #2a3044;border-radius:6px;padding:7px 16px;font-size:13px;cursor:pointer;">✕ Fechar</button>
+  <span style="color:#8892a4;font-size:12px;margin-left:8px;">Para salvar como PDF: Imprimir → Destino → Salvar como PDF</span>
+</div>
+${paginas}
+</body></html>`);
+  w.document.close();
+  w.focus();
 }
 
 inicializar();
