@@ -338,7 +338,7 @@ async function buscarCNPJ(){
   document.getElementById('btn-buscar').disabled=true;
   setStatus('status-busca','info','Consultando BrasilAPI...');
   try{
-    const res=await fetch(`https://brasilapi.com.br/api/cnpj/v1/${raw}`);
+    const res=await fetch(`${SUPA_URL}/functions/v1/ia-proxy`,{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${sgs_token}`},body:JSON.stringify({cnpj:raw})});
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.message||`CNPJ não encontrado (${res.status})`);}
     const d=await res.json();
     set('razao_social',d.razao_social);

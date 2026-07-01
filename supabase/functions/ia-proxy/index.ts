@@ -67,7 +67,23 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401, headers })
   }
 
-  const { prompt } = await req.json().catch(() => ({}))
+  const body = await req.json().catch(() => ({}))
+
+  // ── Rota: consulta CNPJ via BrasilAPI (server-side, sem CORS) ──
+  if (body.cnpj) {
+    const cnpj = String(body.cnpj).replace(/\D/g, '')
+    if (cnpj.length !== 14) {
+      return new Response(JSON.stringify({ error: 'cnpj_invalido' }), { status: 400, headers })
+    }
+    const brasilRes = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`, {
+      headers: { 'Accept': 'application/json', 'User-Agent': 'SGS-SST/1.0' },
+    })
+    const data = await brasilRes.json().catch(() => ({}))
+    return new Response(JSON.stringify(data), { status: brasilRes.status, headers })
+  }
+
+  // ── Rota: sugestão IA via Groq ──
+  const { prompt } = body
   if (!prompt || typeof prompt !== 'string') {
     return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400, headers })
   }
