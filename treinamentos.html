@@ -970,12 +970,12 @@ function emitirCertificado(id){
 
   // Bloco logo lado esquerdo (empresa)
   const logoEsq=logoEmpresa
-    ?`<img src="${logoEmpresa}" style="max-height:40px;max-width:90px;object-fit:contain;">`
-    :`<div style="font-size:8pt;color:#888;font-style:italic;">sem logo</div>`;
+    ?`<img src="${logoEmpresa}" style="max-height:45px;max-width:110px;object-fit:contain;">`
+    :'';
   // Bloco logo lado direito (consultoria)
   const logoDir=logoConsultoria
-    ?`<img src="${logoConsultoria}" style="max-height:40px;max-width:90px;object-fit:contain;">`
-    :`<div style="font-size:8pt;color:#888;font-style:italic;">sem logo</div>`;
+    ?`<img src="${logoConsultoria}" style="max-height:45px;max-width:110px;object-fit:contain;">`
+    :'';
 
   const win=window.open('','_blank');
   win.document.write(`<!DOCTYPE html>
@@ -985,176 +985,164 @@ function emitirCertificado(id){
 <title>Certificado — ${escHtml(cat?.nome||'Treinamento')}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Arial',sans-serif;background:#fff;color:#1a1a1a;}
+body{font-family:'Georgia',serif;background:#e8e8e8;display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px;}
 @page{size:A4 portrait;margin:0;}
-.page{width:210mm;min-height:297mm;margin:0 auto;padding:12mm 14mm;display:flex;flex-direction:column;page-break-after:always;position:relative;}
-.page.verso{page-break-after:auto;}
-.accent{color:#8B1A1A;}
-.gold{color:#B8860B;}
-/* Linha decorativa topo */
-.topo-line{height:5px;background:linear-gradient(90deg,#8B1A1A,#B8860B);margin-bottom:6mm;}
-.rodape-line{height:3px;background:linear-gradient(90deg,#8B1A1A,#B8860B);margin-top:auto;}
+@media print{body{background:#fff;padding:0;gap:0;} .page{box-shadow:none;margin:0;}}
+.page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.18);display:flex;flex-direction:column;padding:14mm 16mm 12mm;position:relative;overflow:hidden;}
+/* Borda interna decorativa */
+.borda{position:absolute;inset:8mm;border:1.5px solid #c8a020;pointer-events:none;}
+.borda::before{content:'';position:absolute;inset:3px;border:0.5px solid #c8a020;opacity:.4;}
+/* Faixa topo */
+.faixa-topo{height:6px;background:linear-gradient(90deg,#1a3a6b 0%,#2a5ca8 50%,#1a3a6b 100%);margin:-14mm -16mm 0;margin-bottom:6mm;}
 /* Header logos */
-.cert-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:4mm;border-bottom:1px solid #ddd;margin-bottom:5mm;}
-.logo-block{display:flex;flex-direction:column;align-items:flex-start;gap:2mm;min-width:55mm;}
-.logo-block.right{align-items:flex-end;}
-.logo-nome{font-size:9pt;font-weight:bold;color:#1a1a1a;line-height:1.2;}
-.logo-sub{font-size:7pt;color:#777;}
-/* Título central */
-.cert-titulo{text-align:center;margin-bottom:4mm;}
-.cert-title-word{font-size:44pt;font-weight:900;color:#8B1A1A;letter-spacing:8px;text-transform:uppercase;line-height:1;}
-.cert-subtitle{font-size:8.5pt;color:#B8860B;letter-spacing:4px;text-transform:uppercase;margin-top:1mm;}
-.cert-numdata{font-size:7.5pt;color:#888;margin-top:2mm;}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:0 4mm 4mm;border-bottom:1px solid #e0d090;margin-bottom:4mm;}
+.hdr-bloco{display:flex;flex-direction:column;gap:1.5mm;max-width:70mm;}
+.hdr-bloco.dir{align-items:flex-end;text-align:right;}
+.hdr-nome{font-family:'Arial',sans-serif;font-size:9.5pt;font-weight:700;color:#1a3a6b;line-height:1.2;}
+.hdr-sub{font-family:'Arial',sans-serif;font-size:7pt;color:#888;}
+/* Título */
+.tit{text-align:center;margin:2mm 0 3mm;}
+.tit-word{font-size:46pt;font-weight:700;color:#1a3a6b;letter-spacing:10px;text-transform:uppercase;line-height:1;font-family:'Georgia',serif;}
+.tit-sub{font-size:8pt;color:#9a7a10;letter-spacing:5px;text-transform:uppercase;margin-top:1mm;font-family:'Arial',sans-serif;}
+.tit-num{font-size:7.5pt;color:#aaa;margin-top:2mm;font-family:'Arial',sans-serif;}
 /* Corpo */
-.cert-certifica{font-size:10pt;color:#555;margin:4mm 0 2mm;text-align:center;}
-.cert-empresa-certifica{font-weight:bold;color:#1a1a1a;}
-.cert-nome-func{font-size:26pt;font-weight:900;color:#8B1A1A;text-align:center;text-transform:uppercase;letter-spacing:2px;border-bottom:2px solid #B8860B;padding-bottom:2mm;margin:2mm 0;}
-.cert-cpf-cargo{font-size:9pt;color:#444;text-align:center;margin-bottom:3mm;}
-.cert-descricao{font-size:10pt;font-weight:bold;color:#B8860B;text-align:center;margin:3mm 0;line-height:1.5;}
-/* Info boxes */
-.info-boxes{display:flex;gap:3mm;margin:4mm 0;}
-.info-box{flex:1;border:1px solid #ddd;border-radius:4px;padding:3mm;text-align:center;}
-.info-box-label{font-size:7pt;color:#aaa;text-transform:uppercase;letter-spacing:1px;margin-bottom:1mm;}
-.info-box-value{font-size:9pt;font-weight:bold;color:#1a1a1a;line-height:1.3;}
+.certifica{font-family:'Arial',sans-serif;font-size:10pt;color:#555;text-align:center;margin:2mm 0 1mm;}
+.nome-func{font-family:'Arial',sans-serif;font-size:22pt;font-weight:900;color:#1a3a6b;text-align:center;text-transform:uppercase;letter-spacing:1.5px;padding:2mm 0 3mm;border-bottom:2px solid #c8a020;margin-bottom:2mm;}
+.cargo-txt{font-family:'Arial',sans-serif;font-size:9pt;color:#555;text-align:center;margin-bottom:3mm;}
+.descricao{font-family:'Arial',sans-serif;font-size:9.5pt;color:#333;text-align:center;margin:2mm 8mm 3mm;line-height:1.55;}
+.descricao strong{color:#1a3a6b;}
+/* Boxes */
+.boxes{display:flex;gap:3mm;margin:3mm 0;}
+.box{flex:1;border:1px solid #e0d090;border-radius:4px;padding:3mm 2mm;text-align:center;background:#fdfbf4;}
+.box-lbl{font-family:'Arial',sans-serif;font-size:6.5pt;color:#bbb;text-transform:uppercase;letter-spacing:1px;margin-bottom:1.5mm;}
+.box-val{font-family:'Arial',sans-serif;font-size:8.5pt;font-weight:700;color:#1a1a1a;line-height:1.3;}
 /* Assinaturas */
-.assinaturas{display:flex;justify-content:space-between;margin-top:auto;padding-top:4mm;gap:4mm;}
-.assin{text-align:center;flex:1;}
-.assin-linha{border-top:1px solid #555;margin:0 auto 2mm;width:80%;}
-.assin-nome{font-size:8pt;font-weight:bold;color:#8B1A1A;text-transform:uppercase;}
-.assin-cargo{font-size:7pt;color:#777;margin-top:1mm;}
+.assins{display:flex;justify-content:space-between;gap:4mm;margin-top:auto;padding-top:5mm;}
+.assin{flex:1;text-align:center;}
+.assin-ln{border-top:1px solid #333;margin:0 auto 2mm;width:78%;}
+.assin-nm{font-family:'Arial',sans-serif;font-size:7.5pt;font-weight:700;color:#1a3a6b;text-transform:uppercase;line-height:1.3;}
+.assin-cg{font-family:'Arial',sans-serif;font-size:6.5pt;color:#888;margin-top:1mm;}
 /* Rodapé */
-.cert-rodape{font-size:7pt;color:#888;text-align:center;margin-top:3mm;padding-top:3mm;border-top:1px solid #eee;line-height:1.6;}
-.cert-rodape strong{color:#8B1A1A;}
-/* VERSO */
-.verso-titulo{font-size:24pt;font-weight:900;color:#8B1A1A;letter-spacing:6px;text-transform:uppercase;text-align:center;margin:3mm 0 1mm;}
-.verso-sub{font-size:10pt;color:#B8860B;text-align:center;font-weight:bold;margin-bottom:4mm;}
-.verso-box{border:1px solid #ddd;border-radius:6px;padding:5mm 6mm;margin:3mm 0;flex:1;}
-.verso-item{font-size:9pt;color:#333;padding:2mm 0;border-bottom:1px solid #f0f0f0;line-height:1.5;}
-.verso-item:last-child{border-bottom:none;}
-.verso-info-row{display:flex;gap:6mm;margin-top:3mm;font-size:8.5pt;}
-.verso-info-label{font-weight:bold;color:#8B1A1A;}
-@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+.rodape{font-family:'Arial',sans-serif;font-size:6.5pt;color:#aaa;text-align:center;margin-top:4mm;padding-top:3mm;border-top:1px solid #e8e0c0;line-height:1.7;}
+.rodape b{color:#1a3a6b;}
+/* Faixa rodapé */
+.faixa-rod{height:4px;background:linear-gradient(90deg,#1a3a6b,#2a5ca8,#1a3a6b);margin:3mm -16mm -12mm;}
+/* ── VERSO ── */
+.v-hdr{display:flex;justify-content:space-between;align-items:center;padding-bottom:3mm;border-bottom:1px solid #e0d090;margin-bottom:3mm;}
+.v-titulo{font-family:'Arial',sans-serif;font-size:20pt;font-weight:900;color:#1a3a6b;letter-spacing:4px;text-transform:uppercase;text-align:center;margin:2mm 0 1mm;}
+.v-sub{font-family:'Arial',sans-serif;font-size:10pt;color:#9a7a10;text-align:center;font-weight:700;margin-bottom:3mm;}
+.v-box{border:1px solid #e0d090;border-radius:6px;padding:4mm 5mm;flex:1;background:#fdfbf4;}
+.v-item{font-family:'Arial',sans-serif;font-size:9pt;color:#333;padding:2mm 0;border-bottom:1px solid #f0ead0;line-height:1.5;}
+.v-item:last-child{border-bottom:none;}
+.v-inforow{display:flex;flex-wrap:wrap;gap:6mm;margin-top:3mm;font-family:'Arial',sans-serif;font-size:8.5pt;color:#555;}
+.v-lbl{font-weight:700;color:#1a3a6b;}
 </style>
 </head>
 <body>
 
 <!-- ══ FRENTE ══ -->
 <div class="page">
-  <div class="topo-line"></div>
+  <div class="borda"></div>
+  <div class="faixa-topo"></div>
 
-  <!-- Logos -->
-  <div class="cert-header">
-    <div class="logo-block">
-      ${logoEsq}
-      <div class="logo-nome">${escHtml(nomeEmpresa)}</div>
-      ${cnpjEmpresa?`<div class="logo-sub">CNPJ: ${escHtml(cnpjEmpresa)}</div>`:''}
+  <div class="hdr">
+    <div class="hdr-bloco">
+      ${logoEsq?`<div>${logoEsq}</div>`:''}
+      <div class="hdr-nome">${escHtml(nomeEmpresa)}</div>
+      ${cnpjEmpresa?`<div class="hdr-sub">CNPJ: ${escHtml(cnpjEmpresa)}</div>`:''}
     </div>
-    <div class="logo-block right">
-      ${logoDir}
-      ${nomeConsultoria?`<div class="logo-nome" style="text-align:right;">${escHtml(nomeConsultoria)}</div>`:''}
-      <div class="logo-sub" style="text-align:right;">Consultoria em Segurança do Trabalho</div>
+    <div class="hdr-bloco dir">
+      ${logoDir?`<div>${logoDir}</div>`:''}
+      ${nomeConsultoria?`<div class="hdr-nome">${escHtml(nomeConsultoria)}</div>`:''}
+      <div class="hdr-sub">Consultoria em Segurança do Trabalho</div>
     </div>
   </div>
 
-  <!-- Título -->
-  <div class="cert-titulo">
-    <div class="cert-title-word">Certificado</div>
-    <div class="cert-subtitle">de capacitação profissional</div>
-    ${r.numero_certificado?`<div class="cert-numdata">Certificado Nº ${escHtml(r.numero_certificado)} · Data: ${fmtData(r.data_realizacao)}</div>`:`<div class="cert-numdata">Data: ${fmtData(r.data_realizacao)}</div>`}
+  <div class="tit">
+    <div class="tit-word">Certificado</div>
+    <div class="tit-sub">de capacitação profissional</div>
+    <div class="tit-num">${r.numero_certificado?`Certificado Nº ${escHtml(r.numero_certificado)} · `:''}Data: ${fmtData(r.data_realizacao)}</div>
   </div>
 
-  <!-- Corpo -->
-  <div class="cert-certifica">
-    ${nomeConsultoria?`<span class="cert-empresa-certifica">${escHtml(nomeConsultoria)}</span> certifica que`:'Certificamos que'}
-  </div>
-  <div class="cert-nome-func">${escHtml(func?.nome_completo||'—')}</div>
-  <div class="cert-cpf-cargo">
-    ocupante do cargo de <strong>${escHtml(funcao?.nome_funcao||'—')}</strong>
+  <div class="certifica">${nomeConsultoria?`<b style="color:#1a1a1a;">${escHtml(nomeConsultoria)}</b> certifica que`:'Certificamos que'}</div>
+  <div class="nome-func">${escHtml(func?.nome_completo||'—')}</div>
+  <div class="cargo-txt">ocupante do cargo de <b>${escHtml(funcao?.nome_funcao||'—')}</b></div>
+
+  <div class="descricao">
+    concluiu com aproveitamento a capacitação referente à
+    <strong>${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' – ':''
+    }${escHtml(cat?.nome||'—')}</strong>${r.carga_horaria?`, com carga horária de ${r.carga_horaria} horas`:', conforme programa de treinamento'}.
   </div>
 
-  <div class="cert-descricao">
-    concluiu com aproveitamento a capacitação referente à ${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' – ':''
-    }${escHtml(cat?.nome||'—')}${cat?.nr_relacionada&&cat?.item_norma?', em conformidade com o '+escHtml(cat.item_norma):''}${r.carga_horaria?', com carga horária de '+r.carga_horaria+' horas.':'.'}
+  <div class="boxes">
+    <div class="box"><div class="box-lbl">Data de realização</div><div class="box-val">${fmtData(r.data_realizacao)}</div></div>
+    ${localCert?`<div class="box"><div class="box-lbl">Local</div><div class="box-val">${escHtml(localCert)}</div></div>`:''}
+    <div class="box"><div class="box-lbl">Carga horária</div><div class="box-val">${r.carga_horaria?r.carga_horaria+'h':'—'}</div></div>
+    ${r.data_vencimento?`<div class="box"><div class="box-lbl">Válido até</div><div class="box-val">${fmtData(r.data_vencimento)}</div></div>`:''}
   </div>
 
-  <!-- Info boxes -->
-  <div class="info-boxes">
-    <div class="info-box">
-      <div class="info-box-label">Data de realização</div>
-      <div class="info-box-value">${fmtData(r.data_realizacao)}</div>
-    </div>
-    ${localCert?`<div class="info-box"><div class="info-box-label">Local</div><div class="info-box-value">${escHtml(localCert)}</div></div>`:''}
-    <div class="info-box">
-      <div class="info-box-label">Carga horária cursada</div>
-      <div class="info-box-value">${r.carga_horaria?r.carga_horaria+'h':'—'}</div>
-    </div>
-    ${r.data_vencimento?`<div class="info-box"><div class="info-box-label">Válido até</div><div class="info-box-value">${fmtData(r.data_vencimento)}</div></div>`:''}
-  </div>
-
-  <!-- Assinaturas -->
-  <div class="assinaturas">
+  <div class="assins">
     <div class="assin">
-      <div class="assin-linha"></div>
-      <div class="assin-nome">${escHtml(r.instrutor||'Instrutor')}</div>
-      <div class="assin-cargo">Instrutor</div>
+      <div class="assin-ln"></div>
+      <div class="assin-nm">${escHtml(r.instrutor||'Instrutor')}</div>
+      <div class="assin-cg">Instrutor</div>
     </div>
     <div class="assin">
-      <div class="assin-linha"></div>
-      <div class="assin-nome">${escHtml(func?.nome_completo||'—')}</div>
-      <div class="assin-cargo">Funcionário(a) / Participante</div>
+      <div class="assin-ln"></div>
+      <div class="assin-nm">${escHtml(func?.nome_completo||'—')}</div>
+      <div class="assin-cg">Funcionário(a) / Participante</div>
     </div>
     <div class="assin">
-      <div class="assin-linha"></div>
-      <div class="assin-nome">${nomeConsultoria?escHtml(nomeConsultoria):'Responsável Técnico'}</div>
-      <div class="assin-cargo">Responsável Técnico</div>
+      <div class="assin-ln"></div>
+      <div class="assin-nm">${nomeConsultoria?escHtml(nomeConsultoria):'Responsável Técnico'}</div>
+      <div class="assin-cg">Responsável Técnico</div>
     </div>
   </div>
 
-  <div class="cert-rodape">
-    <strong>${escHtml(nomeEmpresa)}</strong>${cnpjEmpresa?' · CNPJ '+escHtml(cnpjEmpresa):''}<br>
-    ${nomeConsultoria?`<strong>${escHtml(nomeConsultoria)}</strong> · Consultoria em Segurança do Trabalho`:''}
+  <div class="rodape">
+    <b>${escHtml(nomeEmpresa)}</b>${cnpjEmpresa?' · CNPJ '+escHtml(cnpjEmpresa):''}<br>
+    ${nomeConsultoria?`<b>${escHtml(nomeConsultoria)}</b> · Consultoria em Segurança do Trabalho`:''}
   </div>
-  <div class="rodape-line" style="margin-top:3mm;"></div>
+  <div class="faixa-rod"></div>
 </div>
 
-<!-- ══ VERSO — Conteúdo Programático ══ -->
-<div class="page verso">
-  <div class="topo-line"></div>
+<!-- ══ VERSO ══ -->
+<div class="page">
+  <div class="borda"></div>
+  <div class="faixa-topo"></div>
 
-  <div class="cert-header" style="margin-bottom:3mm;">
-    <div class="logo-block">
-      ${logoEsq}
-      <div class="logo-nome">${escHtml(nomeEmpresa)}</div>
+  <div class="v-hdr">
+    <div class="hdr-bloco">
+      ${logoEsq?`<div>${logoEsq}</div>`:''}
+      <div class="hdr-nome">${escHtml(nomeEmpresa)}</div>
     </div>
-    <div class="logo-block right">
-      ${logoDir}
-      ${nomeConsultoria?`<div class="logo-nome" style="text-align:right;">${escHtml(nomeConsultoria)}</div>`:''}
+    <div class="hdr-bloco dir">
+      ${logoDir?`<div>${logoDir}</div>`:''}
+      ${nomeConsultoria?`<div class="hdr-nome">${escHtml(nomeConsultoria)}</div>`:''}
     </div>
   </div>
 
-  <div class="verso-titulo">Conteúdo Programático</div>
-  <div class="verso-sub">${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' — ':''
-  }${escHtml(cat?.nome||'—')}</div>
+  <div class="v-titulo">Conteúdo Programático</div>
+  <div class="v-sub">${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' — ':''}${escHtml(cat?.nome||'—')}</div>
 
-  <div class="verso-box" style="flex:1;">
+  <div class="v-box">
     ${itens.length
-      ? itens.map(item=>`<div class="verso-item">${escHtml(item)}</div>`).join('')
-      : `<div style="color:#aaa;text-align:center;padding:10mm;font-size:9pt;font-style:italic;">Conteúdo programático não cadastrado.</div>`
+      ?itens.map(item=>`<div class="v-item">${escHtml(item)}</div>`).join('')
+      :`<div style="color:#aaa;text-align:center;padding:10mm;font-size:9pt;font-style:italic;">Conteúdo programático não cadastrado.</div>`
     }
   </div>
 
-  <div class="verso-info-row">
-    ${cat?.periodicidade_reciclagem?`<div><span class="verso-info-label">Periodicidade / Validade:</span> ${escHtml(cat.periodicidade_reciclagem)}</div>`:''}
-    <div><span class="verso-info-label">Carga horária cursada:</span> ${r.carga_horaria?r.carga_horaria+'h':'—'}</div>
+  <div class="v-inforow">
+    ${cat?.periodicidade_reciclagem?`<span><span class="v-lbl">Periodicidade / Validade:</span> ${escHtml(cat.periodicidade_reciclagem)}</span>`:''}
+    <span><span class="v-lbl">Carga horária cursada:</span> ${r.carga_horaria?r.carga_horaria+'h':'—'}</span>
   </div>
 
-  <div class="cert-rodape" style="margin-top:4mm;">
-    <strong>${escHtml(nomeEmpresa)}</strong>${cnpjEmpresa?' · CNPJ '+escHtml(cnpjEmpresa):''}<br>
-    ${nomeConsultoria?`<strong>${escHtml(nomeConsultoria)}</strong> · Consultoria em Segurança do Trabalho<br>`:''}
-    Este certificado é válido em todo o território nacional em conformidade com ${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' e ':''
-    }demais Normas Regulamentadoras do Ministério do Trabalho e Emprego.
+  <div class="rodape" style="margin-top:4mm;">
+    <b>${escHtml(nomeEmpresa)}</b>${cnpjEmpresa?' · CNPJ '+escHtml(cnpjEmpresa):''}<br>
+    ${nomeConsultoria?`<b>${escHtml(nomeConsultoria)}</b> · Consultoria em Segurança do Trabalho<br>`:''}
+    Este certificado é válido em todo o território nacional em conformidade com ${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' e ':''}demais Normas Regulamentadoras do Ministério do Trabalho e Emprego.
   </div>
-  <div class="rodape-line" style="margin-top:3mm;"></div>
+  <div class="faixa-rod"></div>
 </div>
 
 <script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>
