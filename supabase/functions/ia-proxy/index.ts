@@ -12,6 +12,34 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+async function chamarGroq(prompt: string, apiKey: string, tentativa = 0): Promise<Response> {
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey,
+    },
+    body: JSON.stringify({
+      model: 'llama-3.1-8b-instant',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.2,
+      max_tokens: 512,
+    }),
+  })
+
+  if (res.status === 429 && tentativa < 3) {
+    // Respeita o retry-after do Groq se disponível, senão backoff exponencial
+    const retryAfter = res.headers.get('retry-after')
+    const espera = retryAfter ? parseFloat(retryAfter) * 1000 : Math.pow(2, tentativa) * 1500
+    await sleep(espera)
+    return chamarGroq(prompt, apiKey, tentativa + 1)
+  }
+
+  return res
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS_HEADERS })
@@ -44,20 +72,7 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error: 'invalid_request' }), { status: 400, headers })
   }
 
-  const groqRes = await fetch(GROQ_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + Deno.env.get('GROQ_API_KEY'),
-    },
-    body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.2,
-      max_tokens: 512,
-    }),
-  })
-
+  const groqRes = await chamarGroq(prompt, Deno.env.get('GROQ_API_KEY')!)
   const data = await groqRes.json().catch(() => ({}))
 
   if (!groqRes.ok) {
