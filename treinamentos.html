@@ -977,6 +977,17 @@ function emitirCertificado(id){
     ?`<img src="${logoConsultoria}" style="max-height:45px;max-width:110px;object-fit:contain;">`
     :'';
 
+  // pré-calcula colunas e blocos de logo para não aninhar template literals
+  const numCols=localCert?4:3;
+  const hdrLeft=logoEmpresa
+    ?`<img class="hdr-logo" src="${logoEmpresa}" alt="${escHtml(nomeEmpresa)}">`+(cnpjEmpresa?`<div class="hdr-co-sub">CNPJ ${escHtml(cnpjEmpresa)}</div>`:'')
+    :`<div class="hdr-co-nome">${escHtml(nomeEmpresa)}</div>`+(cnpjEmpresa?`<div class="hdr-co-sub">CNPJ ${escHtml(cnpjEmpresa)}</div>`:'');
+  const hdrRight=logoConsultoria
+    ?`<img class="hdr-logo" src="${logoConsultoria}" alt="${escHtml(nomeConsultoria)}">`+(nomeConsultoria?`<div class="hdr-co-sub">Consultoria em SST</div>`:'')
+    :(nomeConsultoria
+      ?`<div class="hdr-co-nome">${escHtml(nomeConsultoria)}</div><div class="hdr-co-sub">Consultoria em SST</div>`
+      :'<div style="width:100px"></div>');
+
   const win=window.open('','_blank');
   win.document.write(`<!DOCTYPE html>
 <html lang="pt-BR">
@@ -985,166 +996,191 @@ function emitirCertificado(id){
 <title>Certificado — ${escHtml(cat?.nome||'Treinamento')}</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-body{font-family:'Georgia',serif;background:#e8e8e8;display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px;}
-@page{size:A4 portrait;margin:8mm 10mm;}
-@media print{body{background:#fff;padding:0;gap:0;} .page{box-shadow:none;margin:0;height:277mm;min-height:unset;overflow:visible;page-break-after:always;} .page:last-child{page-break-after:auto;}}
-.page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 4px 24px rgba(0,0,0,.18);display:flex;flex-direction:column;padding:14mm 16mm 12mm;position:relative;overflow:visible;}
-/* Borda interna decorativa */
-.borda{position:absolute;inset:8mm;border:1.5px solid #c8a020;pointer-events:none;}
-.borda::before{content:'';position:absolute;inset:3px;border:0.5px solid #c8a020;opacity:.4;}
-/* Faixa topo — posição absoluta evita negative-margin frágil */
-.faixa-topo{position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#1a3a6b 0%,#2a5ca8 50%,#1a3a6b 100%);}
-/* Header logos */
-.hdr{display:flex;justify-content:space-between;align-items:center;padding:0 4mm 4mm;border-bottom:1px solid #e0d090;margin-bottom:4mm;}
-.hdr-bloco{display:flex;flex-direction:column;gap:1.5mm;max-width:70mm;}
-.hdr-bloco.dir{align-items:flex-end;text-align:right;}
-.hdr-nome{font-family:'Arial',sans-serif;font-size:9.5pt;font-weight:700;color:#1a3a6b;line-height:1.2;}
-.hdr-sub{font-family:'Arial',sans-serif;font-size:7.5pt;color:#555;}
-/* Título */
-.tit{text-align:center;margin:2mm 0 3mm;}
-.tit-word{font-size:46pt;font-weight:700;color:#1a3a6b;letter-spacing:0.35em;text-transform:uppercase;line-height:1;font-family:'Georgia',serif;}
-.tit-sub{font-size:8pt;color:#9a7a10;letter-spacing:5px;text-transform:uppercase;margin-top:1mm;font-family:'Arial',sans-serif;}
-.tit-num{font-size:8pt;color:#666;margin-top:2mm;font-family:'Arial',sans-serif;}
-/* Corpo */
-.certifica{font-family:'Arial',sans-serif;font-size:10pt;color:#555;text-align:center;margin:2mm 0 1mm;}
-.nome-func{font-family:'Arial',sans-serif;font-size:22pt;font-weight:900;color:#1a3a6b;text-align:center;text-transform:uppercase;letter-spacing:1.5px;padding:2mm 0 3mm;border-bottom:2px solid #c8a020;margin-bottom:2mm;}
-.cargo-txt{font-family:'Arial',sans-serif;font-size:9pt;color:#555;text-align:center;margin-bottom:1mm;}
-.cpf-tipo{font-family:'Arial',sans-serif;font-size:8.5pt;color:#444;text-align:center;margin-bottom:3mm;}
-.descricao{font-family:'Arial',sans-serif;font-size:9.5pt;color:#333;text-align:center;margin:2mm 8mm 3mm;line-height:1.55;}
-.descricao strong{color:#1a3a6b;}
-/* Boxes */
-.boxes{display:flex;gap:3mm;margin:3mm 0;}
-.box{flex:1;border:1px solid #e0d090;border-radius:4px;padding:3mm 2mm;text-align:center;background:#fdfbf4;}
-.box-lbl{font-family:'Arial',sans-serif;font-size:7pt;color:#666;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:1.5mm;}
-.box-val{font-family:'Arial',sans-serif;font-size:8.5pt;font-weight:700;color:#1a1a1a;line-height:1.3;}
-/* Assinaturas */
-.assins{display:flex;justify-content:space-between;gap:4mm;margin-top:auto;padding-top:5mm;}
+body{font-family:'Arial','Helvetica Neue',sans-serif;background:#C9CDD4;display:flex;flex-direction:column;align-items:center;gap:20px;padding:24px;}
+@page{size:A4 portrait;margin:0;}
+@media print{body{background:#fff;padding:0;gap:0;}.page{box-shadow:none!important;page-break-after:always;}.page:last-child{page-break-after:auto;}}
+.page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 6px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── CABEÇALHO NAVY ── */
+.hdr{background:#0D2137;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;min-height:66px;flex-shrink:0;gap:10px;}
+.hdr-logo{max-height:38px;max-width:100px;object-fit:contain;display:block;}
+.hdr-center{text-align:center;flex:1;min-width:0;}
+.hdr-nr{font-size:7pt;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:2px;}
+.hdr-curso{font-size:8.5pt;font-weight:700;color:#fff;line-height:1.25;}
+.hdr-co{display:flex;flex-direction:column;gap:3px;min-width:0;flex-shrink:0;}
+.hdr-co.right{align-items:flex-end;text-align:right;}
+.hdr-co-nome{font-size:7.5pt;font-weight:700;color:rgba(255,255,255,.85);line-height:1.2;}
+.hdr-co-sub{font-size:6.5pt;color:rgba(255,255,255,.4);}
+
+/* ── CORPO ── */
+.body{flex:1;display:flex;flex-direction:column;padding:8mm 14mm 5mm;}
+
+/* eyebrow */
+.eyebrow{display:flex;align-items:center;gap:7px;margin-bottom:3mm;}
+.ey-rule{flex:1;height:1px;background:#B8901E;}
+.ey-txt{font-size:6.5pt;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:#B8901E;white-space:nowrap;}
+
+/* título */
+.cert-title{font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;font-size:36pt;color:#0D2137;text-align:center;letter-spacing:0.18em;text-transform:uppercase;line-height:1;margin-bottom:1.5mm;}
+.cert-sub{font-size:7.5pt;color:#6B7280;text-align:center;letter-spacing:2px;text-transform:uppercase;font-style:italic;margin-bottom:1.5mm;}
+.cert-meta{font-size:7.5pt;color:#9CA3AF;text-align:center;margin-bottom:4.5mm;}
+.amber-rule{width:46%;height:1.5px;background:#B8901E;margin:0 auto 5mm;}
+
+/* nome/cargo */
+.cert-por{font-size:9pt;color:#6B7280;font-style:italic;text-align:center;margin-bottom:2mm;}
+.cert-nome{font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;font-size:21pt;color:#0D2137;text-align:center;text-transform:uppercase;letter-spacing:1.5px;line-height:1.15;margin-bottom:1.5mm;}
+.cert-nome-hr{width:58%;height:1px;background:#D1D5DB;margin:0 auto 2mm;}
+.cert-cargo{font-size:9pt;color:#4B5563;text-align:center;margin-bottom:1mm;}
+.cert-cpftipo{font-size:8pt;color:#4B5563;text-align:center;margin-bottom:3.5mm;}
+
+/* descrição */
+.cert-desc{font-size:9.5pt;color:#374151;text-align:center;line-height:1.65;margin:0 4mm 4.5mm;}
+.cert-desc strong{color:#0D2137;}
+
+/* grade de dados */
+.cert-grid{display:grid;grid-template-columns:repeat(${numCols},1fr);border:1px solid #E5E7EB;border-radius:5px;overflow:hidden;margin-bottom:4.5mm;}
+.cert-cell{padding:3mm 3.5mm 2.5mm;border-right:1px solid #E5E7EB;background:#F9FAFB;}
+.cert-cell:last-child{border-right:none;}
+.cert-cell-lbl{font-size:6pt;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:#9CA3AF;margin-bottom:1.5mm;}
+.cert-cell-val{font-size:9pt;font-weight:700;color:#111827;line-height:1.2;}
+
+/* assinaturas */
+.assins{display:flex;gap:6mm;margin-top:auto;padding-top:4mm;}
 .assin{flex:1;text-align:center;}
-.assin-ln{border-top:1px solid #333;margin:0 auto 2mm;width:78%;}
-.assin-nm{font-family:'Arial',sans-serif;font-size:7.5pt;font-weight:700;color:#1a3a6b;text-transform:uppercase;line-height:1.3;}
-.assin-cg{font-family:'Arial',sans-serif;font-size:7pt;color:#555;margin-top:1mm;}
-/* Rodapé */
-.rodape{font-family:'Arial',sans-serif;font-size:7pt;color:#555;text-align:center;margin-top:4mm;padding-top:3mm;border-top:1px solid #c8c0a0;line-height:1.7;}
-.rodape b{color:#1a3a6b;}
-/* Faixa rodapé */
-.faixa-rod{height:4px;background:linear-gradient(90deg,#1a3a6b,#2a5ca8,#1a3a6b);margin:3mm -16mm -12mm;}
+.assin-ln{border-top:1.5px solid #374151;width:76%;margin:0 auto 2mm;}
+.assin-nm{font-size:7.5pt;font-weight:700;color:#0D2137;text-transform:uppercase;letter-spacing:0.5px;line-height:1.3;}
+.assin-cg{font-size:6.5pt;color:#6B7280;margin-top:1mm;}
+
+/* rodapé navy */
+.ftr{background:#0D2137;padding:7px 22px;flex-shrink:0;}
+.ftr-txt{font-size:6.5pt;color:rgba(255,255,255,.5);text-align:center;line-height:1.7;}
+.ftr-txt b{color:rgba(255,255,255,.85);}
+
 /* ── VERSO ── */
-.v-hdr{display:flex;justify-content:space-between;align-items:center;padding-bottom:3mm;border-bottom:1px solid #e0d090;margin-bottom:3mm;}
-.v-titulo{font-family:'Arial',sans-serif;font-size:20pt;font-weight:900;color:#1a3a6b;letter-spacing:4px;text-transform:uppercase;text-align:center;margin:2mm 0 1mm;}
-.v-sub{font-family:'Arial',sans-serif;font-size:10pt;color:#9a7a10;text-align:center;font-weight:700;margin-bottom:3mm;}
-.v-box{border:1px solid #e0d090;border-radius:6px;padding:4mm 5mm;flex:1;background:#fdfbf4;}
-.v-item{font-family:'Arial',sans-serif;font-size:9pt;color:#333;padding:2mm 0;border-bottom:1px solid #f0ead0;line-height:1.5;}
+.v-hdr{background:#0D2137;padding:15px 22px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-shrink:0;}
+.v-hdr-title{font-family:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;font-size:15pt;color:#fff;letter-spacing:0.5px;white-space:nowrap;}
+.v-hdr-right{text-align:right;min-width:0;}
+.v-hdr-nr{font-size:7.5pt;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:2px;}
+.v-hdr-curso{font-size:8pt;color:rgba(255,255,255,.7);line-height:1.3;}
+.v-body{flex:1;display:flex;flex-direction:column;padding:6mm 14mm 5mm;}
+.v-intro{font-size:8.5pt;color:#4B5563;margin-bottom:4mm;padding-bottom:3mm;border-bottom:1px solid #E5E7EB;line-height:1.5;}
+.v-intro strong{color:#0D2137;}
+.v-items{flex:1;display:flex;flex-direction:column;}
+.v-item{display:flex;align-items:flex-start;gap:3.5mm;padding:2.5mm 0;border-bottom:1px solid #F3F4F6;}
 .v-item:last-child{border-bottom:none;}
-.v-inforow{display:flex;flex-wrap:wrap;gap:6mm;margin-top:3mm;font-family:'Arial',sans-serif;font-size:8.5pt;color:#555;}
-.v-lbl{font-weight:700;color:#1a3a6b;}
+.v-num{flex-shrink:0;width:17px;height:17px;background:#0D2137;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6.5pt;font-weight:700;color:#fff;margin-top:1px;}
+.v-txt{font-size:8.5pt;color:#1F2937;line-height:1.5;flex:1;}
+.v-meta{display:flex;gap:7mm;flex-wrap:wrap;margin-top:4mm;padding-top:3.5mm;border-top:2px solid #0D2137;}
+.v-meta-item{font-size:8pt;color:#4B5563;}
+.v-meta-item b{color:#0D2137;}
 </style>
 </head>
 <body>
 
 <!-- ══ FRENTE ══ -->
 <div class="page">
-  <div class="borda"></div>
-  <div class="faixa-topo"></div>
-
   <div class="hdr">
-    <div class="hdr-bloco">
-      ${logoEsq?`<div>${logoEsq}</div>`:''}
-      <div class="hdr-nome">${escHtml(nomeEmpresa)}</div>
-      ${cnpjEmpresa?`<div class="hdr-sub">CNPJ: ${escHtml(cnpjEmpresa)}</div>`:''}
+    <div class="hdr-co">${hdrLeft}</div>
+    <div class="hdr-center">
+      <div class="hdr-nr">${cat?.nr_relacionada?escHtml(cat.nr_relacionada):''}</div>
+      <div class="hdr-curso">${escHtml(cat?.nome||'Certificado de Treinamento')}</div>
     </div>
-    <div class="hdr-bloco dir">
-      ${logoDir?`<div>${logoDir}</div>`:''}
-      ${nomeConsultoria?`<div class="hdr-nome">${escHtml(nomeConsultoria)}</div>`:''}
-      <div class="hdr-sub">Consultoria em Segurança do Trabalho</div>
+    <div class="hdr-co right">${hdrRight}</div>
+  </div>
+
+  <div class="body">
+    <div class="eyebrow">
+      <div class="ey-rule"></div>
+      <div class="ey-txt">Certificado de Capacitação Profissional</div>
+      <div class="ey-rule"></div>
+    </div>
+
+    <div class="cert-title">Certificado</div>
+    <div class="cert-sub">de capacitação em segurança do trabalho</div>
+    <div class="cert-meta">${r.numero_certificado?`Nº ${escHtml(r.numero_certificado)} &nbsp;·&nbsp; `:''}Emitido em ${fmtData(r.data_realizacao)}</div>
+
+    <div class="amber-rule"></div>
+
+    <div class="cert-por">${nomeConsultoria?`<i>${escHtml(nomeConsultoria)}</i> certifica que`:'Certificamos que'}</div>
+    <div class="cert-nome">${escHtml(func?.nome_completo||'—')}</div>
+    <div class="cert-nome-hr"></div>
+    <div class="cert-cargo">ocupante do cargo de <b>${escHtml(funcao?.nome_funcao||'—')}</b></div>
+    <div class="cert-cpftipo">${func?.cpf?`CPF: <b>${escHtml(func.cpf)}</b> &nbsp;·&nbsp; `:''}Tipo: <b>${escHtml(r.tipo||'Inicial')}</b></div>
+
+    <div class="cert-desc">
+      concluiu com êxito e aproveitamento o programa de capacitação referente à<br>
+      <strong>${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' – ':''}${escHtml(cat?.nome||'—')}</strong>${r.carga_horaria?`, com carga horária de <strong>${r.carga_horaria} horas</strong>`:', conforme programa de treinamento'}${localCert?`, realizado em <strong>${escHtml(localCert)}</strong>`:''}.
+    </div>
+
+    <div class="cert-grid">
+      <div class="cert-cell"><div class="cert-cell-lbl">Data de Realização</div><div class="cert-cell-val">${fmtData(r.data_realizacao)}</div></div>
+      ${localCert?`<div class="cert-cell"><div class="cert-cell-lbl">Local</div><div class="cert-cell-val">${escHtml(localCert)}</div></div>`:''}
+      <div class="cert-cell"><div class="cert-cell-lbl">Carga Horária</div><div class="cert-cell-val">${r.carga_horaria?r.carga_horaria+'h':'—'}</div></div>
+      ${r.data_vencimento
+        ?`<div class="cert-cell"><div class="cert-cell-lbl">Válido até</div><div class="cert-cell-val">${fmtData(r.data_vencimento)}</div></div>`
+        :`<div class="cert-cell"><div class="cert-cell-lbl">Periodicidade</div><div class="cert-cell-val">${escHtml(cat?.periodicidade_reciclagem||'Indeterminada')}</div></div>`}
+    </div>
+
+    <div class="assins">
+      <div class="assin">
+        <div class="assin-ln"></div>
+        <div class="assin-nm">${escHtml(r.instrutor||'Instrutor')}</div>
+        <div class="assin-cg">Instrutor Responsável</div>
+      </div>
+      <div class="assin">
+        <div class="assin-ln"></div>
+        <div class="assin-nm">${escHtml(func?.nome_completo||'—')}</div>
+        <div class="assin-cg">Treinando / Participante</div>
+      </div>
+      <div class="assin">
+        <div class="assin-ln"></div>
+        <div class="assin-nm">${nomeConsultoria?escHtml(nomeConsultoria):'Responsável Técnico'}</div>
+        <div class="assin-cg">Responsável Técnico em SST</div>
+      </div>
     </div>
   </div>
 
-  <div class="tit">
-    <div class="tit-word">Certificado</div>
-    <div class="tit-sub">de capacitação profissional</div>
-    <div class="tit-num">${r.numero_certificado?`Certificado Nº ${escHtml(r.numero_certificado)} · `:''}Data: ${fmtData(r.data_realizacao)}</div>
+  <div class="ftr">
+    <div class="ftr-txt"><b>${escHtml(nomeEmpresa)}</b>${cnpjEmpresa?' · CNPJ '+escHtml(cnpjEmpresa):''}${nomeConsultoria?' &nbsp;|&nbsp; <b>'+escHtml(nomeConsultoria)+'</b> · Consultoria em SST':''}</div>
   </div>
-
-  <div class="certifica">${nomeConsultoria?`<b style="color:#1a1a1a;">${escHtml(nomeConsultoria)}</b> certifica que`:'Certificamos que'}</div>
-  <div class="nome-func">${escHtml(func?.nome_completo||'—')}</div>
-  <div class="cargo-txt">ocupante do cargo de <b>${escHtml(funcao?.nome_funcao||'—')}</b></div>
-  <div class="cpf-tipo">${func?.cpf?`CPF: <b>${escHtml(func.cpf)}</b> &nbsp;·&nbsp; `:''}Tipo: <b>${escHtml(r.tipo||'Inicial')}</b></div>
-
-  <div class="descricao">
-    concluiu com aproveitamento a capacitação referente à
-    <strong>${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' – ':''
-    }${escHtml(cat?.nome||'—')}</strong>${r.carga_horaria?`, com carga horária de ${r.carga_horaria} horas`:', conforme programa de treinamento'}.
-  </div>
-
-  <div class="boxes">
-    <div class="box"><div class="box-lbl">Data de realização</div><div class="box-val">${fmtData(r.data_realizacao)}</div></div>
-    ${localCert?`<div class="box"><div class="box-lbl">Local</div><div class="box-val">${escHtml(localCert)}</div></div>`:''}
-    <div class="box"><div class="box-lbl">Carga horária</div><div class="box-val">${r.carga_horaria?r.carga_horaria+'h':'—'}</div></div>
-    ${r.data_vencimento?`<div class="box"><div class="box-lbl">Válido até</div><div class="box-val">${fmtData(r.data_vencimento)}</div></div>`:''}
-  </div>
-
-  <div class="assins">
-    <div class="assin">
-      <div class="assin-ln"></div>
-      <div class="assin-nm">${escHtml(r.instrutor||'Instrutor')}</div>
-      <div class="assin-cg">Instrutor</div>
-    </div>
-    <div class="assin">
-      <div class="assin-ln"></div>
-      <div class="assin-nm">${escHtml(func?.nome_completo||'—')}</div>
-      <div class="assin-cg">Funcionário(a) / Participante</div>
-    </div>
-    <div class="assin">
-      <div class="assin-ln"></div>
-      <div class="assin-nm">${nomeConsultoria?escHtml(nomeConsultoria):'Responsável Técnico'}</div>
-      <div class="assin-cg">Responsável Técnico</div>
-    </div>
-  </div>
-
-  <div class="rodape">
-    <b>${escHtml(nomeEmpresa)}</b>${cnpjEmpresa?' · CNPJ '+escHtml(cnpjEmpresa):''}<br>
-    ${nomeConsultoria?`<b>${escHtml(nomeConsultoria)}</b> · Consultoria em Segurança do Trabalho`:''}
-  </div>
-  <div class="faixa-rod"></div>
 </div>
 
 <!-- ══ VERSO ══ -->
 <div class="page">
-  <div class="borda"></div>
-  <div class="faixa-topo"></div>
-
   <div class="v-hdr">
-    <div class="hdr-bloco">
-      ${logoEsq?`<div>${logoEsq}</div>`:''}
-      <div class="hdr-nome">${escHtml(nomeEmpresa)}</div>
-    </div>
-    <div class="hdr-bloco dir">
-      ${logoDir?`<div>${logoDir}</div>`:''}
-      ${nomeConsultoria?`<div class="hdr-nome">${escHtml(nomeConsultoria)}</div>`:''}
+    <div class="v-hdr-title">Conteúdo Programático</div>
+    <div class="v-hdr-right">
+      <div class="v-hdr-nr">${cat?.nr_relacionada?escHtml(cat.nr_relacionada):''}</div>
+      <div class="v-hdr-curso">${escHtml(cat?.nome||'—')}</div>
     </div>
   </div>
 
-  <div class="v-titulo">Conteúdo Programático</div>
-  <div class="v-sub">${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' — ':''}${escHtml(cat?.nome||'—')}</div>
+  <div class="v-body">
+    <div class="v-intro">
+      Conteúdo ministrado ao participante <strong>${escHtml(func?.nome_completo||'—')}</strong>${funcao?.nome_funcao?' — cargo: <strong>'+escHtml(funcao.nome_funcao)+'</strong>':''}, em conformidade com ${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' e ':''}demais Normas Regulamentadoras do Ministério do Trabalho e Emprego.
+    </div>
 
-  <div class="v-box">
-    ${itens.length
-      ?itens.map(item=>`<div class="v-item">${escHtml(item)}</div>`).join('')
-      :`<div style="color:#aaa;text-align:center;padding:10mm;font-size:9pt;font-style:italic;">Conteúdo programático não cadastrado.</div>`
-    }
+    <div class="v-items">
+      ${itens.length
+        ?itens.map((item,i)=>`<div class="v-item"><div class="v-num">${i+1}</div><div class="v-txt">${escHtml(item)}</div></div>`).join('')
+        :`<div style="color:#9CA3AF;text-align:center;padding:10mm;font-size:9pt;font-style:italic;">Conteúdo programático não cadastrado.</div>`
+      }
+    </div>
+
+    <div class="v-meta">
+      ${cat?.periodicidade_reciclagem?`<div class="v-meta-item"><b>Periodicidade:</b> ${escHtml(cat.periodicidade_reciclagem)}</div>`:''}
+      <div class="v-meta-item"><b>Carga Horária:</b> ${r.carga_horaria?r.carga_horaria+'h':'—'}</div>
+      <div class="v-meta-item"><b>Tipo:</b> ${escHtml(r.tipo||'Inicial')}</div>
+      ${r.data_vencimento?`<div class="v-meta-item"><b>Próximo treinamento até:</b> ${fmtData(r.data_vencimento)}</div>`:''}
+    </div>
   </div>
 
-  <div class="v-inforow">
-    ${cat?.periodicidade_reciclagem?`<span><span class="v-lbl">Periodicidade / Validade:</span> ${escHtml(cat.periodicidade_reciclagem)}</span>`:''}
-    <span><span class="v-lbl">Carga horária cursada:</span> ${r.carga_horaria?r.carga_horaria+'h':'—'}</span>
+  <div class="ftr">
+    <div class="ftr-txt">
+      <b>${escHtml(nomeEmpresa)}</b>${cnpjEmpresa?' · CNPJ '+escHtml(cnpjEmpresa):''}${nomeConsultoria?' &nbsp;|&nbsp; <b>'+escHtml(nomeConsultoria)+'</b> · Consultoria em SST':''}<br>
+      Este certificado é válido em todo o território nacional em conformidade com ${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' e ':''}demais NRs do Ministério do Trabalho e Emprego.
+    </div>
   </div>
-
-  <div class="rodape" style="margin-top:4mm;">
-    <b>${escHtml(nomeEmpresa)}</b>${cnpjEmpresa?' · CNPJ '+escHtml(cnpjEmpresa):''}<br>
-    ${nomeConsultoria?`<b>${escHtml(nomeConsultoria)}</b> · Consultoria em Segurança do Trabalho<br>`:''}
-    Este certificado é válido em todo o território nacional em conformidade com ${cat?.nr_relacionada?escHtml(cat.nr_relacionada)+' e ':''}demais Normas Regulamentadoras do Ministério do Trabalho e Emprego.
-  </div>
-  <div class="faixa-rod"></div>
 </div>
 
 <script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>
