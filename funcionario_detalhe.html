@@ -777,7 +777,7 @@ async function salvarFuncionario(){
     if(!res.ok){
       const e=await res.json().catch(()=>({}));
       const msg=e.message||'';
-      if(res.status===409||msg.includes('funcionarios_cpf_key'))throw new Error('CPF já cadastrado nesta empresa. Verifique se este funcionário já foi registrado.');
+      if(res.status===409||msg.includes('funcionarios_cpf_key'))throw new Error('CPF já cadastrado no sistema. Este CPF pode estar registrado em outra empresa. Entre em contato com o suporte se precisar cadastrá-lo aqui.');
       if(msg.includes('funcionarios_pis'))throw new Error('PIS/PASEP já cadastrado nesta empresa.');
       if(msg.includes('funcionarios_matricula'))throw new Error('Matrícula já cadastrada nesta empresa.');
       throw new Error(msg||'Erro ao salvar funcionário.');
