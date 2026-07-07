@@ -1198,7 +1198,7 @@ function gerarQRCrachas(){
   const cards=funcionarios.map(f=>{
     const fn=funcoes.find(x=>x.id===f.funcao_id);
     const url=`${BASE}?fid=${f.id}`;
-    return `<div class="qcard"><div class="qcode" id="q${f.id.replace(/-/g,'')}" data-url="${url}"></div>`
+    return `<div class="qcard"><div class="qcode" id="q${String(f.id).replace(/-/g,'')}" data-url="${url}"></div>`
       +`<div class="qnome">${escHtml(f.nome_completo)}</div>`
       +`<div class="qfunc">${escHtml(fn?.nome_funcao||'—')}</div>`
       +`<div class="qemp">${escHtml(nomeEmp)}</div></div>`;
