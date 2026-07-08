@@ -510,7 +510,7 @@ function renderLogos(){
     const url=empresa[item.key]||'';
     return`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;${i?'border-top:1px solid var(--border)':''}">
       <div style="flex-shrink:0;width:80px;height:52px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-        ${url?`<img src="${url}" style="max-width:76px;max-height:48px;object-fit:contain;">`:`<span style="font-size:18px;color:var(--text3);">🖼️</span>`}
+        ${url?`<img src="${url}" style="max-width:76px;max-height:48px;object-fit:contain;" onerror="this.style.display='none'">`:`<span style="font-size:18px;color:var(--text3);">🖼️</span>`}
       </div>
       <div style="flex:1;min-width:0;">
         <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;">${item.label}</div>
