@@ -503,6 +503,9 @@ function renderCampos(){
     {label:'Func. com cadastro individual',key:'total_funcionarios_cadastrados',type:'readonly'},
     {label:'Tipo de atividade',key:'tipo_atividade',type:'select',options:['Geral','Rural','Mineração']},
     {label:'Ativa no sistema',key:'ativo',type:'toggle'},
+    {label:'Logo da empresa (URL)',key:'logo_empresa',type:'text'},
+    {label:'Consultoria responsável',key:'nome_consultoria',type:'text'},
+    {label:'Logo da consultoria (URL)',key:'logo_consultoria',type:'text'},
   ];
   const c=document.getElementById('campos-dados');
   c.innerHTML=campos.map(f=>{
@@ -593,7 +596,7 @@ function getFieldVal(key,type){
 
 async function salvarEdicao(){
   document.getElementById('btn-salvar').disabled=true;document.getElementById('spinner-save').className='spinner show';document.getElementById('label-save').textContent='Salvando...';
-  const campos=[{key:'telefone',type:'text'},{key:'email',type:'email'},{key:'endereco',type:'text'},{key:'cidade',type:'text'},{key:'estado',type:'select'},{key:'cep',type:'text'},{key:'grau_risco',type:'select'},{key:'total_funcionarios_previsto',type:'number'},{key:'tipo_atividade',type:'select'},{key:'ativo',type:'toggle'}];
+  const campos=[{key:'telefone',type:'text'},{key:'email',type:'email'},{key:'endereco',type:'text'},{key:'cidade',type:'text'},{key:'estado',type:'select'},{key:'cep',type:'text'},{key:'grau_risco',type:'select'},{key:'total_funcionarios_previsto',type:'number'},{key:'tipo_atividade',type:'select'},{key:'ativo',type:'toggle'},{key:'logo_empresa',type:'text'},{key:'nome_consultoria',type:'text'},{key:'logo_consultoria',type:'text'}];
   const updates={};campos.forEach(c=>{updates[c.key]=getFieldVal(c.key,c.type);});
   updates.atividade_rural=updates.tipo_atividade==='Rural';
   if(updates.total_funcionarios_previsto!==null)updates.total_funcionarios_previsto_base=updates.total_funcionarios_previsto;
