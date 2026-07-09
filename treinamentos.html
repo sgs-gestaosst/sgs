@@ -321,6 +321,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         </div>
       </div>
     </div>
+    <!-- Gerar lista -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:2px;">
+      <div style="font-size:12px;color:var(--text2);">Imprima a lista, colha as assinaturas e volte para selecionar os participantes.</div>
+      <button type="button" onclick="gerarListaDaTurma()" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;color:var(--text);white-space:nowrap;flex-shrink:0;margin-left:14px;">📋 Gerar lista de presença</button>
+    </div>
     <!-- Seleção de participantes -->
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
@@ -1052,6 +1057,18 @@ function abrirModalListaPresenca(){
 
 function fecharModalListaPresenca(){document.getElementById('modal-lista-presenca').classList.remove('show');}
 
+function gerarListaDaTurma(){
+  const tId=parseInt(document.getElementById('turma-treinamento').value)||null;
+  const data=document.getElementById('turma-data').value;
+  const carga=document.getElementById('turma-carga').value.trim();
+  const instrutor=document.getElementById('turma-instrutor').value.trim();
+  const local=document.getElementById('turma-local').value.trim();
+  const cat=catalogo.find(c=>c.id===tId);
+  const win=window.open('','_blank');
+  if(!win)return;
+  _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas:20});
+}
+
 function gerarListaPresenca(){
   const tId=parseInt(document.getElementById('lp-treinamento').value)||null;
   const data=document.getElementById('lp-data').value;
@@ -1060,14 +1077,18 @@ function gerarListaPresenca(){
   const local=document.getElementById('lp-local').value.trim();
   const nLinhas=Math.max(5,Math.min(50,parseInt(document.getElementById('lp-linhas').value)||15));
   const cat=catalogo.find(c=>c.id===tId);
+  const win=window.open('','_blank');
+  if(!win)return;
+  fecharModalListaPresenca();
+  _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas});
+}
+
+function _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas}){
   const nomeEmpresa=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
   const cnpjEmpresa=empresa?.cnpj||'';
   const logoEmpresa=empresa?.logo_empresa||'';
   const nomeConsultoria=empresa?.nome_consultoria||'';
   const logoConsultoria=empresa?.logo_consultoria||'';
-  const win=window.open('','_blank');
-  if(!win)return;
-  fecharModalListaPresenca();
   const logoEsqHtml=logoEmpresa
     ?`<img src="${logoEmpresa}" style="max-height:50px;max-width:130px;object-fit:contain;">`
     :`<div style="font-size:13px;font-weight:700;color:#1A1A1A;">${escHtml(nomeEmpresa)}</div>${cnpjEmpresa?`<div style="font-size:9px;color:#666;">CNPJ ${escHtml(cnpjEmpresa)}</div>`:''}`;
