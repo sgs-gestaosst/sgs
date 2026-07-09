@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aceite Digital — SGS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Arial',sans-serif;background:#F3F4F6;min-height:100vh;color:#111827;}
+.hdr{background:#1A1A1A;padding:16px 20px;display:flex;align-items:center;gap:12px;}
+.hdr-logo{font-size:13px;font-weight:700;color:#fff;letter-spacing:.08em;border:1px solid rgba(255,255,255,.25);padding:4px 10px;border-radius:6px;text-decoration:none;}
+.hdr-txt{font-size:12px;color:rgba(255,255,255,.5);}
+.wrap{max-width:540px;margin:0 auto;padding:24px 16px 48px;}
+
+.state{text-align:center;padding:60px 16px;}
+.state-ico{font-size:44px;margin-bottom:14px;}
+.state-title{font-size:18px;font-weight:700;color:#1A1A1A;margin-bottom:8px;}
+.state-sub{font-size:13px;color:#6B7280;line-height:1.6;}
+.spinner{width:40px;height:40px;border:4px solid #E5E7EB;border-top-color:#1A1A1A;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden;margin-bottom:16px;}
+.cert-hdr{background:#1A1A1A;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;}
+.ch-left{font-size:8.5px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.3px;}
+.ch-sub{font-size:7px;color:rgba(255,255,255,.3);margin-top:1px;}
+.ch-nr{font-size:7.5px;font-weight:700;letter-spacing:2px;color:#FF6600;text-transform:uppercase;text-align:right;margin-bottom:2px;}
+.ch-curso{font-size:8.5px;font-weight:700;color:#fff;text-align:right;}
+.cert-body{padding:20px;}
+.ct{font-family:'Palatino Linotype','Book Antiqua',Georgia,serif;font-size:26px;text-align:center;color:#1A1A1A;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
+.cr{width:38%;height:1.5px;background:#FF6600;margin:0 auto 14px;}
+.cnome{font-family:'Palatino Linotype','Book Antiqua',Georgia,serif;font-size:16px;font-weight:700;text-align:center;color:#1A1A1A;text-transform:uppercase;margin-bottom:14px;}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ccel{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:6px;padding:8px 10px;}
+.clbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9CA3AF;margin-bottom:3px;}
+.cval{font-size:12px;font-weight:700;color:#111827;}
+
+.who-card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+.who-av{width:44px;height:44px;border-radius:50%;background:#1A1A1A;color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.who-name{font-size:15px;font-weight:700;color:#111827;}
+.who-role{font-size:12px;color:#6B7280;margin-top:2px;}
+
+.confirm-card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:18px;margin-bottom:16px;}
+.decl{font-size:13px;color:#374151;line-height:1.7;margin-bottom:16px;}
+.decl strong{color:#1A1A1A;}
+.chk-row{display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:13px;background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:8px;transition:border-color .2s;}
+.chk-row:hover{border-color:#1A1A1A;}
+.chk-row input{margin-top:2px;accent-color:#1A1A1A;width:16px;height:16px;flex-shrink:0;cursor:pointer;}
+.chk-lbl{font-size:13px;color:#111827;line-height:1.5;font-weight:500;}
+.btn-ok{width:100%;background:#1A1A1A;color:#fff;border:none;border-radius:10px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;transition:background .2s;}
+.btn-ok:disabled{background:#D1D5DB;cursor:default;}
+.btn-ok.ready{background:#059669;}
+.terms{font-size:10.5px;color:#9CA3AF;text-align:center;line-height:1.6;margin-top:12px;}
+
+.success-card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:32px 20px;text-align:center;}
+.sico{width:72px;height:72px;background:#ECFDF5;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;}
+.stitle{font-size:22px;font-weight:800;color:#1A1A1A;margin-bottom:8px;}
+.ssub{font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:22px;}
+.sstamp{background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:10px;padding:14px;text-align:left;}
+.sr{display:flex;gap:8px;margin-bottom:5px;}
+.sl{font-size:10px;color:#15803D;font-weight:700;min-width:72px;flex-shrink:0;}
+.sv{font-size:11px;color:#166534;font-weight:600;line-height:1.4;}
+
+.ftr{text-align:center;margin-top:28px;font-size:11px;color:#9CA3AF;}
+.ftr a{color:#6B7280;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <a href="https://sgs.tec5.com.br" class="hdr-logo">SGS</a>
+  <div class="hdr-txt">Aceite Digital de Certificado</div>
+</div>
+
+<div class="wrap">
+  <div id="loading" class="state">
+    <div class="spinner"></div>
+    <div class="state-title">Verificando link...</div>
+    <div class="state-sub">Aguarde um momento</div>
+  </div>
+
+  <div id="error" class="state" style="display:none">
+    <div class="state-ico">⚠️</div>
+    <div class="state-title" id="err-title">Link inválido</div>
+    <div class="state-sub" id="err-sub">Verifique se o link está correto.</div>
+  </div>
+
+  <div id="already" style="display:none">
+    <div class="success-card">
+      <div class="sico">✅</div>
+      <div class="stitle">Aceite já registrado</div>
+      <div class="ssub">Você já confirmou este certificado.<br>O carimbo digital já foi gerado.</div>
+      <div class="sstamp" id="already-stamp"></div>
+    </div>
+    <div class="ftr"><a href="https://sgs.tec5.com.br">SGS — Sistema de Gestão em SST</a></div>
+  </div>
+
+  <div id="content" style="display:none">
+    <div class="card">
+      <div class="cert-hdr">
+        <div>
+          <div class="ch-left" id="c-emp">—</div>
+          <div class="ch-sub" id="c-cnpj"></div>
+        </div>
+        <div>
+          <div class="ch-nr" id="c-nr"></div>
+          <div class="ch-curso" id="c-curso">Certificado de Treinamento</div>
+        </div>
+      </div>
+      <div class="cert-body">
+        <div class="ct">Certificado</div>
+        <div class="cr"></div>
+        <div class="cnome" id="c-nome">—</div>
+        <div class="cgrid">
+          <div class="ccel"><div class="clbl">Realização</div><div class="cval" id="c-data">—</div></div>
+          <div class="ccel"><div class="clbl">Carga horária</div><div class="cval" id="c-carga">—</div></div>
+          <div class="ccel"><div class="clbl">Tipo</div><div class="cval" id="c-tipo">—</div></div>
+          <div class="ccel"><div class="clbl">Válido até</div><div class="cval" id="c-validade">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="who-card">
+      <div class="who-av" id="who-av">?</div>
+      <div>
+        <div class="who-name" id="who-name">—</div>
+        <div class="who-role" id="who-role">—</div>
+      </div>
+    </div>
+
+    <div class="confirm-card">
+      <div class="decl" id="decl">Ao confirmar, você declara que as informações acima estão corretas.</div>
+      <label class="chk-row">
+        <input type="checkbox" id="chk" onchange="atualizarBtn()">
+        <span class="chk-lbl">Li o certificado e confirmo as informações acima.</span>
+      </label>
+      <button class="btn-ok" id="btn-ok" disabled onclick="confirmar()">✓ Confirmar aceite</button>
+      <div class="terms">Este aceite tem validade legal (Marco Civil da Internet — Lei 12.965/2014).</div>
+    </div>
+  </div>
+
+  <div id="success" style="display:none">
+    <div class="success-card">
+      <div class="sico">✅</div>
+      <div class="stitle">Aceite confirmado!</div>
+      <div class="ssub">Seu aceite foi registrado com sucesso.<br>O carimbo digital foi gerado no certificado.</div>
+      <div class="sstamp" id="suc-stamp"></div>
+    </div>
+    <div class="ftr"><a href="https://sgs.tec5.com.br">SGS — Sistema de Gestão em SST</a></div>
+  </div>
+</div>
+
+<script>
+const SU='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SK='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function api(p){return fetch(SU+'/rest/v1/'+p,{headers:{'apikey':SK,'Authorization':'Bearer '+SK}}).then(r=>r.json());}
+function fmt(s){if(!s)return'—';const[y,m,d]=s.split('-');return d+'/'+m+'/'+y;}
+function fmtDT(s){if(!s)return'—';const d=new Date(s);return d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+
+const TIPO_LABEL={funcionario:'Treinando / Participante',instrutor:'Instrutor Responsável',responsavel_tecnico:'Responsável Técnico SST'};
+const TIPO_DECL={
+  funcionario:'Declaro que participei do treinamento de <strong>{t}</strong>, realizado em {d}, com carga horária de {c}.',
+  instrutor:'Declaro que ministrei o treinamento de <strong>{t}</strong> em {d}, com carga horária de {c}, conforme conteúdo programático registrado.',
+  responsavel_tecnico:'Confirmo que o treinamento de <strong>{t}</strong> foi realizado em {d}, em conformidade com as Normas Regulamentadoras aplicáveis.'
+};
+
+let assId=null;
+
+async function carregar(){
+  const tok=new URLSearchParams(location.search).get('token');
+  if(!tok){err('Link inválido','Nenhum token encontrado neste link.');return;}
+  try{
+    const arr=await api('cert_assinaturas?token=eq.'+tok+'&select=*&limit=1');
+    if(!arr||!arr.length){err('Link não encontrado','Este link não existe ou já expirou.');return;}
+    const ass=arr[0]; assId=ass.id;
+
+    if(ass.status==='aceito'){
+      document.getElementById('already-stamp').innerHTML=stampHtml(ass);
+      show('already'); return;
+    }
+
+    const [regArr]=await Promise.all([api('funcionario_treinamentos?id=eq.'+ass.funcionario_treinamento_id+'&select=*&limit=1')]);
+    if(!regArr||!regArr.length){err('Treinamento não encontrado','Dados do certificado não localizados.');return;}
+    const reg=regArr[0];
+
+    const [funcArr,catArr,empArr]=await Promise.all([
+      api('funcionarios?id=eq.'+reg.funcionario_id+'&select=id,nome_completo&limit=1'),
+      reg.treinamento_id?api('catalogo_treinamentos?id=eq.'+reg.treinamento_id+'&select=id,nome,nr_relacionada&limit=1'):Promise.resolve([]),
+      api('empresas?id=eq.'+ass.empresa_id+'&select=id,nome_fantasia,razao_social,cnpj,cnpj_completo&limit=1')
+    ]);
+
+    const func=funcArr?.[0], cat=catArr?.[0], emp=empArr?.[0];
+    const nomeEmp=emp?.nome_fantasia||emp?.razao_social||'—';
+    const cnpj=emp?.cnpj||emp?.cnpj_completo||'';
+    const nomeTrei=(cat?.nr_relacionada?cat.nr_relacionada+' – ':'')+( cat?.nome||'Treinamento');
+
+    document.getElementById('c-emp').textContent=nomeEmp;
+    if(cnpj)document.getElementById('c-cnpj').textContent='CNPJ '+cnpj;
+    if(cat?.nr_relacionada)document.getElementById('c-nr').textContent=cat.nr_relacionada;
+    document.getElementById('c-curso').textContent=cat?.nome||'Certificado';
+    document.getElementById('c-nome').textContent=func?.nome_completo||'—';
+    document.getElementById('c-data').textContent=fmt(reg.data_realizacao);
+    document.getElementById('c-carga').textContent=reg.carga_horaria?reg.carga_horaria+'h':'—';
+    document.getElementById('c-tipo').textContent=reg.tipo||'—';
+    document.getElementById('c-validade').textContent=fmt(reg.data_vencimento);
+
+    const ini=(ass.nome_signatario||'?').split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase()||'?';
+    document.getElementById('who-av').textContent=ini;
+    document.getElementById('who-name').textContent=ass.nome_signatario||'—';
+    document.getElementById('who-role').textContent=TIPO_LABEL[ass.tipo]||ass.tipo;
+
+    const decl=(TIPO_DECL[ass.tipo]||'Confirmo as informações do certificado.')
+      .replace('{t}',h(nomeTrei)).replace('{d}',fmt(reg.data_realizacao)).replace('{c}',reg.carga_horaria?reg.carga_horaria+'h':'—');
+    document.getElementById('decl').innerHTML=decl;
+
+    show('content');
+  }catch(e){err('Erro ao carregar','Verifique sua conexão e tente novamente.');}
+}
+
+function stampHtml(ass){
+  return`<div class="sr"><span class="sl">Signatário</span><span class="sv">${h(ass.nome_signatario)}</span></div>`
+    +`<div class="sr"><span class="sl">Tipo</span><span class="sv">${TIPO_LABEL[ass.tipo]||ass.tipo}</span></div>`
+    +`<div class="sr"><span class="sl">Data/Hora</span><span class="sv">${fmtDT(ass.aceito_em)}</span></div>`;
+}
+
+function atualizarBtn(){
+  const ok=document.getElementById('chk').checked;
+  const b=document.getElementById('btn-ok');
+  b.disabled=!ok; b.className='btn-ok'+(ok?' ready':'');
+}
+
+async function confirmar(){
+  const b=document.getElementById('btn-ok');
+  b.textContent='Registrando...'; b.disabled=true; b.className='btn-ok';
+  try{
+    const res=await fetch(SU+'/rest/v1/cert_assinaturas?id=eq.'+assId,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SK,'Authorization':'Bearer '+SK,'Prefer':'return=representation'},
+      body:JSON.stringify({status:'aceito',aceito_em:new Date().toISOString()})
+    });
+    if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro');}
+    const[upd]=await res.json();
+    document.getElementById('suc-stamp').innerHTML=stampHtml(upd);
+    show('success');
+  }catch(e){b.textContent='✓ Confirmar aceite';b.disabled=false;b.className='btn-ok ready';alert('Erro: '+e.message);}
+}
+
+function show(id){
+  ['loading','error','already','content','success'].forEach(s=>document.getElementById(s).style.display=s===id?'':'none');
+}
+function err(t,s){document.getElementById('err-title').textContent=t;document.getElementById('err-sub').textContent=s;show('error');}
+
+carregar();
+</script>
+</body>
+</html>
