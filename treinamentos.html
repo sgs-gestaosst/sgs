@@ -208,6 +208,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <input type="text" id="reg-registro-instrutor" placeholder="Ex: CREA 123456/SP">
       </div>
       <div class="modal-field">
+        <label>Registro profissional do resp. técnico</label>
+        <input type="text" id="reg-registro-responsavel" placeholder="Ex: CREA 123456/SP">
+      </div>
+      <div class="modal-field">
         <label>Local</label>
         <input type="text" id="reg-local" placeholder="Local de realização">
       </div>
@@ -297,6 +301,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <div class="modal-field">
           <label>Registro profissional do instrutor</label>
           <input type="text" id="turma-registro-instrutor" placeholder="Ex: CREA 123456/SP">
+        </div>
+        <div class="modal-field">
+          <label>Registro profissional do resp. técnico</label>
+          <input type="text" id="turma-registro-responsavel" placeholder="Ex: CREA 123456/SP">
         </div>
         <div class="modal-field">
           <label>Local</label>
@@ -797,7 +805,7 @@ function abrirModalRegistro(prefFuncionarioId=null){
   const selAcao=document.getElementById('reg-acao');
   selAcao.innerHTML='<option value="">— Nenhuma —</option>'+acoes.map(a=>`<option value="${a.id}">${escHtml(a.titulo)}</option>`).join('');
   // Limpa campos
-  ['reg-tipo','reg-data','reg-vencimento','reg-carga','reg-instrutor','reg-registro-instrutor','reg-local','reg-certificado','reg-observacao'].forEach(id=>{
+  ['reg-tipo','reg-data','reg-vencimento','reg-carga','reg-instrutor','reg-registro-instrutor','reg-registro-responsavel','reg-local','reg-certificado','reg-observacao'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'?el.options[0]?.value||'':'';
   });
   removerArquivo();
@@ -900,6 +908,7 @@ async function salvarRegistro(){
       carga_horaria:parseInt(document.getElementById('reg-carga').value)||null,
       instrutor:document.getElementById('reg-instrutor').value.trim()||null,
       registro_instrutor:document.getElementById('reg-registro-instrutor').value.trim()||null,
+      registro_responsavel:document.getElementById('reg-registro-responsavel').value.trim()||null,
       local_realizacao:document.getElementById('reg-local').value.trim()||null,
       numero_certificado:document.getElementById('reg-certificado').value.trim()||null,
       evidencia_url:evidenciaUrl,
@@ -1873,7 +1882,7 @@ function abrirModalTurma() {
     `<option value="${s.id}">${escHtml(s.nome_setor)}</option>`
   ).join('');
   // Limpa campos
-  ['turma-tipo','turma-data','turma-vencimento','turma-carga','turma-instrutor','turma-registro-instrutor','turma-local','turma-certificado','turma-observacao'].forEach(id => {
+  ['turma-tipo','turma-data','turma-vencimento','turma-carga','turma-instrutor','turma-registro-instrutor','turma-registro-responsavel','turma-local','turma-certificado','turma-observacao'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = el.tagName === 'SELECT' ? el.options[0]?.value || '' : '';
   });
   document.getElementById('turma-busca-func').value = '';
@@ -2023,6 +2032,7 @@ async function salvarTurma() {
       carga_horaria: parseInt(document.getElementById('turma-carga').value) || null,
       instrutor: document.getElementById('turma-instrutor').value.trim() || null,
       registro_instrutor: document.getElementById('turma-registro-instrutor').value.trim() || null,
+      registro_responsavel: document.getElementById('turma-registro-responsavel').value.trim() || null,
       local_realizacao: document.getElementById('turma-local').value.trim() || null,
       numero_certificado: document.getElementById('turma-certificado').value.trim() || null,
       observacao: document.getElementById('turma-observacao').value.trim() || null,
