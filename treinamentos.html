@@ -208,6 +208,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <input type="text" id="reg-registro-instrutor" placeholder="Ex: CREA 123456/SP">
       </div>
       <div class="modal-field">
+        <label>Nome do responsável técnico</label>
+        <input type="text" id="reg-nome-responsavel" placeholder="Nome do responsável técnico">
+      </div>
+      <div class="modal-field">
         <label>Registro profissional do resp. técnico</label>
         <input type="text" id="reg-registro-responsavel" placeholder="Ex: CREA 123456/SP">
       </div>
@@ -301,6 +305,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <div class="modal-field">
           <label>Registro profissional do instrutor</label>
           <input type="text" id="turma-registro-instrutor" placeholder="Ex: CREA 123456/SP">
+        </div>
+        <div class="modal-field">
+          <label>Nome do responsável técnico</label>
+          <input type="text" id="turma-nome-responsavel" placeholder="Nome do responsável técnico">
         </div>
         <div class="modal-field">
           <label>Registro profissional do resp. técnico</label>
@@ -805,7 +813,7 @@ function abrirModalRegistro(prefFuncionarioId=null){
   const selAcao=document.getElementById('reg-acao');
   selAcao.innerHTML='<option value="">— Nenhuma —</option>'+acoes.map(a=>`<option value="${a.id}">${escHtml(a.titulo)}</option>`).join('');
   // Limpa campos
-  ['reg-tipo','reg-data','reg-vencimento','reg-carga','reg-instrutor','reg-registro-instrutor','reg-registro-responsavel','reg-local','reg-certificado','reg-observacao'].forEach(id=>{
+  ['reg-tipo','reg-data','reg-vencimento','reg-carga','reg-instrutor','reg-registro-instrutor','reg-nome-responsavel','reg-registro-responsavel','reg-local','reg-certificado','reg-observacao'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'?el.options[0]?.value||'':'';
   });
   removerArquivo();
@@ -908,6 +916,7 @@ async function salvarRegistro(){
       carga_horaria:parseInt(document.getElementById('reg-carga').value)||null,
       instrutor:document.getElementById('reg-instrutor').value.trim()||null,
       registro_instrutor:document.getElementById('reg-registro-instrutor').value.trim()||null,
+      nome_responsavel:document.getElementById('reg-nome-responsavel').value.trim()||null,
       registro_responsavel:document.getElementById('reg-registro-responsavel').value.trim()||null,
       local_realizacao:document.getElementById('reg-local').value.trim()||null,
       numero_certificado:document.getElementById('reg-certificado').value.trim()||null,
@@ -1081,10 +1090,12 @@ function gerarListaDaTurma(){
   const carga=document.getElementById('turma-carga').value.trim();
   const instrutor=document.getElementById('turma-instrutor').value.trim();
   const local=document.getElementById('turma-local').value.trim();
+  const nomeResp=document.getElementById('turma-nome-responsavel').value.trim();
+  const regResp=document.getElementById('turma-registro-responsavel').value.trim();
   const cat=catalogo.find(c=>c.id===tId);
   const win=window.open('','_blank');
   if(!win)return;
-  _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas:20});
+  _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas:20,nomeResp,regResp});
 }
 
 function gerarListaPresenca(){
@@ -1098,10 +1109,10 @@ function gerarListaPresenca(){
   const win=window.open('','_blank');
   if(!win)return;
   fecharModalListaPresenca();
-  _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas});
+  _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas,nomeResp:'',regResp:''});
 }
 
-function _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas}){
+function _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas,nomeResp,regResp}){
   const nomeEmpresa=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
   const cnpjEmpresa=empresa?.cnpj||'';
   const logoEmpresa=empresa?.logo_empresa||'';
@@ -1209,7 +1220,8 @@ td:last-child{min-width:120px;border-left:1px dashed #D1D5DB;}
   <div class="sign-block">
     <div class="sign-line"></div>
     <div class="sign-label">Responsável Técnico SST</div>
-    <div class="sign-name">${escHtml(nomeConsultoria||nomeEmpresa)}</div>
+    <div class="sign-name">${escHtml(nomeResp||nomeConsultoria||nomeEmpresa)}</div>
+    ${regResp?`<div style="font-size:9px;color:#FF6600;font-weight:600;margin-top:1px;">${escHtml(regResp)}</div>`:''}
   </div>
 </div>
 
@@ -1882,7 +1894,7 @@ function abrirModalTurma() {
     `<option value="${s.id}">${escHtml(s.nome_setor)}</option>`
   ).join('');
   // Limpa campos
-  ['turma-tipo','turma-data','turma-vencimento','turma-carga','turma-instrutor','turma-registro-instrutor','turma-registro-responsavel','turma-local','turma-certificado','turma-observacao'].forEach(id => {
+  ['turma-tipo','turma-data','turma-vencimento','turma-carga','turma-instrutor','turma-registro-instrutor','turma-nome-responsavel','turma-registro-responsavel','turma-local','turma-certificado','turma-observacao'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = el.tagName === 'SELECT' ? el.options[0]?.value || '' : '';
   });
   document.getElementById('turma-busca-func').value = '';
@@ -2032,6 +2044,7 @@ async function salvarTurma() {
       carga_horaria: parseInt(document.getElementById('turma-carga').value) || null,
       instrutor: document.getElementById('turma-instrutor').value.trim() || null,
       registro_instrutor: document.getElementById('turma-registro-instrutor').value.trim() || null,
+      nome_responsavel: document.getElementById('turma-nome-responsavel').value.trim() || null,
       registro_responsavel: document.getElementById('turma-registro-responsavel').value.trim() || null,
       local_realizacao: document.getElementById('turma-local').value.trim() || null,
       numero_certificado: document.getElementById('turma-certificado').value.trim() || null,
