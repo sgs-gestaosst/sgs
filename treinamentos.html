@@ -490,6 +490,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <button class="btn" style="color:var(--danger);border-color:var(--danger);background:transparent;" onclick="excluirRegistro(registroAtualId)">🗑 Excluir</button>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-edit" onclick="fecharModalDetalhes()">Fechar</button>
+        <button class="btn btn-edit" onclick="abrirEdicaoRegistro(registroAtualId)">✏️ Editar</button>
         <button class="btn btn-edit" onclick="fecharModalDetalhes();abrirModalAssinaturas(registroAtualId)">🔏 Aceites</button>
         <button class="btn btn-primary" onclick="emitirCertificadoAtual()">📄 Emitir certificado</button>
       </div>
@@ -820,6 +821,37 @@ function abrirModalRegistro(prefFuncionarioId=null){
 
 function fecharModalRegistro(){
   document.getElementById('modal-registro').classList.remove('show');
+  if(editandoId){
+    editandoId=null;
+    document.getElementById('reg-funcionario').disabled=false;
+    document.getElementById('reg-treinamento').disabled=false;
+    document.getElementById('modal-reg-titulo').textContent='Registrar treinamento';
+    document.getElementById('label-registro').textContent='Salvar registro';
+  }
+}
+
+function abrirEdicaoRegistro(id){
+  const r=registros.find(x=>x.id===id);
+  if(!r)return;
+  fecharModalDetalhes();
+  abrirModalRegistro(r.funcionario_id);
+  editandoId=id;
+  document.getElementById('reg-treinamento').value=r.treinamento_id||'';
+  document.getElementById('reg-tipo').value=r.tipo||'';
+  document.getElementById('reg-data').value=r.data_realizacao||'';
+  document.getElementById('reg-vencimento').value=r.data_vencimento||'';
+  document.getElementById('reg-carga').value=r.carga_horaria||'';
+  document.getElementById('reg-instrutor').value=r.instrutor||'';
+  document.getElementById('reg-registro-instrutor').value=r.registro_instrutor||'';
+  document.getElementById('reg-nome-responsavel').value=r.nome_responsavel||'';
+  document.getElementById('reg-registro-responsavel').value=r.registro_responsavel||'';
+  document.getElementById('reg-local').value=r.local_realizacao||'';
+  document.getElementById('reg-certificado').value=r.numero_certificado||'';
+  document.getElementById('reg-observacao').value=r.observacao||'';
+  document.getElementById('reg-funcionario').disabled=true;
+  document.getElementById('reg-treinamento').disabled=true;
+  document.getElementById('modal-reg-titulo').textContent='Editar treinamento';
+  document.getElementById('label-registro').textContent='Salvar alterações';
 }
 
 function preencherDadosTreinamento(){
@@ -924,6 +956,25 @@ async function salvarRegistro(){
       observacao:document.getElementById('reg-observacao').value.trim()||null,
       ativo:true
     };
+    if(editandoId){
+      // PATCH — não sobrescreve evidencia se não tiver novo arquivo
+      const patchPayload={...payload};
+      if(!arquivoSelecionado){delete patchPayload.evidencia_url;delete patchPayload.evidencia_nome;}
+      delete patchPayload.funcionario_id;delete patchPayload.empresa_id;delete patchPayload.ativo;
+      const res=await fetch(`${SUPA_URL}/rest/v1/funcionario_treinamentos?id=eq.${editandoId}`,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+        body:JSON.stringify(patchPayload)
+      });
+      if(!res.ok){const e=await res.json();throw new Error(e.message||'Erro ao atualizar');}
+      const updated=await res.json();
+      const idx=registros.findIndex(x=>x.id===editandoId);
+      if(idx>=0)registros[idx]={...registros[idx],...updated[0]};
+      renderStats();renderTab();
+      fecharModalRegistro();
+      setStatus('status-geral','success','✓ Registro atualizado!');
+      setTimeout(()=>clearStatus('status-geral'),3000);
+    }else{
     const res=await fetch(`${SUPA_URL}/rest/v1/funcionario_treinamentos`,{
       method:'POST',
       headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
@@ -939,12 +990,13 @@ async function salvarRegistro(){
     renderStats();renderTab();
     fecharModalRegistro();
     setStatus('status-registro','success','Treinamento registrado!');
+    }
   }catch(e){
     setStatus('status-registro','error',e.message);
   }finally{
     document.getElementById('btn-salvar-registro').disabled=false;
     document.getElementById('spinner-registro').className='spinner';
-    document.getElementById('label-registro').textContent='Salvar registro';
+    document.getElementById('label-registro').textContent=editandoId?'Salvar alterações':'Salvar registro';
   }
 }
 
@@ -996,6 +1048,7 @@ function renovarTreinamento(registroId){
 }
 
 let registroAtualId=null;
+let editandoId=null;
 
 function abrirDetalhesRegistro(id){
   const r=registros.find(x=>x.id===id);
