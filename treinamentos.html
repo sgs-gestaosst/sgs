@@ -204,6 +204,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <input type="text" id="reg-instrutor" placeholder="Nome do instrutor">
       </div>
       <div class="modal-field">
+        <label>Registro profissional do instrutor</label>
+        <input type="text" id="reg-registro-instrutor" placeholder="Ex: CREA 123456/SP">
+      </div>
+      <div class="modal-field">
         <label>Local</label>
         <input type="text" id="reg-local" placeholder="Local de realização">
       </div>
@@ -289,6 +293,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <div class="modal-field">
           <label>Instrutor</label>
           <input type="text" id="turma-instrutor" placeholder="Nome do instrutor">
+        </div>
+        <div class="modal-field">
+          <label>Registro profissional do instrutor</label>
+          <input type="text" id="turma-registro-instrutor" placeholder="Ex: CREA 123456/SP">
         </div>
         <div class="modal-field">
           <label>Local</label>
@@ -789,7 +797,7 @@ function abrirModalRegistro(prefFuncionarioId=null){
   const selAcao=document.getElementById('reg-acao');
   selAcao.innerHTML='<option value="">— Nenhuma —</option>'+acoes.map(a=>`<option value="${a.id}">${escHtml(a.titulo)}</option>`).join('');
   // Limpa campos
-  ['reg-tipo','reg-data','reg-vencimento','reg-carga','reg-instrutor','reg-local','reg-certificado','reg-observacao'].forEach(id=>{
+  ['reg-tipo','reg-data','reg-vencimento','reg-carga','reg-instrutor','reg-registro-instrutor','reg-local','reg-certificado','reg-observacao'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.value=el.tagName==='SELECT'?el.options[0]?.value||'':'';
   });
   removerArquivo();
@@ -891,6 +899,7 @@ async function salvarRegistro(){
       data_vencimento:document.getElementById('reg-vencimento').value||null,
       carga_horaria:parseInt(document.getElementById('reg-carga').value)||null,
       instrutor:document.getElementById('reg-instrutor').value.trim()||null,
+      registro_instrutor:document.getElementById('reg-registro-instrutor').value.trim()||null,
       local_realizacao:document.getElementById('reg-local').value.trim()||null,
       numero_certificado:document.getElementById('reg-certificado').value.trim()||null,
       evidencia_url:evidenciaUrl,
@@ -1291,8 +1300,8 @@ async function abrirModalAssinaturas(id){
   try{
     const inserts=[
       {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'funcionario',nome_signatario:func?.nome_completo||'Funcionário',cargo_signatario:funcao?.nome_funcao||null,cpf_signatario:func?.cpf||null},
-      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'instrutor',nome_signatario:r.instrutor||'Instrutor',cargo_signatario:'Instrutor Responsável'},
-      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'responsavel_tecnico',nome_signatario:empresa.nome_consultoria||empresa.nome_fantasia||empresa.razao_social||'Responsável Técnico',cargo_signatario:'Responsável Técnico SST'},
+      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'instrutor',nome_signatario:r.instrutor||'Instrutor',cargo_signatario:'Instrutor Responsável',registro_profissional:r.registro_instrutor||null},
+      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'responsavel_tecnico',nome_signatario:empresa.nome_consultoria||empresa.nome_fantasia||empresa.razao_social||'Responsável Técnico',cargo_signatario:'Responsável Técnico SST',registro_profissional:empresa.registro_responsavel||null},
     ];
     await Promise.all(inserts.map(ins=>fetch(`${SUPA_URL}/rest/v1/cert_assinaturas`,{
       method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'resolution=ignore-duplicates,return=minimal'},
@@ -1300,11 +1309,21 @@ async function abrirModalAssinaturas(id){
     })));
     const res=await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?funcionario_treinamento_id=eq.${r.id}&select=*&order=tipo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const assinaturas=await res.json();
-    // Preenche CPF do funcionário se ainda não estava gravado
+    // Preenche campos de identificação se ainda não estavam gravados
     const funcAss=assinaturas.find(a=>a.tipo==='funcionario');
     if(funcAss&&!funcAss.cpf_signatario&&func?.cpf){
       await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?id=eq.${funcAss.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=minimal'},body:JSON.stringify({cpf_signatario:func.cpf})});
       funcAss.cpf_signatario=func.cpf;
+    }
+    const instrAss=assinaturas.find(a=>a.tipo==='instrutor');
+    if(instrAss&&!instrAss.registro_profissional&&r.registro_instrutor){
+      await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?id=eq.${instrAss.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=minimal'},body:JSON.stringify({registro_profissional:r.registro_instrutor})});
+      instrAss.registro_profissional=r.registro_instrutor;
+    }
+    const respAss=assinaturas.find(a=>a.tipo==='responsavel_tecnico');
+    if(respAss&&!respAss.registro_profissional&&empresa.registro_responsavel){
+      await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?id=eq.${respAss.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=minimal'},body:JSON.stringify({registro_profissional:empresa.registro_responsavel})});
+      respAss.registro_profissional=empresa.registro_responsavel;
     }
     renderAssCards(assinaturas,r,func,cat);
   }catch(e){document.getElementById('ass-cards').innerHTML=`<div style="color:var(--danger);padding:12px;">Erro: ${escHtml(e.message)}</div>`;}
@@ -1864,7 +1883,7 @@ function abrirModalTurma() {
     `<option value="${s.id}">${escHtml(s.nome_setor)}</option>`
   ).join('');
   // Limpa campos
-  ['turma-tipo','turma-data','turma-vencimento','turma-carga','turma-instrutor','turma-local','turma-certificado','turma-observacao'].forEach(id => {
+  ['turma-tipo','turma-data','turma-vencimento','turma-carga','turma-instrutor','turma-registro-instrutor','turma-local','turma-certificado','turma-observacao'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = el.tagName === 'SELECT' ? el.options[0]?.value || '' : '';
   });
   document.getElementById('turma-busca-func').value = '';
@@ -2013,6 +2032,7 @@ async function salvarTurma() {
       data_vencimento: vencimento,
       carga_horaria: parseInt(document.getElementById('turma-carga').value) || null,
       instrutor: document.getElementById('turma-instrutor').value.trim() || null,
+      registro_instrutor: document.getElementById('turma-registro-instrutor').value.trim() || null,
       local_realizacao: document.getElementById('turma-local').value.trim() || null,
       numero_certificado: document.getElementById('turma-certificado').value.trim() || null,
       observacao: document.getElementById('turma-observacao').value.trim() || null,
