@@ -1090,9 +1090,15 @@ function gerarListaDaTurma(){
   const nomeResp=document.getElementById('turma-nome-responsavel').value.trim();
   const regResp=document.getElementById('turma-registro-responsavel').value.trim();
   const cat=catalogo.find(c=>c.id===tId);
+  const participantes=[...document.querySelectorAll('.turma-check:checked')].map(cb=>{
+    const f=funcionarios.find(fn=>fn.id===parseInt(cb.value));
+    if(!f)return null;
+    const fn=funcoes.find(fn=>fn.id===f.funcao_id);
+    return{nome:f.nome_completo,cpf:f.cpf||'',funcao:fn?.nome_funcao||''};
+  }).filter(Boolean);
   const win=window.open('','_blank');
   if(!win)return;
-  _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas:20,nomeResp,regResp});
+  _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas:20,nomeResp,regResp,participantes});
 }
 
 function gerarListaPresenca(){
@@ -1109,7 +1115,7 @@ function gerarListaPresenca(){
   _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas,nomeResp:'',regResp:''});
 }
 
-function _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas,nomeResp,regResp}){
+function _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas,nomeResp,regResp,participantes=null}){
   const nomeEmpresa=empresa?.nome_fantasia||empresa?.razao_social||'Empresa';
   const cnpjEmpresa=empresa?.cnpj||'';
   const logoEmpresa=empresa?.logo_empresa||'';
@@ -1122,7 +1128,17 @@ function _imprimirListaPresenca(win,{cat,data,carga,instrutor,local,nLinhas,nome
     ?`<img src="${logoConsultoria}" style="max-height:50px;max-width:130px;object-fit:contain;">`
     :(nomeConsultoria?`<div style="font-size:11px;font-weight:600;color:#1A1A1A;">${escHtml(nomeConsultoria)}</div><div style="font-size:9px;color:#666;">Consultoria em SST</div>`:'');
   const dataFmt=data?fmtData(data):'___/___/______';
-  const linhasVazias=Array.from({length:nLinhas},(_,i)=>`
+  const fmtCpf=c=>c?c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):c;
+  const linhasVazias=participantes&&participantes.length
+    ?participantes.map((p,i)=>`
+    <tr>
+      <td style="text-align:center;color:#999;font-size:10px;">${i+1}</td>
+      <td style="height:30px;">${escHtml(p.nome)}</td>
+      <td style="font-size:10px;">${escHtml(fmtCpf(p.cpf))}</td>
+      <td style="font-size:10px;">${escHtml(p.funcao)}</td>
+      <td></td>
+    </tr>`).join('')
+    :Array.from({length:nLinhas},(_,i)=>`
     <tr>
       <td style="text-align:center;color:#999;font-size:10px;">${i+1}</td>
       <td style="height:30px;"></td>
