@@ -991,7 +991,7 @@ async function abrirModalAssinaturas(id){
   document.getElementById('modal-assinaturas').classList.add('show');
   try{
     const inserts=[
-      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'funcionario',nome_signatario:func?.nome_completo||'Funcionário',cargo_signatario:funcao?.nome_funcao||null},
+      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'funcionario',nome_signatario:func?.nome_completo||'Funcionário',cargo_signatario:funcao?.nome_funcao||null,cpf_signatario:func?.cpf||null},
       {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'instrutor',nome_signatario:r.instrutor||'Instrutor',cargo_signatario:'Instrutor Responsável'},
       {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'responsavel_tecnico',nome_signatario:empresa.nome_consultoria||empresa.nome_fantasia||empresa.razao_social||'Responsável Técnico',cargo_signatario:'Responsável Técnico SST'},
     ];
@@ -1001,6 +1001,12 @@ async function abrirModalAssinaturas(id){
     })));
     const res=await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?funcionario_treinamento_id=eq.${r.id}&select=*&order=tipo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
     const assinaturas=await res.json();
+    // Preenche CPF do funcionário se ainda não estava gravado
+    const funcAss=assinaturas.find(a=>a.tipo==='funcionario');
+    if(funcAss&&!funcAss.cpf_signatario&&func?.cpf){
+      await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?id=eq.${funcAss.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=minimal'},body:JSON.stringify({cpf_signatario:func.cpf})});
+      funcAss.cpf_signatario=func.cpf;
+    }
     renderAssCards(assinaturas,r,func,cat);
   }catch(e){document.getElementById('ass-cards').innerHTML=`<div style="color:var(--danger);padding:12px;">Erro: ${escHtml(e.message)}</div>`;}
 }
@@ -1018,8 +1024,20 @@ function renderAssCards(assinaturas,r,func,cat){
     const link=`${BASE_ASSINAR}?token=${ass.token}`;
     const ok=ass.status==='aceito';
     const ini=(ass.nome_signatario||'?').split(' ').filter(p=>p.length>1).slice(0,2).map(p=>p[0]).join('').toUpperCase()||'?';
+    const code='#'+(ass.token||'').replace(/-/g,'').substring(0,8);
+    let identRow='';
+    if(ok){
+      if(ass.tipo==='funcionario'&&ass.cpf_signatario)identRow=`<div style="font-size:11px;color:var(--text2);margin-left:42px;">CPF ${escHtml(ass.cpf_signatario)}</div>`;
+      else if(ass.registro_profissional)identRow=`<div style="font-size:11px;color:var(--text2);margin-left:42px;">${escHtml(ass.registro_profissional)}</div>`;
+    }
+    const regInput=(!ok&&ass.tipo!=='funcionario')
+      ?`<div style="margin-bottom:8px;">
+          <input type="text" id="reg-prof-${ass.id}" value="${escHtml(ass.registro_profissional||'')}" placeholder="Ex: CREA 123456/SP" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--text);outline:none;box-sizing:border-box;margin-bottom:4px;">
+          <button onclick="salvarRegistroProfissional(${ass.id})" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;color:var(--text);">Salvar registro</button>
+        </div>`
+      :'';
     return`<div style="background:var(--bg);border:1px solid ${ok?'var(--success)':'var(--border)'};border-radius:10px;padding:14px;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:${ok?'6':'10'}px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:${ok?'4':'10'}px;">
         <div style="width:32px;height:32px;border-radius:50%;background:${ok?'var(--success)':'#374151'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">${ok?'✓':ini}</div>
         <div style="flex:1;">
           <div style="font-size:13px;font-weight:500;">${escHtml(ass.nome_signatario)}</div>
@@ -1028,8 +1046,8 @@ function renderAssCards(assinaturas,r,func,cat){
         <span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:${ok?'#ECFDF5':'#F3F4F6'};color:${ok?'var(--success)':'var(--text3)'};">${ok?'✓ Aceito':'⏳ Pendente'}</span>
       </div>
       ${ok
-        ?`<div style="font-size:11px;color:var(--success);margin-left:42px;">Aceito em ${fmtDateTime(ass.aceito_em)}</div>`
-        :`<div style="display:flex;gap:8px;">
+        ?identRow+`<div style="font-size:10px;color:var(--text3);margin-left:42px;font-family:monospace;">${code}</div><div style="font-size:11px;color:var(--success);margin-left:42px;margin-top:2px;">Aceito em ${fmtDateTime(ass.aceito_em)}</div>`
+        :regInput+`<div style="display:flex;gap:8px;">
             <button onclick="copiarLinkAss('${ass.token}')" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px;font-size:12px;cursor:pointer;color:var(--text);">📋 Copiar link</button>
             <button onclick="waLinkAss('${ass.token}','${escHtml(ass.nome_signatario)}','${escHtml(cat?.nome||'')}','${escHtml(func?.nome_completo||'')}')" style="flex:1;background:#25D366;border:none;border-radius:6px;padding:7px;font-size:12px;cursor:pointer;color:#fff;font-weight:600;">📲 WhatsApp</button>
           </div>`}
@@ -1061,6 +1079,29 @@ function waLinkAss(tok,nome,treinamento,funcionarioNome){
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 }
 
+async function salvarRegistroProfissional(assId){
+  const input=document.getElementById('reg-prof-'+assId);
+  if(!input)return;
+  const valor=input.value.trim()||null;
+  try{
+    const res=await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?id=eq.${assId}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=minimal'},
+      body:JSON.stringify({registro_profissional:valor})
+    });
+    if(!res.ok)throw new Error('Erro ao salvar registro');
+    setStatus('status-assinaturas','success','✓ Registro profissional salvo!');
+    setTimeout(()=>clearStatus('status-assinaturas'),2500);
+    if(assRegAtual){
+      const r=assRegAtual;
+      const cat=catalogo.find(c=>c.id===r.treinamento_id);
+      const func=funcionarios.find(f=>f.id===r.funcionario_id);
+      const fetchRes=await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?funcionario_treinamento_id=eq.${r.id}&select=*&order=tipo.asc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+      if(fetchRes.ok)renderAssCards(await fetchRes.json(),r,func,cat);
+    }
+  }catch(e){setStatus('status-assinaturas','error',e.message);}
+}
+
 async function emitirCertificado(id){
   const r=registros.find(x=>x.id===id);
   if(!r)return;
@@ -1081,10 +1122,15 @@ async function emitirCertificado(id){
     if(ass.status==='aceito'){
       const dt=new Date(ass.aceito_em);
       const dtStr=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      const identLine=(ass.tipo==='funcionario'&&ass.cpf_signatario)
+        ?`<div style="font-size:5px;color:#4B5563;">CPF ${escHtml(ass.cpf_signatario)}</div>`
+        :(ass.registro_profissional?`<div style="font-size:5px;color:#4B5563;">${escHtml(ass.registro_profissional)}</div>`:'');
+      const code='#'+ass.token.replace(/-/g,'').substring(0,8);
       return`<div style="border:1.5px solid #059669;border-radius:4px;background:#ECFDF5;padding:4px 6px;margin-bottom:4px;">
         <div style="display:flex;align-items:center;gap:3px;margin-bottom:2px;"><div style="width:11px;height:11px;background:#059669;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6.5px;color:#fff;flex-shrink:0;">✓</div><span style="font-size:5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#059669;">Aceite digital</span></div>
         <div style="font-size:6.5px;font-weight:700;color:#1F2937;">${escHtml(ass.nome_signatario)}</div>
-        ${ass.cargo_signatario?`<div style="font-size:5px;color:#4B5563;">${escHtml(ass.cargo_signatario)}</div>`:''}
+        ${identLine}
+        <div style="font-size:5px;color:#6B7280;font-family:monospace;">${code}</div>
         <div style="font-size:4.5px;color:#9CA3AF;margin-top:1px;">${dtStr}</div>
       </div>`;
     }

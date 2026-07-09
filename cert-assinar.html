@@ -218,8 +218,13 @@ async function carregar(){
 }
 
 function stampHtml(ass){
+  const code='#'+(ass.token||'').replace(/-/g,'').substring(0,8);
+  let identRow='';
+  if(ass.tipo==='funcionario'&&ass.cpf_signatario)identRow=`<div class="sr"><span class="sl">CPF</span><span class="sv">${h(ass.cpf_signatario)}</span></div>`;
+  else if(ass.registro_profissional)identRow=`<div class="sr"><span class="sl">Registro</span><span class="sv">${h(ass.registro_profissional)}</span></div>`;
   return`<div class="sr"><span class="sl">Signatário</span><span class="sv">${h(ass.nome_signatario)}</span></div>`
-    +`<div class="sr"><span class="sl">Tipo</span><span class="sv">${TIPO_LABEL[ass.tipo]||ass.tipo}</span></div>`
+    +identRow
+    +`<div class="sr"><span class="sl">Código</span><span class="sv" style="font-family:monospace;">${code}</span></div>`
     +`<div class="sr"><span class="sl">Data/Hora</span><span class="sv">${fmtDT(ass.aceito_em)}</span></div>`;
 }
 
