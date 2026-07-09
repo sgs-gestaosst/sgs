@@ -132,6 +132,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <!-- Stats -->
   <div class="stats-grid" id="stats-grid"></div>
+  <div class="status-bar" id="status-geral" style="margin-bottom:8px;"></div>
 
   <!-- Tabs -->
   <div class="tabs">
@@ -458,10 +459,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <button onclick="fecharModalDetalhes()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
     </div>
     <div id="det-conteudo"></div>
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
-      <button class="btn btn-edit" onclick="fecharModalDetalhes()">Fechar</button>
-      <button class="btn btn-edit" onclick="fecharModalDetalhes();abrirModalAssinaturas(registroAtualId)">🔏 Aceites</button>
-      <button class="btn btn-primary" onclick="emitirCertificadoAtual()">📄 Emitir certificado</button>
+    <div style="display:flex;justify-content:space-between;gap:8px;margin-top:20px;">
+      <button class="btn" style="color:var(--danger);border-color:var(--danger);background:transparent;" onclick="excluirRegistro(registroAtualId)">🗑 Excluir</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-edit" onclick="fecharModalDetalhes()">Fechar</button>
+        <button class="btn btn-edit" onclick="fecharModalDetalhes();abrirModalAssinaturas(registroAtualId)">🔏 Aceites</button>
+        <button class="btn btn-primary" onclick="emitirCertificadoAtual()">📄 Emitir certificado</button>
+      </div>
     </div>
   </div>
 </div>
@@ -969,6 +973,46 @@ function _detLinha(label,valor){
 
 function fecharModalDetalhes(){document.getElementById('modal-detalhes').classList.remove('show');}
 async function emitirCertificadoAtual(){await emitirCertificado(registroAtualId);}
+
+async function excluirRegistro(id){
+  const r=registros.find(x=>x.id===id);
+  if(!r)return;
+  const func=funcionarios.find(f=>f.id===r.funcionario_id);
+  const cat=catalogo.find(c=>c.id===r.treinamento_id);
+  const nomeFun=func?.nome_completo||'este funcionário';
+  const nomeTrei=cat?.nome||'este treinamento';
+  if(!confirm(`Excluir o registro de "${nomeTrei}" de ${nomeFun}?\n\nIsso apagará também a evidência anexada e os aceites digitais. Esta ação não pode ser desfeita.`))return;
+  fecharModalDetalhes();
+  setStatus('status-geral','info','Excluindo registro...');
+  try{
+    // 1. Apaga arquivo de evidência do Storage
+    if(r.evidencia_url){
+      const marker='/object/public/'+STORAGE_BUCKET+'/';
+      const idx=r.evidencia_url.indexOf(marker);
+      if(idx!==-1){
+        const storagePath=r.evidencia_url.substring(idx+marker.length).split('?')[0];
+        await fetch(`${SUPA_URL}/storage/v1/object/${STORAGE_BUCKET}/${storagePath}`,{
+          method:'DELETE',
+          headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
+        });
+      }
+    }
+    // 2. Apaga aceites digitais
+    await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?funcionario_treinamento_id=eq.${id}`,{
+      method:'DELETE',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
+    });
+    // 3. Apaga o registro de treinamento
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios_treinamentos?id=eq.${id}&empresa_id=eq.${empresaId}`,{
+      method:'DELETE',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
+    });
+    if(!res.ok)throw new Error('Erro ao excluir registro');
+    setStatus('status-geral','success','✓ Registro excluído.');
+    setTimeout(()=>clearStatus('status-geral'),3000);
+    await carregarRegistros();
+  }catch(e){setStatus('status-geral','error','Erro: '+e.message);}
+}
 
 // ── ACEITES DIGITAIS ──────────────────────────────────
 const BASE_ASSINAR='https://sgs.tec5.com.br/cert-assinar.html';
