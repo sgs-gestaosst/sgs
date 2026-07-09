@@ -1283,7 +1283,7 @@ async function excluirRegistro(id){
     if(!res.ok)throw new Error('Erro ao excluir registro');
     setStatus('status-geral','success','✓ Registro excluído.');
     setTimeout(()=>clearStatus('status-geral'),3000);
-    await carregarRegistros();
+    await inicializar();
   }catch(e){setStatus('status-geral','error','Erro: '+e.message);}
 }
 
