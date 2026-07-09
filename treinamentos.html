@@ -1231,7 +1231,7 @@ async function anexarEvidenciaPost(id){
     const r=registros.find(x=>x.id===id);
     if(!r)throw new Error('Registro não encontrado');
     const up=await uploadEvidencia(file,r.funcionario_id,r.treinamento_id);
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios_treinamentos?id=eq.${id}&empresa_id=eq.${empresaId}`,{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionario_treinamentos?id=eq.${id}&empresa_id=eq.${empresaId}`,{
       method:'PATCH',
       headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=minimal'},
       body:JSON.stringify({evidencia_url:up.url,evidencia_nome:up.nome})
@@ -1276,7 +1276,7 @@ async function excluirRegistro(id){
       headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
     });
     // 3. Apaga o registro de treinamento
-    const res=await fetch(`${SUPA_URL}/rest/v1/funcionarios_treinamentos?id=eq.${id}&empresa_id=eq.${empresaId}`,{
+    const res=await fetch(`${SUPA_URL}/rest/v1/funcionario_treinamentos?id=eq.${id}&empresa_id=eq.${empresaId}`,{
       method:'DELETE',
       headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}
     });
