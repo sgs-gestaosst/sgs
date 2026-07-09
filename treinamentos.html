@@ -1300,8 +1300,8 @@ async function abrirModalAssinaturas(id){
   try{
     const inserts=[
       {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'funcionario',nome_signatario:func?.nome_completo||'Funcionário',cargo_signatario:funcao?.nome_funcao||null,cpf_signatario:func?.cpf||null},
-      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'instrutor',nome_signatario:r.instrutor||'Instrutor',cargo_signatario:'Instrutor Responsável',registro_profissional:r.registro_instrutor||null},
-      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'responsavel_tecnico',nome_signatario:empresa.nome_consultoria||empresa.nome_fantasia||empresa.razao_social||'Responsável Técnico',cargo_signatario:'Responsável Técnico SST',registro_profissional:empresa.registro_responsavel||null},
+      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'instrutor',nome_signatario:r.instrutor||'Instrutor',cargo_signatario:'Instrutor Responsável'},
+      {funcionario_treinamento_id:r.id,empresa_id:parseInt(empresaId),tipo:'responsavel_tecnico',nome_signatario:empresa.nome_consultoria||empresa.nome_fantasia||empresa.razao_social||'Responsável Técnico',cargo_signatario:'Responsável Técnico SST'},
     ];
     await Promise.all(inserts.map(ins=>fetch(`${SUPA_URL}/rest/v1/cert_assinaturas`,{
       method:'POST',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'resolution=ignore-duplicates,return=minimal'},
@@ -1314,16 +1314,6 @@ async function abrirModalAssinaturas(id){
     if(funcAss&&!funcAss.cpf_signatario&&func?.cpf){
       await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?id=eq.${funcAss.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=minimal'},body:JSON.stringify({cpf_signatario:func.cpf})});
       funcAss.cpf_signatario=func.cpf;
-    }
-    const instrAss=assinaturas.find(a=>a.tipo==='instrutor');
-    if(instrAss&&!instrAss.registro_profissional&&r.registro_instrutor){
-      await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?id=eq.${instrAss.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=minimal'},body:JSON.stringify({registro_profissional:r.registro_instrutor})});
-      instrAss.registro_profissional=r.registro_instrutor;
-    }
-    const respAss=assinaturas.find(a=>a.tipo==='responsavel_tecnico');
-    if(respAss&&!respAss.registro_profissional&&empresa.registro_responsavel){
-      await fetch(`${SUPA_URL}/rest/v1/cert_assinaturas?id=eq.${respAss.id}`,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=minimal'},body:JSON.stringify({registro_profissional:empresa.registro_responsavel})});
-      respAss.registro_profissional=empresa.registro_responsavel;
     }
     renderAssCards(assinaturas,r,func,cat);
   }catch(e){document.getElementById('ass-cards').innerHTML=`<div style="color:var(--danger);padding:12px;">Erro: ${escHtml(e.message)}</div>`;}
