@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title id="page-title">Treinamento Online — SGS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --accent:#FF6600;
+  --accent-l:#FFF0E6;
+  --bg:#F3F4F6;
+  --surface:#FFFFFF;
+  --text:#111827;
+  --text2:#6B7280;
+  --border:#E5E7EB;
+  --success:#10B981;
+  --danger:#EF4444;
+  --r:14px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--bg);min-height:100vh;color:var(--text);}
+
+/* ── screens ── */
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ── topbar ── */
+.bar{background:var(--accent);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.bar-logo{font-size:15px;font-weight:700;color:#fff;background:rgba(255,255,255,.2);padding:4px 10px;border-radius:6px;letter-spacing:.02em;}
+.bar-sub{font-size:13px;color:rgba(255,255,255,.85);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+
+/* ── progress ── */
+.prog-wrap{background:var(--border);height:5px;flex-shrink:0;}
+.prog-fill{height:100%;background:var(--accent);transition:width .35s;}
+
+/* ── card ── */
+.card{background:var(--surface);border-radius:var(--r);padding:22px 18px;margin:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);}
+
+/* ── buttons ── */
+.btn{border:none;border-radius:10px;cursor:pointer;font-family:inherit;font-weight:600;-webkit-tap-highlight-color:transparent;transition:opacity .12s,transform .1s;}
+.btn:active:not(:disabled){transform:scale(.97);}
+.btn:disabled{opacity:.4;cursor:default;}
+.btn-primary{background:var(--accent);color:#fff;font-size:17px;padding:16px;width:100%;display:block;}
+.btn-success{background:var(--success);color:#fff;font-size:17px;padding:16px;width:100%;display:block;}
+.btn-ghost{background:var(--bg);color:var(--text2);font-size:15px;padding:13px 18px;border:2px solid var(--border);flex:1;}
+.btn-tts{background:var(--accent-l);color:var(--accent);font-size:15px;padding:13px 18px;border:1.5px solid #FED7B0;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+
+/* ── nav row ── */
+.nav-row{display:flex;gap:10px;padding:0 14px 14px;flex-shrink:0;}
+
+/* ── slide ── */
+.slide-icon{font-size:52px;text-align:center;margin-bottom:14px;}
+.slide-title{font-size:21px;font-weight:700;text-align:center;margin-bottom:14px;line-height:1.3;}
+.slide-divider{border:none;border-top:1px solid var(--border);margin-bottom:16px;}
+.slide-text{font-size:17px;line-height:1.8;color:#374151;}
+.slide-counter{font-size:13px;color:var(--text2);text-align:center;padding:10px 0 4px;}
+
+/* ── questão ── */
+.q-text{font-size:17px;font-weight:600;line-height:1.55;margin-bottom:18px;color:var(--text);}
+.q-opt{display:flex;align-items:flex-start;gap:12px;background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,background .15s;-webkit-tap-highlight-color:transparent;}
+.q-opt.sel{border-color:var(--accent);background:var(--accent-l);}
+.q-opt.sel .q-let{background:var(--accent);color:#fff;}
+.q-opt.cor{border-color:var(--success);background:#F0FDF4;}
+.q-opt.cor .q-let{background:var(--success);color:#fff;}
+.q-opt.err{border-color:var(--danger);background:#FEF2F2;}
+.q-opt.err .q-let{background:var(--danger);color:#fff;}
+.q-let{width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--text2);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.q-label{font-size:16px;color:var(--text);line-height:1.5;}
+.q-counter{font-size:13px;color:var(--text2);text-align:center;padding:10px 0 4px;}
+
+/* ── info grid ── */
+.info-grid{background:var(--bg);border-radius:10px;padding:14px;margin-bottom:18px;}
+.info-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px;}
+.info-row:last-child{margin-bottom:0;}
+.info-val{font-weight:600;color:var(--text);}
+
+/* ── result ── */
+.res-icon{font-size:72px;text-align:center;margin:8px 0 12px;}
+.res-title{font-size:26px;font-weight:700;text-align:center;margin-bottom:6px;}
+.res-score{font-size:52px;font-weight:700;text-align:center;margin:6px 0 4px;}
+.res-msg{font-size:15px;text-align:center;color:var(--text2);line-height:1.65;margin-bottom:20px;}
+
+/* ── loading ── */
+.loader{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.spin{width:44px;height:44px;border-radius:50%;border:4px solid var(--border);border-top-color:var(--accent);animation:sp .8s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* ── done badge ── */
+.done-score{font-size:40px;font-weight:700;color:var(--accent);text-align:center;margin:8px 0;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="screen active" id="screen-loading">
+  <div class="bar"><span class="bar-logo">SGS</span></div>
+  <div class="loader"><div class="spin"></div><span style="color:var(--text2);font-size:15px;">Carregando treinamento...</span></div>
+</div>
+
+<!-- ERRO -->
+<div class="screen" id="screen-erro">
+  <div class="bar"><span class="bar-logo">SGS</span></div>
+  <div class="card" style="margin-top:40px;text-align:center;">
+    <div style="font-size:56px;margin-bottom:14px;">⚠️</div>
+    <div style="font-size:19px;font-weight:700;margin-bottom:8px;">Link inválido</div>
+    <div id="erro-msg" style="font-size:15px;color:var(--text2);line-height:1.6;"></div>
+  </div>
+</div>
+
+<!-- WELCOME -->
+<div class="screen" id="screen-welcome">
+  <div class="bar"><span class="bar-logo">SGS</span><span class="bar-sub">Treinamento Online</span></div>
+  <div class="card" style="margin-top:16px;flex:1;overflow-y:auto;">
+    <div style="font-size:48px;text-align:center;margin-bottom:10px;">🎓</div>
+    <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);text-align:center;margin-bottom:6px;" id="w-nr"></div>
+    <div style="font-size:22px;font-weight:700;text-align:center;line-height:1.3;margin-bottom:20px;" id="w-nome"></div>
+    <div class="info-grid">
+      <div class="info-row"><span style="color:var(--text2);">Trabalhador</span><span class="info-val" id="w-func"></span></div>
+      <div class="info-row"><span style="color:var(--text2);">Carga horária</span><span class="info-val" id="w-carga"></span></div>
+      <div class="info-row"><span style="color:var(--text2);">Módulos</span><span class="info-val" id="w-mods"></span></div>
+      <div class="info-row"><span style="color:var(--text2);">Aprovação mínima</span><span class="info-val" style="color:var(--accent);">70%</span></div>
+    </div>
+    <p style="font-size:14px;color:var(--text2);text-align:center;line-height:1.7;margin-bottom:22px;">
+      Assista todos os módulos e responda a avaliação ao final.<br>
+      Você pode pausar e retomar quando quiser.
+    </p>
+    <button class="btn btn-primary" id="btn-iniciar" onclick="iniciarTreinamento()">▶&nbsp; Iniciar treinamento</button>
+  </div>
+</div>
+
+<!-- SLIDES -->
+<div class="screen" id="screen-slides">
+  <div class="bar"><span class="bar-logo">SGS</span><span class="bar-sub" id="s-bar-sub"></span></div>
+  <div class="prog-wrap"><div class="prog-fill" id="s-prog" style="width:0%"></div></div>
+  <div class="slide-counter" id="s-counter"></div>
+  <div class="card" style="flex:1;overflow-y:auto;">
+    <div class="slide-icon" id="s-icon"></div>
+    <div class="slide-title" id="s-title"></div>
+    <hr class="slide-divider">
+    <div class="slide-text" id="s-text"></div>
+  </div>
+  <div style="padding:10px 14px 4px;flex-shrink:0;">
+    <button class="btn btn-tts" id="btn-tts" onclick="lerSlide()">🔊&nbsp; Ouvir este módulo</button>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" id="btn-prev" onclick="slideAnterior()" disabled>← Anterior</button>
+    <button class="btn btn-ghost" id="btn-next" onclick="proximoSlide()">Próximo →</button>
+  </div>
+</div>
+
+<!-- PRÉ-PROVA -->
+<div class="screen" id="screen-pre">
+  <div class="bar"><span class="bar-logo">SGS</span></div>
+  <div class="card" style="margin-top:40px;text-align:center;">
+    <div style="font-size:56px;margin-bottom:14px;">📝</div>
+    <div style="font-size:22px;font-weight:700;margin-bottom:10px;">Módulos concluídos!</div>
+    <p style="font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:20px;">
+      Agora responda a avaliação.<br>
+      Você pode tentar quantas vezes precisar.
+    </p>
+    <div class="info-grid" style="text-align:left;margin-bottom:20px;">
+      <div class="info-row"><span style="color:var(--text2);">Questões</span><span class="info-val" id="pre-qtd"></span></div>
+      <div class="info-row"><span style="color:var(--text2);">Aprovação mínima</span><span class="info-val" style="color:var(--accent);">70%</span></div>
+    </div>
+    <button class="btn btn-primary" onclick="iniciarProva()">📝&nbsp; Iniciar avaliação</button>
+  </div>
+</div>
+
+<!-- PROVA -->
+<div class="screen" id="screen-exam">
+  <div class="bar"><span class="bar-logo">SGS</span><span class="bar-sub">Avaliação</span></div>
+  <div class="prog-wrap"><div class="prog-fill" id="q-prog" style="width:0%"></div></div>
+  <div class="q-counter" id="q-counter" style="font-size:13px;color:var(--text2);text-align:center;padding:10px 0 4px;"></div>
+  <div class="card" style="flex:1;overflow-y:auto;">
+    <div class="q-text" id="q-texto"></div>
+    <div id="q-opcoes"></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn btn-ghost" id="q-btn-prev" onclick="qAnterior()" disabled>← Anterior</button>
+    <button class="btn btn-ghost" id="q-btn-next" onclick="qProximo()">Próximo →</button>
+  </div>
+  <div style="padding:0 14px 14px;flex-shrink:0;display:none;" id="div-enviar">
+    <button class="btn btn-success" id="btn-enviar" onclick="submeterProva()" disabled>✅&nbsp; Enviar avaliação</button>
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div class="screen" id="screen-result">
+  <div class="bar"><span class="bar-logo">SGS</span></div>
+  <div class="card" style="margin-top:20px;flex:1;overflow-y:auto;">
+    <div class="res-icon" id="res-icon"></div>
+    <div class="res-title" id="res-title"></div>
+    <div class="res-score" id="res-score"></div>
+    <p class="res-msg" id="res-msg"></p>
+    <div id="res-acao"></div>
+  </div>
+</div>
+
+<!-- JÁ CONCLUÍDO -->
+<div class="screen" id="screen-done">
+  <div class="bar"><span class="bar-logo">SGS</span></div>
+  <div class="card" style="margin-top:40px;text-align:center;">
+    <div style="font-size:64px;margin-bottom:14px;">🏆</div>
+    <div style="font-size:22px;font-weight:700;margin-bottom:8px;">Treinamento concluído!</div>
+    <p style="font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:20px;" id="done-msg"></p>
+    <div class="info-grid">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:4px;">Sua nota</div>
+      <div class="done-score" id="done-nota"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://ookqdukeulwcnhilbgbo.supabase.co';
+const SUPA_KEY='sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e';
+const H={'apikey':SUPA_KEY,'Content-Type':'application/json'};
+
+const TOKEN=new URLSearchParams(location.search).get('token');
+let part=null,turma=null,cat=null,slides=[],questoes=[];
+let sIdx=0,qIdx=0,respostas={};
+
+// ── utilitários ──────────────────────────────────────
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function showErro(msg){
+  document.getElementById('erro-msg').textContent=msg;
+  showScreen('erro');
+}
+
+async function api(path,method='GET',body){
+  const opts={method,headers:H};
+  if(body)opts.body=JSON.stringify(body);
+  if(method==='POST')opts.headers={...H,'Prefer':'return=representation'};
+  const r=await fetch(SUPA_URL+path,opts);
+  if(!r.ok&&method!=='PATCH'){const e=await r.json();throw new Error(e.message||'Erro na API');}
+  return method==='PATCH'?null:r.json();
+}
+
+function calcVencimento(data,periodo){
+  if(!data||!periodo)return null;
+  const d=new Date(data+'T12:00:00');
+  ({Anual:()=>d.setFullYear(d.getFullYear()+1),Bienal:()=>d.setFullYear(d.getFullYear()+2),Trienal:()=>d.setFullYear(d.getFullYear()+3),Quadrienal:()=>d.setFullYear(d.getFullYear()+4),Quinquenal:()=>d.setFullYear(d.getFullYear()+5)}[periodo]||function(){d.setFullYear(d.getFullYear()+2)})();
+  return d.toISOString().split('T')[0];
+}
+
+// ── init ─────────────────────────────────────────────
+
+async function init(){
+  if(!TOKEN){showErro('Link inválido. Solicite um novo link ao seu responsável.');return;}
+  try{
+    const d=await api(`/rest/v1/turma_virtual_participantes?token_acesso=eq.${TOKEN}&select=*,turma:turmas_virtuais(*,catalogo:catalogo_treinamentos(*))`);
+    if(!d.length){showErro('Link não encontrado ou expirado. Solicite um novo ao seu responsável.');return;}
+    part=d[0];turma=part.turma;cat=turma.catalogo;
+
+    if(turma.status==='encerrada'){showErro('Esta turma foi encerrada. Fale com seu responsável.');return;}
+
+    if(['aprovado','teoria_aprovada'].includes(part.status)){
+      document.getElementById('done-msg').textContent=`Parabéns, ${part.nome_funcionario||'trabalhador'}! Você completou o treinamento "${cat.nome}".`;
+      document.getElementById('done-nota').textContent=(part.nota_final||0)+'%';
+      showScreen('done');return;
+    }
+
+    const [sd,qd]=await Promise.all([
+      api(`/rest/v1/treinamentos_ead?treinamento_id=eq.${cat.id}&select=slides`),
+      api(`/rest/v1/questoes_ead?treinamento_id=eq.${cat.id}&ativo=eq.true&order=ordem.asc`)
+    ]);
+    slides=(sd[0]?.slides)||[];questoes=qd;
+    if(!slides.length){showErro('Conteúdo não disponível. Contate o responsável.');return;}
+
+    // Welcome
+    document.getElementById('page-title').textContent=cat.nome+' — SGS';
+    document.getElementById('w-nr').textContent=cat.nr_relacionada||'Treinamento';
+    document.getElementById('w-nome').textContent=cat.nome;
+    document.getElementById('w-func').textContent=part.nome_funcionario||'Trabalhador';
+    document.getElementById('w-carga').textContent=(cat.carga_horaria_inicial||8)+'h';
+    document.getElementById('w-mods').textContent=slides.length+' módulos';
+
+    if(part.status==='em_progresso'&&(part.slide_atual||0)>0){
+      sIdx=Math.min(part.slide_atual,slides.length-1);
+      document.getElementById('btn-iniciar').textContent='▶  Continuar de onde parei';
+    }
+    showScreen('welcome');
+  }catch(e){showErro('Erro ao carregar: '+e.message);}
+}
+
+// ── slides ────────────────────────────────────────────
+
+async function iniciarTreinamento(){
+  await api(`/rest/v1/turma_virtual_participantes?token_acesso=eq.${TOKEN}`,'PATCH',{status:'em_progresso',slide_atual:sIdx});
+  renderSlide();showScreen('slides');
+}
+
+function renderSlide(){
+  const s=slides[sIdx];
+  document.getElementById('s-icon').textContent=s.icone||'📖';
+  document.getElementById('s-title').textContent=s.titulo;
+  document.getElementById('s-text').textContent=s.texto;
+  document.getElementById('s-bar-sub').textContent=cat.nome;
+  const pct=Math.round((sIdx+1)/slides.length*100);
+  document.getElementById('s-prog').style.width=pct+'%';
+  document.getElementById('s-counter').textContent=`Módulo ${sIdx+1} de ${slides.length}`;
+  document.getElementById('btn-prev').disabled=sIdx===0;
+  document.getElementById('btn-next').textContent=sIdx===slides.length-1?'Ir para a avaliação →':'Próximo →';
+  pararFala();
+}
+
+async function proximoSlide(){
+  pararFala();
+  if(sIdx===slides.length-1){
+    await api(`/rest/v1/turma_virtual_participantes?token_acesso=eq.${TOKEN}`,'PATCH',{slide_atual:sIdx});
+    document.getElementById('pre-qtd').textContent=questoes.length;
+    showScreen('pre');return;
+  }
+  sIdx++;
+  await api(`/rest/v1/turma_virtual_participantes?token_acesso=eq.${TOKEN}`,'PATCH',{slide_atual:sIdx});
+  renderSlide();window.scrollTo(0,0);
+}
+
+function slideAnterior(){pararFala();if(sIdx>0){sIdx--;renderSlide();}}
+
+// TTS
+function lerSlide(){
+  pararFala();
+  if(!('speechSynthesis' in window)){alert('Seu dispositivo não suporta narração de voz. Leia o conteúdo na tela.');return;}
+  const s=slides[sIdx];
+  const u=new SpeechSynthesisUtterance(s.titulo+'. '+s.texto);
+  u.lang='pt-BR';u.rate=0.92;u.pitch=1.05;
+  u.onend=()=>{const b=document.getElementById('btn-tts');if(b){b.textContent='🔊  Ouvir este módulo';b.onclick=lerSlide;}};
+  window.speechSynthesis.speak(u);
+  const b=document.getElementById('btn-tts');
+  b.textContent='⏹  Parar narração';b.onclick=pararFala;
+}
+
+function pararFala(){
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  const b=document.getElementById('btn-tts');
+  if(b){b.textContent='🔊  Ouvir este módulo';b.onclick=lerSlide;}
+}
+
+// ── prova ─────────────────────────────────────────────
+
+function iniciarProva(){respostas={};qIdx=0;renderQuestao();showScreen('exam');}
+
+function renderQuestao(){
+  const q=questoes[qIdx];
+  const pct=Math.round((qIdx+1)/questoes.length*100);
+  document.getElementById('q-prog').style.width=pct+'%';
+  document.getElementById('q-counter').textContent=`Questão ${qIdx+1} de ${questoes.length}`;
+  document.getElementById('q-texto').textContent=q.pergunta;
+  const ops=['a','b','c','d'];
+  const labels={a:q.opcao_a,b:q.opcao_b,c:q.opcao_c,d:q.opcao_d};
+  document.getElementById('q-opcoes').innerHTML=ops.map(op=>`
+    <div class="q-opt${respostas[q.id]===op?' sel':''}" onclick="selecionarOp('${op}',this,${q.id})">
+      <span class="q-let">${op.toUpperCase()}</span>
+      <span class="q-label">${labels[op]}</span>
+    </div>`).join('');
+  const isLast=qIdx===questoes.length-1;
+  document.getElementById('q-btn-prev').disabled=qIdx===0;
+  document.getElementById('q-btn-next').style.display=isLast?'none':'';
+  document.getElementById('div-enviar').style.display=isLast?'block':'none';
+  if(isLast){
+    const faltam=questoes.filter(q=>!respostas[q.id]).length;
+    document.getElementById('btn-enviar').disabled=faltam>0;
+  }
+}
+
+function selecionarOp(op,el,qId){
+  respostas[qId]=op;
+  document.querySelectorAll('.q-opt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  if(qIdx===questoes.length-1){
+    const faltam=questoes.filter(q=>!respostas[q.id]).length;
+    document.getElementById('btn-enviar').disabled=faltam>0;
+  }
+}
+
+function qProximo(){if(qIdx<questoes.length-1){qIdx++;renderQuestao();window.scrollTo(0,0);}}
+function qAnterior(){if(qIdx>0){qIdx--;renderQuestao();window.scrollTo(0,0);}}
+
+async function submeterProva(){
+  const nResp=Object.keys(respostas).length;
+  if(nResp<questoes.length){alert(`Você ainda tem ${questoes.length-nResp} questão(ões) sem resposta.`);return;}
+  document.getElementById('btn-enviar').disabled=true;
+  document.getElementById('btn-enviar').textContent='Calculando...';
+  let acertos=0;
+  questoes.forEach(q=>{if(respostas[q.id]===q.resposta_correta)acertos++;});
+  const nota=Math.round(acertos/questoes.length*100);
+  const aprovado=nota>=70;
+  const tentativas=(part.tentativas||0)+1;
+  try{
+    if(aprovado)await registrarAprovacao(nota,tentativas);
+    else await api(`/rest/v1/turma_virtual_participantes?token_acesso=eq.${TOKEN}`,'PATCH',{nota_final:nota,tentativas,status:'reprovado'});
+    mostrarResultado(aprovado,nota,acertos);
+  }catch(e){
+    alert('Erro ao salvar resultado: '+e.message);
+    document.getElementById('btn-enviar').disabled=false;
+    document.getElementById('btn-enviar').textContent='✅  Enviar avaliação';
+  }
+}
+
+async function registrarAprovacao(nota,tentativas){
+  const hoje=new Date().toISOString().split('T')[0];
+  const agora=new Date().toISOString();
+  const venc=calcVencimento(hoje,cat.periodicidade_reciclagem);
+
+  await api(`/rest/v1/turma_virtual_participantes?token_acesso=eq.${TOKEN}`,'PATCH',{
+    status:cat.exige_pratica?'aguardando_pratica':'aprovado',
+    nota_final:nota,tentativas,
+    data_teoria_conclusao:agora,
+    data_conclusao:cat.exige_pratica?null:agora
+  });
+
+  if(cat.exige_pratica)return;
+
+  // Cria funcionario_treinamentos
+  const [ft]=await api('/rest/v1/funcionario_treinamentos','POST',{
+    funcionario_id:part.funcionario_id,
+    treinamento_id:cat.id,
+    empresa_id:part.empresa_id,
+    funcao_id:part.funcao_id||null,
+    tipo:'Inicial',
+    modalidade:'EAD',
+    data_realizacao:hoje,
+    data_vencimento:venc,
+    data_teoria:hoje,
+    turma_virtual_id:turma.id,
+    instrutor:turma.instrutor||null,
+    registro_instrutor:turma.registro_instrutor||null,
+    nome_responsavel:turma.nome_responsavel||null,
+    registro_responsavel:turma.registro_responsavel||null,
+    status:'Válido',
+    ativo:true
+  });
+
+  // Cria cert_assinaturas (todas pré-aceitas)
+  await api('/rest/v1/cert_assinaturas','POST',[
+    {funcionario_treinamento_id:ft.id,empresa_id:part.empresa_id,tipo:'funcionario',
+     nome_signatario:part.nome_funcionario||'Participante',cpf_signatario:part.cpf_funcionario||null,
+     cargo_signatario:'Treinando / Participante',token:crypto.randomUUID(),aceito:true,aceito_em:agora},
+    {funcionario_treinamento_id:ft.id,empresa_id:part.empresa_id,tipo:'instrutor',
+     nome_signatario:turma.instrutor||'Instrutor',cargo_signatario:'Instrutor Responsável',
+     registro_profissional:turma.registro_instrutor||null,token:crypto.randomUUID(),aceito:true,aceito_em:agora},
+    {funcionario_treinamento_id:ft.id,empresa_id:part.empresa_id,tipo:'responsavel_tecnico',
+     nome_signatario:turma.nome_responsavel||'Responsável Técnico',cargo_signatario:'Responsável Técnico SST',
+     registro_profissional:turma.registro_responsavel||null,token:crypto.randomUUID(),aceito:true,aceito_em:agora}
+  ]);
+}
+
+function mostrarResultado(aprovado,nota,acertos){
+  document.getElementById('res-icon').textContent=aprovado?'🎉':'📋';
+  document.getElementById('res-title').textContent=aprovado?'Aprovado!':'Não foi dessa vez';
+  document.getElementById('res-score').textContent=nota+'%';
+  document.getElementById('res-score').style.color=aprovado?'var(--success)':'var(--danger)';
+  document.getElementById('res-msg').textContent=aprovado
+    ?`Você acertou ${acertos} de ${questoes.length} questões. Seu certificado já está registrado no sistema!`
+    :`Você acertou ${acertos} de ${questoes.length} questões. São necessários 70% para aprovação. Não desanime, você pode tentar novamente!`;
+  document.getElementById('res-acao').innerHTML=aprovado
+    ?`<div style="background:var(--bg);border-radius:10px;padding:14px;font-size:14px;color:var(--text2);text-align:center;line-height:1.6;">O certificado já está disponível no sistema SGS.<br>Seu responsável pode emiti-lo a qualquer momento.</div>`
+    :`<button class="btn btn-primary" style="margin-top:4px;" onclick="tentarNovamente()">🔄&nbsp; Tentar novamente</button>`;
+  showScreen('result');
+}
+
+function tentarNovamente(){
+  document.getElementById('pre-qtd').textContent=questoes.length;
+  showScreen('pre');
+}
+
+init();
+</script>
+</body>
+</html>
