@@ -52,8 +52,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
 .slide-icon{font-size:52px;text-align:center;margin-bottom:14px;}
 .slide-title{font-size:21px;font-weight:700;text-align:center;margin-bottom:14px;line-height:1.3;}
 .slide-divider{border:none;border-top:1px solid var(--border);margin-bottom:16px;}
-.slide-text{font-size:17px;line-height:1.8;color:#374151;}
+.slide-text{font-size:16px;line-height:1.75;color:#374151;}
 .slide-counter{font-size:13px;color:var(--text2);text-align:center;padding:10px 0 4px;}
+
+/* ── slide rich content ── */
+.slide-destaque{background:#FFF7ED;border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 14px;font-size:14px;font-weight:600;color:#7C2D12;margin:12px 0 0;line-height:1.5;}
+.slide-label-items{font-size:13px;font-weight:600;color:var(--text2);margin:12px 0 4px;}
+.slide-items{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.slide-item{display:flex;align-items:flex-start;gap:12px;background:var(--bg);border-radius:10px;padding:11px 14px;}
+.slide-item-icon{font-size:20px;flex-shrink:0;line-height:1.3;}
+.slide-item-text{font-size:15px;color:var(--text);line-height:1.5;padding-top:2px;}
+.slide-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.slide-card{border-radius:10px;padding:12px 10px;text-align:center;}
+.slide-card-icon{font-size:26px;margin-bottom:5px;}
+.slide-card-titulo{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#555;margin-bottom:4px;}
+.slide-card-text{font-size:12px;color:#374151;line-height:1.5;}
+
+/* ── rate buttons ── */
+.rate-row{display:flex;gap:6px;justify-content:center;padding:8px 14px 4px;flex-shrink:0;}
+.rate-btn{flex:1;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);font-size:13px;font-weight:600;padding:8px 4px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all .12s;-webkit-tap-highlight-color:transparent;}
+.rate-btn.rate-active{border-color:var(--accent);background:var(--accent-l);color:var(--accent);}
 
 /* ── questão ── */
 .q-text{font-size:17px;font-weight:600;line-height:1.55;margin-bottom:18px;color:var(--text);}
@@ -139,7 +157,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;ba
     <hr class="slide-divider">
     <div class="slide-text" id="s-text"></div>
   </div>
-  <div style="padding:10px 14px 4px;flex-shrink:0;">
+  <div class="rate-row">
+    <button class="rate-btn" data-rate="0.7" onclick="setRate(0.7)">🐢 Lento</button>
+    <button class="rate-btn rate-active" data-rate="0.95" onclick="setRate(0.95)">▶ Normal</button>
+    <button class="rate-btn" data-rate="1.3" onclick="setRate(1.3)">⚡ Rápido</button>
+  </div>
+  <div style="padding:4px 14px 4px;flex-shrink:0;">
     <button class="btn btn-tts" id="btn-tts" onclick="lerSlide()">🔊&nbsp; Ouvir este módulo</button>
   </div>
   <div class="nav-row">
@@ -217,7 +240,7 @@ const H={'apikey':SUPA_KEY,'Content-Type':'application/json'};
 
 const TOKEN=new URLSearchParams(location.search).get('token');
 let part=null,turma=null,cat=null,slides=[],questoes=[];
-let sIdx=0,qIdx=0,respostas={};
+let sIdx=0,qIdx=0,respostas={},ttsRate=0.95;
 
 // ── utilitários ──────────────────────────────────────
 
@@ -295,11 +318,37 @@ async function iniciarTreinamento(){
   renderSlide();showScreen('slides');
 }
 
+function renderSlideContent(s){
+  let h='';
+  if(s.texto)h+=`<p class="slide-text">${s.texto}</p>`;
+  if(s.destaque)h+=`<div class="slide-destaque">💡 ${s.destaque}</div>`;
+  if(s.label_items)h+=`<div class="slide-label-items">${s.label_items}</div>`;
+  if(s.items&&s.items.length){
+    const hasCor=s.items.some(i=>i.cor);
+    const hasTitulo=s.items.some(i=>i.titulo);
+    if(hasCor&&hasTitulo){
+      h+=`<div class="slide-cards">${s.items.map(i=>`
+        <div class="slide-card" style="background:${i.cor||'var(--bg)'}">
+          <div class="slide-card-icon">${i.icone}</div>
+          <div class="slide-card-titulo">${i.titulo||''}</div>
+          <div class="slide-card-text">${i.texto}</div>
+        </div>`).join('')}</div>`;
+    }else{
+      h+=`<div class="slide-items">${s.items.map(i=>`
+        <div class="slide-item">
+          <span class="slide-item-icon">${i.icone}</span>
+          <span class="slide-item-text">${i.texto}</span>
+        </div>`).join('')}</div>`;
+    }
+  }
+  return h;
+}
+
 function renderSlide(){
   const s=slides[sIdx];
   document.getElementById('s-icon').textContent=s.icone||'📖';
   document.getElementById('s-title').textContent=s.titulo;
-  document.getElementById('s-text').textContent=s.texto;
+  document.getElementById('s-text').innerHTML=renderSlideContent(s);
   document.getElementById('s-bar-sub').textContent=cat.nome;
   const pct=Math.round((sIdx+1)/slides.length*100);
   document.getElementById('s-prog').style.width=pct+'%';
@@ -324,12 +373,24 @@ async function proximoSlide(){
 function slideAnterior(){pararFala();if(sIdx>0){sIdx--;renderSlide();}}
 
 // TTS
+function setRate(r){
+  ttsRate=r;
+  document.querySelectorAll('.rate-btn').forEach(b=>{
+    b.classList.toggle('rate-active',parseFloat(b.dataset.rate)===r);
+  });
+}
+
 function lerSlide(){
   pararFala();
   if(!('speechSynthesis' in window)){alert('Seu dispositivo não suporta narração de voz. Leia o conteúdo na tela.');return;}
   const s=slides[sIdx];
-  const u=new SpeechSynthesisUtterance(s.titulo+'. '+s.texto);
-  u.lang='pt-BR';u.rate=0.92;u.pitch=1.05;
+  let txt=s.titulo+'. ';
+  if(s.texto)txt+=s.texto+'. ';
+  if(s.destaque)txt+=s.destaque+'. ';
+  if(s.label_items)txt+=s.label_items+' ';
+  if(s.items)txt+=s.items.map(i=>(i.titulo?i.titulo+': ':'')+i.texto).join('. ');
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang='pt-BR';u.rate=ttsRate;u.pitch=1.05;
   u.onend=()=>{const b=document.getElementById('btn-tts');if(b){b.textContent='🔊  Ouvir este módulo';b.onclick=lerSlide;}};
   window.speechSynthesis.speak(u);
   const b=document.getElementById('btn-tts');
