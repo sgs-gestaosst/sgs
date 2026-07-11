@@ -126,6 +126,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <button class="btn btn-edit" onclick="abrirModalCatalogo()">📚 Catálogo</button>
       <button class="btn btn-edit" onclick="abrirModalFuncaoTreinamento()">🔗 Vincular à função</button>
       <button class="btn btn-edit" onclick="abrirModalListaPresenca()">📋 Lista de presença</button>
+      <button class="btn btn-edit" onclick="abrirModalTurmaEAD()">🎓 Turma EAD</button>
       <button class="btn btn-secondary" onclick="abrirModalTurma()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);">👥 Registrar turma</button>
       <button class="btn btn-primary" onclick="abrirModalRegistro()">+ Registrar treinamento</button>
     </div>
@@ -474,6 +475,83 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <span class="spinner" id="spinner-vf"></span>
         Vincular
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TURMA EAD -->
+<div class="modal-overlay" id="modal-turma-ead">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-titulo">
+      <span>🎓 Criar Turma EAD</span>
+      <button onclick="fecharModalTurmaEAD()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div class="modal-grid">
+      <div class="modal-field full">
+        <label>Treinamento EAD</label>
+        <select id="ead-treinamento"><option value="">— Selecione —</option></select>
+      </div>
+      <div class="modal-field">
+        <label>Instrutor responsável</label>
+        <input type="text" id="ead-instrutor" placeholder="Nome do instrutor">
+      </div>
+      <div class="modal-field">
+        <label>Registro profissional do instrutor</label>
+        <input type="text" id="ead-registro-instrutor" placeholder="Ex: CREA 123456/SP">
+      </div>
+      <div class="modal-field">
+        <label>Nome do responsável técnico</label>
+        <input type="text" id="ead-nome-responsavel" placeholder="Nome do responsável técnico">
+      </div>
+      <div class="modal-field">
+        <label>Registro profissional do resp. técnico</label>
+        <input type="text" id="ead-registro-responsavel" placeholder="Ex: CREA 654321/SP">
+      </div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-top:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">PARTICIPANTES <span id="ead-count-badge" style="color:var(--accent);"></span></span>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <select id="ead-filtro-setor" onchange="filtrarFuncsEAD()" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:5px 8px;outline:none;">
+            <option value="">Todos os setores</option>
+          </select>
+          <input type="text" id="ead-busca-func" oninput="filtrarFuncsEAD()" placeholder="Buscar funcionário..." style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:12px;padding:5px 10px;outline:none;width:180px;">
+          <button onclick="toggleTodosEAD(true)" style="font-size:11px;padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;">✓ Todos</button>
+          <button onclick="toggleTodosEAD(false)" style="font-size:11px;padding:4px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text2);cursor:pointer;">✕ Nenhum</button>
+        </div>
+      </div>
+      <div id="ead-lista-funcs" style="max-height:220px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:4px;"></div>
+    </div>
+    <div class="status-bar" id="status-ead"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px;">
+      <button class="btn btn-cancel" onclick="fecharModalTurmaEAD()">Cancelar</button>
+      <button class="btn btn-save" id="btn-salvar-ead" onclick="salvarTurmaEAD()">
+        <span class="spinner" id="spinner-ead"></span>
+        <span id="label-ead">🎓 Criar turma e gerar links</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LINKS EAD -->
+<div class="modal-overlay" id="modal-ead-links">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-titulo">
+      <span>🔗 Links de acesso gerados</span>
+      <button onclick="fecharModalLinksEAD()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;">×</button>
+    </div>
+    <div style="padding:10px 0 14px;">
+      <div style="font-size:13px;font-weight:500;" id="ead-links-titulo"></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px;">Código da turma: <span id="ead-links-codigo" style="font-family:monospace;color:var(--accent);"></span></div>
+    </div>
+    <div style="background:var(--bg);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.6;">
+      Envie o link individual para cada trabalhador via WhatsApp, e-mail ou QR Code.<br>
+      O trabalhador não precisa ter login no SGS.
+    </div>
+    <div id="ead-links-lista" style="max-height:380px;overflow-y:auto;"></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;margin-top:18px;">
+      <button id="btn-copiar-todos" class="btn btn-edit" onclick="copiarTodosLinks()">📋 Copiar todos os links</button>
+      <button class="btn btn-primary" onclick="fecharModalLinksEAD()">Fechar</button>
     </div>
   </div>
 </div>
@@ -1932,7 +2010,7 @@ async function removerVinculoFuncao(id){
 }
 
 // Fecha modais ao clicar fora
-['modal-registro','modal-catalogo','modal-novo-trei','modal-funcao-trei','modal-detalhes','modal-turma'].forEach(id=>{
+['modal-registro','modal-catalogo','modal-novo-trei','modal-funcao-trei','modal-detalhes','modal-turma','modal-turma-ead','modal-ead-links'].forEach(id=>{
   document.getElementById(id)?.addEventListener('click',e=>{
     if(e.target.id===id)document.getElementById(id).classList.remove('show');
   });
@@ -1944,6 +2022,140 @@ async function atualizarSugestoesComTreinamentos(){
 }
 
 inicializar();
+
+// ── TURMA EAD ─────────────────────────────────────────
+
+async function abrirModalTurmaEAD(){
+  setStatus('status-ead','info','Carregando treinamentos EAD...');
+  document.getElementById('modal-turma-ead').classList.add('show');
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/treinamentos_ead?ativo=eq.true&select=treinamento_id`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${token}`}});
+    const ead=await r.json();
+    const eadIds=new Set(ead.map(e=>e.treinamento_id));
+    const eadCat=catalogo.filter(c=>eadIds.has(c.id));
+    const sel=document.getElementById('ead-treinamento');
+    sel.innerHTML='<option value="">— Selecione —</option>'+eadCat.map(c=>`<option value="${c.id}">${escHtml(c.nome)}</option>`).join('');
+    ['ead-instrutor','ead-registro-instrutor','ead-nome-responsavel','ead-registro-responsavel'].forEach(id=>document.getElementById(id).value='');
+    const filtro=document.getElementById('ead-filtro-setor');
+    filtro.innerHTML='<option value="">Todos os setores</option>'+setores.map(s=>`<option value="${s.id}">${escHtml(s.nome_setor)}</option>`).join('');
+    document.getElementById('ead-busca-func').value='';
+    renderParticipantesEAD(funcionarios);
+    atualizarCountEAD();
+    clearStatus('status-ead');
+  }catch(e){setStatus('status-ead','error',e.message);}
+}
+
+function fecharModalTurmaEAD(){document.getElementById('modal-turma-ead').classList.remove('show');}
+
+function renderParticipantesEAD(lista){
+  const c=document.getElementById('ead-lista-funcs');
+  if(!lista.length){c.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text2);font-size:13px;">Nenhum funcionário encontrado</div>';return;}
+  c.innerHTML=lista.map(f=>{
+    const s=setores.find(s=>s.id===f.setor_id);
+    return`<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;font-size:12px;">
+      <input type="checkbox" class="ead-check" value="${f.id}" onchange="atualizarCountEAD()" style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(f.nome_completo)}</div>
+        <div style="font-size:10px;color:var(--text3);">${escHtml(s?.nome_setor||'—')}</div>
+      </div>
+    </label>`;
+  }).join('');
+}
+
+function filtrarFuncsEAD(){
+  const setorId=document.getElementById('ead-filtro-setor').value;
+  const busca=document.getElementById('ead-busca-func').value.toLowerCase().trim();
+  let lista=funcionarios;
+  if(setorId)lista=lista.filter(f=>String(f.setor_id)===String(setorId));
+  if(busca)lista=lista.filter(f=>f.nome_completo.toLowerCase().includes(busca));
+  renderParticipantesEAD(lista);
+}
+
+function atualizarCountEAD(){
+  const n=document.querySelectorAll('.ead-check:checked').length;
+  document.getElementById('ead-count-badge').textContent=n>0?`(${n} selecionado${n>1?'s':''})`:'';}
+
+function toggleTodosEAD(m){document.querySelectorAll('.ead-check').forEach(cb=>cb.checked=m);atualizarCountEAD();}
+
+async function salvarTurmaEAD(){
+  const tId=parseInt(document.getElementById('ead-treinamento').value);
+  if(!tId){alert('Selecione o treinamento.');return;}
+  const selecionados=[...document.querySelectorAll('.ead-check:checked')].map(cb=>parseInt(cb.value));
+  if(!selecionados.length){alert('Selecione pelo menos um participante.');return;}
+  document.getElementById('btn-salvar-ead').disabled=true;
+  document.getElementById('spinner-ead').className='spinner show';
+  document.getElementById('label-ead').textContent='Criando...';
+  setStatus('status-ead','info','Criando turma EAD...');
+  try{
+    const now=new Date();
+    const pad=n=>String(n).padStart(2,'0');
+    const codigo=`TE${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+    const rT=await fetch(`${SUPA_URL}/rest/v1/turmas_virtuais`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify({empresa_id:parseInt(empresaId),treinamento_id:tId,codigo_turma:codigo,
+        instrutor:document.getElementById('ead-instrutor').value.trim()||null,
+        registro_instrutor:document.getElementById('ead-registro-instrutor').value.trim()||null,
+        nome_responsavel:document.getElementById('ead-nome-responsavel').value.trim()||null,
+        registro_responsavel:document.getElementById('ead-registro-responsavel').value.trim()||null,
+        status:'ativa',ativo:true})
+    });
+    if(!rT.ok){const e=await rT.json();throw new Error(e.message||'Erro ao criar turma');}
+    const [turma]=await rT.json();
+    const payload=selecionados.map(fId=>{
+      const f=funcionarios.find(fn=>fn.id===fId);
+      return{turma_virtual_id:turma.id,funcionario_id:fId,empresa_id:parseInt(empresaId),
+        nome_funcionario:f?.nome_completo||null,cpf_funcionario:f?.cpf||null,funcao_id:f?.funcao_id||null,status:'pendente'};
+    });
+    const rP=await fetch(`${SUPA_URL}/rest/v1/turma_virtual_participantes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':`Bearer ${token}`,'Prefer':'return=representation'},
+      body:JSON.stringify(payload)
+    });
+    if(!rP.ok){const e=await rP.json();throw new Error(e.message||'Erro ao adicionar participantes');}
+    const participantes=await rP.json();
+    fecharModalTurmaEAD();
+    abrirModalLinksEAD(turma,participantes);
+  }catch(e){setStatus('status-ead','error',e.message);
+  }finally{
+    document.getElementById('btn-salvar-ead').disabled=false;
+    document.getElementById('spinner-ead').className='spinner';
+    document.getElementById('label-ead').textContent='🎓 Criar turma e gerar links';
+  }
+}
+
+function abrirModalLinksEAD(turma,participantes){
+  const cat=catalogo.find(c=>c.id===turma.treinamento_id);
+  document.getElementById('ead-links-titulo').textContent=cat?.nome||'Treinamento EAD';
+  document.getElementById('ead-links-codigo').textContent=turma.codigo_turma;
+  const BASE=`${location.origin}/ead_player.html?token=`;
+  document.getElementById('ead-links-lista').innerHTML=participantes.map(p=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:500;">${escHtml(p.nome_funcionario||'Participante')}</div>
+        <div style="font-size:10px;color:var(--text3);font-family:monospace;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${BASE}${p.token_acesso}</div>
+      </div>
+      <button onclick="copiarLinkEAD('${p.token_acesso}',this)" style="flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:11px;cursor:pointer;color:var(--text2);">📋 Copiar</button>
+    </div>`).join('');
+  window._eadLinks=participantes.map(p=>`${p.nome_funcionario||'Participante'}: ${BASE}${p.token_acesso}`).join('\n');
+  document.getElementById('modal-ead-links').classList.add('show');
+}
+
+function fecharModalLinksEAD(){document.getElementById('modal-ead-links').classList.remove('show');}
+
+function copiarLinkEAD(tk,btn){
+  navigator.clipboard.writeText(`${location.origin}/ead_player.html?token=${tk}`).then(()=>{
+    btn.textContent='✓ Copiado!';setTimeout(()=>btn.textContent='📋 Copiar',2000);
+  });
+}
+
+function copiarTodosLinks(){
+  if(!window._eadLinks)return;
+  navigator.clipboard.writeText(window._eadLinks).then(()=>{
+    const btn=document.getElementById('btn-copiar-todos');
+    btn.textContent='✓ Todos copiados!';setTimeout(()=>btn.textContent='📋 Copiar todos os links',2000);
+  });
+}
 
 // ── MODAL TURMA ───────────────────────────────────────
 let arquivoTurma = null;
