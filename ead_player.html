@@ -499,16 +499,20 @@ async function registrarAprovacao(nota,tentativas){
   });
 
   // Cria cert_assinaturas (todas pré-aceitas)
+  // Todas com mesmas chaves — PostgREST exige keys idênticas em bulk insert
   await api('/rest/v1/cert_assinaturas','POST',[
     {funcionario_treinamento_id:ft.id,empresa_id:part.empresa_id,tipo:'funcionario',
      nome_signatario:part.nome_funcionario||'Participante',cpf_signatario:part.cpf_funcionario||null,
-     cargo_signatario:'Treinando / Participante',token:crypto.randomUUID(),aceito:true,aceito_em:agora},
+     cargo_signatario:'Treinando / Participante',registro_profissional:null,
+     token:crypto.randomUUID(),aceito:true,aceito_em:agora},
     {funcionario_treinamento_id:ft.id,empresa_id:part.empresa_id,tipo:'instrutor',
-     nome_signatario:turma.instrutor||'Instrutor',cargo_signatario:'Instrutor Responsável',
-     registro_profissional:turma.registro_instrutor||null,token:crypto.randomUUID(),aceito:true,aceito_em:agora},
+     nome_signatario:turma.instrutor||'Instrutor',cpf_signatario:null,
+     cargo_signatario:'Instrutor Responsável',registro_profissional:turma.registro_instrutor||null,
+     token:crypto.randomUUID(),aceito:true,aceito_em:agora},
     {funcionario_treinamento_id:ft.id,empresa_id:part.empresa_id,tipo:'responsavel_tecnico',
-     nome_signatario:turma.nome_responsavel||'Responsável Técnico',cargo_signatario:'Responsável Técnico SST',
-     registro_profissional:turma.registro_responsavel||null,token:crypto.randomUUID(),aceito:true,aceito_em:agora}
+     nome_signatario:turma.nome_responsavel||'Responsável Técnico',cpf_signatario:null,
+     cargo_signatario:'Responsável Técnico SST',registro_profissional:turma.registro_responsavel||null,
+     token:crypto.randomUUID(),aceito:true,aceito_em:agora}
   ]);
 }
 
