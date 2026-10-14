@@ -2,15 +2,22 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # a cada 6 horas
-  workflow_dispatch:        # permite rodar manualmente
+    - cron: '0 */4 * * *'  # a cada 4 horas
+  workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
+      - name: Query Supabase database
         run: |
-          curl -s -o /dev/null -w "%{http_code}" \
-            "https://ookqdukeulwcnhilbgbo.supabase.co/rest/v1/" \
-            -H "apikey: sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://ookqdukeulwcnhilbgbo.supabase.co/rest/v1/empresas?select=id&limit=1" \
+            -H "apikey: sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e" \
+            -H "Authorization: Bearer sb_publishable_l9NggU-e1bgt7CnrYUWo4w_AMoaJa2e")
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "AVISO: Supabase retornou status $STATUS"
+            exit 1
+          fi
+          echo "Supabase ativo."
